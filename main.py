@@ -7,7 +7,7 @@ logging.basicConfig(level=logging.INFO)
 
 bot = Bot(cfg.TOKEN)
 dp = Dispatcher(bot)
-db = Data("localhost", "5432", "pars_db", "pars_user", "pars_pwd")
+db = Data("localhost", "5432", "parsers", "parser_user", "parser_pwd")
 
 @dp.message_handler(commands=['start'])
 async def start(message: types.Message):
