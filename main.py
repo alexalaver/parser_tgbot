@@ -23,7 +23,7 @@ async def profile(message):
     await message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.profile(user_id, db.select_balance(user_id), db.select_tariffe(user_id)), reply_markup=markup_inline)
 
 async def supports_send(message):
-    
+    pass
 
 @dp.message_handler(commands=['start'])
 async def start(message: types.Message):
