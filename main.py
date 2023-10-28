@@ -3,6 +3,7 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher.storage import FSMContext
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from datbas import Data
+import functions as fnc
 import config as cfg
 import logging
 
@@ -19,7 +20,10 @@ async def profile(message):
     btn_inline1 = types.InlineKeyboardButton(cfg.up_balance, callback_data='up_balance')
     btn_inline2 = types.InlineKeyboardButton(cfg.tariff_selection, callback_data='tariff_selection')
     markup_inline.add(btn_inline1, btn_inline2)
-    await message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.profile(user_id, 'test', 'test'), reply_markup=markup_inline)
+    await message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.profile(user_id, db.select_balance(user_id), db.select_tariffe(user_id)), reply_markup=markup_inline)
+
+async def supports_send(message):
+    
 
 @dp.message_handler(commands=['start'])
 async def start(message: types.Message):
@@ -37,6 +41,99 @@ async def start(message: types.Message):
         await message.answer('test', reply_markup=markup_reply)
         await profile(message)
 
+@dp.message_handler(commands=['addadmin'])
+async def add_admin_user(message: types.Message):
+    if message.chat.type == types.ChatType.PRIVATE:
+        user_id = message.from_user.id
+        if db.select_admin(user_id) > 0:
+            select_adm_id = int(message.text.split()[1])
+            if(not db.check_user(select_adm_id)):
+                await message.answer(cfg.error_not_found_user)
+            elif db.check_user(select_adm_id):
+                db.add_admin(select_adm_id)
+                await message.answer(cfg.right_add_admin(fnc.nick_with_link("администратора", select_adm_id)))
+            else:
+                await message.answer(cfg.error_command)
+        else:
+            await message.answer(cfg.error_adm_dostup)
+
+
+@dp.message_handler(commands=['balance'])
+async def balance_user(message: types.Message):
+    if message.chat.type == types.ChatType.PRIVATE:
+        user_id = message.from_user.id
+        if db.select_admin(user_id) > 0:
+            select_adm_id = message.text.split()
+            if len(select_adm_id) == 2:
+                if int(select_adm_id[1]):
+                    select_adm_id = int(message.text.split()[1])
+                    if(not db.check_user(select_adm_id)):
+                        await message.answer(cfg.error_not_found_user)
+                    elif db.check_user(select_adm_id):
+                        balance_user = db.select_balance(select_adm_id)
+                        await message.answer(cfg.balance_user_text(fnc.nick_with_link("пользователя", select_adm_id), str(balance_user)))
+                else:
+                    await message.answer(cfg.balance_command_error)
+            else:
+                await message.answer(cfg.error_command)
+        else:
+            await message.answer(cfg.error_adm_dostup)
+
+@dp.message_handler(commands=['addbalance'])
+async def addbalance_user(message: types.Message):
+    if message.chat.type == types.ChatType.PRIVATE:
+        user_id = message.from_user.id
+        if db.select_admin(user_id) > 0:
+            select_info = message.text.split()
+            if len(select_info) == 3:
+                if int(select_info[1]):
+                    select_user_id = int(select_info[1])
+                    if(not db.check_user(select_user_id)):
+                        await message.answer(cfg.error_not_found_user)
+                    elif db.check_user(select_user_id):
+                        if int(select_info[2]):
+                            select_user_id = int(select_info[1])
+                            select_add_balance = int(select_info[2])
+                            db.addbalance(select_user_id, select_add_balance)
+                            await message.answer(cfg.addbalance_right_admin(fnc.nick_with_link("пользователю", select_user_id), select_add_balance))
+                            await dp.bot.send_message(select_user_id, cfg.addbalance_right_polz(select_add_balance))
+                    else:
+                        await message.answer(cfg.addbalance_command_error)
+                else:
+                    await message.answer(cfg.addbalance_command_error)
+            else:
+                await message.answer(cfg.addbalance_command_error)
+        else:
+            await message.answer(cfg.error_adm_dostup)
+
+@dp.message_handler(commands=['rembalance'])
+async def rembalance_user(message: types.Message):
+    if message.chat.type == types.ChatType.PRIVATE:
+        user_id = message.from_user.id
+        if db.select_admin(user_id) > 0:
+            select_info = message.text.split()
+            if len(select_info) == 3:
+                if int(select_info[1]):
+                    select_user_id = int(select_info[1])
+                    if(not db.check_user(select_user_id)):
+                        await message.answer(cfg.error_not_found_user)
+                    elif db.check_user(select_user_id):
+                        if int(select_info[2]):
+                            select_user_id = int(select_info[1])
+                            select_add_balance = int(select_info[2])
+                            db.rembalance(select_user_id, select_add_balance)
+                            await message.answer(cfg.rembalance_right_admin(fnc.nick_with_link("пользователю", select_user_id), select_add_balance))
+                            await dp.bot.send_message(select_user_id, cfg.rembalance_right_polz(select_add_balance))
+                    else:
+                        await message.answer(cfg.rembalance_command_error)
+                else:
+                    await message.answer(cfg.rembalance_command_error)
+            else:
+                await message.answer(cfg.rembalance_command_error)
+        else:
+            await message.answer(cfg.error_adm_dostup)
+
+
 @dp.callback_query_handler()
 async def buttons_callback(callback_query: types.CallbackQuery):
     if callback_query.data == "tariff_selection":
@@ -44,20 +141,22 @@ async def buttons_callback(callback_query: types.CallbackQuery):
         btn_inline1 = types.InlineKeyboardButton(cfg.start_tariff_button, callback_data='start_tariff')
         btn_inline2 = types.InlineKeyboardButton(cfg.standart_tariff_button, callback_data='standart_tariff')
         btn_inline3 = types.InlineKeyboardButton(cfg.premium_tariff_button, callback_data='premium_tariff')
-        btn_inline4 = types.InlineKeyboardButton(cfg.my_profile, callback_data='profile')
-        btn_inline5 = types.InlineKeyboardButton(cfg.support, callback_data='support')
+        btn_inline4 = types.InlineKeyboardButton(cfg.my_profile, callback_data='profile_tariff')
+        btn_inline5 = types.InlineKeyboardButton(cfg.support, callback_data='support_tariff')
         btn_inline6 = types.InlineKeyboardButton(cfg.back_button, callback_data='back_tariff')
         markup_inline.add(btn_inline1, btn_inline2, btn_inline3)
         markup_inline.row(btn_inline4, btn_inline5)
         markup_inline.add(btn_inline6)
         await callback_query.message.edit_caption(caption=cfg.tariff_list, reply_markup=markup_inline)
-    elif callback_query.data == "back_tariff":
+        await callback_query.answer(cfg.tariff_list_text)
+    elif callback_query.data == "back_tariff" or callback_query.data == "profile_tariff":
         user_id = callback_query.from_user.id
         markup_inline = types.InlineKeyboardMarkup(row_width=1)
         btn_inline1 = types.InlineKeyboardButton(cfg.up_balance, callback_data='up_balance')
         btn_inline2 = types.InlineKeyboardButton(cfg.tariff_selection, callback_data='tariff_selection')
         markup_inline.add(btn_inline1, btn_inline2)
-        await callback_query.message.edit_caption(caption=cfg.profile(user_id, 'test', 'test'), reply_markup=markup_inline)
+        await callback_query.message.edit_caption(caption=cfg.profile(user_id, db.select_balance(user_id), db.select_tariffe(user_id)), reply_markup=markup_inline)
+        await callback_query.answer(cfg.back_text)
 
 @dp.message_handler()
 async def other(message: types.Message):

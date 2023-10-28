@@ -20,3 +20,40 @@ class Data:
         with self.connect:
             self.cursor.execute("SELECT id FROM users WHERE id=%s", (id,))
             return bool(len(self.cursor.fetchall()))
+    def select_balance(self, id):
+        with self.connect:
+            self.cursor.execute("SELECT balance FROM users WHERE id=%s", (id,))
+            a = self.cursor.fetchone()[0]
+            if a is None:
+                return "0$"
+            else:
+                return f"{a}$"
+
+    def select_tariffe(self, id):
+        with self.connect:
+            self.cursor.execute("SELECT tariffe FROM users WHERE id=%s", (id,))
+            a = self.cursor.fetchone()[0]
+            if a is None:
+                return "0 чатов."
+            else:
+                return f"{a} чатов"
+
+    def add_admin(self, id):
+        with self.connect:
+            self.cursor.execute("UPDATE users SET adm=1 WHERE id=%s", (id,))
+            self.connect.commit()
+
+    def select_admin(self, id):
+        with self.connect:
+            self.cursor.execute("SELECT adm FROM users WHERE id=%s", (id,))
+            return self.cursor.fetchone()[0]
+
+    def addbalance(self, id, balanceadd):
+        with self.connect:
+            self.cursor.execute(f"UPDATE users SET balance=balance+{balanceadd} WHERE id=%s", (id,))
+            self.connect.commit()
+
+    def rembalance(self, id, balancerem):
+        with self.connect:
+            self.cursor.execute(f"UPDATE users SET balance=balance-{balancerem} WHERE id=%s", (id,))
+            self.connect.commit()
