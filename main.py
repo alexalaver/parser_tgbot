@@ -11,7 +11,7 @@ logging.basicConfig(level=logging.INFO)
 
 bot = Bot(cfg.TOKEN, parse_mode=types.ParseMode.MARKDOWN)
 dp = Dispatcher(bot, storage=MemoryStorage())
-db = Data("localhost", "5432", "parsers", "parser_user", "parser_pwd")
+db = Data("159.69.75.46", "43652", "pars_db", "pars_user", "pars_pwd")
 
 
 async def profile(message):
