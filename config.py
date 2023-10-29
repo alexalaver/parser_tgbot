@@ -1,4 +1,4 @@
-TOKEN = "6537283600:AAElfw2nNoqVgeABFy_opd48mUKAPPl62FA"
+TOKEN = "6597828235:AAH60BBRislfPCqwBeGsiYMBEjXuBrHujZ0"
 def profile(profile_id, balance, tariffe):
     return f"*Ваш идентификатор: *{profile_id}\n*Текущий баланс: *{balance}\n*Ваш тариф: *{tariffe}"
 
@@ -45,3 +45,16 @@ def rembalance_right_admin(polz, balance):
 
 def rembalance_right_polz(balance):
     return f"Администратор, снял с вашего баланса {balance}$"
+
+support_correct_text = "Вы зашли в меню службу поддержки"
+
+chats_button = "Чаты"
+word_poisk_button = "Слова для поиска"
+
+parser_text = "В данном разделе вы можете настроить поиск ключевых слов по нужным чатам.\nПеред использованием парсинга - не забудьте выбрать подходящий тариф в профиле"
+
+account_button = "Аккаунты"
+posts_button = "Посты"
+autoposting_text = "В этом разделе вы можете настроить всё, что связанно с автопостингом"
+
+take_adm = "Вас повысили до 1 уровня администратора."

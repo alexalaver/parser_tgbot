@@ -34,9 +34,23 @@ class Data:
             self.cursor.execute("SELECT tariffe FROM users WHERE id=%s", (id,))
             a = self.cursor.fetchone()[0]
             if a is None:
-                return "0 чатов."
-            else:
-                return f"{a} чатов"
+                return "Нет действующего тариффа."
+            elif a == 1:
+                return f"Стартовый"
+            elif a == 2:
+                return f"Стандарт"
+            elif a == 3:
+                return f"Премиум"
+
+
+    # def select_tariffe(self, id):
+    #     with self.connect:
+    #         self.cursor.execute("SELECT tariffe FROM users WHERE id=%s", (id,))
+    #         a = self.cursor.fetchone()[0]
+    #         if a is None:
+    #             return "0 чатов."
+    #         else:
+    #             return f"{a} чатов"
 
     def add_admin(self, id):
         with self.connect:
