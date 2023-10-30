@@ -71,3 +71,26 @@ class Data:
         with self.connect:
             self.cursor.execute(f"UPDATE users SET balance=balance-{balancerem} WHERE id=%s", (id,))
             self.connect.commit()
+
+
+    def add_date_tariffe(self, id, data):
+        with self.connect:
+            self.cursor.execute("UPDATE users SET date_tariffe=%s WHERE id=%s", (data, id,))
+            self.connect.commit()
+
+    def check_date_tariffe(self, id):
+        with self.connect:
+            self.cursor.execute("SELECT date_tariffe FROM users WHERE id=%s", (id,))
+            a = self.cursor.fetchone()[0]
+            return a
+
+    def add_chats(self, id, chats):
+        with self.connect:
+            self.cursor.execute(f"UPDATE users SET chats=chats+{chats} WHERE id=%s", (id,))
+            self.connect.commit()
+
+    def check_balance(self, id):
+        with self.connect:
+            self.cursor.execute("SELECT balance FROM users WHERE id=%s", (id,))
+            a = self.cursor.fetchone()[0]
+            return a

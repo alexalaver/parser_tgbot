@@ -6,12 +6,17 @@ from datbas import Data
 import functions as fnc
 import config as cfg
 import logging
+import datetime
 
 logging.basicConfig(level=logging.INFO)
 
 bot = Bot(cfg.TOKEN, parse_mode=types.ParseMode.MARKDOWN)
 dp = Dispatcher(bot, storage=MemoryStorage())
 db = Data("192.168.1.37", "5432", "pars_db", "pars_user", "pars_pwd")
+
+
+class Start_tariffe_all(StatesGroup):
+    start_tariffe_1 = State()
 
 
 async def profile(message):
@@ -195,6 +200,63 @@ async def buttons_callback(callback_query: types.CallbackQuery):
         markup_inline.add(btn_inline6)
         await callback_query.message.edit_caption(caption=cfg.tariff_list, reply_markup=markup_inline)
         await callback_query.answer(cfg.tariff_list_text)
+    elif callback_query.data == "start_tariff":
+        markup_inline = types.InlineKeyboardMarkup(row_width=1)
+        btn_inline1 = types.InlineKeyboardButton(cfg.confirm_button, callback_data='confirm_start')
+        btn_inline2 = types.InlineKeyboardButton(cfg.back_button, callback_data='back_start')
+        markup_inline.add(btn_inline1, btn_inline2)
+        await callback_query.message.edit_caption(caption=cfg.text_tariffe_start, reply_markup=markup_inline)
+        await Start_tariffe_all.start_tariffe_1.set()
+
+@dp.callback_query_handler(state=Start_tariffe_all.start_tariffe_1)
+async def start_tariffe(callback_query: types.CallbackQuery, state: FSMContext):
+    if callback_query.data == "confirm_start":
+        user_id = callback_query.from_user.id
+        balance_us = db.check_balance(user_id)
+        price_tariffe = 10
+        check_tariffe_date = db.check_date_tariffe(user_id)
+        current_date = datetime.datetime.now()
+        if balance_us >= price_tariffe:
+            if check_tariffe_date is None:
+                new_date = current_date + datetime.timedelta(days=30)
+                formatted_date_new = new_date.strftime("%Y-%m-%d %H:%M:%S")
+                db.add_date_tariffe(user_id, formatted_date_new)
+            else:
+                formatted_check_tariffe = datetime.datetime.strptime(check_tariffe_date, "%Y-%m-%d %H:%M:%S")
+                formatted_date_new = formatted_check_tariffe.strftime("%Y-%m-%d %H:%M:%S")
+                db.add_date_tariffe(user_id, formatted_date_new)
+
+            markup_inline = types.InlineKeyboardMarkup(row_width=1)
+            btn_inline1 = types.InlineKeyboardButton(cfg.menu_button, callback_data='menu_start')
+            markup_inline.add(btn_inline1)
+            check_tariffe_date = db.check_date_tariffe(user_id)
+            db.add_chats(user_id, 10)
+            await callback_query.message.edit_caption(cfg.right_tariffe_start(check_tariffe_date), reply_markup=markup_inline)
+            await state.finish()
+
+@dp.message_handler(state=Start_tariffe_all.start_tariffe_1)
+async def start_tariffe_texts(message: types.Message, state: FSMContext):
+    if message.chat.type == types.ChatType.PRIVATE:
+        if message.text == '/cancel':
+            await message.answer(cfg.cancel_tariffe_text)
+            await state.reset_state()
+        else:
+            await message.answer(cfg.state_tariffe_text)
+
+    elif callback_query.data == "back_start":
+        markup_inline = types.InlineKeyboardMarkup(row_width=1)
+        btn_inline1 = types.InlineKeyboardButton(cfg.start_tariff_button, callback_data='start_tariff')
+        btn_inline2 = types.InlineKeyboardButton(cfg.standart_tariff_button, callback_data='standart_tariff')
+        btn_inline3 = types.InlineKeyboardButton(cfg.premium_tariff_button, callback_data='premium_tariff')
+        btn_inline4 = types.InlineKeyboardButton(cfg.my_profile, callback_data='profile_tariff')
+        btn_inline5 = types.InlineKeyboardButton(cfg.support, callback_data='support_tariff')
+        btn_inline6 = types.InlineKeyboardButton(cfg.back_button, callback_data='back_tariff')
+        markup_inline.add(btn_inline1, btn_inline2, btn_inline3)
+        markup_inline.row(btn_inline4, btn_inline5)
+        markup_inline.add(btn_inline6)
+        await callback_query.message.edit_caption(caption=cfg.tariff_list, reply_markup=markup_inline)
+        await callback_query.answer(cfg.tariff_list_text)
+        await state.reset_state()
 
 
 @dp.message_handler()
