@@ -276,6 +276,7 @@ async def button_group_2(callback_query: types.CallbackQuery):
 @dp.message_handler()
 async def other(message: types.Message):
     if message.chat.type == types.ChatType.PRIVATE:
+        user_id = message.from_user.id
         if message.text == cfg.my_profile:
             await profile(message)
         elif message.text == cfg.support:
@@ -284,6 +285,8 @@ async def other(message: types.Message):
             await parsers_send(message)
         elif message.text == cfg.autoposting:
             await autoposting_send(message)
+        elif message.text == 't':
+            await message.answer(db.select_group_name(user_id))
 
 if __name__ == "__main__":
     executor.start_polling(dp)

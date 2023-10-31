@@ -140,3 +140,9 @@ class Data:
             a = self.cursor.fetchone()
             b = [row for row in a]
             return b
+
+    def select_group_name(self, id):
+        with self.connect:
+            self.cursor.execute("SELECT group_name FROM groups WHERE id=%s", (id,))
+            a = self.cursor.fetchall()
+            return a
