@@ -32,6 +32,15 @@ async def texts(message: types.Message):
             await message.answer("Тариф прошёл")
         elif current_data < formated_base:
             await message.answer("Тариф не прошёл")
+    else:
+        textsing = message.text
+        text_lines = textsing.strip().split('\n')
+        await message.answer(f"{len(text_lines)}")
 
 if __name__ == "__main__":
     executor.start_polling(dp)
+
+
+
+
+

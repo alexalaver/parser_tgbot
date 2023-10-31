@@ -94,3 +94,38 @@ class Data:
             self.cursor.execute("SELECT balance FROM users WHERE id=%s", (id,))
             a = self.cursor.fetchone()[0]
             return a
+
+    def check_number_group(self, id):
+        with self.connect:
+            self.cursor.execute("SELECT id FROM groups WHERE id=%s", (id,))
+            a = self.cursor.fetchall()[0]
+            if a is None:
+                return 0
+            else:
+                return len(a)
+
+    def add_channels(self, id, number_group, keyword, channels, group_name):
+        with self.connect:
+            self.cursor.execute("INSERT INTO groups (id, number_group, keyword, channels, group_name) VALUES (%s, %s, %s)", (id, number_group, keyword, channels, group_name,))
+            self.connect.commit()
+
+    def add_cashe_group_name_parsing(self, id, group_name):
+        with self.connect:
+            self.cursor.execute("INSERT INTO cash_parsing (id, group_name) VALUES(%s, %s)", (id, group_name,))
+            self.connect.commit()
+
+    def add_cashe_keyword_parsing(self, id, keyword):
+        with self.connect:
+            self.cursor.execute("UPDATE cash_parsing SET keyword=%s ", (id, keyword,))
+            self.connect.commit()
+
+    def delete_cashe_parsing(self, id):
+        with self.connect:
+            self.cursor.execute("DELETE FROM cash_parsing WHERE id=%s", (id,))
+            self.connect.commit()
+
+    def select_cashe_parsing(self, id):
+        with self.connect:
+            self.cursor.execute("SELECT group_name, keyword FROM cash_parsing WHERE id=%s", (id,))
+            a = self.cursor.fetchone()[0]
+            return a

@@ -14,10 +14,10 @@ bot = Bot(cfg.TOKEN, parse_mode=types.ParseMode.MARKDOWN)
 dp = Dispatcher(bot, storage=MemoryStorage())
 db = Data("192.168.1.37", "5432", "pars_db", "pars_user", "pars_pwd")
 
-
-class Start_tariffe_all(StatesGroup):
-    start_tariffe_1 = State()
-
+class Create_group(StatesGroup):
+    create_group_1 = State()
+    create_group_2 = State()
+    create_group_3 = State()
 
 async def profile(message):
     user_id = message.from_user.id
@@ -35,8 +35,8 @@ async def supports_send(message):
 
 async def parsers_send(message):
     markup_inline = types.InlineKeyboardMarkup(row_width=1)
-    btn_inline1 = types.InlineKeyboardButton(cfg.chats_button, callback_data='chats_button')
-    btn_inline2 = types.InlineKeyboardButton(cfg.word_poisk_button, callback_data='word_poisk_button')
+    btn_inline1 = types.InlineKeyboardButton(cfg.groups_button, callback_data='groups_button')
+    btn_inline2 = types.InlineKeyboardButton(cfg.groups_add_button, callback_data='groups_add_button')
     markup_inline.add(btn_inline1, btn_inline2)
     await message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.parser_text, reply_markup=markup_inline)
 
@@ -159,105 +159,116 @@ async def rembalance_user(message: types.Message):
 
 @dp.callback_query_handler()
 async def buttons_callback(callback_query: types.CallbackQuery):
-    if callback_query.data == "tariff_selection":
-        markup_inline = types.InlineKeyboardMarkup(row_width=1)
-        btn_inline1 = types.InlineKeyboardButton(cfg.start_tariff_button, callback_data='start_tariff')
-        btn_inline2 = types.InlineKeyboardButton(cfg.standart_tariff_button, callback_data='standart_tariff')
-        btn_inline3 = types.InlineKeyboardButton(cfg.premium_tariff_button, callback_data='premium_tariff')
-        btn_inline4 = types.InlineKeyboardButton(cfg.my_profile, callback_data='profile_tariff')
-        btn_inline5 = types.InlineKeyboardButton(cfg.support, callback_data='support_tariff')
-        btn_inline6 = types.InlineKeyboardButton(cfg.back_button, callback_data='back_tariff')
-        markup_inline.add(btn_inline1, btn_inline2, btn_inline3)
-        markup_inline.row(btn_inline4, btn_inline5)
-        markup_inline.add(btn_inline6)
-        await callback_query.message.edit_caption(caption=cfg.tariff_list, reply_markup=markup_inline)
-        await callback_query.answer(cfg.tariff_list_text)
-    elif callback_query.data == "back_tariff" or callback_query.data == "profile_tariff":
+    if callback_query.message.chat.type == types.ChatType.PRIVATE:
         user_id = callback_query.from_user.id
-        markup_inline = types.InlineKeyboardMarkup(row_width=1)
-        btn_inline1 = types.InlineKeyboardButton(cfg.up_balance, callback_data='up_balance')
-        btn_inline2 = types.InlineKeyboardButton(cfg.tariff_selection, callback_data='tariff_selection')
-        markup_inline.add(btn_inline1, btn_inline2)
-        await callback_query.message.edit_caption(caption=cfg.profile(user_id, db.select_balance(user_id), db.select_tariffe(user_id)), reply_markup=markup_inline)
-        await callback_query.answer(cfg.back_text)
-    elif callback_query.data == "support_tariff":
-        markup_inline = types.InlineKeyboardMarkup(row_width=1)
-        btn_inline1 = types.InlineKeyboardButton(cfg.support, callback_data='support', url="tg://user?id=1076482828")
-        btn_inline2 = types.InlineKeyboardButton(cfg.back_button, callback_data='back_support')
-        markup_inline.add(btn_inline1, btn_inline2)
-        await callback_query.message.edit_caption("При индивидуальных запросах или возникновение трудностей, обратитесь по контакту ниже", reply_markup=markup_inline)
-        await callback_query.answer(cfg.support_correct_text)
-    elif callback_query.data == "back_support":
-        markup_inline = types.InlineKeyboardMarkup(row_width=1)
-        btn_inline1 = types.InlineKeyboardButton(cfg.start_tariff_button, callback_data='start_tariff')
-        btn_inline2 = types.InlineKeyboardButton(cfg.standart_tariff_button, callback_data='standart_tariff')
-        btn_inline3 = types.InlineKeyboardButton(cfg.premium_tariff_button, callback_data='premium_tariff')
-        btn_inline4 = types.InlineKeyboardButton(cfg.my_profile, callback_data='profile_tariff')
-        btn_inline5 = types.InlineKeyboardButton(cfg.support, callback_data='support_tariff')
-        btn_inline6 = types.InlineKeyboardButton(cfg.back_button, callback_data='back_tariff')
-        markup_inline.add(btn_inline1, btn_inline2, btn_inline3)
-        markup_inline.row(btn_inline4, btn_inline5)
-        markup_inline.add(btn_inline6)
-        await callback_query.message.edit_caption(caption=cfg.tariff_list, reply_markup=markup_inline)
-        await callback_query.answer(cfg.tariff_list_text)
-    elif callback_query.data == "start_tariff":
-        markup_inline = types.InlineKeyboardMarkup(row_width=1)
-        btn_inline1 = types.InlineKeyboardButton(cfg.confirm_button, callback_data='confirm_start')
-        btn_inline2 = types.InlineKeyboardButton(cfg.back_button, callback_data='back_start')
-        markup_inline.add(btn_inline1, btn_inline2)
-        await callback_query.message.edit_caption(caption=cfg.text_tariffe_start, reply_markup=markup_inline)
-        await Start_tariffe_all.start_tariffe_1.set()
-
-@dp.callback_query_handler(state=Start_tariffe_all.start_tariffe_1)
-async def start_tariffe(callback_query: types.CallbackQuery, state: FSMContext):
-    if callback_query.data == "confirm_start":
-        user_id = callback_query.from_user.id
-        balance_us = db.check_balance(user_id)
-        price_tariffe = 10
-        check_tariffe_date = db.check_date_tariffe(user_id)
-        current_date = datetime.datetime.now()
-        if balance_us >= price_tariffe:
-            if check_tariffe_date is None:
-                new_date = current_date + datetime.timedelta(days=30)
-                formatted_date_new = new_date.strftime("%Y-%m-%d %H:%M:%S")
-                db.add_date_tariffe(user_id, formatted_date_new)
+        if callback_query.data == "groups_add_button":
+            number_group = db.check_number_group(user_id)
+            if 5 >= number_group:
+                markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
+                markup_reply.add(cfg.cancel_creategroup)
+                await Create_group.create_group_1.set()
+                await callback_query.message.answer(cfg.create_group_text_1)
+                await callback_query.message.answer(cfg.create_group_text_2)
+                await callback_query.answer(cfg.create_group_button_uved)
+                db.delete_cashe_parsing(user_id)
             else:
-                formatted_check_tariffe = datetime.datetime.strptime(check_tariffe_date, "%Y-%m-%d %H:%M:%S")
-                formatted_date_new = formatted_check_tariffe.strftime("%Y-%m-%d %H:%M:%S")
-                db.add_date_tariffe(user_id, formatted_date_new)
+                await callback_query.message.answer(cfg.error_group_5)
 
-            markup_inline = types.InlineKeyboardMarkup(row_width=1)
-            btn_inline1 = types.InlineKeyboardButton(cfg.menu_button, callback_data='menu_start')
-            markup_inline.add(btn_inline1)
-            check_tariffe_date = db.check_date_tariffe(user_id)
-            db.add_chats(user_id, 10)
-            await callback_query.message.edit_caption(cfg.right_tariffe_start(check_tariffe_date), reply_markup=markup_inline)
-            await state.finish()
-
-@dp.message_handler(state=Start_tariffe_all.start_tariffe_1)
-async def start_tariffe_texts(message: types.Message, state: FSMContext):
+@dp.message_handler(state=Create_group.create_group_1)
+async def create_group_func_1(message: types.Message, state: FSMContext):
     if message.chat.type == types.ChatType.PRIVATE:
-        if message.text == '/cancel':
-            await message.answer(cfg.cancel_tariffe_text)
+        user_id = message.from_user.id
+        if message.text == cfg.cancel_creategroup:
+            markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+            markup_reply.add(cfg.autoposting)
+            markup_reply.add(cfg.parser)
+            markup_reply.row(cfg.my_profile, cfg.support)
             await state.reset_state()
-        else:
-            await message.answer(cfg.state_tariffe_text)
+            db.delete_cashe_parsing(user_id)
+            await message.answer(cfg.cancel_creategroup_text, reply_markup=markup_reply)
+        elif message.text:
+            if 3 <= len(message.text) <= 15:
+                db.add_cashe_group_name_parsing(user_id, message.text)
+                await message.answer(cfg.create_group_text_3)
+                await Create_group.create_group_2.set()
+            else:
+                await message.answer(cfg.error_len_name_group)
 
-    elif callback_query.data == "back_start":
-        markup_inline = types.InlineKeyboardMarkup(row_width=1)
-        btn_inline1 = types.InlineKeyboardButton(cfg.start_tariff_button, callback_data='start_tariff')
-        btn_inline2 = types.InlineKeyboardButton(cfg.standart_tariff_button, callback_data='standart_tariff')
-        btn_inline3 = types.InlineKeyboardButton(cfg.premium_tariff_button, callback_data='premium_tariff')
-        btn_inline4 = types.InlineKeyboardButton(cfg.my_profile, callback_data='profile_tariff')
-        btn_inline5 = types.InlineKeyboardButton(cfg.support, callback_data='support_tariff')
-        btn_inline6 = types.InlineKeyboardButton(cfg.back_button, callback_data='back_tariff')
-        markup_inline.add(btn_inline1, btn_inline2, btn_inline3)
-        markup_inline.row(btn_inline4, btn_inline5)
-        markup_inline.add(btn_inline6)
-        await callback_query.message.edit_caption(caption=cfg.tariff_list, reply_markup=markup_inline)
-        await callback_query.answer(cfg.tariff_list_text)
-        await state.reset_state()
+@dp.callback_query_handler(state=Create_group.create_group_1)
+async def button_group_1(callback_query: types.CallbackQuery):
+    if callback_query.data is not None:
+        await callback_query.answer(cfg.error_button_create_group)
 
+@dp.message_handler(state=Create_group.create_group_2)
+async def create_group_func_2(message: types.Message, state: FSMContext):
+    if message.chat.type == types.ChatType.PRIVATE:
+        user_id = message.from_user.id
+        if message.text == cfg.cancel_creategroup:
+            markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+            markup_reply.add(cfg.autoposting)
+            markup_reply.add(cfg.parser)
+            markup_reply.row(cfg.my_profile, cfg.support)
+            await state.reset_state()
+            db.delete_cashe_parsing(user_id)
+            await message.answer(cfg.cancel_creategroup_text, reply_markup=markup_reply)
+        elif message.text:
+            if 3 <= len(message.text) <= 20:
+                db.add_cashe_keyword_parsing(user_id, message.text)
+                await message.answer(cfg.create_group_text_4)
+                await Create_group.create_group_3.set()
+            else:
+                await message.answer(cfg.error_len_keyword)
+
+@dp.callback_query_handler(state=Create_group.create_group_2)
+async def button_group_2(callback_query: types.CallbackQuery):
+    if callback_query.data is not None:
+        await callback_query.answer(cfg.error_button_create_group)
+
+@dp.message_handler(state=Create_group.create_group_3)
+async def create_group_func_3(message: types.Message, state: FSMContext):
+    if message.chat.type == types.ChatType.PRIVATE:
+        user_id = message.from_user.id
+        textsing = message.text
+        text_lines = textsing.strip().split('\n')
+        if message.text == cfg.cancel_creategroup:
+            markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+            markup_reply.add(cfg.autoposting)
+            markup_reply.add(cfg.parser)
+            markup_reply.row(cfg.my_profile, cfg.support)
+            await state.reset_state()
+            db.delete_cashe_parsing(user_id)
+            await message.answer(cfg.cancel_creategroup_text, reply_markup=markup_reply)
+        elif message.text:
+            if 2 <= len(message.text) <= 1000:
+                if 10 <= len(text_lines) <= 50:
+                    try:
+                        check_number_group = db.check_number_group(user_id)
+                        new_number_group = check_number_group + 1
+                        cashe_select = db.select_cashe_parsing(user_id)
+                        cashe_group_name = cashe_select[0]
+                        cashe_keyword = cashe_select[1]
+                        db.add_channels(user_id, new_number_group, cashe_keyword, text_lines, cashe_group_name)
+                        await message.answer(cfg.right_create_group)
+                        await state.finish()
+                        db.delete_cashe_parsing(user_id)
+                    except Exception as es:
+                        await state.reset_state()
+                        markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+                        markup_reply.add(cfg.autoposting)
+                        markup_reply.add(cfg.parser)
+                        markup_reply.row(cfg.my_profile, cfg.support)
+                        await message.answer(cfg.error_create_group, reply_markup=markup_reply)
+                        print(f"[ERROR] {es}")
+                        db.delete_cashe_parsing(user_id)
+                else:
+                    await message.answer(cfg.error_len_channels_create)
+            else:
+                await message.answer(cfg.error_len_channels)
+
+@dp.callback_query_handler(state=Create_group.create_group_3)
+async def button_group_2(callback_query: types.CallbackQuery):
+    if callback_query.data is not None:
+        await callback_query.answer(cfg.error_button_create_group)
 
 @dp.message_handler()
 async def other(message: types.Message):
