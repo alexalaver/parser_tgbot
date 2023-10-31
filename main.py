@@ -187,13 +187,18 @@ async def buttons_callback(callback_query: types.CallbackQuery):
             buttons = []
             start = page * buttons_per_page
             end = start + buttons_per_page
+
             for i in range(start, min(end, len(channels))):
                 button = types.InlineKeyboardButton(channels[i], callback_data=channels[i])
             buttons.append(button)
+
             markup_inline.add(*buttons)
+
             next_button = types.InlineKeyboardButton(">>", callback_data=f"next_{page + 1}")
             prev_button = types.InlineKeyboardButton("<<", callback_data=f"prev_{page - 1}")
+
             markup_inline.add(prev_button, next_button)
+
             await callback_query.message.edit_caption(caption='TESTING', reply_markup=markup_inline)
 
 @dp.message_handler(state=Create_group.create_group_1)
