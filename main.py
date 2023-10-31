@@ -34,9 +34,15 @@ async def supports_send(message):
 
 async def parsers_send(message):
     markup_inline = types.InlineKeyboardMarkup(row_width=1)
-    btn_inline1 = types.InlineKeyboardButton(cfg.groups_button, callback_data='groups_button')
-    btn_inline2 = types.InlineKeyboardButton(cfg.groups_add_button, callback_data='groups_add_button')
-    markup_inline.add(btn_inline1, btn_inline2)
+    user_id = message.from_user.id
+    group_names = db.select_group_name(user_id)
+    max_buttons = 5
+    for i in range(min(max_buttons, len(group_names))):
+        button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
+        markup_inline.add(button)
+
+    btn_inline1 = types.InlineKeyboardButton(cfg.groups_add_button, callback_data='groups_add_button')
+    markup_inline.add(btn_inline1)
     await message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.parser_text, reply_markup=markup_inline)
 
 async def autoposting_send(message):
@@ -285,8 +291,7 @@ async def other(message: types.Message):
             await parsers_send(message)
         elif message.text == cfg.autoposting:
             await autoposting_send(message)
-        elif message.text == 't':
-            await message.answer(db.select_group_name(user_id))
+
 
 if __name__ == "__main__":
     executor.start_polling(dp)
