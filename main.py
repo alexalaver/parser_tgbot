@@ -184,22 +184,30 @@ async def buttons_callback(callback_query: types.CallbackQuery):
             channels = db.select_channels(user_id, callback_query.data)
             markup_inline = types.InlineKeyboardMarkup()
             page = 0
-            buttons = []
-            start = page * buttons_per_page
-            end = start + buttons_per_page
 
-            for i in range(start, min(end, len(channels))):
-                button = types.InlineKeyboardButton(channels[i], callback_data=channels[i])
-                buttons.append(button)
+            # Функция для создания кнопок для текущей страницы
+            def create_buttons(page, items):
+                buttons = []
+                start = page * buttons_per_page
+                end = start + buttons_per_page
+                for i in range(start, min(end, len(items))):
+                    button = types.InlineKeyboardButton(items[i], callback_data=items[i])
+                    buttons.append(button)
+                return buttons
 
-            markup_inline.add(*buttons)
+            # Функция для обновления клавиатуры
+            def update_markup(page, channels):
+                markup_inline = types.InlineKeyboardMarkup()
+                buttons = create_buttons(page, channels)
+                markup_inline.add(*buttons)
+                prev_button = types.InlineKeyboardButton("<<", callback_data=f"prev_{page - 1}")
+                next_button = types.InlineKeyboardButton(">>", callback_data=f"next_{page + 1}")
+                markup_inline.add(prev_button, next_button)
+                return markup_inline
 
-            next_button = types.InlineKeyboardButton(">>", callback_data=f"next_{page + 1}")
-            prev_button = types.InlineKeyboardButton("<<", callback_data=f"prev_{page - 1}")
-
-            markup_inline.add(prev_button, next_button)
-
+            markup_inline = update_markup(page, channels)
             await callback_query.message.edit_caption(caption='TESTING', reply_markup=markup_inline)
+
 
 @dp.message_handler(state=Create_group.create_group_1)
 async def create_group_func_1(message: types.Message, state: FSMContext):
