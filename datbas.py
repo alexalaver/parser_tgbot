@@ -105,6 +105,15 @@ class Data:
             else:
                 return len(b)
 
+    def check_numbers_group(self, id):
+        with self.connect:
+            self.cursor.execute("SELECT number_group FROM groups WHERE id=%s", (id,))
+            a = self.cursor.fetchone()[0]
+            if a is None:
+                return 0
+            else:
+                return a
+
     def add_channels(self, id, number_group, keyword, channels, group_name):
         with self.connect:
             self.cursor.execute("INSERT INTO groups (id, number_group, keyword, channels, group_name) VALUES (%s, %s, %s, %s, %s)", (id, number_group, keyword, channels, group_name,))

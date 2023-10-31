@@ -241,7 +241,7 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
             if 2 <= len(message.text) <= 1000:
                 if 10 <= len(text_lines) <= 50:
                     try:
-                        check_number_group = db.check_number_group(user_id)
+                        check_number_group = db.check_numbers_group(user_id)
                         new_number_group = check_number_group + 1
                         cashe_select = db.select_cashe_parsing(user_id)
                         cashe_group_name = cashe_select[0]
