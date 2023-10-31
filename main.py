@@ -291,6 +291,8 @@ async def other(message: types.Message):
             await parsers_send(message)
         elif message.text == cfg.autoposting:
             await autoposting_send(message)
+        elif message.text == 't':
+            await message.answer(db.select_channels(user_id, "Group 2"))
 
 
 if __name__ == "__main__":
