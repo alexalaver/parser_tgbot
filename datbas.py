@@ -99,10 +99,11 @@ class Data:
         with self.connect:
             self.cursor.execute("SELECT id FROM groups WHERE id=%s", (id,))
             a = self.cursor.fetchone()
+            b = str(a[0])
             if a is None:
                 return 0
             else:
-                return len(str(a[0]))
+                return len(b)
 
     def add_channels(self, id, number_group, keyword, channels, group_name):
         with self.connect:
