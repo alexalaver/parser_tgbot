@@ -127,6 +127,6 @@ class Data:
     def select_cashe_parsing(self, id):
         with self.connect:
             self.cursor.execute("SELECT group_name, keyword FROM cash_parsing WHERE id=%s", (id,))
-            result = self.cursor.fetchone()
-            group_name, keyword = result
-            return [group_name, keyword]
+            result = self.cursor.fetchall()
+            a = [list(row) for row in result]
+            return a
