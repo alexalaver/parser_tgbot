@@ -247,7 +247,11 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                         cashe_group_name = cashe_select[0]
                         cashe_keyword = cashe_select[1]
                         db.add_channels(user_id, new_number_group, cashe_keyword, text_lines, cashe_group_name)
-                        await message.answer(cfg.right_create_group)
+                        markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+                        markup_reply.add(cfg.autoposting)
+                        markup_reply.add(cfg.parser)
+                        markup_reply.row(cfg.my_profile, cfg.support)
+                        await message.answer(cfg.right_create_group, reply_markup=markup_reply)
                         await state.finish()
                         db.delete_cashe_parsing(user_id)
                     except Exception as es:
