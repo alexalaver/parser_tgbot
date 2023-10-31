@@ -171,7 +171,7 @@ async def buttons_callback(callback_query: types.CallbackQuery):
                 await callback_query.answer(cfg.create_group_button_uved)
                 db.delete_cashe_parsing(user_id)
             else:
-                await callback_query.message.answer(cfg.error_group_5)
+                await callback_query.answer(cfg.error_group_5)
 
 @dp.message_handler(state=Create_group.create_group_1)
 async def create_group_func_1(message: types.Message, state: FSMContext):
