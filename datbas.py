@@ -128,5 +128,5 @@ class Data:
         with self.connect:
             self.cursor.execute("SELECT group_name, keyword FROM cash_parsing WHERE id=%s", (id,))
             a = self.cursor.fetchone()
-            b = [list(row) for row in a]
+            b = [row for row in a]
             return b
