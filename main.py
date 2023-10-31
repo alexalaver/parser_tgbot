@@ -162,6 +162,7 @@ async def buttons_callback(callback_query: types.CallbackQuery):
         user_id = callback_query.from_user.id
         if callback_query.data == "groups_add_button":
             number_group = db.check_number_group(user_id)
+            await callback_query.message.answer(number_group)
             if int(number_group) < 5:
                 markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
                 markup_reply.add(cfg.cancel_creategroup)
