@@ -106,7 +106,7 @@ class Data:
 
     def add_channels(self, id, number_group, keyword, channels, group_name):
         with self.connect:
-            self.cursor.execute("INSERT INTO groups (id, number_group, keyword, channels, group_name) VALUES (%s, %s, %s)", (id, number_group, keyword, channels, group_name,))
+            self.cursor.execute("INSERT INTO groups (id, number_group, keyword, channels, group_name) VALUES (%s, %s, %s, %s, %s)", (id, number_group, keyword, channels, group_name,))
             self.connect.commit()
 
     def add_cashe_group_name_parsing(self, id, group_name):
