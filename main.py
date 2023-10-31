@@ -170,6 +170,7 @@ async def buttons_callback(callback_query: types.CallbackQuery):
                 await callback_query.message.answer(cfg.create_group_text_2, reply_markup=markup_reply)
                 await callback_query.answer(cfg.create_group_button_uved)
                 db.delete_cashe_parsing(user_id)
+                await callback_query.message.answer(number_group)
             else:
                 await callback_query.answer(cfg.error_group_5)
                 await callback_query.message.answer(number_group)
