@@ -102,7 +102,7 @@ class Data:
             if a is None:
                 return 0
             else:
-                return len(a)
+                return len(str(a))
 
     def add_channels(self, id, number_group, keyword, channels, group_name):
         with self.connect:
