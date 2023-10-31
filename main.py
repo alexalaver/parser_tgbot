@@ -240,20 +240,29 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
         elif message.text:
             if 2 <= len(message.text) <= 1000:
                 if 10 <= len(text_lines) <= 50:
-                    check_number_group = db.check_number_group(user_id)
-                    new_number_group = check_number_group + 1
-                    cashe_select = db.select_cashe_parsing(user_id)
-                    cashe_group_name = cashe_select[0]
-                    cashe_keyword = cashe_select[1]
-                    db.add_channels(user_id, new_number_group, cashe_keyword, text_lines, cashe_group_name)
-                    markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
-                    markup_reply.add(cfg.autoposting)
-                    markup_reply.add(cfg.parser)
-                    markup_reply.row(cfg.my_profile, cfg.support)
-                    print(f"{cashe_group_name} {cashe_keyword}")
-                    await message.answer(cfg.right_create_group, reply_markup=markup_reply)
-                    await state.finish()
-                    db.delete_cashe_parsing(user_id)
+                    try:
+                        check_number_group = db.check_number_group(user_id)
+                        new_number_group = check_number_group + 1
+                        cashe_select = db.select_cashe_parsing(user_id)
+                        cashe_group_name = cashe_select[0]
+                        cashe_keyword = cashe_select[1]
+                        db.add_channels(user_id, new_number_group, cashe_keyword, text_lines, cashe_group_name)
+                        markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+                        markup_reply.add(cfg.autoposting)
+                        markup_reply.add(cfg.parser)
+                        markup_reply.row(cfg.my_profile, cfg.support)
+                        await message.answer(cfg.right_create_group, reply_markup=markup_reply)
+                        await state.finish()
+                        db.delete_cashe_parsing(user_id)
+                    except Exception as es:
+                        await state.reset_state()
+                        markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+                        markup_reply.add(cfg.autoposting)
+                        markup_reply.add(cfg.parser)
+                        markup_reply.row(cfg.my_profile, cfg.support)
+                        await message.answer(cfg.error_create_group, reply_markup=markup_reply)
+                        print(f"[ERROR] {es}")
+                        db.delete_cashe_parsing(user_id)
                 else:
                     await message.answer(cfg.error_len_channels_create)
             else:
