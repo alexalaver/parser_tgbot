@@ -116,7 +116,7 @@ class Data:
 
     def add_cashe_keyword_parsing(self, id, keyword):
         with self.connect:
-            self.cursor.execute("UPDATE cash_parsing SET keyword=%s ", (id, keyword,))
+            self.cursor.execute("UPDATE cash_parsing SET keyword=%s ", (keyword,))
             self.connect.commit()
 
     def delete_cashe_parsing(self, id):
