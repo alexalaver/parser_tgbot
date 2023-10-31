@@ -145,4 +145,5 @@ class Data:
         with self.connect:
             self.cursor.execute("SELECT group_name FROM groups WHERE id=%s", (id,))
             a = self.cursor.fetchall()
-            return a
+            result_list = [item[0] for item in a]
+            return result_list
