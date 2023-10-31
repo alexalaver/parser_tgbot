@@ -190,7 +190,7 @@ async def buttons_callback(callback_query: types.CallbackQuery):
 
             for i in range(start, min(end, len(channels))):
                 button = types.InlineKeyboardButton(channels[i], callback_data=channels[i])
-            buttons.append(button)
+                buttons.append(button)
 
             markup_inline.add(*buttons)
 
