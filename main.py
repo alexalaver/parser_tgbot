@@ -182,8 +182,9 @@ async def buttons_callback(callback_query: types.CallbackQuery):
         elif callback_query.data in db.select_group_name(user_id):
             buttons_per_page = 10
             channels = db.select_channels(user_id, callback_query.data)
-            markup_inline = types.InlineKeyboardMarkup()
-            page = 0
+
+            # Получите номер страницы из callback_data
+            page = int(callback_query.data.split("_")[1]) if callback_query.data.startswith("page_") else 0
 
             # Функция для создания кнопок для текущей страницы
             def create_buttons(page, items):
@@ -191,27 +192,24 @@ async def buttons_callback(callback_query: types.CallbackQuery):
                 start = page * buttons_per_page
                 end = start + buttons_per_page
                 for i in range(start, min(end, len(items))):
-                    button = types.InlineKeyboardButton(items[i], callback_data=items[i])
+                    button = types.InlineKeyboardButton(items[i], callback_data=f"select_{items[i]}")
                     buttons.append(button)
                 return buttons
 
-            # Функция для обновления клавиатуры
-            def update_markup(page, channels):
-                markup_inline = types.InlineKeyboardMarkup()
-                buttons = create_buttons(page, channels)
-                markup_inline.add(*buttons)
+            # Создаем клавиатуру для текущей страницы
+            markup_inline = types.InlineKeyboardMarkup()
+            buttons = create_buttons(page, channels)
+            markup_inline.add(*buttons)
 
-                if page > 0:
-                    prev_button = types.InlineKeyboardButton("<<", callback_data=f"prev_{page - 1}")
-                    markup_inline.insert(prev_button)
+            # Добавляем кнопки "вперед" и "назад" в зависимости от страницы
+            if page > 0:
+                prev_button = types.InlineKeyboardButton("<< Назад", callback_data=f"page_{page - 1}")
+                markup_inline.row(prev_button)
+            if (page + 1) * buttons_per_page < len(channels):
+                next_button = types.InlineKeyboardButton("Вперед >>", callback_data=f"page_{page + 1}")
+                markup_inline.row(next_button)
 
-                if (page + 1) * buttons_per_page < len(channels):
-                    next_button = types.InlineKeyboardButton(">>", callback_data=f"next_{page + 1}")
-                    markup_inline.insert(next_button)
-
-                return markup_inline
-
-            markup_inline = update_markup(page, channels)
+            # Отправляем сообщение с клавиатурой
             await callback_query.message.edit_caption(caption='TESTING', reply_markup=markup_inline)
 
 
