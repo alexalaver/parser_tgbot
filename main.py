@@ -162,7 +162,6 @@ async def buttons_callback(callback_query: types.CallbackQuery):
         user_id = callback_query.from_user.id
         if callback_query.data == "groups_add_button":
             number_group = db.check_number_group(user_id)
-            await callback_query.message.answer(number_group)
             if int(number_group) < 5:
                 markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
                 markup_reply.add(cfg.cancel_creategroup)
@@ -171,10 +170,8 @@ async def buttons_callback(callback_query: types.CallbackQuery):
                 await callback_query.message.answer(cfg.create_group_text_2, reply_markup=markup_reply)
                 await callback_query.answer(cfg.create_group_button_uved)
                 db.delete_cashe_parsing(user_id)
-                await callback_query.message.answer(number_group)
             else:
                 await callback_query.answer(cfg.error_group_5)
-                await callback_query.message.answer(number_group)
 
 @dp.message_handler(state=Create_group.create_group_1)
 async def create_group_func_1(message: types.Message, state: FSMContext):
