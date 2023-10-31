@@ -23,8 +23,7 @@ async def profile(message):
     user_id = message.from_user.id
     markup_inline = types.InlineKeyboardMarkup(row_width=1, )
     btn_inline1 = types.InlineKeyboardButton(cfg.up_balance, callback_data='up_balance')
-    btn_inline2 = types.InlineKeyboardButton(cfg.tariff_selection, callback_data='tariff_selection')
-    markup_inline.add(btn_inline1, btn_inline2)
+    markup_inline.add(btn_inline1)
     await message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.profile(user_id, db.select_balance(user_id), db.select_tariffe(user_id)), reply_markup=markup_inline)
 
 async def supports_send(message):
