@@ -193,9 +193,12 @@ async def create_group_func_1(message: types.Message, state: FSMContext):
             await message.answer(cfg.cancel_creategroup_text, reply_markup=markup_reply)
         elif message.text:
             if 3 <= len(message.text) <= 15:
-                db.add_cashe_group_name_parsing(user_id, message.text)
-                await message.answer(cfg.create_group_text_3)
-                await Create_group.create_group_2.set()
+                if message.text in db.select_group_name(user_id):
+                    await message.answer(cfg.error_name_again)
+                else:
+                    db.add_cashe_group_name_parsing(user_id, message.text)
+                    await message.answer(cfg.create_group_text_3)
+                    await Create_group.create_group_2.set()
             else:
                 await message.answer(cfg.error_len_name_group)
 
@@ -291,8 +294,6 @@ async def other(message: types.Message):
             await parsers_send(message)
         elif message.text == cfg.autoposting:
             await autoposting_send(message)
-        elif message.text == 't':
-            await message.answer(db.select_channels(user_id, "Group 2"))
 
 
 if __name__ == "__main__":
