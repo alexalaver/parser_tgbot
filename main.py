@@ -251,6 +251,7 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                         markup_reply.add(cfg.autoposting)
                         markup_reply.add(cfg.parser)
                         markup_reply.row(cfg.my_profile, cfg.support)
+                        print(f"{cashe_group_name} {cashe_keyword}")
                         await message.answer(cfg.right_create_group, reply_markup=markup_reply)
                         await state.finish()
                         db.delete_cashe_parsing(user_id)
