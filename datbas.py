@@ -148,6 +148,7 @@ class Data:
             result_list = [item[0] for item in a]
             return result_list
 
+
     def select_channels(self, id, group_name):
         with self.connect:
             self.cursor.execute("SELECT channels FROM groups WHERE id=%s AND group_name=%s", (id, group_name,))

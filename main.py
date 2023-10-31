@@ -14,6 +14,7 @@ bot = Bot(cfg.TOKEN, parse_mode=types.ParseMode.MARKDOWN)
 dp = Dispatcher(bot, storage=MemoryStorage())
 db = Data("192.168.1.37", "5432", "pars_db", "pars_user", "pars_pwd")
 
+
 class Create_group(StatesGroup):
     create_group_1 = State()
     create_group_2 = State()
@@ -178,6 +179,22 @@ async def buttons_callback(callback_query: types.CallbackQuery):
                 db.delete_cashe_parsing(user_id)
             else:
                 await callback_query.answer(cfg.error_group_5, show_alert=True)
+        elif callback_query.data in db.select_group_name(user_id):
+            buttons_per_page = 10
+            channels = db.select_channels(user_id, callback_query.data)
+            markup_inline = types.InlineKeyboardMarkup()
+            page = 0
+            buttons = []
+            start = page * buttons_per_page
+            end = start + buttons_per_page
+            for i in range(start, min(end, len(channels))):
+                button = types.InlineKeyboardButton(channels[i], callback_data=channels[i])
+            buttons.append(button)
+            markup_inline.add(*buttons)
+            next_button = types.InlineKeyboardButton(">>", callback_data=f"next_{page + 1}")
+            prev_button = types.InlineKeyboardButton("<<", callback_data=f"prev_{page - 1}")
+            markup_inline.add(prev_button, next_button)
+            await callback_query.message.edit_caption(caption='TESTING', reply_markup=markup_inline)
 
 @dp.message_handler(state=Create_group.create_group_1)
 async def create_group_func_1(message: types.Message, state: FSMContext):
