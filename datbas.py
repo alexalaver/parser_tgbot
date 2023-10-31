@@ -98,7 +98,7 @@ class Data:
     def check_number_group(self, id):
         with self.connect:
             self.cursor.execute("SELECT id FROM groups WHERE id=%s", (id,))
-            a = self.cursor.fetchone()
+            a = self.cursor.fetchall()
             b = [row for row in a]
             if a is None:
                 return 0
