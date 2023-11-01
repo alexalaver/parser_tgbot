@@ -181,7 +181,7 @@ async def buttons_callback(callback_query: types.CallbackQuery):
                 await callback_query.answer(cfg.error_group_5, show_alert=True)
         elif callback_query.data in db.select_group_name(user_id):
             channels = db.select_channels(user_id, callback_query.data)
-            markup_inline = types.InlineKeyboardMarkup(row_width=5)
+            markup_inline = types.InlineKeyboardMarkup(row_width=4)
             max_buttons = 50
             for i in range(min(max_buttons, len(channels))):
                 button = types.InlineKeyboardButton(text=channels[i], callback_data=channels[i])
