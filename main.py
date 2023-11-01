@@ -180,43 +180,17 @@ async def buttons_callback(callback_query: types.CallbackQuery):
             else:
                 await callback_query.answer(cfg.error_group_5, show_alert=True)
         elif callback_query.data in db.select_group_name(user_id):
-            buttons_per_page = 10
             channels = db.select_channels(user_id, callback_query.data)
-
-            # Получите номер страницы из callback_data
-            page = int(callback_query.data.split("_")[1]) if callback_query.data.startswith("page_") else 0
-
-            # Функция для создания кнопок для текущей страницы
-            def create_buttons(page, items):
-                buttons = []
-                start = page * buttons_per_page
-                end = start + buttons_per_page
-                for i in range(start, min(end, len(items))):
-                    button = types.InlineKeyboardButton(items[i], callback_data=f"select_{items[i]}")
-                    buttons.append(button)
-                return buttons
-
-            # Создаем клавиатуру для текущей страницы
-            markup_inline = types.InlineKeyboardMarkup()
-            buttons = create_buttons(page, channels)
-            markup_inline.add(*buttons)
-
-            # Добавляем кнопки "вперед" и "назад" в зависимости от страницы
-            navigation_buttons = []
-
-            if page > 0:
-                prev_button = types.InlineKeyboardButton("<< Назад", callback_data=f"page_{page - 1}")
-                navigation_buttons.append(prev_button)
-
-            if (page + 1) * buttons_per_page < len(channels):
-                next_button = types.InlineKeyboardButton("Вперед >>", callback_data=f"page_{page + 1}")
-                navigation_buttons.append(next_button)
-
-            if navigation_buttons:
-                markup_inline.row(*navigation_buttons)
-
-            # Отправляем сообщение с клавиатурой
-            await callback_query.message.edit_caption(caption='TESTING', reply_markup=markup_inline)
+            markup_inline = types.InlineKeyboardMarkup(row_width=1)
+            max_buttons = 50
+            for i in range(min(max_buttons, len(channels))):
+                button = types.InlineKeyboardButton(text=channels[i], callback_data=channels[i])
+                markup_inline.row(button)
+            if db.check_date_tariffe(user_id, callback_query.data) is None:
+                pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels')
+                markup_inline.add(pay_money_buttons)
+            back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels')
+            markup_inline.add(back_channels)
 
 
 @dp.message_handler(state=Create_group.create_group_1)

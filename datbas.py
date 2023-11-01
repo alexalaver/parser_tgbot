@@ -78,9 +78,9 @@ class Data:
             self.cursor.execute("UPDATE users SET date_tariffe=%s WHERE id=%s", (data, id,))
             self.connect.commit()
 
-    def check_date_tariffe(self, id):
+    def check_date_tariffe(self, id, group_name):
         with self.connect:
-            self.cursor.execute("SELECT date_tariffe FROM users WHERE id=%s", (id,))
+            self.cursor.execute("SELECT data_end FROM groups WHERE id=%s AND group_name=%s", (id, group_name,))
             a = self.cursor.fetchone()[0]
             return a
 
