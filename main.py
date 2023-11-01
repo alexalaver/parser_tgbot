@@ -182,10 +182,8 @@ async def buttons_callback(callback_query: types.CallbackQuery):
         elif callback_query.data in db.select_group_name(user_id):
             channels = db.select_channels(user_id, callback_query.data)
             markup_inline = types.InlineKeyboardMarkup(row_width=4)
-            max_buttons = 50
-            for i in range(min(max_buttons, len(channels))):
-                button = types.InlineKeyboardButton(text=channels[i], callback_data=channels[i])
-                markup_inline.row(button)
+            for channel in channels:
+                markup_inline.add(types.InlineKeyboardButton(text=channel, callback_data=channel))
             if db.check_date_tariffe(user_id, callback_query.data) is None:
                 pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels')
                 markup_inline.add(pay_money_buttons)
