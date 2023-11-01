@@ -191,6 +191,8 @@ async def buttons_callback(callback_query: types.CallbackQuery):
             back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels')
             markup_inline.add(back_channels)
             await callback_query.message.edit_caption(caption="TESTING", reply_markup=markup_inline)
+            if callback_query.data in channels:
+                await callback_query.answer(f"testing{callback_query.data}")
 
 
 @dp.message_handler(state=Create_group.create_group_1)
