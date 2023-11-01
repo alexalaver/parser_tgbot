@@ -190,7 +190,7 @@ async def buttons_callback(callback_query: types.CallbackQuery):
                 pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels')
                 markup_inline.add(pay_money_buttons)
             back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels')
-            markup_inline.row(back_channels)
+            markup_inline.add(back_channels)
             await callback_query.message.edit_caption(caption="TESTING", reply_markup=markup_inline)
 
 
