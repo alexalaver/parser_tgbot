@@ -283,7 +283,7 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
             for channel in channels:
                 buttons = types.InlineKeyboardButton(text=channel, callback_data=channel)
                 markup_inline.row(buttons)
-            if db.check_date_tarife(user_id, callback_query.data) is None:
+            if db.check_date_tarife_for_number(user_id, number_group) is None:
                 pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels')
                 markup_inline.add(pay_money_buttons)
             back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels')
