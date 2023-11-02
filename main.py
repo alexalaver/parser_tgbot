@@ -222,17 +222,18 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
         check_tarife = db.check_date_tarife_for_number(user_id, number_group)
         group_name = db.select_group_name_for_number_group(user_id, number_group)
         if callback_query.data in channels:
-            current_data = datetime.datetime.now()
-            formated_check_date_tarife = datetime.datetime.strptime(check_tarife, "%Y-%m-%d %H:%M:%S")
             if check_tarife is None:
                 await callback_query.answer(text=cfg.error_oplata, show_alert=True)
-            elif current_data >= formated_check_date_tarife:
-                db.delete_old_tariffe(user_id, number_group)
-                await callback_query.answer(text=cfg.error_oplata, show_alert=True)
             else:
-                keyword = db.select_keyword(user_id, number_group)
-                await callback_query.message.answer(keyword)
-                await callback_query.answer(cfg.button_correct)
+                current_data = datetime.datetime.now()
+                formated_check_date_tarife = datetime.datetime.strptime(check_tarife, "%Y-%m-%d %H:%M:%S")
+                if current_data >= formated_check_date_tarife:
+                    db.delete_old_tariffe(user_id, number_group)
+                    await callback_query.answer(text=cfg.error_oplata, show_alert=True)
+                else:
+                    keyword = db.select_keyword(user_id, number_group)
+                    await callback_query.message.answer(keyword)
+                    await callback_query.answer(cfg.button_correct)
         elif callback_query.data == "back_channels":
             await state.reset_state()
             db.delete_cash_parsing_use(user_id)
