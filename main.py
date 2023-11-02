@@ -204,9 +204,9 @@ async def buttons_callback(callback_query: types.CallbackQuery):
 async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMContext):
     if callback_query.message.chat.type == types.ChatType.PRIVATE:
         user_id = callback_query.from_user.id
-        channels = db.select_channels(user_id, callback_query.data)
+        number_group = db.select_number_group_parser(user_id)
+        channels = db.select_channels(user_id, number_group)
         if callback_query.data in channels:
-            number_group = db.select_number_group_parser(user_id)
             keyword = db.select_keyword(user_id, number_group)
             await callback_query.message.answer(keyword)
         elif callback_query.data == "back_channels":
