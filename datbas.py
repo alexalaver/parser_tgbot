@@ -75,7 +75,7 @@ class Data:
 
     def add_date_tariffe(self, id, data, number_group):
         with self.connect:
-            self.cursor.execute("UPDATE groups SET date_end=%s WHERE id=%s AND number_group=%s", (data, id, number_group,))
+            self.cursor.execute("UPDATE groups SET data_end=%s WHERE id=%s AND number_group=%s", (data, id, number_group,))
             self.connect.commit()
 
     def check_date_tarife(self, id, group_name):
