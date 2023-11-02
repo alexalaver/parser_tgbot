@@ -185,8 +185,7 @@ async def buttons_callback(callback_query: types.CallbackQuery):
         elif callback_query.data in db.select_group_name(user_id):
             await Parsers_use.parsers_use_1.set()
             db.delete_cash_parsing_use(user_id)
-            group_name = db.select_group_name(user_id)
-            number_group = db.select_number_group(user_id, group_name)
+            number_group = db.select_number_group(user_id, callback_query.data)
             db.add_cash_parsing_use(user_id, number_group)
             channels = db.select_channels(user_id, callback_query.data)
             markup_inline = types.InlineKeyboardMarkup(row_width=4)
@@ -212,6 +211,7 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
             await callback_query.message.answer(keyword)
         elif callback_query.data == "back_channels":
             await state.reset_state()
+            db.delete_cash_parsing_use(user_id)
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
             group_names = db.select_group_name(user_id)
             max_buttons = 5
