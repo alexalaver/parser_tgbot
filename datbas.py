@@ -86,7 +86,7 @@ class Data:
 
     def check_date_tarife_for_number(self, id, number_group):
         with self.connect:
-            self.cursor.execute("SELECT data_end FROM groups WHERE id=%s AND group_name=%s", (id, number_group,))
+            self.cursor.execute("SELECT data_end FROM groups WHERE id=%s AND number_group=%s", (id, number_group,))
             a = self.cursor.fetchone()[0]
             return a
 
