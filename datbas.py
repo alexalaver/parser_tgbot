@@ -154,3 +154,31 @@ class Data:
             self.cursor.execute("SELECT channels FROM groups WHERE id=%s AND group_name=%s", (id, group_name,))
             a = self.cursor.fetchone()[0]
             return a
+
+    def select_number_group(self, id, group_name):
+        with self.connect:
+            self.cursor.execute("SELECT number_group FROM groups WHERE id=%s AND group_name=%s", (id, group_name,))
+            a = self.cursor.fetchone()[0]
+            return a
+
+    def delete_cash_parsing_use(self, id):
+        with self.connect:
+            self.cursor.execute("DELETE FROM cash_parsing_use WHERE id=%s", (id,))
+            self.connect.commit()
+
+    def add_cash_parsing_use(self, id, number_group):
+        with self.connect:
+            self.cursor.execute("INSERT INTO cash_parsing_use (id, number_group) VALUES(%s, %s)", (id, number_group,))
+            self.connect.commit()
+
+    def select_keyword(self, id, number_group):
+        with self.connect:
+            self.cursor.execute("SELECT keyword FROM groups WHERE id=%s AND number_group=%s", (id, number_group,))
+            a = self.cursor.fetchone()[0]
+            return a
+
+    def select_number_group_parser(self, id):
+        with self.connect:
+            self.cursor.execute("SELECT number_group FROM cash_parsing_use WHERE id=%s", (id,))
+            a = self.cursor.fetchone()[0]
+            return a

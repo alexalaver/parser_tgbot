@@ -20,6 +20,9 @@ class Create_group(StatesGroup):
     create_group_2 = State()
     create_group_3 = State()
 
+class Parsers_use(StatesGroup):
+    parsers_use_1 = State()
+
 async def profile(message):
     user_id = message.from_user.id
     markup_inline = types.InlineKeyboardMarkup(row_width=1, )
@@ -180,6 +183,11 @@ async def buttons_callback(callback_query: types.CallbackQuery):
             else:
                 await callback_query.answer(cfg.error_group_5, show_alert=True)
         elif callback_query.data in db.select_group_name(user_id):
+            await Parsers_use.parsers_use_1.set()
+            db.delete_cash_parsing_use(user_id)
+            group_name = db.select_group_name(user_id)
+            number_group = db.select_number_group(user_id, group_name)
+            db.add_cash_parsing_use(user_id, number_group)
             channels = db.select_channels(user_id, callback_query.data)
             markup_inline = types.InlineKeyboardMarkup(row_width=4)
             for channel in channels:
@@ -191,8 +199,33 @@ async def buttons_callback(callback_query: types.CallbackQuery):
             back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels')
             markup_inline.add(back_channels)
             await callback_query.message.edit_caption(caption="TESTING", reply_markup=markup_inline)
-            if callback_query.data in channels:
-                await callback_query.answer(f"testing{callback_query.data}")
+
+
+@dp.callback_query_handler(state=Parsers_use.parsers_use_1)
+async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMContext):
+    if callback_query.message.chat.type == types.ChatType.PRIVATE:
+        user_id = callback_query.from_user.id
+        channels = db.select_channels(user_id, callback_query.data)
+        if callback_query.data in channels:
+            number_group = db.select_number_group_parser(user_id)
+            keyword = db.select_keyword(user_id, number_group)
+            await callback_query.message.answer(keyword)
+        elif callback_query.data == "back_channels":
+            await state.reset_state()
+            markup_inline = types.InlineKeyboardMarkup(row_width=1)
+            group_names = db.select_group_name(user_id)
+            max_buttons = 5
+            for i in range(min(max_buttons, len(group_names))):
+                button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
+                markup_inline.add(button)
+
+            btn_inline1 = types.InlineKeyboardButton(cfg.groups_add_button, callback_data='groups_add_button')
+            markup_inline.add(btn_inline1)
+            await callback_query.message.edit_caption(caption=cfg.parser_text, reply_markup=markup_inline)
+@dp.message_handler(state=Parsers_use.parsers_use_1)
+async def parsers_use_1_text(message: types.Message):
+    if message.chat.type == types.ChatType.PRIVATE:
+        await message.answer(cfg.error_parsers_texts)
 
 
 @dp.message_handler(state=Create_group.create_group_1)
