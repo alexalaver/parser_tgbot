@@ -277,6 +277,21 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                 await callback_query.message.answer(text=cfg.tariffe_correct(group_name, channels_len, formatted_date_new), reply_markup=markup_inline)
             else:
                 await callback_query.answer(text=cfg.tariffe_error, show_alert=True)
+        elif callback_query.data == "back_oplata":
+            db.delete_cash_parsing_use(user_id)
+            number_group = db.select_number_group(user_id, callback_query.data)
+            db.add_cash_parsing_use(user_id, number_group)
+            channels = db.select_channels(user_id, callback_query.data)
+            markup_inline = types.InlineKeyboardMarkup(row_width=4)
+            for channel in channels:
+                buttons = types.InlineKeyboardButton(text=channel, callback_data=channel)
+                markup_inline.row(buttons)
+            if db.check_date_tarife(user_id, callback_query.data) is None:
+                pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels')
+                markup_inline.add(pay_money_buttons)
+            back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels')
+            markup_inline.add(back_channels)
+            await callback_query.message.edit_caption(caption="TESTING", reply_markup=markup_inline)
 
 @dp.message_handler(state=Parsers_use.parsers_use_1)
 async def parsers_use_1_text(message: types.Message):
