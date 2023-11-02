@@ -170,7 +170,7 @@ class Data:
     def select_group_name_for_number_group(self, id, number_group):
         with self.connect:
             self.cursor.execute("SELECT group_name FROM groups WHERE id=%s AND number_group=%s", (id, number_group,))
-            a = self.cursor.fetchall()[0]
+            a = self.cursor.fetchone()[0]
             return a
 
 

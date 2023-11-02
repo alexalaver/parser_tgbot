@@ -200,7 +200,7 @@ async def buttons_callback(callback_query: types.CallbackQuery):
             await callback_query.message.edit_caption(caption="TESTING", reply_markup=markup_inline)
         elif callback_query.data == "menu_after_pay":
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
-            user_id = callback_query.message.from_user.id
+            user_id = callback_query.from_user.id
             group_names = db.select_group_name(user_id)
             max_buttons = 5
             for i in range(min(max_buttons, len(group_names))):
@@ -209,8 +209,7 @@ async def buttons_callback(callback_query: types.CallbackQuery):
 
             btn_inline1 = types.InlineKeyboardButton(cfg.groups_add_button, callback_data='groups_add_button')
             markup_inline.add(btn_inline1)
-            await callback_query.message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.parser_text,
-                                       reply_markup=markup_inline)
+            await callback_query.message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.parser_text, reply_markup=markup_inline)
 
 
 @dp.callback_query_handler(state=Parsers_use.parsers_use_1)
