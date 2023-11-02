@@ -192,7 +192,7 @@ async def buttons_callback(callback_query: types.CallbackQuery):
             for channel in channels:
                 buttons = types.InlineKeyboardButton(text=channel, callback_data=channel)
                 markup_inline.row(buttons)
-            if db.check_date_tariffe(user_id, callback_query.data) is None:
+            if db.check_date_tarife(user_id, callback_query.data) is None:
                 pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels')
                 markup_inline.add(pay_money_buttons)
             back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels')
@@ -219,7 +219,7 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
         user_id = callback_query.from_user.id
         number_group = db.select_number_group_parser(user_id)
         channels = db.select_channels_with_number(user_id, number_group)
-        check_tarife = db.check_date_tariffe(user_id, number_group)
+        check_tarife = db.check_date_tarife_for_number(user_id, number_group)
         group_name = db.select_group_name_for_number_group(user_id, number_group)
         if callback_query.data in channels:
             current_data = datetime.datetime.now()

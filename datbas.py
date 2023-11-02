@@ -78,9 +78,15 @@ class Data:
             self.cursor.execute("UPDATE groups SET date_end=%s WHERE id=%s AND number_group=%s", (data, id, number_group,))
             self.connect.commit()
 
-    def check_date_tariffe(self, id, number_group):
+    def check_date_tarife(self, id, group_name):
         with self.connect:
-            self.cursor.execute("SELECT data_end FROM groups WHERE id=%s AND number_group=%s", (id, number_group,))
+            self.cursor.execute("SELECT data_end FROM groups WHERE id=%s AND group_name=%s", (id, group_name,))
+            a = self.cursor.fetchone()[0]
+            return a
+
+    def check_date_tarife_for_number(self, id, number_group):
+        with self.connect:
+            self.cursor.execute("SELECT data_end FROM groups WHERE id=%s AND group_name=%s", (id, number_group,))
             a = self.cursor.fetchone()[0]
             return a
 
@@ -103,7 +109,7 @@ class Data:
     def update_balance(self, id, oplata):
         with self.connect:
             self.cursor.execute(f"UPDATE users SET balance=balance-{oplata} WHERE id=%s", (id,))
-            self.connect
+            self.connect.commit()
 
     def check_number_group(self, id):
         with self.connect:
