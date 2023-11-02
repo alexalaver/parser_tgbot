@@ -198,6 +198,19 @@ async def buttons_callback(callback_query: types.CallbackQuery):
             back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels')
             markup_inline.add(back_channels)
             await callback_query.message.edit_caption(caption="TESTING", reply_markup=markup_inline)
+        elif callback_query.data == "menu_after_pay":
+            markup_inline = types.InlineKeyboardMarkup(row_width=1)
+            user_id = callback_query.message.from_user.id
+            group_names = db.select_group_name(user_id)
+            max_buttons = 5
+            for i in range(min(max_buttons, len(group_names))):
+                button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
+                markup_inline.add(button)
+
+            btn_inline1 = types.InlineKeyboardButton(cfg.groups_add_button, callback_data='groups_add_button')
+            markup_inline.add(btn_inline1)
+            await callback_query.message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.parser_text,
+                                       reply_markup=markup_inline)
 
 
 @dp.callback_query_handler(state=Parsers_use.parsers_use_1)
@@ -206,9 +219,20 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
         user_id = callback_query.from_user.id
         number_group = db.select_number_group_parser(user_id)
         channels = db.select_channels_with_number(user_id, number_group)
+        check_tarife = db.check_date_tariffe(user_id, number_group)
+        group_name = db.select_group_name_for_number_group(user_id, number_group)
         if callback_query.data in channels:
-            keyword = db.select_keyword(user_id, number_group)
-            await callback_query.message.answer(keyword)
+            current_data = datetime.datetime.now()
+            formated_check_date_tarife = datetime.datetime.strptime(check_tarife, "%Y-%m-%d %H:%M:%S")
+            if check_tarife is None:
+                await callback_query.answer(text=cfg.error_oplata, show_alert=True)
+            elif current_data >= formated_check_date_tarife:
+                db.delete_old_tariffe(user_id, number_group)
+                await callback_query.answer(text=cfg.error_oplata, show_alert=True)
+            else:
+                keyword = db.select_keyword(user_id, number_group)
+                await callback_query.message.answer(keyword)
+                await callback_query.answer(cfg.button_correct)
         elif callback_query.data == "back_channels":
             await state.reset_state()
             db.delete_cash_parsing_use(user_id)
@@ -222,6 +246,37 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
             btn_inline1 = types.InlineKeyboardButton(cfg.groups_add_button, callback_data='groups_add_button')
             markup_inline.add(btn_inline1)
             await callback_query.message.edit_caption(caption=cfg.parser_text, reply_markup=markup_inline)
+            await callback_query.answer(cfg.back_text)
+        elif callback_query.data == "pay_money_channels":
+            markup_inline = types.InlineKeyboardMarkup(row_width=1)
+            btn_inline1 = types.InlineKeyboardButton(cfg.confirm_oplata, callback_data='confirm_oplata')
+            btn_inline2 = types.InlineKeyboardButton(cfg.back_button, callback_data='back_oplata')
+            markup_inline.add(btn_inline1, btn_inline2)
+            channels_len = len(channels)
+            money_oplata = str(5 * int(channels_len))
+            await callback_query.message.edit_caption(caption=cfg.oplata_chatov(channels_len, money_oplata), reply_markup=markup_inline)
+            await callback_query.answer(cfg.button_correct)
+        elif callback_query.data == "confirm_oplata":
+            balance = db.check_balance(user_id)
+            channels_len = len(channels)
+            money_oplata = 5 * int(channels_len)
+            if balance >= money_oplata:
+                db.update_balance(user_id, money_oplata)
+                channels_len = len(channels)
+                current_data = datetime.datetime.now()
+                new_date = current_data + datetime.timedelta(days=30)
+                formatted_date_new = new_date.strftime("%Y-%m-%d %H:%M:%S")
+                db.add_date_tariffe(user_id, formatted_date_new, number_group)
+                markup_inline = types.InlineKeyboardMarkup(row_width=1)
+                btn_inline1 = types.InlineKeyboardButton(cfg.menu_button, callback_data='menu_after_pay')
+                markup_inline.add(btn_inline1)
+                db.delete_cash_parsing_use(user_id)
+                await state.finish()
+                await callback_query.message.delete()
+                await callback_query.message.answer(text=cfg.tariffe_correct(group_name, channels_len, formatted_date_new), reply_markup=markup_inline)
+            else:
+                await callback_query.answer(text=cfg.tariffe_error, show_alert=True)
+
 @dp.message_handler(state=Parsers_use.parsers_use_1)
 async def parsers_use_1_text(message: types.Message):
     if message.chat.type == types.ChatType.PRIVATE:

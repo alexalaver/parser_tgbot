@@ -73,16 +73,21 @@ class Data:
             self.connect.commit()
 
 
-    def add_date_tariffe(self, id, data):
+    def add_date_tariffe(self, id, data, number_group):
         with self.connect:
-            self.cursor.execute("UPDATE users SET date_tariffe=%s WHERE id=%s", (data, id,))
+            self.cursor.execute("UPDATE groups SET date_end=%s WHERE id=%s AND number_group=%s", (data, id, number_group,))
             self.connect.commit()
 
-    def check_date_tariffe(self, id, group_name):
+    def check_date_tariffe(self, id, number_group):
         with self.connect:
-            self.cursor.execute("SELECT data_end FROM groups WHERE id=%s AND group_name=%s", (id, group_name,))
+            self.cursor.execute("SELECT data_end FROM groups WHERE id=%s AND number_group=%s", (id, number_group,))
             a = self.cursor.fetchone()[0]
             return a
+
+    def delete_old_tariffe(self, id, number_group):
+        with self.connect:
+            self.cursor.execute("DELETE data_end FROM groups WHERE id=%s AND number_group=%s", (id, number_group,))
+            self.connect.commit()
 
     def add_chats(self, id, chats):
         with self.connect:
@@ -94,6 +99,11 @@ class Data:
             self.cursor.execute("SELECT balance FROM users WHERE id=%s", (id,))
             a = self.cursor.fetchone()[0]
             return a
+
+    def update_balance(self, id, oplata):
+        with self.connect:
+            self.cursor.execute(f"UPDATE users SET balance=balance-{oplata} WHERE id=%s", (id,))
+            self.connect
 
     def check_number_group(self, id):
         with self.connect:
@@ -147,6 +157,12 @@ class Data:
             a = self.cursor.fetchall()
             result_list = [item[0] for item in a]
             return result_list
+
+    def select_group_name_for_number_group(self, id, number_group):
+        with self.connect:
+            self.cursor.execute("SELECT group_name FROM groups WHERE id=%s AND number_group=%s", (id, number_group,))
+            a = self.cursor.fetchall()[0]
+            return a
 
 
     def select_channels(self, id, group_name):
