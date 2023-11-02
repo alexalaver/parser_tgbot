@@ -230,8 +230,9 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                     db.delete_old_tariffe(user_id, number_group)
                     await callback_query.answer(text=cfg.error_oplata, show_alert=True)
                 else:
+                    channel_name = callback_query.data
                     keyword = db.select_keyword(user_id, number_group)
-                    await callback_query.message.answer(keyword)
+                    await callback_query.message.answer(f"ключевое слово - {keyword}\nназвание чата - {channel_name}")
                     await callback_query.answer(cfg.button_correct)
         elif callback_query.data == "back_channels":
             await state.reset_state()
