@@ -2,7 +2,7 @@ TOKEN = "6597828235:AAH60BBRislfPCqwBeGsiYMBEjXuBrHujZ0"
 API_ID = '1234000'
 API_HASH = 'c42d27d03355c1ef54ec5007540b3bee'
 
-STRING_SESSION = ''
+STRING_SESSION = '1ApWapzMBu0X5-Wu7thoQIH9l1g4VrLZbWg3g4yE1JE9keduPFS0DYhngleKLSFBCJuwVCRrLM5AGBBPHcO_ZLh8ZXQAuFV1CMKdRfMGBgYSonjZg-JxshHMBFEGZY-kS0PVNGmxkNYqtWTxa4uXpBTevfv5_Yf-U1MQTCR2Rl-0LIbMQdsWEi87uGKEVLE0fBXvU9tK_IbEClGst-oZU3wTz2EUAQ9DN0AkaqD8Ic4__44dl_L2HjFntltAttwF9Q--_fY1SW0A88Ri9sbDcbdYat1667Er88CakV3UgQPLVsjNQQUILT8myt71yURYs7NE1aEuqJT28GMwM1FwwxYD9HeJXgwc='
 
 def profile(profile_id, balance, tariffe):
     return f"*Ваш идентификатор: *{profile_id}\n*Текущий баланс: *{balance}\n*Ваш тариф: *{tariffe}"
