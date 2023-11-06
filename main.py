@@ -6,12 +6,13 @@ from datbas import Data
 from datetime import datetime
 from schedule import Scheduler
 from telethon import TelegramClient, events
+from apscheduler.schedulers.background import BackgroundScheduler
 from telethon.sessions import StringSession
 import threading
 import time
-import requests
 import warnings
 import functions as fnc
+import asyncio
 import config as cfg
 import logging
 import datetime
@@ -22,6 +23,9 @@ logger = logging.getLogger(__name__)
 bot = Bot(cfg.TOKEN, parse_mode=types.ParseMode.MARKDOWN)
 dp = Dispatcher(bot, storage=MemoryStorage())
 db = Data("192.168.1.37", "5432", "pars_db", "pars_user", "pars_pwd")
+
+with TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH) as client:
+    print("Это ваша строка сессии, сохраните её безопасно: ", client.session.save())
 
 telethon_client = TelegramClient(StringSession(cfg.STRING_SESSION), cfg.API_ID, cfg.API_HASH)
 
@@ -67,19 +71,17 @@ class ThreadedScheduler(Scheduler, RepeatTimer):
             function=self.run_pending,
         )
 
-def search_and_forward(message: types.Message):
+async def search_and_forward(message: types.Message):
     user_id = message.from_user.id
-    chat_ids = ["@mediapartisanschat"]
-    keywords = ['Армения']
+    chat_ids = db.select_all_channels(user_id)
+    keywords = db.select_all_keyword(user_id)
     try:
-        telethon_client.start()
-        with telethon_client:
+        await telethon_client.start()
+        async with telethon_client:
             for chat_id in chat_ids:
-                for message in telethon_client.iter_messages(chat_id):
+                async for message in telethon_client.iter_messages(chat_id):
                     if any(keyword.lower() in (message.text or "").lower() for keyword in keywords):
-                        # bot.send_message(user_id, message.text)
-                        data = {'chat_id': {user_id}, 'text': message.text}
-                        requests.post(url="https://api.telegram.org/bot" + cfg.TOKEN + "/sendMessage", data=data).json()
+                        await bot.send_message(user_id, message.text)
                         logger.info(f"Сообщение отправлено пользователю {user_id}: {message.text}")
     except Exception as e:
         logger.error(f"Ошибка при выполнении поиска и пересылки: {e}")
@@ -495,15 +497,15 @@ async def other(message: types.Message):
             await parsers_send(message)
         elif message.text == cfg.autoposting:
             await autoposting_send(message)
-        elif message.text == 'tt':
-            text = db.select_all_channels(user_id)
-            await message.answer(text)
 
+def schedule_search_and_forward():
+    asyncio.run(search_and_forward())
+
+# Настройка планировщика
+scheduler = BackgroundScheduler()
+scheduler.add_job(schedule_search_and_forward, 'interval', seconds=300)
+scheduler.start()
 
 if __name__ == "__main__":
-    executor.start_polling(dp)
-    logger.info("Starting bot...")
-    my_schedule = ThreadedScheduler(run_pending_interval=300) # stex workern enq stexcum
-    job1 = my_schedule.every(300).seconds.do(search_and_forward()) # stex dnum enq et funkcian inchqan jamanaky mek ani
-    my_schedule.start() # stex el miacnum enq
     executor.start_polling(dp, skip_updates=True)
+    logger.info("Starting bot...")
