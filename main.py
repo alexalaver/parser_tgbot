@@ -9,6 +9,7 @@ from telethon import TelegramClient, events
 from telethon.sessions import StringSession
 import threading
 import time
+import warnings
 import functions as fnc
 import config as cfg
 import logging
@@ -22,6 +23,48 @@ dp = Dispatcher(bot, storage=MemoryStorage())
 db = Data("192.168.1.37", "5432", "pars_db", "pars_user", "pars_pwd")
 
 telethon_client = TelegramClient(StringSession(cfg.STRING_SESSION), cfg.API_ID, cfg.API_HASH)
+
+class RepeatTimer(threading.Timer):
+    """Add repeated run of target to timer functionality. Source: https://stackoverflow.com/a/48741004/16466191"""
+    running: bool = False
+
+    def __init__(self, *args, **kwargs):
+        threading.Timer.__init__(self, *args, **kwargs)
+
+    def start(self) -> None:
+        """Protect from running start method multiple times"""
+        if not self.running:
+            super(RepeatTimer, self).start()
+            self.running = True
+        else:
+            warnings.warn('Timer is already running, cannot be started again.')
+
+    def cancel(self) -> None:
+        """Protect from running stop method multiple times"""
+        if self.running:
+            super(RepeatTimer, self).cancel()
+            self.running = False
+        else:
+            warnings.warn('Timer is already canceled, cannot be canceled again.')
+
+    def run(self):
+        """Replace run method of timer to run continuously"""
+        while not self.finished.wait(self.interval):
+            self.function(*self.args, **self.kwargs)
+
+
+class ThreadedScheduler(Scheduler, RepeatTimer):
+    """Non-blocking scheduler. Advice taken from: https://stackoverflow.com/a/50465583/16466191"""
+    def __init__(
+            self,
+            run_pending_interval: float,
+    ):
+        """Initialize parent classes"""
+        Scheduler.__init__(self)
+        super(RepeatTimer, self).__init__(
+            interval=run_pending_interval,
+            function=self.run_pending,
+        )
 
 async def search_and_forward(message: types.Message):
     user_id = message.from_user.id
@@ -449,7 +492,15 @@ async def other(message: types.Message):
             await parsers_send(message)
         elif message.text == cfg.autoposting:
             await autoposting_send(message)
+        elif message.text == 'tt':
+            text = db.select_all_channels(user_id)
+            await message.answer(text)
 
 
 if __name__ == "__main__":
     executor.start_polling(dp)
+    logger.info("Starting bot...")
+    my_schedule = ThreadedScheduler(run_pending_interval=600) # stex workern enq stexcum
+    job1 = my_schedule.every(600).seconds.do() # stex dnum enq et funkcian inchqan jamanaky mek ani
+    my_schedule.start() # stex el miacnum enq
+    executor.start_polling(dp, skip_updates=True)
