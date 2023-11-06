@@ -1,4 +1,5 @@
 import psycopg2
+import itertools
 
 class Data:
     def __init__(self, host1, port1, data, user1, password1):
@@ -224,4 +225,5 @@ class Data:
         with self.connect:
             self.cursor.execute("SELECT channels FROM groups WHERE id=%s AND data_end IS NOT NULL", (id,))
             a = self.cursor.fetchall()
-            return a
+            combined_list = list(itertools.chain(*a))
+            return combined_list
