@@ -73,13 +73,13 @@ def search_and_forward(message: types.Message):
     keywords = ['Армения']
     try:
         telethon_client.start()
-        async with telethon_client:
+        with telethon_client:
             for chat_id in chat_ids:
                 async for message in telethon_client.iter_messages(chat_id):
                     if any(keyword.lower() in (message.text or "").lower() for keyword in keywords):
-                        bot.send_message(user_id, message.text)
-                        # data = {'chat_id': {user_id}, 'text': message.text}
-                        # requests.post(url="https://api.telegram.org/bot" + cfg.TOKEN + "/sendMessage", data=data).json()
+                        # bot.send_message(user_id, message.text)
+                        data = {'chat_id': {user_id}, 'text': message.text}
+                        requests.post(url="https://api.telegram.org/bot" + cfg.TOKEN + "/sendMessage", data=data).json()
                         logger.info(f"Сообщение отправлено пользователю {user_id}: {message.text}")
     except Exception as e:
         logger.error(f"Ошибка при выполнении поиска и пересылки: {e}")
