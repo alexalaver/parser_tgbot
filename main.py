@@ -9,6 +9,7 @@ from telethon import TelegramClient, events
 from telethon.sessions import StringSession
 import threading
 import time
+import requests
 import warnings
 import functions as fnc
 import config as cfg
@@ -66,17 +67,19 @@ class ThreadedScheduler(Scheduler, RepeatTimer):
             function=self.run_pending,
         )
 
-async def search_and_forward(message: types.Message):
+def search_and_forward(message: types.Message):
     user_id = message.from_user.id
     chat_ids = ["@mediapartisanschat"]
     keywords = ['Армения']
     try:
-        await telethon_client.start()
+        telethon_client.start()
         async with telethon_client:
             for chat_id in chat_ids:
                 async for message in telethon_client.iter_messages(chat_id):
                     if any(keyword.lower() in (message.text or "").lower() for keyword in keywords):
-                        await bot.send_message(user_id, message.text)
+                        bot.send_message(user_id, message.text)
+                        # data = {'chat_id': {user_id}, 'text': message.text}
+                        # requests.post(url="https://api.telegram.org/bot" + cfg.TOKEN + "/sendMessage", data=data).json()
                         logger.info(f"Сообщение отправлено пользователю {user_id}: {message.text}")
     except Exception as e:
         logger.error(f"Ошибка при выполнении поиска и пересылки: {e}")
@@ -498,9 +501,9 @@ async def other(message: types.Message):
 
 
 if __name__ == "__main__":
-    # executor.start_polling(dp)
-    # logger.info("Starting bot...")
-    # my_schedule = ThreadedScheduler(run_pending_interval=600) # stex workern enq stexcum
-    # job1 = my_schedule.every(600).seconds.do() # stex dnum enq et funkcian inchqan jamanaky mek ani
-    # my_schedule.start() # stex el miacnum enq
+    executor.start_polling(dp)
+    logger.info("Starting bot...")
+    my_schedule = ThreadedScheduler(run_pending_interval=300) # stex workern enq stexcum
+    job1 = my_schedule.every(300).seconds.do(search_and_forward()) # stex dnum enq et funkcian inchqan jamanaky mek ani
+    my_schedule.start() # stex el miacnum enq
     executor.start_polling(dp, skip_updates=True)
