@@ -227,3 +227,4 @@ class Data:
             return a
 
 db = Data("192.168.1.37", "5432", "pars_db", "pars_user", "pars_pwd")
+print(db.select_all_channels(6930905488))
