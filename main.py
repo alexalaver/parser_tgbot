@@ -351,6 +351,8 @@ async def button_group_1(callback_query: types.CallbackQuery):
 async def create_group_func_2(message: types.Message, state: FSMContext):
     if message.chat.type == types.ChatType.PRIVATE:
         user_id = message.from_user.id
+        textsing = message.text
+        text_lines = textsing.strip().split('\n')
         if message.text == cfg.cancel_creategroup:
             markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
             markup_reply.add(cfg.autoposting)
@@ -360,10 +362,23 @@ async def create_group_func_2(message: types.Message, state: FSMContext):
             db.delete_cashe_parsing(user_id)
             await message.answer(cfg.cancel_creategroup_text, reply_markup=markup_reply)
         elif message.text:
-            if 3 <= len(message.text) <= 20:
-                db.add_cashe_keyword_parsing(user_id, message.text)
-                await message.answer(cfg.create_group_text_4)
-                await Create_group.create_group_3.set()
+            if 2 <= len(message.text) <= 500:
+                if 1 <= len(text_lines) <= 20:
+                    try:
+                        db.add_cashe_keyword_parsing(user_id, text_lines)
+                        await message.answer(cfg.right_create_group)
+                        await Create_group.create_group_3.set()
+                    except Exception as es:
+                        await state.reset_state()
+                        markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+                        markup_reply.add(cfg.autoposting)
+                        markup_reply.add(cfg.parser)
+                        markup_reply.row(cfg.my_profile, cfg.support)
+                        await message.answer(cfg.error_create_group, reply_markup=markup_reply)
+                        print(f"[ERROR] {es}")
+                        db.delete_cashe_parsing(user_id)
+                else:
+                    await message.answer(cfg.error_len_keyword_create)
             else:
                 await message.answer(cfg.error_len_keyword)
 
