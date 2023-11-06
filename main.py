@@ -366,7 +366,7 @@ async def create_group_func_2(message: types.Message, state: FSMContext):
                 if 1 <= len(text_lines) <= 20:
                     try:
                         db.add_cashe_keyword_parsing(user_id, text_lines)
-                        await message.answer(cfg.right_create_group)
+                        await message.answer(cfg.create_group_text_3)
                         await Create_group.create_group_3.set()
                     except Exception as es:
                         await state.reset_state()
