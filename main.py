@@ -75,7 +75,7 @@ def search_and_forward(message: types.Message):
         telethon_client.start()
         with telethon_client:
             for chat_id in chat_ids:
-                async for message in telethon_client.iter_messages(chat_id):
+                for message in telethon_client.iter_messages(chat_id):
                     if any(keyword.lower() in (message.text or "").lower() for keyword in keywords):
                         # bot.send_message(user_id, message.text)
                         data = {'chat_id': {user_id}, 'text': message.text}
