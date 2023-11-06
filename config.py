@@ -1,4 +1,9 @@
 TOKEN = "6597828235:AAH60BBRislfPCqwBeGsiYMBEjXuBrHujZ0"
+API_ID = '1234000'
+API_HASH = 'c42d27d03355c1ef54ec5007540b3bee'
+
+STRING_SESSION = ''
+
 def profile(profile_id, balance, tariffe):
     return f"*Ваш идентификатор: *{profile_id}\n*Текущий баланс: *{balance}\n*Ваш тариф: *{tariffe}"
 

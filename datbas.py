@@ -219,3 +219,11 @@ class Data:
             self.cursor.execute("SELECT number_group FROM cash_parsing_use WHERE id=%s", (id,))
             a = self.cursor.fetchone()[0]
             return a
+
+    def select_all_channels(self, id):
+        with self.connect:
+            self.cursor.execute("SELECT channels FROM groups WHERE id=%s AND data_end IS NOT NULL", (id,))
+            a = self.cursor.fetchall()
+            return a
+
+db = Data("192.168.1.37", "5432", "pars_db", "pars_user", "pars_pwd")

@@ -3,17 +3,40 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher.storage import FSMContext
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from datbas import Data
+from datetime import datetime
+from schedule import Scheduler
+from telethon import TelegramClient, events
+from telethon.sessions import StringSession
+import threading
+import time
 import functions as fnc
 import config as cfg
 import logging
 import datetime
 
 logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 bot = Bot(cfg.TOKEN, parse_mode=types.ParseMode.MARKDOWN)
 dp = Dispatcher(bot, storage=MemoryStorage())
 db = Data("192.168.1.37", "5432", "pars_db", "pars_user", "pars_pwd")
 
+telethon_client = TelegramClient(StringSession(cfg.STRING_SESSION), cfg.API_ID, cfg.API_HASH)
+
+async def search_and_forward(message: types.Message):
+    user_id = message.from_user.id
+    chat_ids = ["@mediapartisanschat"]
+    keywords = ['Армения']
+    try:
+        await telethon_client.start()
+        async with telethon_client:
+            for chat_id in chat_ids:
+                async for message in telethon_client.iter_messages(chat_id):
+                    if any(keyword.lower() in (message.text or "").lower() for keyword in keywords):
+                        await bot.send_message(user_id, message.text)
+                        logger.info(f"Сообщение отправлено пользователю {user_id}: {message.text}")
+    except Exception as e:
+        logger.error(f"Ошибка при выполнении поиска и пересылки: {e}")
 
 class Create_group(StatesGroup):
     create_group_1 = State()
