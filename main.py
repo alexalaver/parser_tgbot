@@ -69,36 +69,36 @@ class ThreadedScheduler(Scheduler, RepeatTimer):
             function=self.run_pending,
         )
 
+async def search_in_group(num, groups):
+    group = groups[num]
+    user_id, chat_ids, keywords = group[0], group[2], group[5]
+
+    for chat_id in chat_ids:
+        try:
+            last_message = await telethon_client.get_messages(chat_id, limit=1)
+            if last_message:
+                message = last_message[0]
+                for keyword in keywords:
+                    if keyword in message.message:
+                        # Отправляем исходное сообщение пользователю
+                        await telethon_client.send_message(user_id, message)
+                        break
+
+            # Ожидание перед проверкой следующего чата
+            await asyncio.sleep(10)
+
+        except Exception as e:
+            print(f"Ошибка: {e}")
+
+    # Переход к следующей группе или возврат к началу списка
+    new_num = (num + 1) % len(groups)
+    # Планирование проверки следующей группы
+    await asyncio.sleep(10)
+    await search_in_group(new_num, groups)
+
 async def search_and_forward():
-    await telethon_client.start()
-    groups = db.select_all_channels_group()  # Получаем все группы из базы данных
-    num = 0
-    while True:  # Бесконечный цикл для постоянной работы
-        group = groups[num]
-        user_id, chat_ids, keywords = group[0], group[2], group[5]
-
-        for chat_id in chat_ids:
-            try:
-                # Получение истории чата (последнее сообщение)
-                last_message = await telethon_client.get_messages(chat_id, limit=1)
-                if last_message:
-                    # Проверяем наличие ключевых слов в последнем сообщении
-                    for keyword in keywords:
-                        if keyword in last_message[0].message:
-                            # Отправляем сообщение пользователю, если найдено ключевое слово
-                            await telethon_client.send_message(user_id, f"Найдено ключевое слово: {keyword}")
-                            break
-
-                # Ожидание перед проверкой следующего чата
-                await asyncio.sleep(10)
-
-            except Exception as e:
-                print(f"Ошибка: {e}")
-
-        # Переход к следующей группе или возврат к началу списка
-        num = (num + 1) % len(groups)
-        # Ожидание перед повторной проверкой групп
-        await asyncio.sleep(10)
+    groups = db.select_all_channels_group()
+    await search_in_group(0, groups)  # Начать с первой группы
 
 
 
