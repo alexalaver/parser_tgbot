@@ -42,7 +42,7 @@ async def search_and_forward():
                         if any(keyword.lower() in (message.text or "").lower() for keyword in keywords):
                             await bot.send_message(user_id, message.text)
                             logger.info(f"Сообщение отправлено пользователю {user_id}: {message.text}")
-                    await asyncio.sleep(15)  # Ожидаем перед следующим сообщением
+                            await asyncio.sleep(15)  # Ожидаем перед следующим сообщением
                 await asyncio.sleep(60)  # Ожидаем перед обработкой следующей группы
     except Exception as e:
         logger.error(f"Ошибка при выполнении поиска и пересылки: {e}")
