@@ -228,6 +228,12 @@ class Data:
             combined_list = list(itertools.chain(*a))
             return combined_list
 
+    def select_all_channels_group(self):
+        with self.connect:
+            self.cursor.execute("SELECT * FROM groups AND data_end IS NOT NULL")
+            a = self.cursor.fetchall()
+            return a
+
     def select_all_keyword(self, id):
         with self.connect:
             self.cursor.execute("SELECT keyword FROM groups WHERE id=%s AND data_end IS NOT NULL", (id,))

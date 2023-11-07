@@ -68,8 +68,7 @@ class ThreadedScheduler(Scheduler, RepeatTimer):
             function=self.run_pending,
         )
 
-async def search_and_forward(message: types.Message):
-    user_id = message.from_user.id
+async def search_and_forward(user_id: int):
     chat_ids = db.select_all_channels(user_id)
     keywords = db.select_all_keyword(user_id)
     try:
@@ -82,6 +81,11 @@ async def search_and_forward(message: types.Message):
                         logger.info(f"Сообщение отправлено пользователю {user_id}: {message.text}")
     except Exception as e:
         logger.error(f"Ошибка при выполнении поиска и пересылки: {e}")
+
+@dp.message_handler(commands=['start_search'])
+async def start_search_handler(message: types.Message):
+    user_id = message.from_user.id
+    scheduler.add_job(search_and_forward, args=[user_id])
 
 class Create_group(StatesGroup):
     create_group_1 = State()
@@ -494,6 +498,10 @@ async def other(message: types.Message):
             await parsers_send(message)
         elif message.text == cfg.autoposting:
             await autoposting_send(message)
+        elif message.text == "test":
+            groups = db.select_all_channels_group()
+            for group in groups:
+                await message.answer(group)
 
 def schedule_search_and_forward():
     asyncio.run(search_and_forward())
@@ -506,3 +514,11 @@ scheduler.start()
 if __name__ == "__main__":
     executor.start_polling(dp, skip_updates=True)
     logger.info("Starting bot...")
+    scheduler = AsyncIOScheduler()
+    user_ids = db.get_all_saved_user_ids()  # Это ваш метод для получения всех сохранённых user_ids
+    for user_id in user_ids:
+        scheduler.add_job(search_and_forward, 'interval', minutes=5, args=[user_id])
+    scheduler.start()
+
+    # Запуск бота
+    executor.start_polling(dp, skip_updates=True)
