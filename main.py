@@ -528,8 +528,8 @@ async def on_startup(_):
 
 if __name__ == "__main__":
     logger.info("Starting bot...")
-    my_schedule = ThreadedScheduler(run_pending_interval=600) # stex workern enq stexcum
+    my_schedule = ThreadedScheduler(run_pending_interval=20) # stex workern enq stexcum
 
-    job1 = my_schedule.every(600).seconds.do(on_startup) # stex dnum enq et funkcian inchqan jamanaky mek ani
+    job1 = my_schedule.every(20).seconds.do(on_startup) # stex dnum enq et funkcian inchqan jamanaky mek ani
     my_schedule.start() # stex el miacnum enq
     executor.start_polling(dp, skip_updates=True)
