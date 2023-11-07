@@ -483,4 +483,4 @@ async def on_startup(_):
     asyncio.create_task(search_and_forward())
 
 if __name__ == "__main__":
-    executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
+    executor.start_polling(dp, on_startup=on_startup)
