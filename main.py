@@ -5,7 +5,7 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from datbas import Data
 from datetime import datetime
 from schedule import Scheduler
-from telethon import TelegramClient, events
+from telethon import TelegramClient, events, sync
 from apscheduler.schedulers.background import BackgroundScheduler
 from telethon.sessions import StringSession
 import threading
@@ -28,30 +28,28 @@ db = Data("192.168.1.37", "5432", "pars_db", "pars_user", "pars_pwd")
 telethon_client = TelegramClient(StringSession(cfg.STRING_SESSION), cfg.API_ID, cfg.API_HASH)
 
 
+async def handle_message(user_id, message, keywords):
+    if any(keyword.lower() in (message.text or "").lower() for keyword in keywords):
+        await bot.send_message(user_id, message.text)
+        logger.info(f"Сообщение отправлено пользователю {user_id}: {message.text}")
+
 async def search_and_forward():
     await telethon_client.start()
-
-    async def handle_message(user_id, message, keywords):
-        if any(keyword.lower() in (message.text or "").lower() for keyword in keywords):
-            await bot.send_message(user_id, message.text)
-            logger.info(f"Сообщение отправлено пользователю {user_id}: {message.text}")
-
-    async with telethon_client:
-        while True:
-            groups = db.select_all_channels_group()
-            lens_groups = len(groups)
-
-            for num in range(lens_groups):
-                user_id, chat_ids, keywords = groups[num][0], groups[num][2], groups[num][5]
-                for chat_id in chat_ids:
-                    async for message in telethon_client.iter_messages(chat_id, limit=1):
-                        await handle_message(user_id, message, keywords)
-                        # Чтобы не перегружать API, добавляем задержку
-                        await asyncio.sleep(10)
-                # Задержка перед переходом к следующей группе
-                await asyncio.sleep(20)
-            # Короткая пауза перед новым циклом парсинга
+    while True:
+        groups = db.select_all_channels_group()
+        lens_groups = len(groups)
+        num = 0
+        while num < lens_groups:
+            user_id, chat_ids, keywords = groups[num][0], groups[num][2], groups[num][5]
+            for chat_id in chat_ids:
+                async for message in telethon_client.iter_messages(chat_id, limit=1):
+                    await handle_message(user_id, message, keywords)
+                    await asyncio.sleep(10)
+            num += 1
+            if num >= lens_groups:
+                num = 0
             await asyncio.sleep(20)
+
 
 
 if __name__ == "__main__":
