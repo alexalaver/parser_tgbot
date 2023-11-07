@@ -230,7 +230,7 @@ class Data:
 
     def select_all_channels_group(self):
         with self.connect:
-            self.cursor.execute("SELECT * FROM groups AND data_end IS NOT NULL")
+            self.cursor.execute("SELECT * FROM groups WHERE data_end IS NOT NULL")
             a = self.cursor.fetchall()
             return a
 

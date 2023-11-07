@@ -26,48 +26,6 @@ db = Data("192.168.1.37", "5432", "pars_db", "pars_user", "pars_pwd")
 
 telethon_client = TelegramClient(StringSession(cfg.STRING_SESSION), cfg.API_ID, cfg.API_HASH)
 
-class RepeatTimer(threading.Timer):
-    """Add repeated run of target to timer functionality. Source: https://stackoverflow.com/a/48741004/16466191"""
-    running: bool = False
-
-    def __init__(self, *args, **kwargs):
-        threading.Timer.__init__(self, *args, **kwargs)
-
-    def start(self) -> None:
-        """Protect from running start method multiple times"""
-        if not self.running:
-            super(RepeatTimer, self).start()
-            self.running = True
-        else:
-            warnings.warn('Timer is already running, cannot be started again.')
-
-    def cancel(self) -> None:
-        """Protect from running stop method multiple times"""
-        if self.running:
-            super(RepeatTimer, self).cancel()
-            self.running = False
-        else:
-            warnings.warn('Timer is already canceled, cannot be canceled again.')
-
-    def run(self):
-        """Replace run method of timer to run continuously"""
-        while not self.finished.wait(self.interval):
-            self.function(*self.args, **self.kwargs)
-
-
-class ThreadedScheduler(Scheduler, RepeatTimer):
-    """Non-blocking scheduler. Advice taken from: https://stackoverflow.com/a/50465583/16466191"""
-    def __init__(
-            self,
-            run_pending_interval: float,
-    ):
-        """Initialize parent classes"""
-        Scheduler.__init__(self)
-        super(RepeatTimer, self).__init__(
-            interval=run_pending_interval,
-            function=self.run_pending,
-        )
-
 async def search_and_forward(user_id: int):
     chat_ids = db.select_all_channels(user_id)
     keywords = db.select_all_keyword(user_id)
@@ -82,10 +40,6 @@ async def search_and_forward(user_id: int):
     except Exception as e:
         logger.error(f"Ошибка при выполнении поиска и пересылки: {e}")
 
-@dp.message_handler(commands=['start_search'])
-async def start_search_handler(message: types.Message):
-    user_id = message.from_user.id
-    scheduler.add_job(search_and_forward, args=[user_id])
 
 class Create_group(StatesGroup):
     create_group_1 = State()
@@ -503,22 +457,14 @@ async def other(message: types.Message):
             for group in groups:
                 await message.answer(group)
 
-def schedule_search_and_forward():
-    asyncio.run(search_and_forward())
-
-# Настройка планировщика
-scheduler = BackgroundScheduler()
-scheduler.add_job(schedule_search_and_forward, 'interval', seconds=300)
-scheduler.start()
 
 if __name__ == "__main__":
-    executor.start_polling(dp, skip_updates=True)
-    logger.info("Starting bot...")
-    scheduler = AsyncIOScheduler()
-    user_ids = db.get_all_saved_user_ids()  # Это ваш метод для получения всех сохранённых user_ids
-    for user_id in user_ids:
-        scheduler.add_job(search_and_forward, 'interval', minutes=5, args=[user_id])
-    scheduler.start()
+    # logger.info("Starting bot...")
+    # scheduler = AsyncIOScheduler()
+    # user_ids = db.get_all_saved_user_ids()  # Это ваш метод для получения всех сохранённых user_ids
+    # for user_id in user_ids:
+    #     scheduler.add_job(search_and_forward, 'interval', minutes=5, args=[user_id])
+    # scheduler.start()
 
     # Запуск бота
     executor.start_polling(dp, skip_updates=True)
