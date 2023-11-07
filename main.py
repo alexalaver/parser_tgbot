@@ -455,7 +455,8 @@ async def other(message: types.Message):
         elif message.text == "test":
             groups = db.select_all_channels_group()
             for group in groups:
-                print(group[0])
+                print(group[2])
+                print(len(group[0]))
 
 
 if __name__ == "__main__":
