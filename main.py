@@ -28,26 +28,35 @@ db = Data("192.168.1.37", "5432", "pars_db", "pars_user", "pars_pwd")
 telethon_client = TelegramClient(StringSession(cfg.STRING_SESSION), cfg.API_ID, cfg.API_HASH)
 
 
-async def handle_message(user_id, message, keywords):
-    if any(keyword.lower() in (message.text or "").lower() for keyword in keywords):
-        await bot.send_message(user_id, message.text)
-        logger.info(f"Сообщение отправлено пользователю {user_id}: {message.text}")
-
 async def search_and_forward():
     await telethon_client.start()
+    groups = db.select_all_channels_group()  # Получаем все группы из базы данных
     num = 0
-    while True:
-        groups = db.select_all_channels_group()
-        if num >= len(groups):
-            num = 0
-        user_id, chat_ids, keywords = groups[num][0], groups[num][2], groups[num][5]
+    while True:  # Бесконечный цикл для постоянной работы
+        group = groups[num]
+        user_id, chat_ids, keywords = group[0], group[2], group[5]
+
         for chat_id in chat_ids:
-            async for message in telethon_client.iter_messages(chat_id, limit=1):
-                if any(keyword.lower() in (message.text or "").lower() for keyword in keywords):
-                    await bot.send_message(user_id, message.text)
-                    await asyncio.sleep(10)
-                    logger.info(f"Сообщение отправлено пользователю {user_id}: {message.text}")
-        num += 1
+            try:
+                # Получение истории чата (последнее сообщение)
+                last_message = await telethon_client.get_messages(chat_id, limit=1)
+                if last_message:
+                    # Проверяем наличие ключевых слов в последнем сообщении
+                    for keyword in keywords:
+                        if keyword in last_message[0].message:
+                            # Отправляем сообщение пользователю, если найдено ключевое слово
+                            await telethon_client.send_message(user_id, f"Найдено ключевое слово: {keyword}")
+                            break
+
+                # Ожидание перед проверкой следующего чата
+                await asyncio.sleep(10)
+
+            except Exception as e:
+                print(f"Ошибка: {e}")
+
+        # Переход к следующей группе или возврат к началу списка
+        num = (num + 1) % len(groups)
+        # Ожидание перед повторной проверкой групп
         await asyncio.sleep(10)
 
 
@@ -471,16 +480,10 @@ async def other(message: types.Message):
             await parsers_send(message)
         elif message.text == cfg.autoposting:
             await autoposting_send(message)
-        elif message.text == "test":
-            groups = db.select_all_channels_group()
-            print(groups[0][2])
-            print(len(groups))
-            for group in groups:
-                print(group[2])
-                print(group[0])
+
 
 async def on_startup(_):
     asyncio.create_task(search_and_forward())
 
 if __name__ == "__main__":
-    executor.start_polling(dp, on_startup=on_startup)
+    executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
