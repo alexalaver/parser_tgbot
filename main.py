@@ -35,20 +35,21 @@ async def handle_message(user_id, message, keywords):
 
 async def search_and_forward():
     await telethon_client.start()
+    num = 0
     while True:
         groups = db.select_all_channels_group()
-        lens_groups = len(groups)
-        num = 0
-        while num < lens_groups:
-            user_id, chat_ids, keywords = groups[num][0], groups[num][2], groups[num][5]
-            for chat_id in chat_ids:
-                async for message in telethon_client.iter_messages(chat_id, limit=1):
-                    await handle_message(user_id, message, keywords)
+        if num >= len(groups):
+            num = 0
+        user_id, chat_ids, keywords = groups[num][0], groups[num][2], groups[num][5]
+        for chat_id in chat_ids:
+            async for message in telethon_client.iter_messages(chat_id, limit=1):
+                if any(keyword.lower() in (message.text or "").lower() for keyword in keywords):
+                    await bot.send_message(user_id, message.text)
                     await asyncio.sleep(10)
-            num += 1
-            if num >= lens_groups:
-                num = 0
-            await asyncio.sleep(20)
+                    logger.info(f"Сообщение отправлено пользователю {user_id}: {message.text}")
+        num += 1
+        await asyncio.sleep(10)
+
 
 
 
