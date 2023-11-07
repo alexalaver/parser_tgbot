@@ -24,10 +24,8 @@ bot = Bot(cfg.TOKEN, parse_mode=types.ParseMode.MARKDOWN)
 dp = Dispatcher(bot, storage=MemoryStorage())
 db = Data("192.168.1.37", "5432", "pars_db", "pars_user", "pars_pwd")
 
-with TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH) as client:
-    print("This is your string session: ", client.session.save())
 
-# telethon_client = TelegramClient(StringSession(cfg.STRING_SESSION), cfg.API_ID, cfg.API_HASH)
+telethon_client = TelegramClient(StringSession(cfg.STRING_SESSION), cfg.API_ID, cfg.API_HASH)
 
 async def search_and_forward():
     try:
