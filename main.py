@@ -27,26 +27,46 @@ db = Data("192.168.1.37", "5432", "pars_db", "pars_user", "pars_pwd")
 
 telethon_client = TelegramClient(StringSession(cfg.STRING_SESSION), cfg.API_ID, cfg.API_HASH)
 
+from telethon.sync import TelegramClient
+from telethon import events
+
+
 async def search_and_forward():
     try:
         await telethon_client.start()
-        while True:  # Создаем бесконечный цикл для перебора групп
+
+        async def handle_message(user_id, message):
+            if any(keyword.lower() in (message.text or "").lower() for keyword in keywords):
+                await bot.send_message(user_id, message.text)
+                logger.info(f"Сообщение отправлено пользователю {user_id}: {message.text}")
+                await asyncio.sleep(10)
+
+        while True:
             groups = db.select_all_channels_group()
             lens_groups = len(groups)
-            for num in range(lens_groups):  # Проходим по всем группам
-                user_id = groups[num][0]
-                chat_ids = groups[num][2]
-                keywords = groups[num][5]
+
+            event_handlers = {}
+            for num in range(lens_groups):
+                user_id, chat_ids, keywords = groups[num][0], groups[num][2], groups[num][5]
+
                 for chat_id in chat_ids:
-                    async for message in telethon_client.iter_messages(chat_id):
-                        if any(keyword.lower() in (message.text or "").lower() for keyword in keywords):
-                            await bot.send_message(user_id, message.text)
-                            logger.info(f"Сообщение отправлено пользователю {user_id}: {message.text}")
-                            await asyncio.sleep(15)  # Ожидаем перед следующим сообщением
-                await asyncio.sleep(60)  # Ожидаем перед обработкой следующей группы
+                    if chat_id not in event_handlers:
+                        @telethon_client.on(events.NewMessage(chats=chat_id))
+                        async def new_message_handler(event):
+                            await handle_message(user_id, event.message)
+
+                        event_handlers[chat_id] = new_message_handler
+
+            await telethon_client.run_until_disconnected()
     except Exception as e:
         logger.error(f"Ошибка при выполнении поиска и пересылки: {e}")
 
+
+if __name__ == "__main__":
+    # Ваш запуск бота aiogram должен быть здесь
+    # ...
+    # Затем запускаем функцию поиска и пересылки сообщений
+    asyncio.run(search_and_forward())
 
 
 class Create_group(StatesGroup):
