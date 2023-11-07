@@ -27,39 +27,31 @@ db = Data("192.168.1.37", "5432", "pars_db", "pars_user", "pars_pwd")
 
 telethon_client = TelegramClient(StringSession(cfg.STRING_SESSION), cfg.API_ID, cfg.API_HASH)
 
-from telethon.sync import TelegramClient
-from telethon import events
-
 
 async def search_and_forward():
-    try:
-        await telethon_client.start()
+    await telethon_client.start()
 
-        async def handle_message(user_id, message):
-            if any(keyword.lower() in (message.text or "").lower() for keyword in keywords):
-                await bot.send_message(user_id, message.text)
-                logger.info(f"Сообщение отправлено пользователю {user_id}: {message.text}")
-                await asyncio.sleep(10)
+    async def handle_message(user_id, message, keywords):
+        if any(keyword.lower() in (message.text or "").lower() for keyword in keywords):
+            await bot.send_message(user_id, message.text)
+            logger.info(f"Сообщение отправлено пользователю {user_id}: {message.text}")
 
+    async with telethon_client:
         while True:
             groups = db.select_all_channels_group()
             lens_groups = len(groups)
 
-            event_handlers = {}
             for num in range(lens_groups):
                 user_id, chat_ids, keywords = groups[num][0], groups[num][2], groups[num][5]
-
                 for chat_id in chat_ids:
-                    if chat_id not in event_handlers:
-                        @telethon_client.on(events.NewMessage(chats=chat_id))
-                        async def new_message_handler(event):
-                            await handle_message(user_id, event.message)
-
-                        event_handlers[chat_id] = new_message_handler
-
-            await telethon_client.run_until_disconnected()
-    except Exception as e:
-        logger.error(f"Ошибка при выполнении поиска и пересылки: {e}")
+                    async for message in telethon_client.iter_messages(chat_id, limit=1):
+                        await handle_message(user_id, message, keywords)
+                        # Чтобы не перегружать API, добавляем задержку
+                        await asyncio.sleep(1)
+                # Задержка перед переходом к следующей группе
+                await asyncio.sleep(1)
+            # Короткая пауза перед новым циклом парсинга
+            await asyncio.sleep(1)
 
 
 if __name__ == "__main__":
@@ -489,9 +481,7 @@ async def other(message: types.Message):
                 print(group[0])
 
 async def on_startup(_):
-    # Здесь запускаем нашу функцию в фоне
     asyncio.create_task(search_and_forward())
 
 if __name__ == "__main__":
-    # Запускаем функцию on_startup при старте
     executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
