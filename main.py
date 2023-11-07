@@ -468,10 +468,10 @@ async def other(message: types.Message):
                 print(group[2])
                 print(group[0])
 
-async def on_startup(_):
-    # Здесь запускаем нашу функцию в фоне
-    asyncio.create_task(search_and_forward())
+async def on_startup():
+    asyncio.create_task(search_and_forward(telethon_client, db, bot))
 
-if __name__ == "__main__":
-    # Запускаем функцию on_startup при старте
-    executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
+if __name__ == '__main__':
+    dispatcher = Dispatcher(bot)
+    dispatcher.on_startup(on_startup)
+    executor.start_polling(dp)
