@@ -454,8 +454,10 @@ async def other(message: types.Message):
             await autoposting_send(message)
         elif message.text == "test":
             groups = db.select_all_channels_group()
+            print(groups[0][2])
+            print(len(groups))
             for group in groups:
-                print(group[2][0])
+                print(group[2])
                 print(group[0])
 
 
