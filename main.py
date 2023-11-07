@@ -3,7 +3,7 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher.storage import FSMContext
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from datbas import Data
-from datetime import datetime
+from datetime import datetime, timedelta
 from schedule import Scheduler
 from telethon import TelegramClient, events
 from telethon.errors import FloodWaitError
@@ -33,19 +33,19 @@ async def search_and_forward():
         await telethon_client.start()
         while True:
             groups = db.select_all_channels_group()
-            lens_groups = len(groups)
-            for num in range(lens_groups):
-                user_id, chat_ids, keywords = groups[num][0], groups[num][2], groups[num][5]
+            for group in groups:
+                user_id, chat_ids, keywords = group[0], group[2], group[5]
                 for chat_id in chat_ids:
                     try:
-                        async for message in telethon_client.iter_messages(chat_id, wait_time=10):
+                        async for message in telethon_client.iter_messages(chat_id, offset_date=datetime.now() - timedelta(seconds=10)):
                             if any(keyword.lower() in (message.text or "").lower() for keyword in keywords):
                                 await bot.send_message(user_id, message.text)
                                 print(f"Сообщение отправлено пользователю {user_id}: {message.text}")
-                            await asyncio.sleep(1)
+                            # Не устанавливаем задержку, если необходимо отсылать сразу
                     except FloodWaitError as e:
                         print(f"Предупреждение о флуде, ждем: {e.seconds} секунд.")
                         await asyncio.sleep(e.seconds)
+                # Задержка между проверками групп
                 await asyncio.sleep(1)
     except Exception as e:
         # Логгирование ошибки
