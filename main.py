@@ -47,11 +47,11 @@ async def search_and_forward():
                     async for message in telethon_client.iter_messages(chat_id, limit=1):
                         await handle_message(user_id, message, keywords)
                         # Чтобы не перегружать API, добавляем задержку
-                        await asyncio.sleep(1)
+                        await asyncio.sleep(10)
                 # Задержка перед переходом к следующей группе
-                await asyncio.sleep(1)
+                await asyncio.sleep(20)
             # Короткая пауза перед новым циклом парсинга
-            await asyncio.sleep(1)
+            await asyncio.sleep(20)
 
 
 if __name__ == "__main__":
