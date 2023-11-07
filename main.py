@@ -31,24 +31,20 @@ telethon_client = TelegramClient(StringSession(cfg.STRING_SESSION), cfg.API_ID, 
 async def search_and_forward(telethon_client, db, bot):
     try:
         await telethon_client.start()
+        groups = db.select_all_channels_group()
+        lens_groups = len(groups)
+        num = 0
         while True:
-            groups = db.select_all_channels_group()
-            lens_groups = len(groups)
-            for num in range(lens_groups):
-                user_id, chat_ids, keywords = groups[num][0], groups[num][2], groups[num][5]
-                for chat_id in chat_ids:
-                    try:
-                        async for message in telethon_client.iter_messages(chat_id, wait_time=10):
-                            if any(keyword.lower() in (message.text or "").lower() for keyword in keywords):
-                                await bot.send_message(user_id, message.text)
-                                print(f"Сообщение отправлено пользователю {user_id}: {message.text}")
-                            await asyncio.sleep(1)
-                    except FloodWaitError as e:
-                        print(f"Предупреждение о флуде, ждем: {e.seconds} секунд.")
-                        await asyncio.sleep(e.seconds)
-                await asyncio.sleep(1)
+            group = groups[num]
+            user_id, chat_ids, keywords = group[0], group[2], group[5]
+            for chat_id in chat_ids:
+                async for message in telethon_client.iter_messages(chat_id, limit=1, wait_time=10):
+                    if any(keyword.lower() in (message.text or "").lower() for keyword in keywords):
+                        await bot.send_message(user_id, message.text)
+                        print(f"Сообщение отправлено пользователю {user_id}: {message.text}")
+            num = (num + 1) % lens_groups
+            await asyncio.sleep(10)  # Пауза перед следующим циклом проверки
     except Exception as e:
-        # Логгирование ошибки
         print(f"Ошибка при выполнении поиска и пересылки: {e}")
 
 
