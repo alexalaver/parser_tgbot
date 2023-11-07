@@ -5,7 +5,7 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from datbas import Data
 from datetime import datetime
 from schedule import Scheduler
-from telethon import TelegramClient, events, sync
+from telethon import TelegramClient, events
 from apscheduler.schedulers.background import BackgroundScheduler
 from telethon.sessions import StringSession
 import threading
@@ -27,87 +27,26 @@ db = Data("192.168.1.37", "5432", "pars_db", "pars_user", "pars_pwd")
 
 telethon_client = TelegramClient(StringSession(cfg.STRING_SESSION), cfg.API_ID, cfg.API_HASH)
 
-class RepeatTimer(threading.Timer):
-    """Add repeated run of target to timer functionality. Source: https://stackoverflow.com/a/48741004/16466191"""
-    running: bool = False
-
-    def __init__(self, *args, **kwargs):
-        threading.Timer.__init__(self, *args, **kwargs)
-
-    def start(self) -> None:
-        """Protect from running start method multiple times"""
-        if not self.running:
-            super(RepeatTimer, self).start()
-            self.running = True
-        else:
-            warnings.warn('Timer is already running, cannot be started again.')
-
-    def cancel(self) -> None:
-        """Protect from running stop method multiple times"""
-        if self.running:
-            super(RepeatTimer, self).cancel()
-            self.running = False
-        else:
-            warnings.warn('Timer is already canceled, cannot be canceled again.')
-
-    def run(self):
-        """Replace run method of timer to run continuously"""
-        while not self.finished.wait(self.interval):
-            self.function(*self.args, **self.kwargs)
-
-
-class ThreadedScheduler(Scheduler, RepeatTimer):
-    """Non-blocking scheduler. Advice taken from: https://stackoverflow.com/a/50465583/16466191"""
-    def __init__(
-            self,
-            run_pending_interval: float,
-    ):
-        """Initialize parent classes"""
-        Scheduler.__init__(self)
-        super(RepeatTimer, self).__init__(
-            interval=run_pending_interval,
-            function=self.run_pending,
-        )
-
-async def search_in_group(num, groups):
-    group = groups[num]
-    user_id, chat_ids, keywords = group[0], group[2], group[5]
-
-    for chat_id in chat_ids:
-        try:
-            last_message = await telethon_client.get_messages(chat_id, limit=1)
-            if last_message:
-                message = last_message[0]
-                for keyword in keywords:
-                    if keyword in message.message:
-                        # Отправляем исходное сообщение пользователю
-                        await telethon_client.send_message(user_id, message)
-                        break
-
-            # Ожидание перед проверкой следующего чата
-            await asyncio.sleep(10)
-
-        except Exception as e:
-            print(f"Ошибка: {e}")
-
-    # Переход к следующей группе или возврат к началу списка
-    new_num = (num + 1) % len(groups)
-    # Планирование проверки следующей группы
-    await asyncio.sleep(10)
-    await search_in_group(new_num, groups)
-
 async def search_and_forward():
-    groups = db.select_all_channels_group()
-    await search_in_group(0, groups)  # Начать с первой группы
+    try:
+        await telethon_client.start()
+        while True:
+            groups = db.select_all_channels_group()
+            lens_groups = len(groups)
+            for num in range(lens_groups):
+                user_id = groups[num][0]
+                chat_ids = groups[num][2]
+                keywords = groups[num][5]
+                for chat_id in chat_ids:
+                    async for message in telethon_client.iter_messages(chat_id):
+                        if any(keyword.lower() in (message.text or "").lower() for keyword in keywords):
+                            await bot.send_message(user_id, message.text)
+                            logger.info(f"Сообщение отправлено пользователю {user_id}: {message.text}")
+                            await asyncio.sleep(15)
+                await asyncio.sleep(60)
+    except Exception as e:
+        logger.error(f"Ошибка при выполнении поиска и пересылки: {e}")
 
-
-
-
-if __name__ == "__main__":
-    # Ваш запуск бота aiogram должен быть здесь
-    # ...
-    # Затем запускаем функцию поиска и пересылки сообщений
-    asyncio.run(search_and_forward())
 
 
 class Create_group(StatesGroup):
@@ -521,15 +460,18 @@ async def other(message: types.Message):
             await parsers_send(message)
         elif message.text == cfg.autoposting:
             await autoposting_send(message)
-
+        elif message.text == "test":
+            groups = db.select_all_channels_group()
+            print(groups[0][2])
+            print(len(groups))
+            for group in groups:
+                print(group[2])
+                print(group[0])
 
 async def on_startup(_):
+    # Здесь запускаем нашу функцию в фоне
     asyncio.create_task(search_and_forward())
 
 if __name__ == "__main__":
-    logger.info("Starting bot...")
-    my_schedule = ThreadedScheduler(run_pending_interval=20) # stex workern enq stexcum
-
-    job1 = my_schedule.every(20).seconds.do(on_startup) # stex dnum enq et funkcian inchqan jamanaky mek ani
-    my_schedule.start() # stex el miacnum enq
-    executor.start_polling(dp, skip_updates=True)
+    # Запускаем функцию on_startup при старте
+    executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
