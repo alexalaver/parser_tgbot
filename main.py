@@ -35,8 +35,8 @@ async def check_for_new_groups(current_count):
 
 async def search_and_forward():
     num = 0
-    last_message_ids = {}  # Словарь для отслеживания последнего сообщения по chat_id
-    last_checked_keywords = {}  # Словарь для отслеживания последнего сообщения по user_id и keywords
+    last_message_ids = {}
+    last_checked_keywords = {}
     await telethon_client.start()
 
     groups_count = len(db.select_all_channels_group())
@@ -68,7 +68,6 @@ async def search_and_forward():
                             print(f"Message sent to user {user_id}: {message.text}")
                             new_last_id = max(new_last_id, message.id)
 
-                    # Обновляем last_checked_keywords если были найдены новые сообщения
                     if new_last_id > last_keyword_id:
                         last_checked_keywords[(user_id, keywords_set)] = new_last_id
 
@@ -78,12 +77,11 @@ async def search_and_forward():
                     await asyncio.sleep(wait_time)
 
                 finally:
-                    # Получаем последнее сообщение, чтобы обновить last_message_ids
                     messages = await telethon_client.get_messages(chat_id, limit=1)
                     if messages:
                         last_message_ids[chat_id] = messages[0].id
 
-            num = (num + 1) % len(groups)  # Это автоматически обнулит num, если он превышает количество групп
+            num = (num + 1) % len(groups)
 
         except Exception as e:
             print(f"Произошла ошибка: {e}")
