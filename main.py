@@ -31,7 +31,7 @@ telethon_client = TelegramClient(StringSession(cfg.STRING_SESSION), cfg.API_ID, 
 
 async def search_and_forward():
     num = 0  # Индекс текущей группы
-
+    await telethon_client.start()
     while True:
         try:
             groups = db.select_all_channels_group()
