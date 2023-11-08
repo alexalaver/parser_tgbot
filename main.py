@@ -33,6 +33,7 @@ async def search_and_forward():
     num = 0
     last_message_ids = {}
     await telethon_client.start()
+
     while True:
         try:
             groups = db.select_all_channels_group()
@@ -41,33 +42,30 @@ async def search_and_forward():
                 continue
 
             if num >= len(groups):
-                num = 0  # Reset the counter after reaching the end of the list
+                num = 0
 
             group = groups[num]
-            user_id, chat_ids, keywords = group[0], group[2], group[5]
+            user_id, chat_ids, keywords = group[0], group[2], group[5]  # Удаление .split()
 
             for chat_id in chat_ids:
                 last_id = last_message_ids.get(chat_id, 0)
-                message_found = False
-
+                # Получение последних 10 сообщений и проверка на наличие ключевых слов
                 async for message in telethon_client.iter_messages(chat_id, offset_id=last_id, limit=10, reverse=True):
                     if message.text and any(keyword.lower() in message.text.lower() for keyword in keywords):
                         await bot.send_message(user_id, message.text)
                         print(f"Message sent to user {user_id}: {message.text}")
-                        message_found = True
-                        break  # Found a message, break the loop to proceed to next user
+                # Обновление last_message_ids с ID последнего сообщения
+                messages = await telethon_client.get_messages(chat_id, limit=1)
+                if messages:
+                    last_message_ids[chat_id] = messages[0].id
 
-                last_message_ids[chat_id] = (await telethon_client.get_messages(chat_id, limit=1)).id
-                if message_found:
-                    break  # If a message is found and sent, no need to check other chats for this user
-
-            num += 1  # Proceed to the next user
+            num += 1
 
         except Exception as e:
             print(f"Произошла ошибка: {e}")
             await asyncio.sleep(10)
 
-        await asyncio.sleep(1)  # Wait before the next iteration
+        await asyncio.sleep(1)
 
 
 
