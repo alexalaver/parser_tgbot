@@ -30,41 +30,40 @@ telethon_client = TelegramClient(StringSession(cfg.STRING_SESSION), cfg.API_ID, 
 
 
 async def search_and_forward():
-    num = 0  # Индекс текущей группы
-    last_message_ids = {}  # Словарь для хранения ID последнего сообщения каждого чата
+    num = 0
+    last_message_ids = {}
     await telethon_client.start()
     while True:
         try:
             groups = db.select_all_channels_group()
             if not groups:
-                await asyncio.sleep(10)  # Ожидание, если нет групп
+                await asyncio.sleep(10)
                 continue
 
-            if num >= len(groups):  # Если дошли до конца списка групп, начинаем с начала
+            if num >= len(groups):
                 num = 0
-                await asyncio.sleep(10)  # Ожидание перед новым циклом проверки
+                await asyncio.sleep(10)
 
             group = groups[num]
-            user_id, chat_ids, keywords = group[0], group[2], group[5]
+            user_id, chat_ids, keywords = group[0], group[2].split(), group[13:]
 
             for chat_id in chat_ids:
                 last_id = last_message_ids.get(chat_id, 0)
+
                 async for message in telethon_client.iter_messages(chat_id, offset_id=last_id, reverse=True):
-                    if message.id == last_id:
-                        # Пропускаем, так как это сообщение уже было обработано
-                        continue
                     if message.text and any(keyword.lower() in message.text.lower() for keyword in keywords):
                         await bot.send_message(user_id, message.text)
                         print(f"Message sent to user {user_id}: {message.text}")
-                    last_message_ids[chat_id] = message.id  # Обновляем последнее ID сообщения
-                    break  # Переходим к следующему чату после обработки одного сообщения
+                    last_message_ids[chat_id] = message.id
+                    break
 
-            num += 1  # Переход к следующей группе после обработки всех чатов
+            num += 1
 
         except Exception as e:
             print(f"Произошла ошибка: {e}")
-            # Задержка перед повторной попыткой
             await asyncio.sleep(10)
+
+        await asyncio.sleep(1)
 
 
 
