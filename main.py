@@ -28,28 +28,28 @@ db = Data("192.168.1.37", "5432", "pars_db", "pars_user", "pars_pwd")
 
 telethon_client = TelegramClient(StringSession(cfg.STRING_SESSION), cfg.API_ID, cfg.API_HASH)
 
+
 async def search_and_forward():
+    num = 0
     try:
         await telethon_client.start()
         while True:
             groups = db.select_all_channels_group()
-            for group in groups:
-                user_id, chat_ids, keywords = group[0], group[2], group[5]
-                for chat_id in chat_ids:
-                    try:
-                        async for message in telethon_client.iter_messages(chat_id, offset_date=datetime.now() - timedelta(seconds=10)):
-                            if any(keyword.lower() in (message.text or "").lower() for keyword in keywords):
-                                await bot.send_message(user_id, message.text)
-                                print(f"Сообщение отправлено пользователю {user_id}: {message.text}")
-                            # Не устанавливаем задержку, если необходимо отсылать сразу
-                    except FloodWaitError as e:
-                        print(f"Предупреждение о флуде, ждем: {e.seconds} секунд.")
-                        await asyncio.sleep(e.seconds)
-                # Задержка между проверками групп
-                await asyncio.sleep(1)
+            lens_groups = len(groups)
+            if num >= lens_groups:
+                num = 0
+
+            user_id, chat_ids, keywords = groups[num]
+            for chat_id in chat_ids:
+                async for message in telethon_client.iter_messages(chat_id, limit=1):
+                    if any(keyword.lower() in message.text.lower() for keyword in keywords):
+                        await bot.send_message(user_id, message.text)
+                        logger.info(f"Message sent to user {user_id}: {message.text}")
+                        await asyncio.sleep(10)
+            await asyncio.sleep(1)
+
     except Exception as e:
-        # Логгирование ошибки
-        print(f"Ошибка при выполнении поиска и пересылки: {e}")
+        logger.error(f"Error during search and forward: {e}")
 
 
 
