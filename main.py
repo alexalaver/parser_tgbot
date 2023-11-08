@@ -35,10 +35,10 @@ async def check_for_new_groups(current_count):
 
 async def search_and_forward():
     num = 0
-    last_message_ids = {}
-    last_checked_keywords = {}
-    await telethon_client.start()
+    last_message_ids = {}  # Словарь для отслеживания последнего сообщения по chat_id
+    messages_sent = {}  # Словарь для хранения идентификаторов сообщений, которые уже были отправлены
 
+    await telethon_client.start()
     groups_count = len(db.select_all_channels_group())
 
     while True:
@@ -48,40 +48,44 @@ async def search_and_forward():
                 await asyncio.sleep(10)
                 continue
 
+            # Проверяем, появились ли новые группы
             if await check_for_new_groups(groups_count):
                 groups_count = len(groups)
                 num = 0
 
             group = groups[num]
             user_id, chat_ids, keywords = group[0], group[2], group[5]
-            keywords_set = frozenset(keywords)
 
             for chat_id in chat_ids:
+                # Получаем последнее сохраненное id сообщения для чата
                 last_id = last_message_ids.get(chat_id, 0)
-                last_keyword_id = last_checked_keywords.get((user_id, keywords_set), 0)
-                new_last_id = 0
+                messages_to_check = 10
+                # Принудительно проверяем последние 10 сообщений, если переключились на нового пользователя
+                forced_check = num == 0 or last_id == 0
 
                 try:
-                    async for message in telethon_client.iter_messages(chat_id, offset_id=last_id, limit=10, reverse=True):
-                        if message.id > last_keyword_id and message.text and any(keyword.lower() in message.text.lower() for keyword in keywords):
-                            await bot.send_message(user_id, message.text)
-                            print(f"Message sent to user {user_id}: {message.text}")
-                            new_last_id = max(new_last_id, message.id)
-
-                    if new_last_id > last_keyword_id:
-                        last_checked_keywords[(user_id, keywords_set)] = new_last_id
+                    async for message in telethon_client.iter_messages(chat_id, offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
+                        if message.text and any(keyword.lower() in message.text.lower() for keyword in keywords):
+                            message_key = (user_id, message.id)
+                            if message_key not in messages_sent or forced_check:
+                                await bot.send_message(user_id, message.text)
+                                print(f"Message sent to user {user_id}: {message.text}")
+                                messages_sent[message_key] = True
 
                 except FloodWaitError as e:
                     wait_time = e.seconds
                     print(f"Flood wait error on chat {chat_id}. Sleeping for {wait_time} seconds.")
                     await asyncio.sleep(wait_time)
-
                 finally:
+                    # Получаем последнее сообщение, чтобы обновить last_message_ids
                     messages = await telethon_client.get_messages(chat_id, limit=1)
                     if messages:
                         last_message_ids[chat_id] = messages[0].id
 
-            num = (num + 1) % len(groups)
+            # Переходим к следующей группе
+            num += 1
+            if num >= len(groups):
+                num = 0
 
         except Exception as e:
             print(f"Произошла ошибка: {e}")
