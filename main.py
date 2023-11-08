@@ -39,6 +39,10 @@ async def search_and_forward():
             await asyncio.sleep(10)
             continue
 
+        # Если num больше, чем индексы в списке groups, сбрасываем его на 0
+        if num >= len(groups):
+            num = 0
+
         group = groups[num]
         user_id, chat_ids, keywords = group[0], group[2], group[5]
 
@@ -51,15 +55,16 @@ async def search_and_forward():
                         await bot.send_message(user_id, message.text)
                         print(f"Message sent to user {user_id}: {message.text}")
                     last_message_ids[chat_id] = message.id
-                    break
+                    break  # Выходим после первого найденного сообщения
 
+                # Ожидаем 1 секунду перед следующим запросом, чтобы избежать flood wait
                 await asyncio.sleep(1)
             except Exception as e:
                 print(f"Error in chat {chat_id}: {e}")
 
-        num += 1
+        num += 1  # Переходим к следующему элементу в списке
 
-        # Периодическая проверка групп каждые 10 секунд
+        # Периодическая пауза, чтобы избежать излишней нагрузки на сервер
         if num % len(groups) == 0:
             await asyncio.sleep(10)
 
