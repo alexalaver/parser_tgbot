@@ -29,6 +29,12 @@ db = Data("192.168.1.37", "5432", "pars_db", "pars_user", "pars_pwd")
 telethon_client = TelegramClient(StringSession(cfg.STRING_SESSION), cfg.API_ID, cfg.API_HASH)
 
 
+async def check_for_new_groups(last_count):
+    groups = db.select_all_channels_group()
+    if len(groups) > last_count:
+        return True
+    return False
+
 async def search_and_forward():
     num = 0
     last_message_ids = {}
@@ -43,6 +49,8 @@ async def search_and_forward():
 
             if num >= len(groups):
                 num = 0
+            if await check_for_new_groups(len(groups)):
+                groups = db.select_all_channels_group()
 
             group = groups[num]
             user_id, chat_ids, keywords = group[0], group[2], group[5]
