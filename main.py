@@ -30,30 +30,37 @@ telethon_client = TelegramClient(StringSession(cfg.STRING_SESSION), cfg.API_ID, 
 
 
 async def search_and_forward():
-    num = 0
-    try:
-        await telethon_client.start()
-        while True:
+    num = 0  # Индекс текущей группы
+    await telethon_client.start()
+    while True:
+        try:
             groups = db.select_all_channels_group()
-            lens_groups = len(groups)
-            if num >= lens_groups:
+            if not groups:
+                await asyncio.sleep(10)  # Ожидание, если нет групп
+                continue
+
+            if num >= len(groups):  # Если дошли до конца списка групп, начинаем с начала
                 num = 0
 
-            user_id = groups[num][0]
-            chat_ids = groups[num][2]
-            keywords = groups[num][5]
-
+            group = groups[num]
+            user_id, chat_ids, keywords = group[0], group[2], group[5]
             for chat_id in chat_ids:
                 async for message in telethon_client.iter_messages(chat_id, limit=1):
-                    if any(keyword.lower() in message.text.lower() for keyword in keywords):
+                    if message.text and any(keyword.lower() in message.text.lower() for keyword in keywords):
                         await bot.send_message(user_id, message.text)
-                        logger.info(f"Message sent to user {user_id}: {message.text}")
-                        await asyncio.sleep(10)
+                        print(f"Message sent to user {user_id}: {message.text}")
+                # Задержка после проверки каждого чата в группе, а не после каждого сообщения
+                await asyncio.sleep(10)
+
+            # Переход к следующей группе после обработки всех чатов
             num += 1
+            # Задержка перед проверкой следующей группы
             await asyncio.sleep(1)
 
-    except Exception as e:
-        logger.error(f"Error during search and forward: {e}")
+        except Exception as e:
+            print(f"Произошла ошибка: {e}")
+            # Задержка перед повторной попыткой
+            await asyncio.sleep(10)
 
 
 
