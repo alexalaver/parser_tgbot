@@ -39,7 +39,7 @@ async def search_and_forward():
             await asyncio.sleep(10)
             continue
 
-        group = groups[num % len(groups)]
+        group = groups[num]
         user_id, chat_ids, keywords = group[0], group[2], group[5]
 
         for chat_id in chat_ids:
