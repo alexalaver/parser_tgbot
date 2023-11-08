@@ -29,16 +29,17 @@ db = Data("192.168.1.37", "5432", "pars_db", "pars_user", "pars_pwd")
 telethon_client = TelegramClient(StringSession(cfg.STRING_SESSION), cfg.API_ID, cfg.API_HASH)
 
 
-async def check_for_new_groups(last_count):
-    groups = db.select_all_channels_group()
-    if len(groups) > last_count:
-        return True
-    return False
+async def check_for_new_groups(current_count):
+    new_count = len(db.select_all_channels_group())
+    return new_count != current_count
 
 async def search_and_forward():
     num = 0
     last_message_ids = {}
+    message_keywords_checked = {}
     await telethon_client.start()
+
+    groups_count = len(db.select_all_channels_group())
 
     while True:
         try:
@@ -47,21 +48,26 @@ async def search_and_forward():
                 await asyncio.sleep(10)
                 continue
 
-            if num >= len(groups):
+            if await check_for_new_groups(groups_count):
+                groups_count = len(groups)
                 num = 0
-            if await check_for_new_groups(len(groups)):
-                groups = db.select_all_channels_group()
 
             group = groups[num]
             user_id, chat_ids, keywords = group[0], group[2], group[5]
+            keywords_set = frozenset(keywords)
 
             for chat_id in chat_ids:
                 last_id = last_message_ids.get(chat_id, 0)
+                message_last_checked_id = message_keywords_checked.get((user_id, keywords_set), 0)
+
                 try:
-                    async for message in telethon_client.iter_messages(chat_id, offset_id=last_id, limit=10, reverse=True):
+                    async for message in telethon_client.iter_messages(chat_id, offset_id=max(last_id, message_last_checked_id) + 1, limit=10, reverse=True):
                         if message.text and any(keyword.lower() in message.text.lower() for keyword in keywords):
-                            await bot.send_message(user_id, message.text)
-                            print(f"Message sent to user {user_id}: {message.text}")
+                            if message.id > message_last_checked_id:
+                                await bot.send_message(user_id, message.text)
+                                print(f"Message sent to user {user_id}: {message.text}")
+                                message_keywords_checked[(user_id, keywords_set)] = message.id
+
                 except FloodWaitError as e:
                     wait_time = e.seconds
                     print(f"Flood wait error on chat {chat_id}. Sleeping for {wait_time} seconds.")
@@ -72,18 +78,14 @@ async def search_and_forward():
                         last_message_ids[chat_id] = messages[0].id
 
             num += 1
-
-        except FloodWaitError as e:
-            wait_time = e.seconds
-            print(f"Flood wait error occurred. Sleeping for {wait_time} seconds.")
-            await asyncio.sleep(wait_time)
+            if num >= len(groups):
+                num = 0
 
         except Exception as e:
             print(f"Произошла ошибка: {e}")
             await asyncio.sleep(10)
 
         await asyncio.sleep(1)
-
 
 
 class Create_group(StatesGroup):
