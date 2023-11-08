@@ -34,21 +34,18 @@ async def search_and_forward():
     last_message_ids = {}
     await telethon_client.start()
     while True:
-        try:
-            groups = db.select_all_channels_group()
-            if not groups:
-                await asyncio.sleep(10)
-                continue
+        groups = db.select_all_channels_group()
+        if not groups:
+            await asyncio.sleep(10)
+            continue
 
-            if num >= len(groups):
-                num = 0
+        group = groups[num % len(groups)]
+        user_id, chat_ids, keywords = group[0], group[2], group[5]
 
-            group = groups[num]
-            user_id, chat_ids, keywords = group[0], group[2], group[5]
+        for chat_id in chat_ids:
+            last_id = last_message_ids.get(chat_id, 0)
 
-            for chat_id in chat_ids:
-                last_id = last_message_ids.get(chat_id, 0)
-
+            try:
                 async for message in telethon_client.iter_messages(chat_id, offset_id=last_id, reverse=True):
                     if message.text and any(keyword.lower() in message.text.lower() for keyword in keywords):
                         await bot.send_message(user_id, message.text)
@@ -56,13 +53,16 @@ async def search_and_forward():
                     last_message_ids[chat_id] = message.id
                     break
 
-            num += 1
+                await asyncio.sleep(1)
+            except Exception as e:
+                print(f"Error in chat {chat_id}: {e}")
 
-        except Exception as e:
-            print(f"Произошла ошибка: {e}")
+        num += 1
+
+        # Периодическая проверка групп каждые 10 секунд
+        if num % len(groups) == 0:
             await asyncio.sleep(10)
 
-        await asyncio.sleep(1)
 
 class Create_group(StatesGroup):
     create_group_1 = State()
