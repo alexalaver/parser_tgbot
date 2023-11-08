@@ -39,13 +39,17 @@ async def search_and_forward():
             if num >= lens_groups:
                 num = 0
 
-            user_id, chat_ids, keywords = groups[num]
+            user_id = groups[num][0]
+            chat_ids = groups[num][2]
+            keywords = groups[num][5]
+
             for chat_id in chat_ids:
                 async for message in telethon_client.iter_messages(chat_id, limit=1):
                     if any(keyword.lower() in message.text.lower() for keyword in keywords):
                         await bot.send_message(user_id, message.text)
                         logger.info(f"Message sent to user {user_id}: {message.text}")
                         await asyncio.sleep(10)
+            num += 1
             await asyncio.sleep(1)
 
     except Exception as e:
