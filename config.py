@@ -4,8 +4,8 @@ API_HASH = 'c42d27d03355c1ef54ec5007540b3bee'
 
 STRING_SESSION = '1ApWapzMBuzpEhsLOLVqODnYizulpyqZLTBfbFnDX0um5LbrpS8qzrIW2sfEObNnC0WFrJZYBsFs7-mtdoUtosSG8_fvVMLRLwADcI2rK457moLW6LJZrigSBPKR-PQh8YPcK_Y-rOx9uQDvVTYdfb1J5U9BXQpTldcUkdw4Kb1gpet7h5RvXc0ptXsHYmKriLUUPRyjr3S0BggBiPQfbMr3KVU-W0tvaU0LYQEr5mCVGBPCTE2hbcFuCM-VSY3F3JShihkEVXbemG0auV9XtfLHUisXv2Ukv6FsmGsqdWWlPL3Vu3cXtNG4N9PHU9QaKbG1Ep1HNSvXl55HL7gubTnjPrBzFzQM='
 
-def profile(profile_id, balance, tariffe):
-    return f"*Ваш идентификатор: *{profile_id}\n*Текущий баланс: *{balance}\n*Ваш тариф: *{tariffe}"
+def profile(profile_id, balance):
+    return f"*Ваш идентификатор: *{profile_id}\n*Текущий баланс: *{balance}"
 
 up_balance = "Пополнение баланса"
 tariff_selection = "Выбор тарифа"
@@ -15,10 +15,6 @@ parser = "Парсер"
 my_profile = "Мой профиль"
 support = "Саппорт"
 
-tariff_list = "*Ниже предоставлены основные тарифы.\nМаксимальное количество чатов для парсинга - 50,\nесли вам необходимо больше - свяжитесь с саппортом*"
-start_tariff_button = "Стартовый, 10 чатов - 15$"
-standart_tariff_button = "Стандарт, 25 чатов - 39$"
-premium_tariff_button = "Премиум, 50 чатов - 69$"
 back_button = "Назад"
 back_text = "Вы вернулись назад."
 tariff_list_text = "Вы зашли в список тарифов."

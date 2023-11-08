@@ -30,28 +30,6 @@ class Data:
             else:
                 return f"{a}$"
 
-    def select_tariffe(self, id):
-        with self.connect:
-            self.cursor.execute("SELECT tariffe FROM users WHERE id=%s", (id,))
-            a = self.cursor.fetchone()[0]
-            if a is None:
-                return "Нет действующего тариффа."
-            elif a == 1:
-                return f"Стартовый"
-            elif a == 2:
-                return f"Стандарт"
-            elif a == 3:
-                return f"Премиум"
-
-
-    # def select_tariffe(self, id):
-    #     with self.connect:
-    #         self.cursor.execute("SELECT tariffe FROM users WHERE id=%s", (id,))
-    #         a = self.cursor.fetchone()[0]
-    #         if a is None:
-    #             return "0 чатов."
-    #         else:
-    #             return f"{a} чатов"
 
     def add_admin(self, id):
         with self.connect:
@@ -144,22 +122,8 @@ class Data:
             self.cursor.execute("INSERT INTO cash_parsing (id, group_name) VALUES(%s, %s)", (id, group_name,))
             self.connect.commit()
 
-    def add_cashe_keyword_parsing(self, id, keyword):
-        with self.connect:
-            self.cursor.execute("UPDATE cash_parsing SET keyword=%s WHERE id=%s", (keyword, id,))
-            self.connect.commit()
 
-    def delete_cashe_parsing(self, id):
-        with self.connect:
-            self.cursor.execute("DELETE FROM cash_parsing WHERE id=%s", (id,))
-            self.connect.commit()
 
-    def select_cashe_parsing(self, id):
-        with self.connect:
-            self.cursor.execute("SELECT group_name, keyword FROM cash_parsing WHERE id=%s", (id,))
-            a = self.cursor.fetchone()
-            b = [row for row in a]
-            return b
 
     def select_group_name(self, id):
         with self.connect:
