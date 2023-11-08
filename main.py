@@ -69,6 +69,7 @@ async def search_and_forward():
             await asyncio.sleep(10)
 
 
+
 class Create_group(StatesGroup):
     create_group_1 = State()
     create_group_2 = State()
