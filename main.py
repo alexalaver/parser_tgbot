@@ -45,7 +45,9 @@ async def search_and_forward():
                 await asyncio.sleep(10)
 
             group = groups[num]
-            user_id, chat_ids, keywords = group[0], group[2].split(), group[13:]
+            user_id = group[0]
+            chat_ids = group[2].split()
+            keywords = group[5].split()
 
             for chat_id in chat_ids:
                 last_id = last_message_ids.get(chat_id, 0)
@@ -64,7 +66,6 @@ async def search_and_forward():
             await asyncio.sleep(10)
 
         await asyncio.sleep(1)
-
 
 
 class Create_group(StatesGroup):
