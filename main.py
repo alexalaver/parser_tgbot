@@ -35,8 +35,8 @@ async def check_for_new_groups(current_count):
 
 async def search_and_forward():
     num = 0
-    last_message_ids = {}  # Словарь для отслеживания последнего сообщения по chat_id
-    messages_sent = {}  # Словарь для хранения идентификаторов сообщений, которые уже были отправлены
+    last_message_ids = {}
+    messages_sent = {}
 
     await telethon_client.start()
     groups_count = len(db.select_all_channels_group())
@@ -48,7 +48,6 @@ async def search_and_forward():
                 await asyncio.sleep(10)
                 continue
 
-            # Проверяем, появились ли новые группы
             if await check_for_new_groups(groups_count):
                 groups_count = len(groups)
                 num = 0
@@ -57,10 +56,8 @@ async def search_and_forward():
             user_id, chat_ids, keywords = group[0], group[2], group[5]
 
             for chat_id in chat_ids:
-                # Получаем последнее сохраненное id сообщения для чата
                 last_id = last_message_ids.get(chat_id, 0)
                 messages_to_check = 10
-                # Принудительно проверяем последние 10 сообщений, если переключились на нового пользователя
                 forced_check = num == 0 or last_id == 0
 
                 try:
@@ -77,12 +74,10 @@ async def search_and_forward():
                     print(f"Flood wait error on chat {chat_id}. Sleeping for {wait_time} seconds.")
                     await asyncio.sleep(wait_time)
                 finally:
-                    # Получаем последнее сообщение, чтобы обновить last_message_ids
                     messages = await telethon_client.get_messages(chat_id, limit=1)
                     if messages:
                         last_message_ids[chat_id] = messages[0].id
 
-            # Переходим к следующей группе
             num += 1
             if num >= len(groups):
                 num = 0
@@ -246,7 +241,7 @@ async def rembalance_user(message: types.Message):
 
 
 @dp.callback_query_handler()
-async def buttons_callback(callback_query: types.CallbackQuery):
+async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContext):
     if callback_query.message.chat.type == types.ChatType.PRIVATE:
         user_id = callback_query.from_user.id
         if callback_query.data == "groups_add_button":
@@ -265,7 +260,8 @@ async def buttons_callback(callback_query: types.CallbackQuery):
             await Parsers_use.parsers_use_1.set()
             db.delete_cash_parsing_use(user_id)
             number_group = db.select_number_group(user_id, callback_query.data)
-            db.add_cash_parsing_use(user_id, number_group)
+            await state.update_data(number_group=number_group)
+            # db.add_cash_parsing_use(user_id, number_group)
             channels = db.select_channels(user_id, callback_query.data)
             markup_inline = types.InlineKeyboardMarkup(row_width=4)
             for channel in channels:
@@ -295,7 +291,9 @@ async def buttons_callback(callback_query: types.CallbackQuery):
 async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMContext):
     if callback_query.message.chat.type == types.ChatType.PRIVATE:
         user_id = callback_query.from_user.id
-        number_group = db.select_number_group_parser(user_id)
+        data = await state.get_data()
+        number_group = data.get('number_group')
+        # number_group = db.select_number_group_parser(user_id)
         channels = db.select_channels_with_number(user_id, number_group)
         check_tarife = db.check_date_tarife_for_number(user_id, number_group)
         group_name = db.select_group_name_for_number_group(user_id, number_group)
@@ -315,7 +313,7 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                     await callback_query.answer(cfg.button_correct)
         elif callback_query.data == "back_channels":
             await state.reset_state()
-            db.delete_cash_parsing_use(user_id)
+            # db.delete_cash_parsing_use(user_id)
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
             group_names = db.select_group_name(user_id)
             max_buttons = 5
@@ -350,7 +348,7 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                 markup_inline = types.InlineKeyboardMarkup(row_width=1)
                 btn_inline1 = types.InlineKeyboardButton(cfg.menu_button, callback_data='menu_after_pay')
                 markup_inline.add(btn_inline1)
-                db.delete_cash_parsing_use(user_id)
+                # db.delete_cash_parsing_use(user_id)
                 await state.finish()
                 await callback_query.message.delete()
                 await callback_query.message.answer(text=cfg.tariffe_correct(group_name, channels_len, formatted_date_new), reply_markup=markup_inline)
