@@ -34,39 +34,40 @@ async def search_and_forward():
     last_message_ids = {}
     await telethon_client.start()
     while True:
-        groups = db.select_all_channels_group()
-        if not groups:
-            await asyncio.sleep(10)
-            continue
+        try:
+            groups = db.select_all_channels_group()
+            if not groups:
+                await asyncio.sleep(10)
+                continue
 
-        # Если num больше, чем индексы в списке groups, сбрасываем его на 0
-        if num >= len(groups):
-            num = 0
+            if num >= len(groups):
+                num = 0  # Reset the counter after reaching the end of the list
 
-        group = groups[num]
-        user_id, chat_ids, keywords = group[0], group[2], group[5]
+            group = groups[num]
+            user_id, chat_ids, keywords = group[0], group[2], group[5]
 
-        for chat_id in chat_ids:
-            last_id = last_message_ids.get(chat_id, 0)
+            for chat_id in chat_ids:
+                last_id = last_message_ids.get(chat_id, 0)
+                message_found = False
 
-            try:
-                async for message in telethon_client.iter_messages(chat_id, offset_id=last_id, reverse=True):
+                async for message in telethon_client.iter_messages(chat_id, offset_id=last_id, limit=10, reverse=True):
                     if message.text and any(keyword.lower() in message.text.lower() for keyword in keywords):
                         await bot.send_message(user_id, message.text)
                         print(f"Message sent to user {user_id}: {message.text}")
-                    last_message_ids[chat_id] = message.id
-                    break  # Выходим после первого найденного сообщения
+                        message_found = True
+                        break  # Found a message, break the loop to proceed to next user
 
-                # Ожидаем 1 секунду перед следующим запросом, чтобы избежать flood wait
-                await asyncio.sleep(1)
-            except Exception as e:
-                print(f"Error in chat {chat_id}: {e}")
+                last_message_ids[chat_id] = (await telethon_client.get_messages(chat_id, limit=1)).id
+                if message_found:
+                    break  # If a message is found and sent, no need to check other chats for this user
 
-        num += 1  # Переходим к следующему элементу в списке
+            num += 1  # Proceed to the next user
 
-        # Периодическая пауза, чтобы избежать излишней нагрузки на сервер
-        if num % len(groups) == 0:
+        except Exception as e:
+            print(f"Произошла ошибка: {e}")
             await asyncio.sleep(10)
+
+        await asyncio.sleep(1)  # Wait before the next iteration
 
 
 
