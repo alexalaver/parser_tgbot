@@ -6,9 +6,9 @@ from datbas import Data
 from datetime import datetime, timedelta
 from schedule import Scheduler
 from telethon import TelegramClient, events
-from telethon.errors import FloodWaitError
 from apscheduler.schedulers.background import BackgroundScheduler
 from telethon.sessions import StringSession
+from telethon.errors import FloodWaitError
 import threading
 import time
 import warnings
@@ -45,21 +45,30 @@ async def search_and_forward():
                 num = 0
 
             group = groups[num]
-            user_id, chat_ids, keywords = group[0], group[2], group[5]  # Удаление .split()
+            user_id, chat_ids, keywords = group[0], group[2], group[5]
 
             for chat_id in chat_ids:
                 last_id = last_message_ids.get(chat_id, 0)
-                # Получение последних 10 сообщений и проверка на наличие ключевых слов
-                async for message in telethon_client.iter_messages(chat_id, offset_id=last_id, limit=10, reverse=True):
-                    if message.text and any(keyword.lower() in message.text.lower() for keyword in keywords):
-                        await bot.send_message(user_id, message.text)
-                        print(f"Message sent to user {user_id}: {message.text}")
-                # Обновление last_message_ids с ID последнего сообщения
-                messages = await telethon_client.get_messages(chat_id, limit=1)
-                if messages:
-                    last_message_ids[chat_id] = messages[0].id
+                try:
+                    async for message in telethon_client.iter_messages(chat_id, offset_id=last_id, limit=10, reverse=True):
+                        if message.text and any(keyword.lower() in message.text.lower() for keyword in keywords):
+                            await bot.send_message(user_id, message.text)
+                            print(f"Message sent to user {user_id}: {message.text}")
+                except FloodWaitError as e:
+                    wait_time = e.seconds
+                    print(f"Flood wait error on chat {chat_id}. Sleeping for {wait_time} seconds.")
+                    await asyncio.sleep(wait_time)
+                finally:
+                    messages = await telethon_client.get_messages(chat_id, limit=1)
+                    if messages:
+                        last_message_ids[chat_id] = messages[0].id
 
             num += 1
+
+        except FloodWaitError as e:
+            wait_time = e.seconds
+            print(f"Flood wait error occurred. Sleeping for {wait_time} seconds.")
+            await asyncio.sleep(wait_time)
 
         except Exception as e:
             print(f"Произошла ошибка: {e}")
