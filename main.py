@@ -30,37 +30,30 @@ telethon_client = TelegramClient(StringSession(cfg.STRING_SESSION), cfg.API_ID, 
 
 
 async def search_and_forward():
-    num = 0  # Индекс текущей группы
-    await telethon_client.start()
-    while True:
-        try:
+    num = 0
+    try:
+        await telethon_client.start()
+        while True:
             groups = db.select_all_channels_group()
-            if not groups:
-                await asyncio.sleep(10)  # Ожидание, если нет групп
-                continue
-
-            lens = len(groups)
-            if num >= lens:  # Если дошли до конца списка групп, начинаем с начала
+            lens_groups = len(groups)
+            if num >= lens_groups:
                 num = 0
 
-            group = groups[num]
-            user_id, chat_ids, keywords = group[0], group[2], group[5]
+            user_id = groups[num][0]
+            chat_ids = groups[num][2]
+            keywords = groups[num][5]
+
             for chat_id in chat_ids:
                 async for message in telethon_client.iter_messages(chat_id, limit=1):
-                    # Добавлена проверка на None
-                    if message.text and any(keyword.lower() in message.text.lower() for keyword in keywords):
+                    if any(keyword.lower() in message.text.lower() for keyword in keywords):
                         await bot.send_message(user_id, message.text)
-                        # Добавить логирование, если необходимо
-                        print(f"Message sent to user {user_id}: {message.text}")
-                    await asyncio.sleep(10)  # Ожидание перед проверкой следующего сообщения
+                        logger.info(f"Message sent to user {user_id}: {message.text}")
+                        await asyncio.sleep(10)
+            num += 1
+            await asyncio.sleep(1)
 
-            num += 1  # Переход к следующей группе после обработки
-
-        except Exception as e:
-            print(f"Произошла ошибка: {e}")
-            await asyncio.sleep(10)  # Ожидание перед повторной попыткой
-
-        await asyncio.sleep(1)
+    except Exception as e:
+        logger.error(f"Error during search and forward: {e}")
 
 
 
