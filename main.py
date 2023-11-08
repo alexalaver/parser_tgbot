@@ -383,14 +383,15 @@ async def create_group_func_1(message: types.Message, state: FSMContext):
             markup_reply.add(cfg.parser)
             markup_reply.row(cfg.my_profile, cfg.support)
             await state.reset_state()
-            db.delete_cashe_parsing(user_id)
+            # db.delete_cashe_parsing(user_id)
             await message.answer(cfg.cancel_creategroup_text, reply_markup=markup_reply)
         elif message.text:
             if 3 <= len(message.text) <= 15:
                 if message.text in db.select_group_name(user_id):
                     await message.answer(cfg.error_name_again)
                 else:
-                    db.add_cashe_group_name_parsing(user_id, message.text)
+                    # db.add_cashe_group_name_parsing(user_id, message.text)
+                    await state.update_data(group_name=message.text)
                     await message.answer(cfg.create_group_text_3)
                     await Create_group.create_group_2.set()
             else:
@@ -413,13 +414,14 @@ async def create_group_func_2(message: types.Message, state: FSMContext):
             markup_reply.add(cfg.parser)
             markup_reply.row(cfg.my_profile, cfg.support)
             await state.reset_state()
-            db.delete_cashe_parsing(user_id)
+            # db.delete_cashe_parsing(user_id)
             await message.answer(cfg.cancel_creategroup_text, reply_markup=markup_reply)
         elif message.text:
             if 2 <= len(message.text) <= 500:
                 if 1 <= len(text_lines) <= 20:
                     try:
-                        db.add_cashe_keyword_parsing(user_id, text_lines)
+                        # db.add_cashe_keyword_parsing(user_id, text_lines)
+                        await state.update_data(text_lines=text_lines)
                         await message.answer(cfg.create_group_text_4)
                         await Create_group.create_group_3.set()
                     except Exception as es:
@@ -430,7 +432,7 @@ async def create_group_func_2(message: types.Message, state: FSMContext):
                         markup_reply.row(cfg.my_profile, cfg.support)
                         await message.answer(cfg.error_create_group, reply_markup=markup_reply)
                         print(f"[ERROR] {es}")
-                        db.delete_cashe_parsing(user_id)
+                        # db.delete_cashe_parsing(user_id)
                 else:
                     await message.answer(cfg.error_len_keyword_create)
             else:
@@ -453,7 +455,7 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
             markup_reply.add(cfg.parser)
             markup_reply.row(cfg.my_profile, cfg.support)
             await state.reset_state()
-            db.delete_cashe_parsing(user_id)
+            # db.delete_cashe_parsing(user_id)
             await message.answer(cfg.cancel_creategroup_text, reply_markup=markup_reply)
         elif message.text:
             if 2 <= len(message.text) <= 1000:
@@ -461,9 +463,9 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                     try:
                         check_number_group = db.check_numbers_group(user_id)
                         new_number_group = check_number_group + 1
-                        cashe_select = db.select_cashe_parsing(user_id)
-                        cashe_group_name = cashe_select[0]
-                        cashe_keyword = cashe_select[1]
+                        data = await state.get_data()
+                        cashe_group_name = data.get('group_name')
+                        cashe_keyword = data.get('text_lines')
                         db.add_channels(user_id, new_number_group, cashe_keyword, text_lines, cashe_group_name)
                         markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
                         markup_reply.add(cfg.autoposting)
@@ -471,7 +473,7 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                         markup_reply.row(cfg.my_profile, cfg.support)
                         await message.answer(cfg.right_create_group, reply_markup=markup_reply)
                         await state.finish()
-                        db.delete_cashe_parsing(user_id)
+                        # db.delete_cashe_parsing(user_id)
                     except Exception as es:
                         await state.reset_state()
                         markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
@@ -480,7 +482,7 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                         markup_reply.row(cfg.my_profile, cfg.support)
                         await message.answer(cfg.error_create_group, reply_markup=markup_reply)
                         print(f"[ERROR] {es}")
-                        db.delete_cashe_parsing(user_id)
+                        # db.delete_cashe_parsing(user_id)
                 else:
                     await message.answer(cfg.error_len_channels_create)
             else:
