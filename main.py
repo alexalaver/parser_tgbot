@@ -35,8 +35,8 @@ async def check_for_new_groups(current_count):
 
 async def search_and_forward():
     num = 0
-    last_message_ids = {}
-    message_keywords_checked = {}
+    last_message_ids = {}  # Словарь для отслеживания последнего сообщения по chat_id
+    last_checked_keywords = {}  # Словарь для отслеживания последнего сообщения по user_id и keywords
     await telethon_client.start()
 
     groups_count = len(db.select_all_channels_group())
@@ -58,34 +58,38 @@ async def search_and_forward():
 
             for chat_id in chat_ids:
                 last_id = last_message_ids.get(chat_id, 0)
-                message_last_checked_id = message_keywords_checked.get((user_id, keywords_set), 0)
+                last_keyword_id = last_checked_keywords.get((user_id, keywords_set), 0)
+                new_last_id = 0
 
                 try:
-                    async for message in telethon_client.iter_messages(chat_id, offset_id=max(last_id, message_last_checked_id) + 1, limit=10, reverse=True):
-                        if message.text and any(keyword.lower() in message.text.lower() for keyword in keywords):
-                            if message.id > message_last_checked_id:
-                                await bot.send_message(user_id, message.text)
-                                print(f"Message sent to user {user_id}: {message.text}")
-                                message_keywords_checked[(user_id, keywords_set)] = message.id
+                    async for message in telethon_client.iter_messages(chat_id, offset_id=last_id, limit=10, reverse=True):
+                        if message.id > last_keyword_id and message.text and any(keyword.lower() in message.text.lower() for keyword in keywords):
+                            await bot.send_message(user_id, message.text)
+                            print(f"Message sent to user {user_id}: {message.text}")
+                            new_last_id = max(new_last_id, message.id)
+
+                    # Обновляем last_checked_keywords если были найдены новые сообщения
+                    if new_last_id > last_keyword_id:
+                        last_checked_keywords[(user_id, keywords_set)] = new_last_id
 
                 except FloodWaitError as e:
                     wait_time = e.seconds
                     print(f"Flood wait error on chat {chat_id}. Sleeping for {wait_time} seconds.")
                     await asyncio.sleep(wait_time)
+
                 finally:
+                    # Получаем последнее сообщение, чтобы обновить last_message_ids
                     messages = await telethon_client.get_messages(chat_id, limit=1)
                     if messages:
                         last_message_ids[chat_id] = messages[0].id
 
-            num += 1
-            if num >= len(groups):
-                num = 0
+            num = (num + 1) % len(groups)  # Это автоматически обнулит num, если он превышает количество групп
 
         except Exception as e:
             print(f"Произошла ошибка: {e}")
             await asyncio.sleep(10)
 
-        await asyncio.sleep(1)
+        await asyncio.sleep(20)
 
 
 class Create_group(StatesGroup):
