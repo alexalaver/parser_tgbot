@@ -315,6 +315,9 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                         for channel in channels:
                             buttons = types.InlineKeyboardButton(text=f"{channel} ✅", callback_data=f"{channel} ✅")
                             markup_inline.row(buttons)
+                        for off_channel in off_channels:
+                            buttons = types.InlineKeyboardButton(text=f"{off_channel} ❌", callback_data=f"{off_channel} ❌")
+                            markup_inline.row(buttons)
                         back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels')
                         markup_inline.add(back_channels)
                         await callback_query.message.edit_caption(caption="TESTING", reply_markup=markup_inline)
