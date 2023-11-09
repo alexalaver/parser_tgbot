@@ -306,6 +306,8 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                         all_channels.remove(channel_name[:-2])
                         off_channels = db.select_off_channels(user_id)
                         off_channels.append(channel_name[:-2])
+                        db.update_all_channels(user_id, all_channels)
+                        db.update_off_channels(user_id, off_channels)
                         await state.update_data(number_group=number_group)
                         channels = db.select_channels(user_id, callback_query.data)
                         markup_inline = types.InlineKeyboardMarkup(row_width=4)

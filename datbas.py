@@ -163,15 +163,6 @@ class Data:
             a = self.cursor.fetchone()[0]
             return a
 
-    def delete_cash_parsing_use(self, id):
-        with self.connect:
-            self.cursor.execute("DELETE FROM cash_parsing_use WHERE id=%s", (id,))
-            self.connect.commit()
-
-    def add_cash_parsing_use(self, id, number_group):
-        with self.connect:
-            self.cursor.execute("INSERT INTO cash_parsing_use (id, number_group) VALUES(%s, %s)", (id, number_group,))
-            self.connect.commit()
 
     def select_keyword(self, id, number_group):
         with self.connect:
@@ -211,3 +202,13 @@ class Data:
             a = self.cursor.fetchall()
             combined_list = list(itertools.chain(*a))
             return combined_list
+
+    def update_all_channels(self, id, channels):
+        with self.connect:
+            self.cursor.execute("UPDATE groups SET channels=%s WHERE id=%s", (id, channels,))
+            self.connect.commit()
+
+    def update_off_channels(self, id, channels):
+        with self.connect:
+            self.cursor.execute("UPDATE groups SET off_channels=%s WHERE id=%s", (id, channels,))
+            self.connect.commit()
