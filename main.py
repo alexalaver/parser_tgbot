@@ -309,7 +309,7 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                     await callback_query.answer(text=cfg.error_oplata, show_alert=True)
                 else:
                     channel_name = callback_query.data
-                    await callback_query.message.answer(channel_name[-1])
+                    await callback_query.message.answer(channel_name)
                     if channel_name[-1] == "✅":
                         channel_name = channel_name[:-1].strip()
                         all_channels = db.select_channels_number_group(number_group)
