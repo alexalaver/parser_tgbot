@@ -392,14 +392,22 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
             else:
                 await callback_query.answer(text=cfg.tariffe_error, show_alert=True)
         elif callback_query.data == "back_oplata":
-            channels = db.select_channels_for_number(user_id, number_group)
+            channels = db.select_channels(user_id, callback_query.data)
+            off_channels = db.select_all_off_channels(user_id, callback_query.data)
             markup_inline = types.InlineKeyboardMarkup(row_width=4)
-            for channel in channels:
-                buttons = types.InlineKeyboardButton(text=channel, callback_data=channel)
-                markup_inline.row(buttons)
-            if db.check_date_tarife_for_number(user_id, number_group) is None:
+            if db.check_date_tarife(user_id, callback_query.data) is None:
+                for channel in channels:
+                    buttons = types.InlineKeyboardButton(text=f"{channel} ⚠️", callback_data=f"{channel} ⚠️")
+                    markup_inline.row(buttons)
                 pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels')
                 markup_inline.add(pay_money_buttons)
+            else:
+                for channel in channels:
+                    buttons = types.InlineKeyboardButton(text=f"{channel} ✅", callback_data=f"{channel} ✅")
+                    markup_inline.row(buttons)
+                for off_channel in off_channels:
+                    buttons_1 = types.InlineKeyboardButton(text=f"{off_channel} ❌", callback_data=f"{off_channel} ❌")
+                    markup_inline.row(buttons_1)
             back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels')
             markup_inline.add(back_channels)
             await callback_query.message.edit_caption(caption="TESTING", reply_markup=markup_inline)

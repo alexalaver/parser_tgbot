@@ -169,7 +169,7 @@ class Data:
             self.cursor.execute("SELECT off_channels FROM groups WHERE number_group=%s", (number_group,))
             a = self.cursor.fetchone()
             if a is None:
-                return a
+                return []
             else:
                 return a[0]
 
