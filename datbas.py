@@ -105,12 +105,12 @@ class Data:
 
     def check_numbers_group(self, id):
         with self.connect:
-            self.cursor.execute("SELECT number_group FROM groups WHERE id=%s", (id,))
-            a = self.cursor.fetchone()
+            self.cursor.execute("SELECT * FROM groups")
+            a = self.cursor.fetchall()
             if a is None:
                 return 0
             else:
-                return a[0]
+                return len(a)
 
     def add_channels(self, id, number_group, keyword, channels, group_name):
         with self.connect:
