@@ -235,6 +235,8 @@ async def rembalance_user(message: types.Message):
             await message.answer(cfg.error_adm_dostup)
 
 
+
+#Функционал открытых inline кнопок
 @dp.callback_query_handler()
 async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContext):
     if callback_query.message.chat.type == types.ChatType.PRIVATE:
@@ -257,7 +259,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
             channels = db.select_channels(user_id, callback_query.data)
             markup_inline = types.InlineKeyboardMarkup(row_width=4)
             for channel in channels:
-                buttons = types.InlineKeyboardButton(text=channel, callback_data=channel)
+                buttons = types.InlineKeyboardButton(text=f"{channel} ✅", callback_data=channel)
                 markup_inline.row(buttons)
             if db.check_date_tarife(user_id, callback_query.data) is None:
                 pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels')
@@ -299,9 +301,9 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                     await callback_query.answer(text=cfg.error_oplata, show_alert=True)
                 else:
                     channel_name = callback_query.data
-                    keyword = db.select_keyword(user_id, number_group)
-                    await callback_query.message.answer(f"ключевое слово - {keyword}\nназвание чата - {channel_name}")
-                    await callback_query.answer(cfg.button_correct)
+                    if channel_name[-1] == "✅":
+                        off_channels = db.select_off_channels(user_id)
+                        await callback_query.message.answer(off_channels)
         elif callback_query.data == "back_channels":
             await state.reset_state()
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
