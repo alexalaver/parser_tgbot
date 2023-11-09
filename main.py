@@ -303,9 +303,9 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                     channel_name = callback_query.data
                     channel_name = channel_name.strip()
                     if channel_name[-1] == "✅":
-                        all_channels = db.select_all_channels(user_id)
+                        all_channels = db.select_channels_number_group(number_group)
                         all_channels.remove(str(channel_name[:-1]))
-                        off_channels = db.select_off_channels(user_id)
+                        off_channels = db.select_off_channels(number_group)
                         off_channels.append(str(channel_name[:-1]))
                         db.update_all_channels(user_id, all_channels)
                         db.update_off_channels(user_id, off_channels)

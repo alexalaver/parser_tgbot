@@ -196,10 +196,17 @@ class Data:
             combined_list = list(itertools.chain(*a))
             return combined_list
 
-    def select_off_channels(self, id):
+    def select_channels_number_group(self, number_group):
         with self.connect:
-            self.cursor.execute("SELECT off_channels FROM groups WHERE id=%s", (id,))
-            a = self.cursor.fetchall()
+            self.cursor.execute("SELECT channels FROM groups WHERE number_group=%s AND data_end IS NOT NULL", (number_group,))
+            a = self.cursor.fetchone()
+            combined_list = list(itertools.chain(*a))
+            return combined_list
+
+    def select_off_channels(self, number_group):
+        with self.connect:
+            self.cursor.execute("SELECT off_channels FROM groups WHERE number_group=%s", (number_group,))
+            a = self.cursor.fetchone()
             combined_list = list(itertools.chain(*a))
             return combined_list
 
