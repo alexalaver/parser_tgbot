@@ -290,7 +290,6 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
         channels = db.select_channels_with_number(user_id, number_group)
         check_tarife = db.check_date_tarife_for_number(user_id, number_group)
         group_name = db.select_group_name_for_number_group(user_id, number_group)
-        await callback_query.message.answer(callback_query.data[:-2])
         if callback_query.data in channels:
             if check_tarife is None:
                 await callback_query.answer(text=cfg.error_oplata, show_alert=True)
@@ -302,7 +301,7 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                     await callback_query.answer(text=cfg.error_oplata, show_alert=True)
                 else:
                     channel_name = callback_query.data
-                    await callback_query.message.answer(channel_name[-1])
+                    await callback_query.message.answer(channel_name)
                     if channel_name[-1] == "✅":
                         off_channels = db.select_off_channels(user_id)
                         await callback_query.message.answer(off_channels)
