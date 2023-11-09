@@ -200,19 +200,16 @@ class Data:
         with self.connect:
             self.cursor.execute("SELECT channels FROM groups WHERE number_group=%s AND data_end IS NOT NULL", (number_group,))
             a = self.cursor.fetchone()
-            combined_list = list(a)
-            return combined_list
+            return a
 
     def select_off_channels(self, number_group):
         with self.connect:
             self.cursor.execute("SELECT off_channels FROM groups WHERE number_group=%s", (number_group,))
             a = self.cursor.fetchone()
             if a is None:
-                combined_list = list()
-                return combined_list
+                return a
             else:
-                combined_list = list(a)
-                return combined_list
+                return a
 
     def update_all_channels(self, id, channels):
         with self.connect:
