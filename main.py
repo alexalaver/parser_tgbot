@@ -259,15 +259,19 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
             channels = db.select_channels(user_id, callback_query.data)
             off_channels = db.select_all_off_channels(user_id, callback_query.data)
             markup_inline = types.InlineKeyboardMarkup(row_width=4)
-            for channel in channels:
-                buttons = types.InlineKeyboardButton(text=f"{channel} ✅", callback_data=f"{channel} ✅")
-                markup_inline.row(buttons)
-            for off_channel in off_channels:
-                buttons = types.InlineKeyboardButton(text=f"{off_channel} ✅", callback_data=f"{off_channel} ✅")
-                markup_inline.row(buttons)
             if db.check_date_tarife(user_id, callback_query.data) is None:
+                for channel in channels:
+                    buttons = types.InlineKeyboardButton(text=f"{channel} ⚠️", callback_data=f"{channel} ✅")
+                    markup_inline.row(buttons)
                 pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels')
                 markup_inline.add(pay_money_buttons)
+            else:
+                for channel in channels:
+                    buttons = types.InlineKeyboardButton(text=f"{channel} ✅", callback_data=f"{channel} ✅")
+                    markup_inline.row(buttons)
+                for off_channel in off_channels:
+                    buttons = types.InlineKeyboardButton(text=f"{off_channel} ✅", callback_data=f"{off_channel} ✅")
+                    markup_inline.row(buttons)
             back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels')
             markup_inline.add(back_channels)
             await callback_query.message.edit_caption(caption="TESTING", reply_markup=markup_inline)
@@ -398,11 +402,32 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
             back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels')
             markup_inline.add(back_channels)
             await callback_query.message.edit_caption(caption="TESTING", reply_markup=markup_inline)
+        elif callback_query.data == "back_sostoyanie":
+            markup_inline = types.InlineKeyboardMarkup(row_width=1)
+            user_id = callback_query.from_user.id
+            group_names = db.select_group_name(user_id)
+            max_buttons = 5
+            for i in range(min(max_buttons, len(group_names))):
+                button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
+                markup_inline.add(button)
+
+            btn_inline1 = types.InlineKeyboardButton(cfg.groups_add_button, callback_data='groups_add_button')
+            markup_inline.add(btn_inline1)
+            await callback_query.message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.parser_text, reply_markup=markup_inline)
+            await state.reset_state()
+
 
 @dp.message_handler(state=Parsers_use.parsers_use_1)
-async def parsers_use_1_text(message: types.Message):
+async def parsers_use_1_text(message: types.Message, state: FSMContext):
     if message.chat.type == types.ChatType.PRIVATE:
-        await message.answer(cfg.error_parsers_texts)
+        if message.text == "/cancel":
+            await message.answer(cfg.cancel_sostoyanie)
+            await state.reset_state()
+        else:
+            markup_inline = types.InlineKeyboardMarkup(row_width=1)
+            btn1_inline = types.InlineKeyboardButton(cfg.back_button, callback_data="back_sostoyanie")
+            markup_inline.add(btn1_inline)
+            await message.answer(cfg.error_parsers_texts, reply_markup=markup_inline)
 
 
 @dp.message_handler(state=Create_group.create_group_1)
