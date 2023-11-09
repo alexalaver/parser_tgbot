@@ -302,8 +302,10 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                 else:
                     channel_name = callback_query.data
                     if channel_name[-1] == "✅":
+                        off_channels_list = []
                         off_channels = db.select_off_channels(user_id)
-                        await callback_query.message.answer(off_channels)
+                        off_channels_list.append(off_channels)
+                        await callback_query.message.answer("test")
         elif callback_query.data == "back_channels":
             await state.reset_state()
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
