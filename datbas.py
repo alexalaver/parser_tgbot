@@ -211,12 +211,12 @@ class Data:
             else:
                 return a
 
-    def update_all_channels(self, id, channels):
+    def update_all_channels(self, number_group, channels):
         with self.connect:
-            self.cursor.execute("UPDATE groups SET channels=%s WHERE id=%s", (id, channels,))
+            self.cursor.execute("UPDATE groups SET channels=%s WHERE number_group=%s", (channels, number_group,))
             self.connect.commit()
 
-    def update_off_channels(self, id, channels):
+    def update_off_channels(self, number_group, channels):
         with self.connect:
-            self.cursor.execute("UPDATE groups SET off_channels=%s WHERE id=%s", (id, channels,))
+            self.cursor.execute("UPDATE groups SET off_channels=%s WHERE number_group=%s", (channels, number_group,))
             self.connect.commit()
