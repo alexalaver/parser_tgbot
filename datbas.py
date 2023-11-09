@@ -199,7 +199,7 @@ class Data:
     def select_channels_number_group(self, number_group):
         with self.connect:
             self.cursor.execute("SELECT channels FROM groups WHERE number_group=%s AND data_end IS NOT NULL", (number_group,))
-            a = self.cursor.fetchone()
+            a = self.cursor.fetchone()[0]
             return a
 
     def select_off_channels(self, number_group):
@@ -207,9 +207,9 @@ class Data:
             self.cursor.execute("SELECT off_channels FROM groups WHERE number_group=%s", (number_group,))
             a = self.cursor.fetchone()
             if a is None:
-                return a
+                return []
             else:
-                return a
+                return a[0]
 
     def update_all_channels(self, id, channels):
         with self.connect:
