@@ -148,11 +148,11 @@ class Data:
     def select_all_off_channels(self, id, group_name):
         with self.connect:
             self.cursor.execute("SELECT off_channels FROM groups WHERE id=%s AND group_name=%s", (id, group_name,))
-            a = self.cursor.fetchone()[0]
-            if a is None:
-                return []
+            a = self.cursor.fetchone()
+            if a:
+                return a[0]
             else:
-                return a
+                return []
 
 
     def select_channels_for_number(self, id, number_group):
@@ -170,11 +170,11 @@ class Data:
     def select_off_channels_with_number(self, number_group):
         with self.connect:
             self.cursor.execute("SELECT off_channels FROM groups WHERE number_group=%s", (number_group,))
-            a = self.cursor.fetchone()[0]
-            if a is None:
-                return []
-            else:
+            a = self.cursor.fetchone()
+            if a:
                 return a[0]
+            else:
+                return []
 
     def select_number_group(self, id, group_name):
         with self.connect:
