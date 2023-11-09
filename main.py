@@ -299,7 +299,7 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
         off_channels = db.select_off_channels_with_number(number_group)
         check_tarife = db.check_date_tarife_for_number(user_id, number_group)
         group_name = db.select_group_name_for_number_group(user_id, number_group)
-        if callback_query.data[:-2] in channels:
+        if callback_query.data[:-2] in channels or callback_query.data[:-2] in off_channels:
             if check_tarife is None:
                 await callback_query.answer(text=cfg.error_oplata, show_alert=True)
             else:
@@ -310,55 +310,46 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                     await callback_query.answer(text=cfg.error_oplata, show_alert=True)
                 else:
                     channel_name = callback_query.data
-                    channel_name = channel_name[:-1].strip()
-                    all_channels = db.select_channels_number_group(number_group)
-                    all_channels.remove(channel_name)
-                    off_channels = db.select_off_channels(number_group)
-                    off_channels.append(channel_name)
-                    db.update_all_channels(number_group, all_channels)
-                    db.update_off_channels(number_group, off_channels)
-                    await state.update_data(number_group=number_group)
-                    channels = db.select_channels_with_number(number_group)
-                    markup_inline = types.InlineKeyboardMarkup(row_width=4)
-                    for channel in channels:
-                        buttons = types.InlineKeyboardButton(text=f"{channel} ✅", callback_data=f"{channel} ✅")
-                        markup_inline.row(buttons)
-                    for off_channel in off_channels:
-                        buttons_1 = types.InlineKeyboardButton(text=f"{off_channel} ❌", callback_data=f"{off_channel} ❌")
-                        markup_inline.row(buttons_1)
-                    back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels')
-                    markup_inline.add(back_channels)
-                    await callback_query.message.edit_caption(caption="TESTING", reply_markup=markup_inline)
-        elif callback_query.data[:-2] in off_channels:
-            if check_tarife is None:
-                await callback_query.answer(text=cfg.error_oplata, show_alert=True)
-            else:
-                current_data = datetime.datetime.now()
-                formated_check_date_tarife = datetime.datetime.strptime(check_tarife, "%Y-%m-%d %H:%M:%S")
-                if current_data >= formated_check_date_tarife:
-                    db.delete_old_tariffe(user_id, number_group)
-                    await callback_query.answer(text=cfg.error_oplata, show_alert=True)
-                else:
-                    channel_name = callback_query.data
-                    channel_name = channel_name[:-1].strip()
-                    off_channels = db.select_off_channels(number_group)
-                    off_channels.remove(channel_name)
-                    all_channels = db.select_channels_number_group(number_group)
-                    all_channels.append(channel_name)
-                    db.update_all_channels(number_group, all_channels)
-                    db.update_off_channels(number_group, off_channels)
-                    await state.update_data(number_group=number_group)
-                    channels = db.select_channels_with_number(number_group)
-                    markup_inline = types.InlineKeyboardMarkup(row_width=4)
-                    for channel in channels:
-                        buttons = types.InlineKeyboardButton(text=f"{channel} ✅", callback_data=f"{channel} ✅")
-                        markup_inline.row(buttons)
-                    for off_channel in off_channels:
-                        buttons_1 = types.InlineKeyboardButton(text=f"{off_channel} ❌", callback_data=f"{off_channel} ❌")
-                        markup_inline.row(buttons_1)
-                    back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels')
-                    markup_inline.add(back_channels)
-                    await callback_query.message.edit_caption(caption="TESTING", reply_markup=markup_inline)
+                    if channel_name[-1] == "✅":
+                        channel_name = channel_name[:-1].strip()
+                        all_channels = db.select_channels_number_group(number_group)
+                        all_channels.remove(channel_name)
+                        off_channels = db.select_off_channels(number_group)
+                        off_channels.append(channel_name)
+                        db.update_all_channels(number_group, all_channels)
+                        db.update_off_channels(number_group, off_channels)
+                        await state.update_data(number_group=number_group)
+                        channels = db.select_channels_with_number(number_group)
+                        markup_inline = types.InlineKeyboardMarkup(row_width=4)
+                        for channel in channels:
+                            buttons = types.InlineKeyboardButton(text=f"{channel} ✅", callback_data=f"{channel} ✅")
+                            markup_inline.row(buttons)
+                        for off_channel in off_channels:
+                            buttons_1 = types.InlineKeyboardButton(text=f"{off_channel} ❌", callback_data=f"{off_channel} ❌")
+                            markup_inline.row(buttons_1)
+                        back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels')
+                        markup_inline.add(back_channels)
+                        await callback_query.message.edit_caption(caption="TESTING", reply_markup=markup_inline)
+                    elif channel_name[-1] == "❌":
+                        channel_name = channel_name[:-1].strip()
+                        off_channels = db.select_off_channels(number_group)
+                        off_channels.remove(channel_name)
+                        all_channels = db.select_channels_number_group(number_group)
+                        all_channels.append(channel_name)
+                        db.update_all_channels(number_group, all_channels)
+                        db.update_off_channels(number_group, off_channels)
+                        await state.update_data(number_group=number_group)
+                        channels = db.select_channels_with_number(number_group)
+                        markup_inline = types.InlineKeyboardMarkup(row_width=4)
+                        for channel in channels:
+                            buttons = types.InlineKeyboardButton(text=f"{channel} ✅", callback_data=f"{channel} ✅")
+                            markup_inline.row(buttons)
+                        for off_channel in off_channels:
+                            buttons_1 = types.InlineKeyboardButton(text=f"{off_channel} ❌", callback_data=f"{off_channel} ❌")
+                            markup_inline.row(buttons_1)
+                        back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels')
+                        markup_inline.add(back_channels)
+                        await callback_query.message.edit_caption(caption="TESTING", reply_markup=markup_inline)
         elif callback_query.data == "back_channels":
             await state.reset_state()
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
