@@ -304,9 +304,11 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                     channel_name = channel_name.strip()
                     if channel_name[-1] == "✅":
                         all_channels = db.select_channels_number_group(number_group)
-                        await callback_query.message.answer(f"{all_channels}", parse_mode=types.ParseMode.HTML)
-                        await callback_query.message.answer(f"{channel_name[:-1]}", parse_mode=types.ParseMode.HTML)
-                        all_channels.remove(str(channel_name[:-1]))
+                        if channel_name[:-1] in all_channels:
+                            all_channels.remove(channel_name[:-1])
+                        else:
+                            print(f"Элемент {channel_name[:-1]} не найден в списке.")
+                        # all_channels.remove(str(channel_name[:-1]))
                         off_channels = db.select_off_channels(number_group)
                         off_channels.append(str(channel_name[:-1]))
                         db.update_all_channels(user_id, all_channels)
