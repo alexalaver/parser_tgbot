@@ -329,7 +329,8 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                         back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels')
                         markup_inline.add(back_channels)
                         await callback_query.message.edit_caption(caption="TESTING", reply_markup=markup_inline)
-                    else:
+                    elif channel_name[-1] == "❌":
+                        await callback_query.message.answer("right")
                         channel_name = channel_name[:-1].strip()
                         off_channels = db.select_off_channels(number_group)
                         off_channels.remove(channel_name)
