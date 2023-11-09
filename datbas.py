@@ -66,11 +66,11 @@ class Data:
     def check_date_tarife_for_number(self, number_group):
         with self.connect:
             self.cursor.execute("SELECT data_end FROM groups WHERE number_group=%s", (number_group,))
-            a = self.cursor.fetchone()[0]
+            a = self.cursor.fetchone()
             if a is None:
                 return None
             else:
-                return a
+                return a[0]
 
     def delete_old_tariffe(self, id, number_group):
         with self.connect:
