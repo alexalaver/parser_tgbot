@@ -151,9 +151,9 @@ class Data:
             a = self.cursor.fetchone()[0]
             return a
 
-    def select_channels_with_number(self, id, number_group):
+    def select_channels_with_number(self, number_group):
         with self.connect:
-            self.cursor.execute("SELECT channels FROM groups WHERE id=%s AND number_group=%s", (id, number_group,))
+            self.cursor.execute("SELECT channels FROM groups WHERE number_group=%s", (number_group,))
             a = self.cursor.fetchone()[0]
             return a
 

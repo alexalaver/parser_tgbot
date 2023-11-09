@@ -287,7 +287,7 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
         user_id = callback_query.from_user.id
         data = await state.get_data()
         number_group = data.get('number_group')
-        channels = db.select_channels_with_number(user_id, number_group)
+        channels = db.select_channels_with_number(number_group)
         check_tarife = db.check_date_tarife_for_number(user_id, number_group)
         group_name = db.select_group_name_for_number_group(user_id, number_group)
         if callback_query.data[:-2] in channels:
@@ -310,7 +310,7 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                         db.update_all_channels(number_group, all_channels)
                         db.update_off_channels(number_group, off_channels)
                         await state.update_data(number_group=number_group)
-                        channels = db.select_channels(user_id, callback_query.data)
+                        channels = db.select_channels_with_number(number_group)
                         markup_inline = types.InlineKeyboardMarkup(row_width=4)
                         for channel in channels:
                             buttons = types.InlineKeyboardButton(text=f"{channel} ✅", callback_data=f"{channel} ✅")
