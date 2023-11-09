@@ -103,7 +103,7 @@ class Data:
             else:
                 return len(b)
 
-    def check_numbers_group(self, id):
+    def check_numbers_group(self):
         with self.connect:
             self.cursor.execute("SELECT number_group FROM groups ORDER BY id DESC LIMIT 1;")
             a = self.cursor.fetchall()
