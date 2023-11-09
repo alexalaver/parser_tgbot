@@ -261,7 +261,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
             markup_inline = types.InlineKeyboardMarkup(row_width=4)
             if db.check_date_tarife(user_id, callback_query.data) is None:
                 for channel in channels:
-                    buttons = types.InlineKeyboardButton(text=f"{channel} ⚠️", callback_data=f"{channel} ✅")
+                    buttons = types.InlineKeyboardButton(text=f"{channel} ⚠️", callback_data=f"{channel} ⚠️")
                     markup_inline.row(buttons)
                 pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels')
                 markup_inline.add(pay_money_buttons)
@@ -270,7 +270,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     buttons = types.InlineKeyboardButton(text=f"{channel} ✅", callback_data=f"{channel} ✅")
                     markup_inline.row(buttons)
                 for off_channel in off_channels:
-                    buttons = types.InlineKeyboardButton(text=f"{off_channel} ✅", callback_data=f"{off_channel} ✅")
+                    buttons = types.InlineKeyboardButton(text=f"{off_channel} ❌", callback_data=f"{off_channel} ❌")
                     markup_inline.row(buttons)
             back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels')
             markup_inline.add(back_channels)
