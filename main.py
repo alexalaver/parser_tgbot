@@ -257,9 +257,13 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
             number_group = db.select_number_group(user_id, callback_query.data)
             await state.update_data(number_group=number_group)
             channels = db.select_channels(user_id, callback_query.data)
+            off_channels = db.select_all_off_channels(user_id, callback_query.data)
             markup_inline = types.InlineKeyboardMarkup(row_width=4)
             for channel in channels:
                 buttons = types.InlineKeyboardButton(text=f"{channel} ✅", callback_data=f"{channel} ✅")
+                markup_inline.row(buttons)
+            for off_channel in off_channels:
+                buttons = types.InlineKeyboardButton(text=f"{off_channel} ✅", callback_data=f"{off_channel} ✅")
                 markup_inline.row(buttons)
             if db.check_date_tarife(user_id, callback_query.data) is None:
                 pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels')

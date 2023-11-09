@@ -145,6 +145,13 @@ class Data:
             a = self.cursor.fetchone()[0]
             return a
 
+    def select_all_off_channels(self, id, group_name):
+        with self.connect:
+            self.cursor.execute("SELECT off_channels FROM groups WHERE id=%s AND group_name=%s", (id, group_name,))
+            a = self.cursor.fetchone()[0]
+            return a
+
+
     def select_channels_for_number(self, id, number_group):
         with self.connect:
             self.cursor.execute("SELECT channels FROM groups WHERE id=%s AND number_group=%s", (id, number_group,))
