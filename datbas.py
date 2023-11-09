@@ -208,5 +208,6 @@ class Data:
     def select_off_channels(self, id):
         with self.connect:
             self.cursor.execute("SELECT off_channels FROM groups WHERE id=%s", (id,))
-            a = self.cursor.fetchone()[0]
-            return a
+            a = self.cursor.fetchall()
+            combined_list = list(itertools.chain(*a))
+            return combined_list

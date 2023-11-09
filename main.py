@@ -302,10 +302,19 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                 else:
                     channel_name = callback_query.data
                     if channel_name[-1] == "✅":
-                        off_channels_list = []
+                        all_channels = db.select_all_channels(user_id)
+                        all_channels.remove(channel_name[:-2])
                         off_channels = db.select_off_channels(user_id)
-                        off_channels_list.append(off_channels)
-                        await callback_query.message.answer("test")
+                        off_channels.append(channel_name[:-2])
+                        await state.update_data(number_group=number_group)
+                        channels = db.select_channels(user_id, callback_query.data)
+                        markup_inline = types.InlineKeyboardMarkup(row_width=4)
+                        for channel in channels:
+                            buttons = types.InlineKeyboardButton(text=f"{channel} ✅", callback_data=f"{channel} ✅")
+                            markup_inline.row(buttons)
+                        back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels')
+                        markup_inline.add(back_channels)
+                        await callback_query.message.edit_caption(caption="TESTING", reply_markup=markup_inline)
         elif callback_query.data == "back_channels":
             await state.reset_state()
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
