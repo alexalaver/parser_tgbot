@@ -16,7 +16,7 @@ import datetime
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-bot = Bot(cfg.TOKEN, parse_mode=types.ParseMode.MARKDOWN)
+bot = Bot(cfg.TOKEN)
 dp = Dispatcher(bot, storage=MemoryStorage())
 db = Data("192.168.1.37", "5432", "pars_db", "pars_user", "pars_pwd")
 
@@ -60,7 +60,7 @@ async def search_and_forward():
                         if message.text and any(keyword.lower() in message.text.lower() for keyword in keywords):
                             message_key = (user_id, message.id)
                             if message_key not in messages_sent or forced_check:
-                                await bot.send_message(user_id, message.text)
+                                await bot.send_message(user_id, message.text, parse_mode=types.ParseMode.MARKDOWN)
                                 print(f"Message sent to user {user_id}: {message.text}")
                                 messages_sent[message_key] = True
 
@@ -97,13 +97,13 @@ async def profile(message):
     markup_inline = types.InlineKeyboardMarkup(row_width=1, )
     btn_inline1 = types.InlineKeyboardButton(cfg.up_balance, callback_data='up_balance')
     markup_inline.add(btn_inline1)
-    await message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.profile(user_id, db.select_balance(user_id)), reply_markup=markup_inline)
+    await message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.profile(user_id, db.select_balance(user_id)), reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
 
 async def supports_send(message):
     markup_inline = types.InlineKeyboardMarkup(row_width=1)
     btn_inline1 = types.InlineKeyboardButton(cfg.support, callback_data='support', url="tg://user?id=1076482828")
     markup_inline.add(btn_inline1)
-    await message.answer("При индивидуальных запросах или возникновение трудностей, обратитесь по контакту ниже", reply_markup=markup_inline)
+    await message.answer("При индивидуальных запросах или возникновение трудностей, обратитесь по контакту ниже", reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
 
 async def parsers_send(message):
     markup_inline = types.InlineKeyboardMarkup(row_width=1)
@@ -116,14 +116,14 @@ async def parsers_send(message):
 
     btn_inline1 = types.InlineKeyboardButton(cfg.groups_add_button, callback_data='groups_add_button')
     markup_inline.add(btn_inline1)
-    await message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.parser_text, reply_markup=markup_inline)
+    await message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.parser_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
 
 async def autoposting_send(message):
     markup_inline = types.InlineKeyboardMarkup(row_width=1)
     btn_inline1 = types.InlineKeyboardButton(cfg.account_button, callback_data='accounts_button')
     btn_inline2 = types.InlineKeyboardButton(cfg.posts_button, callback_data='posts_button')
     markup_inline.add(btn_inline1, btn_inline2)
-    await message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.autoposting_text, reply_markup=markup_inline)
+    await message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.autoposting_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
 
 @dp.message_handler(commands=['start'])
 async def start(message: types.Message):
@@ -138,7 +138,7 @@ async def start(message: types.Message):
         markup_reply.add(cfg.parser)
         markup_reply.row(cfg.my_profile, cfg.support)
 
-        await message.answer('test', reply_markup=markup_reply)
+        await message.answer('test', reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
         await profile(message)
 
 @dp.message_handler(commands=['addadmin'])
@@ -148,15 +148,15 @@ async def add_admin_user(message: types.Message):
         if db.select_admin(user_id) > 0:
             select_adm_id = int(message.text.split()[1])
             if(not db.check_user(select_adm_id)):
-                await message.answer(cfg.error_not_found_user)
+                await message.answer(cfg.error_not_found_user, parse_mode=types.ParseMode.MARKDOWN)
             elif db.check_user(select_adm_id):
                 db.add_admin(select_adm_id)
-                await message.answer(cfg.right_add_admin(fnc.nick_with_link("администратора", select_adm_id)))
-                await dp.bot.send_message(select_adm_id, cfg.take_adm)
+                await message.answer(cfg.right_add_admin(fnc.nick_with_link("администратора", select_adm_id)), parse_mode=types.ParseMode.MARKDOWN)
+                await dp.bot.send_message(select_adm_id, cfg.take_adm, parse_mode=types.ParseMode.MARKDOWN)
             else:
-                await message.answer(cfg.error_command)
+                await message.answer(cfg.error_command, parse_mode=types.ParseMode.MARKDOWN)
         else:
-            await message.answer(cfg.error_adm_dostup)
+            await message.answer(cfg.error_adm_dostup, parse_mode=types.ParseMode.MARKDOWN)
 
 
 @dp.message_handler(commands=['balance'])
@@ -169,16 +169,16 @@ async def balance_user(message: types.Message):
                 if int(select_adm_id[1]):
                     select_adm_id = int(message.text.split()[1])
                     if(not db.check_user(select_adm_id)):
-                        await message.answer(cfg.error_not_found_user)
+                        await message.answer(cfg.error_not_found_user, parse_mode=types.ParseMode.MARKDOWN)
                     elif db.check_user(select_adm_id):
                         balance_user = db.select_balance(select_adm_id)
-                        await message.answer(cfg.balance_user_text(fnc.nick_with_link("пользователя", select_adm_id), str(balance_user)))
+                        await message.answer(cfg.balance_user_text(fnc.nick_with_link("пользователя", select_adm_id), str(balance_user)), parse_mode=types.ParseMode.MARKDOWN)
                 else:
-                    await message.answer(cfg.balance_command_error)
+                    await message.answer(cfg.balance_command_error, parse_mode=types.ParseMode.MARKDOWN)
             else:
-                await message.answer(cfg.error_command)
+                await message.answer(cfg.error_command, parse_mode=types.ParseMode.MARKDOWN)
         else:
-            await message.answer(cfg.error_adm_dostup)
+            await message.answer(cfg.error_adm_dostup, parse_mode=types.ParseMode.MARKDOWN)
 
 @dp.message_handler(commands=['addbalance'])
 async def addbalance_user(message: types.Message):
@@ -190,22 +190,22 @@ async def addbalance_user(message: types.Message):
                 if int(select_info[1]):
                     select_user_id = int(select_info[1])
                     if(not db.check_user(select_user_id)):
-                        await message.answer(cfg.error_not_found_user)
+                        await message.answer(cfg.error_not_found_user, parse_mode=types.ParseMode.MARKDOWN)
                     elif db.check_user(select_user_id):
                         if int(select_info[2]):
                             select_user_id = int(select_info[1])
                             select_add_balance = int(select_info[2])
                             db.addbalance(select_user_id, select_add_balance)
-                            await message.answer(cfg.addbalance_right_admin(fnc.nick_with_link("пользователю", select_user_id), select_add_balance))
-                            await dp.bot.send_message(select_user_id, cfg.addbalance_right_polz(select_add_balance))
+                            await message.answer(cfg.addbalance_right_admin(fnc.nick_with_link("пользователю", select_user_id), select_add_balance), parse_mode=types.ParseMode.MARKDOWN)
+                            await dp.bot.send_message(select_user_id, cfg.addbalance_right_polz(select_add_balance), parse_mode=types.ParseMode.MARKDOWN)
                     else:
-                        await message.answer(cfg.addbalance_command_error)
+                        await message.answer(cfg.addbalance_command_error, parse_mode=types.ParseMode.MARKDOWN)
                 else:
-                    await message.answer(cfg.addbalance_command_error)
+                    await message.answer(cfg.addbalance_command_error, parse_mode=types.ParseMode.MARKDOWN)
             else:
-                await message.answer(cfg.addbalance_command_error)
+                await message.answer(cfg.addbalance_command_error, parse_mode=types.ParseMode.MARKDOWN)
         else:
-            await message.answer(cfg.error_adm_dostup)
+            await message.answer(cfg.error_adm_dostup, parse_mode=types.ParseMode.MARKDOWN)
 
 @dp.message_handler(commands=['rembalance'])
 async def rembalance_user(message: types.Message):
@@ -217,22 +217,22 @@ async def rembalance_user(message: types.Message):
                 if int(select_info[1]):
                     select_user_id = int(select_info[1])
                     if(not db.check_user(select_user_id)):
-                        await message.answer(cfg.error_not_found_user)
+                        await message.answer(cfg.error_not_found_user, parse_mode=types.ParseMode.MARKDOWN)
                     elif db.check_user(select_user_id):
                         if int(select_info[2]):
                             select_user_id = int(select_info[1])
                             select_add_balance = int(select_info[2])
                             db.rembalance(select_user_id, select_add_balance)
-                            await message.answer(cfg.rembalance_right_admin(fnc.nick_with_link("пользователю", select_user_id), select_add_balance))
-                            await dp.bot.send_message(select_user_id, cfg.rembalance_right_polz(select_add_balance))
+                            await message.answer(cfg.rembalance_right_admin(fnc.nick_with_link("пользователю", select_user_id), select_add_balance), parse_mode=types.ParseMode.MARKDOWN)
+                            await dp.bot.send_message(select_user_id, cfg.rembalance_right_polz(select_add_balance), parse_mode=types.ParseMode.MARKDOWN)
                     else:
-                        await message.answer(cfg.rembalance_command_error)
+                        await message.answer(cfg.rembalance_command_error, parse_mode=types.ParseMode.MARKDOWN)
                 else:
-                    await message.answer(cfg.rembalance_command_error)
+                    await message.answer(cfg.rembalance_command_error, parse_mode=types.ParseMode.MARKDOWN)
             else:
-                await message.answer(cfg.rembalance_command_error)
+                await message.answer(cfg.rembalance_command_error, parse_mode=types.ParseMode.MARKDOWN)
         else:
-            await message.answer(cfg.error_adm_dostup)
+            await message.answer(cfg.error_adm_dostup, parse_mode=types.ParseMode.MARKDOWN)
 
 
 
@@ -247,8 +247,8 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
                 markup_reply.add(cfg.cancel_creategroup)
                 await Create_group.create_group_1.set()
-                await callback_query.message.answer(cfg.create_group_text_1)
-                await callback_query.message.answer(cfg.create_group_text_2, reply_markup=markup_reply)
+                await callback_query.message.answer(cfg.create_group_text_1, parse_mode=types.ParseMode.MARKDOWN)
+                await callback_query.message.answer(cfg.create_group_text_2, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
                 await callback_query.answer(cfg.create_group_button_uved)
             else:
                 await callback_query.answer(cfg.error_group_5, show_alert=True)
@@ -274,7 +274,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     markup_inline.row(buttons_1)
             back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels')
             markup_inline.add(back_channels)
-            await callback_query.message.edit_caption(caption="TESTING", reply_markup=markup_inline)
+            await callback_query.message.edit_caption(caption="TESTING", reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
         elif callback_query.data == "menu_after_pay":
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
             user_id = callback_query.from_user.id
@@ -286,7 +286,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
 
             btn_inline1 = types.InlineKeyboardButton(cfg.groups_add_button, callback_data='groups_add_button')
             markup_inline.add(btn_inline1)
-            await callback_query.message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.parser_text, reply_markup=markup_inline)
+            await callback_query.message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.parser_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
 
 
 @dp.callback_query_handler(state=Parsers_use.parsers_use_1)
@@ -299,7 +299,6 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
         off_channels = db.select_off_channels_with_number(number_group) or []
         check_tarife = db.check_date_tarife_for_number(number_group)
         group_name = db.select_group_name_for_number_group(user_id, number_group)
-        await callback_query.message.answer(callback_query.data[:-2])
         if callback_query.data[:-2] in channels or callback_query.data[:-2] in off_channels:
             if check_tarife is None:
                 await callback_query.answer(text=cfg.error_oplata, show_alert=True)
@@ -329,7 +328,7 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                             markup_inline.row(buttons_1)
                         back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels')
                         markup_inline.add(back_channels)
-                        await callback_query.message.edit_caption(caption="TESTING", reply_markup=markup_inline)
+                        await callback_query.message.edit_caption(caption="TESTING", reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
                     elif channel_name[-1] == "❌":
                         channel_name = channel_name[:-1].strip()
                         off_channels = db.select_off_channels(number_group)
@@ -348,7 +347,7 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                             markup_inline.row(buttons_1)
                         back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels')
                         markup_inline.add(back_channels)
-                        await callback_query.message.edit_caption(caption="TESTING", reply_markup=markup_inline)
+                        await callback_query.message.edit_caption(caption="TESTING", reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
         elif callback_query.data == "back_channels":
             await state.reset_state()
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
@@ -360,7 +359,7 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
 
             btn_inline1 = types.InlineKeyboardButton(cfg.groups_add_button, callback_data='groups_add_button')
             markup_inline.add(btn_inline1)
-            await callback_query.message.edit_caption(caption=cfg.parser_text, reply_markup=markup_inline)
+            await callback_query.message.edit_caption(caption=cfg.parser_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
             await callback_query.answer(cfg.back_text)
         elif callback_query.data == "pay_money_channels":
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
@@ -369,7 +368,7 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
             markup_inline.add(btn_inline1, btn_inline2)
             channels_len = len(channels)
             money_oplata = str(5 * int(channels_len))
-            await callback_query.message.edit_caption(caption=cfg.oplata_chatov(channels_len, money_oplata), reply_markup=markup_inline)
+            await callback_query.message.edit_caption(caption=cfg.oplata_chatov(channels_len, money_oplata), reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
             await callback_query.answer(cfg.button_correct)
         elif callback_query.data == "confirm_oplata":
             balance = db.check_balance(user_id)
@@ -387,7 +386,7 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                 markup_inline.add(btn_inline1)
                 await state.finish()
                 await callback_query.message.delete()
-                await callback_query.message.answer(text=cfg.tariffe_correct(group_name, channels_len, formatted_date_new), reply_markup=markup_inline)
+                await callback_query.message.answer(text=cfg.tariffe_correct(group_name, channels_len, formatted_date_new), reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
             else:
                 await callback_query.answer(text=cfg.tariffe_error, show_alert=True)
         elif callback_query.data == "back_oplata":
@@ -409,7 +408,7 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                     markup_inline.row(buttons_1)
             back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels')
             markup_inline.add(back_channels)
-            await callback_query.message.edit_caption(caption="TESTING", reply_markup=markup_inline)
+            await callback_query.message.edit_caption(caption="TESTING", reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
         elif callback_query.data == "back_sostoyanie":
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
             user_id = callback_query.from_user.id
@@ -421,7 +420,7 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
 
             btn_inline1 = types.InlineKeyboardButton(cfg.groups_add_button, callback_data='groups_add_button')
             markup_inline.add(btn_inline1)
-            await callback_query.message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.parser_text, reply_markup=markup_inline)
+            await callback_query.message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.parser_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
             await state.reset_state()
 
 
@@ -429,13 +428,13 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
 async def parsers_use_1_text(message: types.Message, state: FSMContext):
     if message.chat.type == types.ChatType.PRIVATE:
         if message.text == "/cancel":
-            await message.answer(cfg.cancel_sostoyanie)
+            await message.answer(cfg.cancel_sostoyanie, parse_mode=types.ParseMode.MARKDOWN)
             await state.reset_state()
         else:
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
             btn1_inline = types.InlineKeyboardButton(cfg.back_button, callback_data="back_sostoyanie")
             markup_inline.add(btn1_inline)
-            await message.answer(cfg.error_parsers_texts, reply_markup=markup_inline)
+            await message.answer(cfg.error_parsers_texts, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
 
 
 @dp.message_handler(state=Create_group.create_group_1)
@@ -448,17 +447,17 @@ async def create_group_func_1(message: types.Message, state: FSMContext):
             markup_reply.add(cfg.parser)
             markup_reply.row(cfg.my_profile, cfg.support)
             await state.reset_state()
-            await message.answer(cfg.cancel_creategroup_text, reply_markup=markup_reply)
+            await message.answer(cfg.cancel_creategroup_text, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
         elif message.text:
             if 3 <= len(message.text) <= 15:
                 if message.text in db.select_group_name(user_id):
-                    await message.answer(cfg.error_name_again)
+                    await message.answer(cfg.error_name_again, parse_mode=types.ParseMode.MARKDOWN)
                 else:
                     await state.update_data(group_name=message.text)
-                    await message.answer(cfg.create_group_text_3)
+                    await message.answer(cfg.create_group_text_3, parse_mode=types.ParseMode.MARKDOWN)
                     await Create_group.create_group_2.set()
             else:
-                await message.answer(cfg.error_len_name_group)
+                await message.answer(cfg.error_len_name_group, parse_mode=types.ParseMode.MARKDOWN)
 
 @dp.callback_query_handler(state=Create_group.create_group_1)
 async def button_group_1(callback_query: types.CallbackQuery):
@@ -477,13 +476,13 @@ async def create_group_func_2(message: types.Message, state: FSMContext):
             markup_reply.add(cfg.parser)
             markup_reply.row(cfg.my_profile, cfg.support)
             await state.reset_state()
-            await message.answer(cfg.cancel_creategroup_text, reply_markup=markup_reply)
+            await message.answer(cfg.cancel_creategroup_text, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
         elif message.text:
             if 2 <= len(message.text) <= 500:
                 if 1 <= len(text_lines) <= 20:
                     try:
                         await state.update_data(text_lines=text_lines)
-                        await message.answer(cfg.create_group_text_4)
+                        await message.answer(cfg.create_group_text_4, parse_mode=types.ParseMode.MARKDOWN)
                         await Create_group.create_group_3.set()
                     except Exception as es:
                         await state.reset_state()
@@ -491,17 +490,17 @@ async def create_group_func_2(message: types.Message, state: FSMContext):
                         markup_reply.add(cfg.autoposting)
                         markup_reply.add(cfg.parser)
                         markup_reply.row(cfg.my_profile, cfg.support)
-                        await message.answer(cfg.error_create_group, reply_markup=markup_reply)
+                        await message.answer(cfg.error_create_group, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
                         print(f"[ERROR] {es}")
                 else:
-                    await message.answer(cfg.error_len_keyword_create)
+                    await message.answer(cfg.error_len_keyword_create, parse_mode=types.ParseMode.MARKDOWN)
             else:
-                await message.answer(cfg.error_len_keyword)
+                await message.answer(cfg.error_len_keyword, parse_mode=types.ParseMode.MARKDOWN)
 
 @dp.callback_query_handler(state=Create_group.create_group_2)
 async def button_group_2(callback_query: types.CallbackQuery):
     if callback_query.data is not None:
-        await callback_query.answer(cfg.error_button_create_group)
+        await callback_query.answer(cfg.error_button_create_group, parse_mode=types.ParseMode.MARKDOWN)
 
 @dp.message_handler(state=Create_group.create_group_3)
 async def create_group_func_3(message: types.Message, state: FSMContext):
@@ -515,7 +514,7 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
             markup_reply.add(cfg.parser)
             markup_reply.row(cfg.my_profile, cfg.support)
             await state.reset_state()
-            await message.answer(cfg.cancel_creategroup_text, reply_markup=markup_reply)
+            await message.answer(cfg.cancel_creategroup_text, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
         elif message.text:
             if 2 <= len(message.text) <= 1000:
                 if 10 <= len(text_lines) <= 50:
@@ -530,7 +529,7 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                         markup_reply.add(cfg.autoposting)
                         markup_reply.add(cfg.parser)
                         markup_reply.row(cfg.my_profile, cfg.support)
-                        await message.answer(cfg.right_create_group, reply_markup=markup_reply)
+                        await message.answer(cfg.right_create_group, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
                         await state.finish()
                     except Exception as es:
                         await state.reset_state()
@@ -538,12 +537,12 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                         markup_reply.add(cfg.autoposting)
                         markup_reply.add(cfg.parser)
                         markup_reply.row(cfg.my_profile, cfg.support)
-                        await message.answer(cfg.error_create_group, reply_markup=markup_reply)
+                        await message.answer(cfg.error_create_group, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
                         print(f"[ERROR] {es}")
                 else:
-                    await message.answer(cfg.error_len_channels_create)
+                    await message.answer(cfg.error_len_channels_create, parse_mode=types.ParseMode.MARKDOWN)
             else:
-                await message.answer(cfg.error_len_channels)
+                await message.answer(cfg.error_len_channels, parse_mode=types.ParseMode.MARKDOWN)
 
 @dp.callback_query_handler(state=Create_group.create_group_3)
 async def button_group_2(callback_query: types.CallbackQuery):
