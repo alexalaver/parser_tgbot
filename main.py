@@ -348,6 +348,8 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                         back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels')
                         markup_inline.add(back_channels)
                         await callback_query.message.edit_caption(caption="TESTING", reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+                    else:
+                        await callback_query.message.answer("hello")
         elif callback_query.data == "back_channels":
             await state.reset_state()
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
