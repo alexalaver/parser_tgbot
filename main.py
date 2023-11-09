@@ -295,8 +295,8 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
         user_id = callback_query.from_user.id
         data = await state.get_data()
         number_group = data.get('number_group')
-        channels = db.select_channels_with_number(number_group)
-        off_channels = db.select_off_channels_with_number(number_group)
+        channels = db.select_channels_with_number(number_group) or []
+        off_channels = db.select_off_channels_with_number(number_group) or []
         check_tarife = db.check_date_tarife_for_number(user_id, number_group)
         group_name = db.select_group_name_for_number_group(user_id, number_group)
         if callback_query.data[:-2] in channels or callback_query.data[:-2] in off_channels:
