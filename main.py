@@ -301,16 +301,16 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                     await callback_query.answer(text=cfg.error_oplata, show_alert=True)
                 else:
                     channel_name = callback_query.data
-                    channel_name = channel_name.strip()
                     if channel_name[-1] == "✅":
+                        channel_name = channel_name[:-1].strip()
                         all_channels = db.select_channels_number_group(number_group)
-                        if channel_name[:-1] in all_channels:
-                            all_channels.remove(channel_name[:-1])
+                        if channel_name in all_channels:
+                            all_channels.remove(channel_name)
                         else:
-                            print(f"Элемент {channel_name[:-1]} не найден в списке.")
+                            print(f"Элемент {channel_name} не найден в списке.")
                         # all_channels.remove(str(channel_name[:-1]))
                         off_channels = db.select_off_channels(number_group)
-                        off_channels.append(str(channel_name[:-1]))
+                        off_channels.append(channel_name)
                         db.update_all_channels(user_id, all_channels)
                         db.update_off_channels(user_id, off_channels)
                         await state.update_data(number_group=number_group)
