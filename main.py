@@ -393,7 +393,7 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
             channels = db.select_channels_with_number(number_group)
             off_channels = db.select_off_channels_with_number(number_group)
             markup_inline = types.InlineKeyboardMarkup(row_width=4)
-            if db.check_date_tarife(user_id, callback_query.data) is None:
+            if check_tarife is None:
                 for channel in channels:
                     buttons = types.InlineKeyboardButton(text=f"{channel} ⚠️", callback_data=f"{channel} ⚠️")
                     markup_inline.row(buttons)
