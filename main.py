@@ -74,12 +74,12 @@ async def search_and_forward():
                             message_key = (user_id, message.id)
                             if message_key not in messages_sent or forced_check:
                                 chat = await telethon_client.get_entity(trimmed_chat_id)
-                                chat_name = chat.title if hasattr(chat, 'title') else 'Неизвестный чат'
+                                chat_identifier = f"@{chat.username}" if chat.username else f"ID {chat.id}"
 
                                 sender = await message.get_sender()
-                                sender_name = sender.first_name if sender else 'Анонимный пользователь'
+                                sender_identifier = f"@{sender.username}" if sender and sender.username else "Анонимный пользователь"
 
-                                message_text = f"{message.text}\n\nИз чата {chat_name}\n\n Сообщение от {sender_name}"
+                                message_text = f"{message.text}\n\nИз чата {chat_identifier}\n\n Сообщение от {sender_identifier}"
                                 await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.MARKDOWN)
                                 print(f"Message sent to user {user_id}: {message.text}")
                                 messages_sent[message_key] = True
