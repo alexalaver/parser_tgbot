@@ -91,5 +91,4 @@
 #     executor.start_polling(dp, skip_updates=True)
 
 a = ['test', 'hello', 'razdva']
-print(list(set(a)))
-print(a)
+print(a[1:])
