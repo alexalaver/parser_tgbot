@@ -67,9 +67,7 @@ async def search_and_forward():
                 forced_check = num == 0 and last_id == 0
 
                 try:
-                    async for message in telethon_client.iter_messages(trimmed_chat_id,
-                                                                       offset_id=last_id - messages_to_check,
-                                                                       limit=messages_to_check, reverse=True):
+                    async for message in telethon_client.iter_messages(trimmed_chat_id, offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
                         if message.text and any(keyword.lower() in message.text.lower() for keyword in keywords):
                             message_key = (user_id, message.id)
                             if message_key not in messages_sent or forced_check:
