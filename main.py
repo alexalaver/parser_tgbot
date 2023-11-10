@@ -35,7 +35,7 @@ async def check_for_new_channels(current_count):
 async def search_and_forward():
     num = 0
     last_message_ids = {}
-    messages_sent = set()
+    messages_sent = {}
 
     await telethon_client.start()
     groups_count = len(db.select_all_channels_group())
@@ -55,33 +55,37 @@ async def search_and_forward():
             user_id, chat_ids, keywords = group[0], group[2], group[5]
             chat_ids = [item for item in chat_ids if item.endswith('✅')]
             for chat_id in chat_ids:
-                trimmed_chat_id = chat_id[:-2]
-                last_id = last_message_ids.get(trimmed_chat_id, 0)
-                messages_to_check = 10 if last_id == 0 else 1  # Изменено здесь
+                last_id = last_message_ids.get(chat_id[:-2], 0)
+                messages_to_check = 10
+                forced_check = num == 0 or last_id == 0
 
                 try:
-                    async for message in telethon_client.iter_messages(trimmed_chat_id, offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
+                    async for message in telethon_client.iter_messages(chat_id[:-2], offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
                         if message.text and any(keyword.lower() in message.text.lower() for keyword in keywords):
-                            message_key = f"{trimmed_chat_id}_{message.id}"
-                            if message_key not in messages_sent:
+                            message_key = (user_id, message.id)
+                            if message_key not in messages_sent or forced_check:
                                 await bot.send_message(user_id, message.text, parse_mode=types.ParseMode.MARKDOWN)
                                 print(f"Message sent to user {user_id}: {message.text}")
-                                messages_sent.add(message_key)
-                                last_message_ids[trimmed_chat_id] = message.id
+                                messages_sent[message_key] = True
 
                 except FloodWaitError as e:
                     wait_time = e.seconds
-                    print(f"Flood wait error on chat {trimmed_chat_id}. Sleeping for {wait_time} seconds.")
+                    print(f"Flood wait error on chat {chat_id[:-2]}. Sleeping for {wait_time} seconds.")
                     await asyncio.sleep(wait_time)
+                finally:
+                    messages = await telethon_client.get_messages(chat_id[:-2], limit=1)
+                    if messages:
+                        last_message_ids[chat_id[:-2]] = messages[0].id
 
-            num = (num + 1) % len(groups)
+            num += 1
+            if num >= len(groups):
+                num = 0
 
         except Exception as e:
             print(f"Произошла ошибка: {e}")
             await asyncio.sleep(10)
 
         await asyncio.sleep(20)
-
 
 
 class Create_group(StatesGroup):
