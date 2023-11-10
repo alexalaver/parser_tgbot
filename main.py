@@ -58,7 +58,7 @@ async def search_and_forward():
                 forced_check = num == 0 or last_id == 0
 
                 try:
-                    async for message in telethon_client.iter_messages(chat_id, offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
+                    async for message in telethon_client.iter_messages(chat_id[:-2], offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
                         if message.text and any(keyword.lower() in message.text.lower() for keyword in keywords):
                             message_key = (user_id, message.id)
                             if message_key not in messages_sent or forced_check:
@@ -68,12 +68,12 @@ async def search_and_forward():
 
                 except FloodWaitError as e:
                     wait_time = e.seconds
-                    print(f"Flood wait error on chat {chat_id}. Sleeping for {wait_time} seconds.")
+                    print(f"Flood wait error on chat {chat_id[:-2]}. Sleeping for {wait_time} seconds.")
                     await asyncio.sleep(wait_time)
                 finally:
-                    messages = await telethon_client.get_messages(chat_id, limit=1)
+                    messages = await telethon_client.get_messages(chat_id[:-2], limit=1)
                     if messages:
-                        last_message_ids[chat_id] = messages[0].id
+                        last_message_ids[chat_id[:-2]] = messages[0].id
 
             num += 1
             if num >= len(groups):
