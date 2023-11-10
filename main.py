@@ -28,6 +28,10 @@ async def check_for_new_groups(current_count):
     new_count = len(db.select_all_channels_group())
     return new_count != current_count
 
+async def check_for_new_channels(current_count):
+    new_count = len(db.select_all_channels_group())
+    return new_count != current_count
+
 async def search_and_forward():
     num = 0
     last_message_ids = {}
@@ -49,9 +53,11 @@ async def search_and_forward():
 
             group = groups[num]
             user_id, chat_ids, keywords = group[0], group[2], group[5]
-            print(chat_ids)
             chat_ids = [item for item in chat_ids if item.endswith('✅')]
-            print(chat_ids)
+            if await check_for_new_channels(len(chat_ids)):
+                groups = db.select_all_channels_group()
+                user_id, chat_ids, keywords = group[0], group[2], group[5]
+                chat_ids = [item for item in chat_ids if item.endswith('✅')]
             for chat_id in chat_ids:
                 last_id = last_message_ids.get(chat_id[:-2], 0)
                 messages_to_check = 10
