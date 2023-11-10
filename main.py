@@ -273,11 +273,11 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
             for channel in channels:
                 buttons = types.InlineKeyboardButton(text=channel, callback_data=channel)
                 markup_inline.row(buttons)
+            buttons_count = types.InlineKeyboardButton(text=f"Страница 1/{fnc.get_category(channels_count)}", callback_data="page")
+            markup_inline.add(buttons_count)
             if channels_count > 10:
-                buttons_count = types.InlineKeyboardButton(text=f"Страница 1/{fnc.get_category(channels_count)}", callback_data="page")
                 buttons_next = types.InlineKeyboardButton(text=cfg.next_page, callback_data="next_page")
                 buttons_old = types.InlineKeyboardButton(text=cfg.old_page, callback_data="old_lage")
-                markup_inline.add(buttons_count)
                 markup_inline.row(buttons_next, buttons_old)
             if db.check_date_tarife(user_id, callback_query.data) is None:
                 pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels')
