@@ -50,10 +50,9 @@ async def search_and_forward():
             group = groups[num]
             user_id, chat_ids, keywords = group[0], group[2], group[5]
             chat_ids = [item for item in chat_ids if item.endswith('✅')]
-            chat_ids = chat_ids[:-2]
 
             for chat_id in chat_ids:
-                last_id = last_message_ids.get(chat_id, 0)
+                last_id = last_message_ids.get(chat_id[:-2], 0)
                 messages_to_check = 10
                 forced_check = num == 0 or last_id == 0
 
