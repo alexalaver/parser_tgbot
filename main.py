@@ -272,7 +272,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
             channels_count = len(channels)
             channels_page = fnc.get_category(channels_count)
             await state.update_data(channels_page=channels_page)
-            for channel in channels[:9]:
+            for channel in channels[:10]:
                 buttons = types.InlineKeyboardButton(text=channel, callback_data=channel)
                 markup_inline.row(buttons)
             buttons_count = types.InlineKeyboardButton(text=f"Страница 1/{channels_page}", callback_data="page")
