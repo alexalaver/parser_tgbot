@@ -44,7 +44,6 @@ async def search_and_forward():
         try:
             groups = db.select_all_channels_group()
             if not groups:
-                print("No groups found, sleeping...")
                 await asyncio.sleep(10)
                 continue
 
@@ -55,15 +54,13 @@ async def search_and_forward():
             group = groups[num]
             user_id, chat_ids, keywords = group[0], group[2], group[5]
             chat_ids = [item for item in chat_ids if item.endswith('✅')]
-
             for chat_id in chat_ids:
                 trimmed_chat_id = chat_id[:-2]
-                last_id = last_message_ids.get(trimmed_chat_id, None)
-                messages_to_check = 10 if last_id is not None else 1  # Изменено здесь
+                last_id = last_message_ids.get(trimmed_chat_id, 0)
+                messages_to_check = 10 if last_id == 0 else 1  # Изменено здесь
 
                 try:
-                    async for message in telethon_client.iter_messages(trimmed_chat_id, offset_id=last_id, limit=messages_to_check, reverse=True):
-                        print(f"Checking message: {message.id} from chat: {trimmed_chat_id}")  # Добавлено для диагностики
+                    async for message in telethon_client.iter_messages(trimmed_chat_id, offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
                         if message.text and any(keyword.lower() in message.text.lower() for keyword in keywords):
                             message_key = f"{trimmed_chat_id}_{message.id}"
                             if message_key not in messages_sent:
