@@ -313,9 +313,6 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
         channels = db.select_channels_with_number(number_group)
         check_tarife = db.check_date_tarife_for_number(number_group)
         group_name = db.select_group_name_for_number_group(user_id, number_group)
-        channels_count = data.get("channels_count")
-        channels_page = data.get("channels_page")
-        page_here = data.get("page_here")
         if callback_query.data in channels:
             if check_tarife is None:
                 await callback_query.answer(text=cfg.error_oplata, show_alert=True)
@@ -346,16 +343,22 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                     markup_inline.add(back_channels)
                     await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
         elif callback_query.data == "next_page":
+            channels_count = data.get("channels_count")
+            channels_page = data.get("channels_page")
+            page_here = data.get("page_here")
             if channels_page == page_here:
                 await callback_query.answer(cfg.error_page_next, show_alert=True)
             else:
                 channels = db.select_channels_with_number(number_group)
                 markup_inline = types.InlineKeyboardMarkup(row_width=2)
-                page_here = 1
-                for channel in channels[:channels_count - 10]:
+                page_here = page_here + 1
+                channels_count = channels_count - 10
+                await state.update_data(page_here=page_here)
+                await state.update_data(channels_count=channels_count)
+                for channel in channels[:channels_count]:
                     buttons = types.InlineKeyboardButton(text=channel, callback_data=channel)
                     markup_inline.row(buttons)
-                buttons_count = types.InlineKeyboardButton(text=f"Страница {page_here + 1}/{channels_page}", callback_data="page")
+                buttons_count = types.InlineKeyboardButton(text=f"Страница {page_here}/{channels_page}", callback_data="page")
                 markup_inline.add(buttons_count)
                 if channels_count > 10:
                     buttons_next = types.InlineKeyboardButton(text=cfg.next_page, callback_data="next_page")
@@ -368,16 +371,23 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                 markup_inline.add(back_channels)
                 await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
         elif callback_query.data == "old_page":
+            channels_count = data.get("channels_count")
+            channels_page = data.get("channels_page")
+            page_here = data.get("page_here")
             if channels_page == page_here:
                 await callback_query.answer(cfg.error_page_old, show_alert=True)
             else:
                 channels = db.select_channels_with_number(number_group)
                 markup_inline = types.InlineKeyboardMarkup(row_width=2)
                 page_here = 1
-                for channel in channels[:channels_count + 10]:
+                page_here = page_here - 1
+                channels_count = channels_count + 10
+                await state.update_data(page_here=page_here)
+                await state.update_data(channels_count=channels_count)
+                for channel in channels[:channels_count]:
                     buttons = types.InlineKeyboardButton(text=channel, callback_data=channel)
                     markup_inline.row(buttons)
-                buttons_count = types.InlineKeyboardButton(text=f"Страница {page_here - 1}/{channels_page}", callback_data="page")
+                buttons_count = types.InlineKeyboardButton(text=f"Страница {page_here}/{channels_page}", callback_data="page")
                 markup_inline.add(buttons_count)
                 if channels_count > 10:
                     buttons_next = types.InlineKeyboardButton(text=cfg.next_page, callback_data="next_page")
