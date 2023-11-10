@@ -305,12 +305,12 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                     channel_name = callback_query.data
                     if channel_name[-1] == "✅":
                         all_channels = db.select_channels_with_number(number_group)
-                        new_callback = channel_name[:-1] + '❌'
+                        new_callback = channel_name[:-2] + '❌'
                         new_channels = [new_callback if item == channel_name else item for item in all_channels]
                         db.update_all_channels(number_group, new_channels)
                     elif channel_name[-1] == "❌":
                         all_channels = db.select_channels_with_number(number_group)
-                        new_callback = callback_query[:-1] + '✅'
+                        new_callback = channel_name[:-2] + '✅'
                         new_channels = [new_callback if item == channel_name else item for item in all_channels]
                         db.update_all_channels(number_group, new_channels)
                     channels = db.select_channels_with_number(number_group)
