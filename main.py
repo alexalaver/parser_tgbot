@@ -266,12 +266,23 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
         elif callback_query.data in db.select_group_name(user_id):
             await Parsers_use.parsers_use_1.set()
             number_group = db.select_number_group(user_id, callback_query.data)
-            await state.update_data(number_group=number_group)
+            await state.update_data(number_group=number_group, current_page=1)
+
             channels = db.select_channels(user_id, callback_query.data)
+            total_pages = (len(channels) + 9) // 10
+            current_page = 1
+
+            start_index = (current_page - 1) * 10
+            end_index = min(start_index + 10, len(channels))
+
             markup_inline = types.InlineKeyboardMarkup(row_width=4)
-            for channel in channels:
-                buttons = types.InlineKeyboardButton(text=channel, callback_data=channel)
-                markup_inline.row(buttons)
+            for channel in channels[start_index:end_index]:
+                button = types.InlineKeyboardButton(text=channel, callback_data=channel)
+                markup_inline.row(button)
+
+            if total_pages > 1:
+                next_button = types.InlineKeyboardButton("След. страница", callback_data='next_page')
+                markup_inline.add(next_button)
             if db.check_date_tarife(user_id, callback_query.data) is None:
                 pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels')
                 markup_inline.add(pay_money_buttons)
@@ -301,6 +312,8 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
         channels = db.select_channels_with_number(number_group)
         check_tarife = db.check_date_tarife_for_number(number_group)
         group_name = db.select_group_name_for_number_group(user_id, number_group)
+        number_group = data.get('number_group')
+        current_page = data.get('current_page', 1)
         if callback_query.data in channels:
             if check_tarife is None:
                 await callback_query.answer(text=cfg.error_oplata, show_alert=True)
@@ -330,6 +343,29 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                     back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels')
                     markup_inline.add(back_channels)
                     await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+        elif callback_query.data == 'next_page':
+            current_page += 1
+            await state.update_data(current_page=current_page)
+            channels = db.select_channels_with_number(number_group)
+            total_pages = (len(channels) + 9) // 10
+
+            start_index = (current_page - 1) * 10
+            end_index = min(start_index + 10, len(channels))
+
+            markup_inline = types.InlineKeyboardMarkup(row_width=4)
+            for channel in channels[start_index:end_index]:
+                button = types.InlineKeyboardButton(text=channel, callback_data=channel)
+                markup_inline.row(button)
+
+            if current_page > 1:
+                prev_button = types.InlineKeyboardButton("Пред. страница", callback_data='prev_page')
+                markup_inline.add(prev_button)
+
+            if current_page < total_pages:
+                next_button = types.InlineKeyboardButton("След. страница", callback_data='next_page')
+                markup_inline.add(next_button)
+
+            await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
         elif callback_query.data == "back_channels":
             await state.reset_state()
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
