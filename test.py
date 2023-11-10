@@ -90,5 +90,6 @@
 # if __name__ == '__main__':
 #     executor.start_polling(dp, skip_updates=True)
 
-a = ['test', 'hello', 'razdva']
-print(a[1:])
+
+for i in range(1, 51):
+    print(f"test{str(i)}")
