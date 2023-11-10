@@ -10,7 +10,6 @@ from telethon.errors import FloodWaitError
 import functions as fnc
 import asyncio
 import config as cfg
-import json
 import logging
 import datetime
 
@@ -33,69 +32,63 @@ async def check_for_new_channels(current_count):
     new_count = len(db.select_all_channels_group())
     return new_count != current_count
 
-def load_state(file_name):
-    try:
-        with open(file_name, 'r') as file:
-            return json.load(file)
-    except FileNotFoundError:
-        return {"last_check_time": datetime.datetime.now().isoformat(), "messages_sent": []}
-
-def save_state(file_name, state):
-    with open(file_name, 'w') as file:
-        json.dump(state, file)
-
 async def search_and_forward():
-    state_file = 'state.json'
-    state = load_state(state_file)
-    last_check_time = datetime.datetime.fromisoformat(state['last_check_time'])
+    num = 0
+    last_message_ids = {}
+    messages_sent = set()
 
     await telethon_client.start()
     groups_count = len(db.select_all_channels_group())
 
-    num = 0
-
     while True:
-        groups = db.select_all_channels_group()
-        if not groups:
-            await asyncio.sleep(10)
-            continue
+        try:
+            groups = db.select_all_channels_group()
+            if not groups:
+                await asyncio.sleep(10)
+                continue
 
-        if await check_for_new_groups(groups_count):
-            groups_count = len(groups)
-            num = 0
+            if await check_for_new_groups(groups_count):
+                groups_count = len(groups)
+                num = 0
 
-        group = groups[num]
-        user_id, chat_ids, keywords = group[0], group[2], group[5]
-        chat_ids = [item for item in chat_ids if item.endswith('✅')]
-
-        if await check_for_new_channels(len(chat_ids)):
-            group = db.select_all_channels_group()[num]
+            group = groups[num]
             user_id, chat_ids, keywords = group[0], group[2], group[5]
             chat_ids = [item for item in chat_ids if item.endswith('✅')]
+            if await check_for_new_channels(len(chat_ids)):
+                groups = db.select_all_channels_group()
+                user_id, chat_ids, keywords = group[0], group[2], group[5]
+                chat_ids = [item for item in chat_ids if item.endswith('✅')]
+            for chat_id in chat_ids:
+                trimmed_chat_id = chat_id[:-2]
+                last_id = last_message_ids.get(trimmed_chat_id, 0)
+                messages_to_check = 10
+                forced_check = num == 0 or last_id == 0
 
-        for chat_id in chat_ids:
-            trimmed_chat_id = chat_id[:-2]
+                try:
+                    async for message in telethon_client.iter_messages(trimmed_chat_id, offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
+                        if message.text and any(keyword.lower() in message.text.lower() for keyword in keywords):
+                            message_key = f"{trimmed_chat_id}_{message.id}"
+                            if message_key not in messages_sent or forced_check:
+                                await bot.send_message(user_id, message.text, parse_mode=types.ParseMode.MARKDOWN)
+                                print(f"Message sent to user {user_id}: {message.text}")
+                                messages_sent.add(message_key)
+                                last_message_ids[trimmed_chat_id] = message.id
 
-            try:
-                async for message in telethon_client.iter_messages(trimmed_chat_id, reverse=True):
-                    if message.date <= last_check_time:
-                        break
-                    if message.text and any(keyword.lower() in message.text.lower() for keyword in keywords):
-                        message_key = f"{trimmed_chat_id}_{message.id}"
-                        if message_key not in state['messages_sent']:
-                            await bot.send_message(user_id, message.text, parse_mode=types.ParseMode.MARKDOWN)
-                            print(f"Message sent to user {user_id}: {message.text}")
-                            state['messages_sent'].append(message_key)
+                except FloodWaitError as e:
+                    wait_time = e.seconds
+                    print(f"Flood wait error on chat {trimmed_chat_id}. Sleeping for {wait_time} seconds.")
+                    await asyncio.sleep(wait_time)
 
-            except FloodWaitError as e:
-                wait_time = e.seconds
-                print(f"Flood wait error on chat {trimmed_chat_id}. Sleeping for {wait_time} seconds.")
-                await asyncio.sleep(wait_time)
+            num += 1
+            if num >= len(groups):
+                num = 0
 
-        num = (num + 1) % len(groups)
-        state['last_check_time'] = datetime.datetime.now().isoformat()
-        save_state(state_file, state)
+        except Exception as e:
+            print(f"Произошла ошибка: {e}")
+            await asyncio.sleep(10)
+
         await asyncio.sleep(20)
+
 
 
 class Create_group(StatesGroup):
