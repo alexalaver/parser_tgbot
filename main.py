@@ -366,7 +366,7 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
             else:
                 await callback_query.answer(text=cfg.tariffe_error, show_alert=True)
         elif callback_query.data == "back_oplata":
-            channels = db.select_channels_number_group(number_group)
+            channels = db.select_channels_with_number(number_group)
             markup_inline = types.InlineKeyboardMarkup(row_width=4)
             for channel in channels:
                 buttons = types.InlineKeyboardButton(text=channel, callback_data=channel)
