@@ -508,7 +508,7 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
         user_id = message.from_user.id
         textsing = message.text
         text_line = textsing.strip().split('\n')
-        text_lines = [element + ' ⚠️️️' for element in text_line]
+        text_lines = [element + ' ⚠' for element in text_line]
         if message.text == cfg.cancel_creategroup:
             markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
             markup_reply.add(cfg.autoposting)
