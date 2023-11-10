@@ -375,6 +375,7 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
             channels_count = data.get("channels_count")
             channels_page = data.get("channels_page")
             page_here = data.get("page_here")
+            await callback_query.message.answer(f"{channels_count}\n{channels_page}\n{page_here}")
             if channels_page == page_here:
                 await callback_query.answer(cfg.error_page_old, show_alert=True)
             else:
