@@ -314,6 +314,9 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
         check_tarife = db.check_date_tarife_for_number(number_group)
         group_name = db.select_group_name_for_number_group(user_id, number_group)
         channels_count_all = len(channels)
+        channels_count = data.get("channels_count")
+        channels_page = data.get("channels_page")
+        page_here = data.get("page_here")
         if callback_query.data in channels:
             if check_tarife is None:
                 await callback_query.answer(text=cfg.error_oplata, show_alert=True)
@@ -344,9 +347,6 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                     markup_inline.add(back_channels)
                     await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
         elif callback_query.data == "next_page":
-            channels_count = data.get("channels_count")
-            channels_page = data.get("channels_page")
-            page_here = data.get("page_here")
             if channels_page == page_here:
                 await callback_query.answer(cfg.error_page_next, show_alert=True)
             else:
@@ -372,9 +372,6 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                 markup_inline.add(back_channels)
                 await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
         elif callback_query.data == "old_page":
-            channels_count = data.get("channels_count")
-            channels_page = data.get("channels_page")
-            page_here = data.get("page_here")
             if channels_page == page_here:
                 await callback_query.answer(cfg.error_page_old, show_alert=True)
             else:
