@@ -10,6 +10,7 @@ from telethon.errors import FloodWaitError
 import functions as fnc
 import asyncio
 import config as cfg
+import json
 import logging
 import datetime
 
@@ -32,13 +33,26 @@ async def check_for_new_channels(current_count):
     new_count = len(db.select_all_channels_group())
     return new_count != current_count
 
+def load_state(file_name):
+    try:
+        with open(file_name, 'r') as file:
+            return json.load(file)
+    except FileNotFoundError:
+        return {"last_check_time": datetime.datetime.now().isoformat(), "messages_sent": []}
+
+def save_state(file_name, state):
+    with open(file_name, 'w') as file:
+        json.dump(state, file)
+
 async def search_and_forward():
-    num = 0
-    last_message_ids = {}
-    messages_sent = set()
+    state_file = 'state.json'
+    state = load_state(state_file)
+    last_check_time = datetime.datetime.fromisoformat(state['last_check_time'])
 
     await telethon_client.start()
     groups_count = len(db.select_all_channels_group())
+
+    num = 0
 
     while True:
         groups = db.select_all_channels_group()
@@ -61,24 +75,17 @@ async def search_and_forward():
 
         for chat_id in chat_ids:
             trimmed_chat_id = chat_id[:-2]
-            last_id = last_message_ids.get(trimmed_chat_id, 0)
-            messages_to_check = 10
-            forced_check = num == 0 or last_id == 0
 
             try:
-                async for message in telethon_client.iter_messages(trimmed_chat_id, offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
+                async for message in telethon_client.iter_messages(trimmed_chat_id, reverse=True):
+                    if message.date <= last_check_time:
+                        break
                     if message.text and any(keyword.lower() in message.text.lower() for keyword in keywords):
-                        message_timestamp = message.date.replace(tzinfo=None)
-                        if message_timestamp > datetime.datetime.now() - datetime.timedelta(hours=1): # Примерный лимит времени
-                            message_key = f"{trimmed_chat_id}_{message.id}"
-                            if message_key not in messages_sent or forced_check:
-                                await bot.send_message(user_id, message.text, parse_mode=types.ParseMode.MARKDOWN)
-                                print(f"Message sent to user {user_id}: {message.text}")
-                                messages_sent.add(message_key)
-
-                messages = await telethon_client.get_messages(trimmed_chat_id, limit=1)
-                if messages:
-                    last_message_ids[trimmed_chat_id] = messages[0].id
+                        message_key = f"{trimmed_chat_id}_{message.id}"
+                        if message_key not in state['messages_sent']:
+                            await bot.send_message(user_id, message.text, parse_mode=types.ParseMode.MARKDOWN)
+                            print(f"Message sent to user {user_id}: {message.text}")
+                            state['messages_sent'].append(message_key)
 
             except FloodWaitError as e:
                 wait_time = e.seconds
@@ -86,6 +93,8 @@ async def search_and_forward():
                 await asyncio.sleep(wait_time)
 
         num = (num + 1) % len(groups)
+        state['last_check_time'] = datetime.datetime.now().isoformat()
+        save_state(state_file, state)
         await asyncio.sleep(20)
 
 
