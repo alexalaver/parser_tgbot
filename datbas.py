@@ -105,7 +105,7 @@ class Data:
 
     def check_numbers_group(self):
         with self.connect:
-            self.cursor.execute("SELECT number_group FROM groups ORDER BY id DESC LIMIT 1;")
+            self.cursor.execute("SELECT number_group FROM groups ORDER BY number_group DESC LIMIT 1;")
             a = self.cursor.fetchone()
             if a is None:
                 return 0
