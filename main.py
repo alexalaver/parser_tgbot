@@ -380,7 +380,6 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
             else:
                 channels = db.select_channels_with_number(number_group)
                 markup_inline = types.InlineKeyboardMarkup(row_width=2)
-                page_here = 1
                 page_here = page_here - 1
                 channels_count = channels_count + 10
                 await state.update_data(page_here=page_here)
