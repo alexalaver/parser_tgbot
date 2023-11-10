@@ -279,7 +279,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
             await state.update_data(page_here=page_here)
             await state.update_data(from_page=from_page)
             await state.update_data(before_page=before_page)
-            for channel in channels[from_page:20]:
+            for channel in channels[from_page:before_page]:
                 buttons = types.InlineKeyboardButton(text=channel, callback_data=channel)
                 markup_inline.row(buttons)
             buttons_count = types.InlineKeyboardButton(text=f"Страница {page_here}/{channels_page}", callback_data="page")
@@ -362,7 +362,7 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                 await state.update_data(page_here=page_here)
                 await state.update_data(channels_count=channels_count)
                 from_page = from_page + 10
-                before_page = before_page + (channels_count % 10)
+                before_page = before_page + 10
                 await state.update_data(from_page=from_page)
                 await state.update_data(before_page=before_page)
                 for channel in channels[from_page:before_page]:
@@ -388,7 +388,7 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                 channels = db.select_channels_with_number(number_group)
                 markup_inline = types.InlineKeyboardMarkup(row_width=2)
                 page_here = page_here - 1
-                before_page = before_page - (channels_count % 10)
+                before_page = before_page - 10
                 from_page = from_page - 10
                 await state.update_data(from_page=from_page)
                 await state.update_data(before_page=before_page)
