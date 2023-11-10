@@ -279,7 +279,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
             await state.update_data(page_here=page_here)
             await state.update_data(from_page=from_page)
             await state.update_data(before_page=before_page)
-            for channel in channels[from_page:before_page]:
+            for channel in channels[from_page:20]:
                 buttons = types.InlineKeyboardButton(text=channel, callback_data=channel)
                 markup_inline.row(buttons)
             buttons_count = types.InlineKeyboardButton(text=f"Страница {page_here}/{channels_page}", callback_data="page")
