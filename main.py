@@ -372,7 +372,7 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                 markup_inline.add(buttons_count)
                 if channels_count_all > 10:
                     buttons_next = types.InlineKeyboardButton(text=cfg.next_page, callback_data="next_page")
-                    buttons_old = types.InlineKeyboardButton(text=cfg.old_page, callback_data="old_lage")
+                    buttons_old = types.InlineKeyboardButton(text=cfg.old_page, callback_data="old_page")
                     markup_inline.row(buttons_old, buttons_next)
                 if db.check_date_tarife_for_number(number_group) is None:
                     pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels')
@@ -401,7 +401,7 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                 markup_inline.add(buttons_count)
                 if channels_count_all > 10:
                     buttons_next = types.InlineKeyboardButton(text=cfg.next_page, callback_data="next_page")
-                    buttons_old = types.InlineKeyboardButton(text=cfg.old_page, callback_data="old_lage")
+                    buttons_old = types.InlineKeyboardButton(text=cfg.old_page, callback_data="old_page")
                     markup_inline.row(buttons_old, buttons_next)
                 if db.check_date_tarife_for_number(number_group) is None:
                     pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels')
