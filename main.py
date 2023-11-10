@@ -359,12 +359,12 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                 channels = db.select_channels_with_number(number_group)
                 markup_inline = types.InlineKeyboardMarkup(row_width=2)
                 page_here = page_here + 1
-                await state.update_data(page_here=page_here)
-                await state.update_data(channels_count=channels_count)
+                await state.update_data(page_here1=page_here)
+                await state.update_data(channels_count1=channels_count)
                 from_page = from_page + 10
                 before_page = before_page + (channels_count % 10)
-                await state.update_data(from_page=from_page)
-                await state.update_data(before_page=before_page)
+                await state.update_data(from_page1=from_page)
+                await state.update_data(before_page1=before_page)
                 for channel in channels[from_page:before_page]:
                     buttons = types.InlineKeyboardButton(text=channel, callback_data=channel)
                     markup_inline.row(buttons)
@@ -381,11 +381,11 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                 markup_inline.add(back_channels)
                 await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
         elif callback_query.data == "old_page":
-            channels_count = data.get("channels_count")
+            channels_count = data.get("channels_count1")
             channels_page = data.get("channels_page")
-            page_here = data.get("page_here")
-            from_page = data.get("from_page")
-            before_page = data.get("before_page")
+            page_here = data.get("page_here1")
+            from_page = data.get("from_page1")
+            before_page = data.get("before_page1")
             if page_here == 1:
                 await callback_query.answer(cfg.error_page_old, show_alert=True)
             else:
@@ -394,10 +394,10 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                 page_here = page_here - 1
                 before_page = before_page - (channels_count % 10)
                 from_page = from_page - 10
-                await state.update_data(from_page=from_page)
-                await state.update_data(before_page=before_page)
-                await state.update_data(page_here=page_here)
-                await state.update_data(channels_count=channels_count)
+                await state.update_data(from_page1=from_page)
+                await state.update_data(before_page1=before_page)
+                await state.update_data(page_here1=page_here)
+                await state.update_data(channels_count1=channels_count)
                 for channel in channels[from_page:before_page]:
                     buttons = types.InlineKeyboardButton(text=channel, callback_data=channel)
                     markup_inline.row(buttons)
