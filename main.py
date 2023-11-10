@@ -282,7 +282,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
             markup_inline.add(buttons_count)
             if channels_count > 10:
                 buttons_next = types.InlineKeyboardButton(text=cfg.next_page, callback_data="next_page")
-                buttons_old = types.InlineKeyboardButton(text=cfg.old_page, callback_data="old_lage")
+                buttons_old = types.InlineKeyboardButton(text=cfg.old_page, callback_data="old_page")
                 markup_inline.row(buttons_old, buttons_next)
             if db.check_date_tarife(user_id, callback_query.data) is None:
                 pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels')
@@ -375,7 +375,6 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
             channels_count = data.get("channels_count")
             channels_page = data.get("channels_page")
             page_here = data.get("page_here")
-            await callback_query.message.answer(f"{channels_count}\n{channels_page}\n{page_here}")
             if channels_page == page_here:
                 await callback_query.answer(cfg.error_page_old, show_alert=True)
             else:
