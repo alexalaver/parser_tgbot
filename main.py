@@ -533,7 +533,7 @@ async def create_group_func_1(message: types.Message, state: FSMContext):
             await message.answer(cfg.cancel_creategroup_text, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
         elif message.text:
             if 3 <= len(message.text) <= 15:
-                if message.text in db.select_group_name(user_id):
+                if message.text in db.select_all_group_name():
                     await message.answer(cfg.error_name_again, parse_mode=types.ParseMode.MARKDOWN)
                 else:
                     await state.update_data(group_name=message.text)

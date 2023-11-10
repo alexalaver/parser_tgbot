@@ -132,6 +132,13 @@ class Data:
             result_list = [item[0] for item in a]
             return result_list
 
+    def select_all_group_name(self):
+        with self.connect:
+            self.cursor.execute("SELECT group_name FROM groups")
+            a = self.cursor.fetchall()
+            result_list = [item[0] for item in a]
+            return result_list
+
     def select_group_name_for_number_group(self, id, number_group):
         with self.connect:
             self.cursor.execute("SELECT group_name FROM groups WHERE id=%s AND number_group=%s", (id, number_group,))
