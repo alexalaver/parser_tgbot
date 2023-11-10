@@ -67,11 +67,20 @@ async def search_and_forward():
                 forced_check = num == 0 and last_id == 0
 
                 try:
-                    async for message in telethon_client.iter_messages(trimmed_chat_id, offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
+                    async for message in telethon_client.iter_messages(trimmed_chat_id,
+                                                                       offset_id=last_id - messages_to_check,
+                                                                       limit=messages_to_check, reverse=True):
                         if message.text and any(keyword.lower() in message.text.lower() for keyword in keywords):
                             message_key = (user_id, message.id)
                             if message_key not in messages_sent or forced_check:
-                                await bot.send_message(user_id, message.text, parse_mode=types.ParseMode.MARKDOWN)
+                                chat = await telethon_client.get_entity(trimmed_chat_id)
+                                chat_name = chat.title if hasattr(chat, 'title') else 'Неизвестный чат'
+
+                                sender = await message.get_sender()
+                                sender_name = sender.first_name if sender else 'Анонимный пользователь'
+
+                                message_text = f"{message.text}\n\nИз чата {chat_name}\n\n Сообщение от {sender_name}"
+                                await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.MARKDOWN)
                                 print(f"Message sent to user {user_id}: {message.text}")
                                 messages_sent[message_key] = True
 
@@ -264,6 +273,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
             else:
                 await callback_query.answer(cfg.error_group_5, show_alert=True)
         elif callback_query.data in db.select_group_name(user_id):
+            await callback_query.answer(cfg.group_text_uved)
             await Parsers_use.parsers_use_1.set()
             number_group = db.select_number_group(user_id, callback_query.data)
             await state.update_data(number_group=number_group)
@@ -335,11 +345,13 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                 else:
                     channel_name = callback_query.data
                     if channel_name[-1] == "✅":
+                        await callback_query.answer(cfg.off_channels_uved)
                         all_channels = db.select_channels_with_number(number_group)
                         new_callback = channel_name[:-1] + '❌'
                         new_channels = [new_callback if item == channel_name else item for item in all_channels]
                         db.update_all_channels(number_group, new_channels)
                     elif channel_name[-1] == "❌":
+                        await callback_query.answer(cfg.on_channels_uved)
                         all_channels = db.select_channels_with_number(number_group)
                         new_callback = channel_name[:-1] + '✅'
                         new_channels = [new_callback if item == channel_name else item for item in all_channels]
@@ -365,6 +377,7 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
             if channels_page == page_here:
                 await callback_query.answer(cfg.error_page_next, show_alert=True)
             else:
+                await callback_query.answer(cfg.next_page_text)
                 channels = db.select_channels_with_number(number_group)
                 markup_inline = types.InlineKeyboardMarkup(row_width=2)
                 page_here = page_here + 1
@@ -394,6 +407,7 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
             if page_here == 1:
                 await callback_query.answer(cfg.error_page_old, show_alert=True)
             else:
+                await callback_query.answer(cfg.old_page_text)
                 channels = db.select_channels_with_number(number_group)
                 markup_inline = types.InlineKeyboardMarkup(row_width=2)
                 page_here = page_here - 1
@@ -418,6 +432,8 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                 back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels')
                 markup_inline.add(back_channels)
                 await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+        elif callback_query.data == "page":
+            await callback_query.answer(cfg.page_text)
         elif callback_query.data == "back_channels":
             await state.reset_state()
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
