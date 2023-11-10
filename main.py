@@ -371,9 +371,8 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
             for channel in channels:
                 buttons = types.InlineKeyboardButton(text=channel, callback_data=channel)
                 markup_inline.row(buttons)
-            if db.check_date_tarife(user_id, callback_query.data) is None:
-                pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels')
-                markup_inline.add(pay_money_buttons)
+            pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels')
+            markup_inline.add(pay_money_buttons)
             back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels')
             markup_inline.add(back_channels)
             await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
