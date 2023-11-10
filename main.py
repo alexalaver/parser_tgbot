@@ -261,7 +261,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
             markup_inline = types.InlineKeyboardMarkup(row_width=4)
             if db.check_date_tarife(user_id, callback_query.data) is None:
                 for channel in channels:
-                    buttons = types.InlineKeyboardButton(text=f"{channel} ⚠️", callback_data=f"{channel} ⚠️")
+                    buttons = types.InlineKeyboardButton(text=f"{channel} ⚠", callback_data=f"{channel} ⚠")
                     markup_inline.row(buttons)
                 pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels')
                 markup_inline.add(pay_money_buttons)
@@ -274,7 +274,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     markup_inline.row(buttons_1)
             back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels')
             markup_inline.add(back_channels)
-            await callback_query.message.edit_caption(caption="TESTING", reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+            await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
         elif callback_query.data == "menu_after_pay":
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
             user_id = callback_query.from_user.id
@@ -328,7 +328,7 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                             markup_inline.row(buttons_1)
                         back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels')
                         markup_inline.add(back_channels)
-                        await callback_query.message.edit_caption(caption="TESTING", reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+                        await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
                     elif channel_name[-1] == "❌":
                         channel_name = channel_name[:-1].strip()
                         off_channels = db.select_off_channels(number_group)
@@ -347,9 +347,7 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                             markup_inline.row(buttons_1)
                         back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels')
                         markup_inline.add(back_channels)
-                        await callback_query.message.edit_caption(caption="TESTING", reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
-                    else:
-                        await callback_query.message.answer("hello")
+                        await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
         elif callback_query.data == "back_channels":
             await state.reset_state()
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
@@ -397,7 +395,7 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
             markup_inline = types.InlineKeyboardMarkup(row_width=4)
             if check_tarife is None:
                 for channel in channels:
-                    buttons = types.InlineKeyboardButton(text=f"{channel} ⚠️", callback_data=f"{channel} ⚠️")
+                    buttons = types.InlineKeyboardButton(text=f"{channel} ⚠", callback_data=f"{channel} ⚠")
                     markup_inline.row(buttons)
                 pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels')
                 markup_inline.add(pay_money_buttons)
@@ -410,7 +408,7 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                     markup_inline.row(buttons_1)
             back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels')
             markup_inline.add(back_channels)
-            await callback_query.message.edit_caption(caption="TESTING", reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+            await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
         elif callback_query.data == "back_sostoyanie":
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
             user_id = callback_query.from_user.id
@@ -502,14 +500,15 @@ async def create_group_func_2(message: types.Message, state: FSMContext):
 @dp.callback_query_handler(state=Create_group.create_group_2)
 async def button_group_2(callback_query: types.CallbackQuery):
     if callback_query.data is not None:
-        await callback_query.answer(cfg.error_button_create_group, parse_mode=types.ParseMode.MARKDOWN)
+        await callback_query.answer(cfg.error_button_create_group)
 
 @dp.message_handler(state=Create_group.create_group_3)
 async def create_group_func_3(message: types.Message, state: FSMContext):
     if message.chat.type == types.ChatType.PRIVATE:
         user_id = message.from_user.id
         textsing = message.text
-        text_lines = textsing.strip().split('\n')
+        text_line = textsing.strip().split('\n')
+        text_lines = [element + ' ⚠️️️' for element in text_line]
         if message.text == cfg.cancel_creategroup:
             markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
             markup_reply.add(cfg.autoposting)
