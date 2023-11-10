@@ -348,8 +348,8 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
             channels_len = len(channels)
             money_oplata = 5 * int(channels_len)
             if balance >= money_oplata:
-                all_channels = db.select_channels_number_group(number_group)
-                new_channels = [newer[:-2] + " ✅" for newer in all_channels]
+                channels = db.select_channels_with_number(number_group)
+                new_channels = [newer[:-2] + " ✅" for newer in channels]
                 db.update_all_channels(number_group, new_channels)
                 db.update_balance(user_id, money_oplata)
                 channels_len = len(channels)
