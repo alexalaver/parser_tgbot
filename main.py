@@ -292,7 +292,7 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
         channels = db.select_channels_with_number(number_group)
         check_tarife = db.check_date_tarife_for_number(number_group)
         group_name = db.select_group_name_for_number_group(user_id, number_group)
-        if callback_query.data[:-2] in channels:
+        if callback_query.data in channels:
             if check_tarife is None:
                 await callback_query.answer(text=cfg.error_oplata, show_alert=True)
             else:
