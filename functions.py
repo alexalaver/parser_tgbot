@@ -12,5 +12,7 @@ def get_category(a):
         return 3
     elif 31 <= a <= 40:
         return 4
-    elif 41 <= a <= 50:
+    elif 40 <= a <= 49:
         return 5
+    elif a == 50:
+        return 6
