@@ -272,7 +272,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
             channels_count = len(channels)
             channels_page = fnc.get_category(channels_count)
             page_here = 1
-            from_page = 1
+            from_page = 0
             before_page = 10
             await state.update_data(channels_count=channels_count)
             await state.update_data(channels_page=channels_page)
