@@ -90,6 +90,6 @@
 # if __name__ == '__main__':
 #     executor.start_polling(dp, skip_updates=True)
 
-a = ['testing !', 'loveyou !', "odin ?", "dva ?", "privetiki !"]
-new_list = [item for item in a if item.endswith('!')]
-print(new_list)
+a = ['test', 'hello', 'razdva']
+print(list(set(a)))
+print(a)
