@@ -304,14 +304,14 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                 else:
                     channel_name = callback_query.data
                     if channel_name[-1] == "✅":
-                        all_channels = db.select_channels_number_group(number_group)
+                        all_channels = db.select_channels_with_number(number_group)
                         new_callback = channel_name.data[:-1] + '❌'
-                        new_channels = [new_callback if item == channel_name.data else item for item in all_channels]
+                        new_channels = [new_callback if item == channel_name else item for item in all_channels]
                         db.update_all_channels(number_group, new_channels)
                     elif channel_name[-1] == "❌":
-                        all_channels = db.select_channels_number_group(number_group)
+                        all_channels = db.select_channels_with_number(number_group)
                         new_callback = callback_query.data[:-1] + '✅'
-                        new_channels = [new_callback if item == callback_query.data else item for item in all_channels]
+                        new_channels = [new_callback if item == channel_name else item for item in all_channels]
                         db.update_all_channels(number_group, new_channels)
                     channels = db.select_channels_with_number(number_group)
                     markup_inline = types.InlineKeyboardMarkup(row_width=4)
