@@ -8,6 +8,7 @@ from telethon import TelegramClient
 from telethon.sessions import StringSession
 from telethon.errors import FloodWaitError
 from telethon.errors import ChannelPrivateError, ChannelInvalidError
+from telethon.tl.types import Chat
 import functions as fnc
 import asyncio
 import config as cfg
@@ -36,15 +37,21 @@ async def check_for_new_channels(current_count):
 async def check_private_channel(channels, user_id):
     for channel in channels:
         try:
-            result = await telethon_client.get_entity(channel)
-            if result.broadcast or result.megagroup:
-                pass
+            chat = await telethon_client.get_entity(channel)
+
+            if isinstance(chat, Chat):
+                print("Чат найден, он открыт")
+            else:
+                print("Это не стандартный групповой чат")
+
         except ChannelPrivateError:
             lst = []
             lst.append(channel)
-            await dp.bot.send_message(user_id, f"{lst}")
+            await bot.send_message(user_id, f"{lst}")
         except ChannelInvalidError:
-            pass
+            print("Чат не существует")
+        except Exception as e:
+            print(f"Произошла неожиданная ошибка: {e}")
 
 async def search_and_forward():
     num = 0
