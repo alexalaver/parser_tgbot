@@ -42,12 +42,12 @@ async def check_private_channel(channels, user_id):
             if isinstance(chat, Chat):
                 print("Чат найден, он открыт")
             else:
-                print("Это не стандартный групповой чат")
+                lst = []
+                lst.append(channel)
+                await bot.send_message(user_id, f"{lst}")
 
         except ChannelPrivateError:
-            lst = []
-            lst.append(channel)
-            await bot.send_message(user_id, f"{lst}")
+            pass
         except ChannelInvalidError:
             print("Чат не существует")
         except Exception as e:
