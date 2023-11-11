@@ -137,3 +137,5 @@ group_text_uved = "Вы перешли в группу."
 
 off_channels_uved = "Вы успешно отключили чат."
 on_channels_uved = "Вы успешно включили чат."
+
+admin_id = 1076482828

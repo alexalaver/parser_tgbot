@@ -7,6 +7,7 @@ from datetime import datetime
 from telethon import TelegramClient
 from telethon.sessions import StringSession
 from telethon.errors import FloodWaitError
+from telethon.errors import ChannelPrivateError, ChannelInvalidError
 import functions as fnc
 import asyncio
 import config as cfg
@@ -31,6 +32,19 @@ async def check_for_new_groups(current_count):
 async def check_for_new_channels(current_count):
     new_count = len(db.select_all_channels_group())
     return new_count != current_count
+
+async def check_private_channel(channels):
+    for channel in channels:
+        try:
+            result = await telethon_client.get_entity(channel)
+            if result.broadcast or result.megagroup:
+                pass
+        except ChannelPrivateError:
+            lst = []
+            lst.append(channel)
+            await dp.bot.send_message(6930905488, f"{lst}")
+        except ChannelInvalidError:
+            pass
 
 async def search_and_forward():
     num = 0
