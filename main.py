@@ -39,7 +39,7 @@ async def check_private_channel(channels, user_id):
         for channel in channels:
             await telethon_client.get_entity(channel)
     except Exception as e:
-        await bot.send_message(user_id, f"{fnc.nick_with_link('Пользователь', user_id)}, добавил закрытые чаты, вам необходимо подписаться на них.\n\n{channels}")
+        await bot.send_message(user_id, f"{fnc.nick_with_link('Пользователь', user_id)}, добавил закрытые чаты, вам необходимо подписаться на них.\n\n{channels}", parse_mode=types.ParseMode.MARKDOWN)
 
 async def search_and_forward():
     num = 0
