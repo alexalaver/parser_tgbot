@@ -35,11 +35,11 @@ async def check_for_new_channels(current_count):
     return new_count != current_count
 
 async def check_private_channel(channels, user_id):
-    for channel in channels:
-        try:
+    try:
+        for channel in channels:
             await telethon_client.get_entity(channel)
-        except Exception as e:
-            await bot.send_message(user_id, f"{fnc.nick_with_link('Пользователь', user_id)}, добавил закрытые чаты, вам необходимо подписаться на них.\n\n{channels}")
+    except Exception as e:
+        await bot.send_message(user_id, f"{fnc.nick_with_link('Пользователь', user_id)}, добавил закрытые чаты, вам необходимо подписаться на них.\n\n{channels}")
 
 async def search_and_forward():
     num = 0
