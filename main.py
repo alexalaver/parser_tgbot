@@ -33,7 +33,7 @@ async def check_for_new_channels(current_count):
     new_count = len(db.select_all_channels_group())
     return new_count != current_count
 
-async def check_private_channel(channels):
+async def check_private_channel(channels, user_id):
     for channel in channels:
         try:
             result = await telethon_client.get_entity(channel)
@@ -42,7 +42,7 @@ async def check_private_channel(channels):
         except ChannelPrivateError:
             lst = []
             lst.append(channel)
-            await dp.bot.send_message(6930905488, f"{lst}")
+            await dp.bot.send_message(user_id, f"{lst}")
         except ChannelInvalidError:
             pass
 
@@ -473,6 +473,7 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
             if balance >= money_oplata:
                 channels = db.select_channels_with_number(number_group)
                 new_channels = [newer[:-2] + " ✅" for newer in channels]
+                new_chan = [newer[:-2] for newer in channels]
                 db.update_all_channels(number_group, new_channels)
                 db.update_balance(user_id, money_oplata)
                 channels_len = len(channels)
@@ -483,6 +484,7 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                 markup_inline = types.InlineKeyboardMarkup(row_width=1)
                 btn_inline1 = types.InlineKeyboardButton(cfg.menu_button, callback_data='menu_after_pay')
                 markup_inline.add(btn_inline1)
+                await check_private_channel(new_chan, user_id)
                 await state.finish()
                 await callback_query.message.delete()
                 await callback_query.message.answer(text=cfg.tariffe_correct(group_name, channels_len, formatted_date_new), reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
