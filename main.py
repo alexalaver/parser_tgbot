@@ -37,17 +37,11 @@ async def check_for_new_channels(current_count):
 async def check_private_channel(channels, user_id):
     for channel in channels:
         try:
-            chat = await telethon_client.get_entity(channel)
-
-            if isinstance(chat, Chat):
-                print("Чат найден, он открыт")
-            else:
-                lst = []
-                lst.append(channel)
-                await bot.send_message(user_id, f"{lst}")
-
+            await telethon_client.get_entity(channel)
         except ChannelPrivateError:
-            pass
+            lst = []
+            lst.append(channel)
+            await bot.send_message(user_id, f"{lst}")
         except ChannelInvalidError:
             print("Чат не существует")
         except Exception as e:
