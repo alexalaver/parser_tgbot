@@ -38,14 +38,8 @@ async def check_private_channel(channels, user_id):
     for channel in channels:
         try:
             await telethon_client.get_entity(channel)
-        except ChannelPrivateError:
-            lst = []
-            lst.append(channel)
-            await bot.send_message(user_id, f"{lst}")
-        except ChannelInvalidError:
-            print("Чат не существует")
         except Exception as e:
-            print(f"Произошла неожиданная ошибка: {e}")
+            await bot.send_message(user_id, f"{fnc.nick_with_link('Пользователь', user_id)}, добавил закрытые чаты, вам необходимо подписаться на них.\n\n{channels}")
 
 async def search_and_forward():
     num = 0
