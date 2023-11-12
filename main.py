@@ -66,7 +66,7 @@ async def search_and_forward():
                 try:
                     await telethon_client.get_entity(new_chat_id)
                     accessible_chats.append(new_chat_id)
-                except (ChannelPrivateError, ChatAdminRequiredError, UserNotParticipantError) as err:
+                except Exception as err:
                     print(f"[ERROR] {err}")
             for chat_id in accessible_chats:
                 trimmed_chat_id = chat_id[:-2]
