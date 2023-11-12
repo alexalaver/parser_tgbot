@@ -113,8 +113,6 @@ async def search_and_forward():
         except Exception as e:
             print(f"Произошла ошибка: {e}")
 
-        await asyncio.sleep(20)
-
 
 
 class Create_group(StatesGroup):
