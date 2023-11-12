@@ -6,8 +6,7 @@ from datbas import Data
 from datetime import datetime
 from telethon import TelegramClient
 from telethon.sessions import StringSession
-from telethon.errors import FloodWaitError, ChannelPrivateError, ChatAdminRequiredError
-from telethon.errors.rpcerrorlist import UserNotParticipantError
+from telethon.errors import FloodWaitError, ChannelPrivateError, ChatAdminRequiredError, UserNotParticipantError
 import functions as fnc
 import asyncio
 import config as cfg
@@ -47,10 +46,12 @@ async def search_and_forward():
 
     await telethon_client.start()
     groups_count = len(db.select_all_channels_group())
+    groups = db.select_all_channels_group()
 
     while True:
+        skip_to_next_group = False
+
         try:
-            groups = db.select_all_channels_group()
             if not groups:
                 await asyncio.sleep(10)
                 continue
@@ -58,6 +59,7 @@ async def search_and_forward():
             if await check_for_new_groups(groups_count):
                 groups_count = len(groups)
                 num = 0
+
             group = groups[num]
             user_id, chat_ids, keywords = group[0], group[2], group[5]
             chat_ids = [item for item in chat_ids if item.endswith('✅')]
@@ -79,7 +81,6 @@ async def search_and_forward():
                         if message.text and any(keyword.lower() in message.text.lower() for keyword in keywords):
                             message_key = (user_id, message.id)
                             if message_key not in messages_sent or forced_check:
-
                                 sender = await message.get_sender()
                                 sender_identifier = f"@{sender.username}" if sender and sender.username else "Анонимный пользователь"
 
@@ -92,26 +93,32 @@ async def search_and_forward():
                     wait_time = e.seconds
                     print(f"Flood wait error on chat {trimmed_chat_id}. Sleeping for {wait_time} seconds.")
                     await asyncio.sleep(wait_time)
-                except ChannelPrivateError:
-                    print(f"Access denied for chat {trimmed_chat_id}. Skipping to next chat.")
-                    continue
-                except ChatAdminRequiredError:
-                    print(f"Chat not accessible or bot is not a member. Skipping chat {trimmed_chat_id}.")
-                    continue
-                except UserNotParticipantError:
-                    print(f"Bot is not a member of {trimmed_chat_id}. Skipping chat.")
-                    continue
+                except (ChannelPrivateError, ChatAdminRequiredError, UserNotParticipantError):
+                    print(f"Problem with chat {trimmed_chat_id}. Skipping to next chat.")
+                    skip_to_next_group = True
+                    break
+
                 finally:
                     messages = await telethon_client.get_messages(trimmed_chat_id, limit=1)
                     if messages:
                         last_message_ids[trimmed_chat_id] = messages[0].id
 
-            num += 1
-            if num >= len(groups):
-                num = 0
+            if skip_to_next_group:
+                num += 1
+                if num >= len(groups):
+                    num = 0
+                continue
 
         except Exception as e:
             print(f"Произошла ошибка: {e}")
+
+        await asyncio.sleep(10)
+
+        num += 1
+        if num >= len(groups):
+            num = 0
+
+        await asyncio.sleep(20)
 
 
 
