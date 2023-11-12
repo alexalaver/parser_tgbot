@@ -95,7 +95,7 @@ async def search_and_forward():
                     messages = await telethon_client.get_messages(trimmed_chat_id, limit=1)
                     if messages:
                         last_message_ids[trimmed_chat_id] = messages[0].id
-                    await asyncio.sleep(5)
+                    await asyncio.sleep(1)
 
             num += 1
             if num >= len(groups):
