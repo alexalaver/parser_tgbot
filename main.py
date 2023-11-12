@@ -7,6 +7,7 @@ from datetime import datetime
 from telethon import TelegramClient
 from telethon.sessions import StringSession
 from telethon.errors import FloodWaitError, ChannelPrivateError, ChatAdminRequiredError
+from telethon.errors.rpcerrorlist import UserNotParticipantError
 import functions as fnc
 import asyncio
 import config as cfg
@@ -96,6 +97,9 @@ async def search_and_forward():
                     continue
                 except ChatAdminRequiredError:
                     print(f"Chat not accessible or bot is not a member. Skipping chat {trimmed_chat_id}.")
+                    continue
+                except UserNotParticipantError:
+                    print(f"Bot is not a member of {trimmed_chat_id}. Skipping chat.")
                     continue
                 finally:
                     messages = await telethon_client.get_messages(trimmed_chat_id, limit=1)
