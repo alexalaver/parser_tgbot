@@ -92,7 +92,7 @@ async def search_and_forward():
                 except FloodWaitError as e:
                     wait_time = e.seconds
                     print(f"Flood wait error on chat {trimmed_chat_id}. Sleeping for {wait_time} seconds.")
-                    await asyncio.sleep(wait_time)
+                    continue
                 except (ChannelPrivateError, ChatAdminRequiredError, UserNotParticipantError):
                     print(f"Problem with chat {trimmed_chat_id}. Skipping to next chat.")
                     skip_to_next_group = True
