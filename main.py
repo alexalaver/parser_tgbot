@@ -64,10 +64,11 @@ async def search_and_forward():
             accessible_chats = []
             for new_chat_id in chat_ids:
                 try:
-                    await telethon_client.get_entity(new_chat_id)
+                    await telethon_client.get_entity(new_chat_id[:-2])
                     accessible_chats.append(new_chat_id)
                 except Exception as err:
                     print(f"[ERROR] {err}")
+                    continue
             for chat_id in accessible_chats:
                 trimmed_chat_id = chat_id[:-2]
                 try:
