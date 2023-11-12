@@ -46,21 +46,26 @@ async def search_and_forward():
 
     await telethon_client.start()
     groups_count = len(db.select_all_channels_group())
-    groups = db.select_all_channels_group()
 
     while True:
         try:
+            groups = db.select_all_channels_group()
             if not groups:
                 await asyncio.sleep(10)
                 continue
 
-            # if await check_for_new_groups(groups_count):
-            #     groups_count = len(groups)
-            #     num = 0
-
+            if await check_for_new_groups(groups_count):
+                groups_count = len(groups)
+                num = 0
             group = groups[num]
             user_id, chat_ids, keywords = group[0], group[2], group[5]
             chat_ids = [item for item in chat_ids if item.endswith('✅')]
+            if await check_for_new_channels(len(chat_ids)):
+                groups = db.select_all_channels_group()
+                group = groups[num]
+                user_id, chat_ids, keywords = group[0], group[2], group[5]
+                chat_ids = [item for item in chat_ids if item.endswith('✅')]
+
             accessible_chats = []
             for new_chat_id in chat_ids:
                 try:
@@ -68,19 +73,20 @@ async def search_and_forward():
                     accessible_chats.append(new_chat_id)
                 except Exception as err:
                     print(f"[ERROR] {err}")
-                    continue
 
             for chat_id in accessible_chats:
                 trimmed_chat_id = chat_id[:-2]
-                try:
-                    last_id = last_message_ids.get(trimmed_chat_id, 0)
-                    messages_to_check = 10
-                    forced_check = num == 0 and last_id == 0
+                last_id = last_message_ids.get(trimmed_chat_id, 0)
+                messages_to_check = 10
 
+                forced_check = num == 0 and last_id == 0
+
+                try:
                     async for message in telethon_client.iter_messages(trimmed_chat_id, offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
                         if message.text and any(keyword.lower() in message.text.lower() for keyword in keywords):
                             message_key = (user_id, message.id)
                             if message_key not in messages_sent or forced_check:
+
                                 sender = await message.get_sender()
                                 sender_identifier = f"@{sender.username}" if sender and sender.username else "Анонимный пользователь"
 
@@ -88,31 +94,27 @@ async def search_and_forward():
                                 await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
                                 print(f"Message sent to user {user_id}: {message.text}")
                                 messages_sent[message_key] = True
-                                await asyncio.sleep(2)
 
                 except FloodWaitError as e:
                     wait_time = e.seconds
-                    print(f"Flood wait error on chat {trimmed_chat_id}. {wait_time}.")
+                    print(f"Flood wait error on chat {trimmed_chat_id}. Sleeping for {wait_time} seconds.")
                     await asyncio.sleep(wait_time)
-                except (ChannelPrivateError, ChatAdminRequiredError, UserNotParticipantError):
-                    print(f"No access to chat {trimmed_chat_id}. Skipping to next chat.")
-                    continue
-
                 finally:
                     messages = await telethon_client.get_messages(trimmed_chat_id, limit=1)
                     if messages:
                         last_message_ids[trimmed_chat_id] = messages[0].id
 
-        except Exception as e:
-            print(f"Произошла ошибка: {e}")
-            await asyncio.sleep(10)
-
-        finally:
             num += 1
             if num >= len(groups):
                 num = 0
 
+        except Exception as e:
+            print(f"Произошла ошибка: {e}")
+            await asyncio.sleep(10)
+
         await asyncio.sleep(20)
+
+
 
 class Create_group(StatesGroup):
     create_group_1 = State()
