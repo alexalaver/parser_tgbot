@@ -6,7 +6,7 @@ from datbas import Data
 from datetime import datetime
 from telethon import TelegramClient
 from telethon.sessions import StringSession
-from telethon.errors import FloodWaitError, ChannelPrivateError, ChatAdminRequiredError, UserNotParticipantError
+from telethon.errors import FloodWaitError, ChannelPrivateError, UserNotParticipantError
 import functions as fnc
 import asyncio
 import config as cfg
