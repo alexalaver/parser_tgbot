@@ -7,8 +7,6 @@ from datetime import datetime
 from telethon import TelegramClient
 from telethon.sessions import StringSession
 from telethon.errors import FloodWaitError
-from telethon.errors import ChannelPrivateError, ChannelInvalidError
-from telethon.tl.types import Chat
 import functions as fnc
 import asyncio
 import config as cfg
@@ -126,7 +124,7 @@ async def profile(message):
 
 async def supports_send(message):
     markup_inline = types.InlineKeyboardMarkup(row_width=1)
-    btn_inline1 = types.InlineKeyboardButton(cfg.support, callback_data='support', url="tg://user?id=1076482828")
+    btn_inline1 = types.InlineKeyboardButton(cfg.support, callback_data='support', url=f"tg://user?id={cfg.admin_id}")
     markup_inline.add(btn_inline1)
     await message.answer("При индивидуальных запросах или возникновение трудностей, обратитесь по контакту ниже", reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
 
