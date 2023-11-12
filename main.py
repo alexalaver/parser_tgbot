@@ -6,7 +6,7 @@ from datbas import Data
 from datetime import datetime
 from telethon import TelegramClient
 from telethon.sessions import StringSession
-from telethon.errors import FloodWaitError
+from telethon.errors import FloodWaitError, ChannelPrivateError
 import functions as fnc
 import asyncio
 import config as cfg
@@ -91,11 +91,13 @@ async def search_and_forward():
                     wait_time = e.seconds
                     print(f"Flood wait error on chat {trimmed_chat_id}. Sleeping for {wait_time} seconds.")
                     await asyncio.sleep(wait_time)
+                except ChannelPrivateError:
+                    print(f"Access denied for chat {trimmed_chat_id}. Skipping to next chat.")
+                    continue
                 finally:
                     messages = await telethon_client.get_messages(trimmed_chat_id, limit=1)
                     if messages:
                         last_message_ids[trimmed_chat_id] = messages[0].id
-                    await asyncio.sleep(1)
 
             num += 1
             if num >= len(groups):
@@ -106,6 +108,7 @@ async def search_and_forward():
             await asyncio.sleep(10)
 
         await asyncio.sleep(20)
+
 
 
 class Create_group(StatesGroup):
