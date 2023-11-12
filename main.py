@@ -6,7 +6,7 @@ from datbas import Data
 from datetime import datetime
 from telethon import TelegramClient
 from telethon.sessions import StringSession
-from telethon.errors import FloodWaitError, ChannelPrivateError
+from telethon.errors import FloodWaitError, ChannelPrivateError, ChatAdminRequiredError
 import functions as fnc
 import asyncio
 import config as cfg
@@ -93,6 +93,9 @@ async def search_and_forward():
                     await asyncio.sleep(wait_time)
                 except ChannelPrivateError:
                     print(f"Access denied for chat {trimmed_chat_id}. Skipping to next chat.")
+                    continue
+                except ChatAdminRequiredError:
+                    print(f"Chat not accessible or bot is not a member. Skipping chat {trimmed_chat_id}.")
                     continue
                 finally:
                     messages = await telethon_client.get_messages(trimmed_chat_id, limit=1)
