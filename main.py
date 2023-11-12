@@ -87,6 +87,7 @@ async def search_and_forward():
                                 await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
                                 print(f"Message sent to user {user_id}: {message.text}")
                                 messages_sent[message_key] = True
+                                await asyncio.sleep(2)
 
                 except FloodWaitError as e:
                     wait_time = e.seconds
