@@ -6,7 +6,7 @@ from datbas import Data
 from datetime import datetime
 from telethon import TelegramClient
 from telethon.sessions import StringSession
-from telethon.errors import FloodWaitError, ChannelPrivateError
+from telethon.errors import FloodWaitError, ChannelPrivateError, ChatAdminRequiredError, UserNotParticipantError
 import functions as fnc
 import asyncio
 import config as cfg
@@ -39,7 +39,6 @@ async def check_private_channel(channels, user_id):
     except Exception as e:
         await bot.send_message(cfg.admin_id, f"{fnc.nick_with_link('Пользователь', user_id)}, добавил закрытые чаты, вам необходимо подписаться на них.\n\n{channels}", parse_mode=types.ParseMode.MARKDOWN)
 
-
 async def search_and_forward():
     num = 0
     last_message_ids = {}
@@ -62,17 +61,23 @@ async def search_and_forward():
             group = groups[num]
             user_id, chat_ids, keywords = group[0], group[2], group[5]
             chat_ids = [item for item in chat_ids if item.endswith('✅')]
-
-            for chat_id in chat_ids:
-                trimmed_chat_id = chat_id[:-2]
-                last_id = last_message_ids.get(trimmed_chat_id, 0)
-                messages_to_check = 10
-
+            accessible_chats = []
+            for new_chat_id in chat_ids:
                 try:
+                    await telethon_client.get_entity(new_chat_id)
+                    accessible_chats.append(new_chat_id)
+                except (ChannelPrivateError, ChatAdminRequiredError, UserNotParticipantError):
+            for chat_id in accessible_chats:
+                trimmed_chat_id = chat_id[:-2]
+                try:
+                    last_id = last_message_ids.get(trimmed_chat_id, 0)
+                    messages_to_check = 10
+                    forced_check = num == 0 and last_id == 0
+
                     async for message in telethon_client.iter_messages(trimmed_chat_id, offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
                         if message.text and any(keyword.lower() in message.text.lower() for keyword in keywords):
                             message_key = (user_id, message.id)
-                            if message_key not in messages_sent:
+                            if message_key not in messages_sent or forced_check:
                                 sender = await message.get_sender()
                                 sender_identifier = f"@{sender.username}" if sender and sender.username else "Анонимный пользователь"
 
@@ -80,21 +85,18 @@ async def search_and_forward():
                                 await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
                                 print(f"Message sent to user {user_id}: {message.text}")
                                 messages_sent[message_key] = True
-                                await asyncio.sleep(5)
 
                 except FloodWaitError as e:
-                    print(f"Flood wait error on chat {trimmed_chat_id}, waiting for {e.seconds} seconds.")
-                    await asyncio.sleep(e.seconds)
-                    continue
-                except ChannelPrivateError:
-                    print(f"No access to chat {trimmed_chat_id}, skipping.")
-                    continue
-                except Exception as inner_e:
-                    print(f"Error processing messages in chat {trimmed_chat_id}: {inner_e}")
+                    wait_time = e.seconds
+                    print(f"Flood wait error on chat {trimmed_chat_id}. {wait_time}.")
+                    await asyncio.sleep(wait_time)
+                except (ChannelPrivateError, ChatAdminRequiredError, UserNotParticipantError):
+                    print(f"No access to chat {trimmed_chat_id}. Skipping to next chat.")
                     continue
 
                 finally:
-                    if messages := await telethon_client.get_messages(trimmed_chat_id, limit=1):
+                    messages = await telethon_client.get_messages(trimmed_chat_id, limit=1)
+                    if messages:
                         last_message_ids[trimmed_chat_id] = messages[0].id
 
             num += 1
@@ -102,10 +104,12 @@ async def search_and_forward():
                 num = 0
 
         except Exception as e:
-            print(f"Unexpected error: {e}")
+            print(f"Произошла ошибка: {e}")
             await asyncio.sleep(10)
 
         await asyncio.sleep(20)
+
+
 
 class Create_group(StatesGroup):
     create_group_1 = State()
