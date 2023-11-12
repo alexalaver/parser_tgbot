@@ -89,8 +89,8 @@ async def search_and_forward():
 
                 except FloodWaitError as e:
                     wait_time = e.seconds
-                    print(f"Flood wait error on chat {trimmed_chat_id}. Skipping for now.")
-                    break
+                    print(f"Flood wait error on chat {trimmed_chat_id}. Sleeping for {wait_time} seconds.")
+                    await asyncio.sleep(5)
                 finally:
                     messages = await telethon_client.get_messages(trimmed_chat_id, limit=1)
                     if messages:
