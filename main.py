@@ -73,6 +73,7 @@ async def search_and_forward():
                     accessible_chats.append(new_chat_id)
                 except Exception as err:
                     print(f"[ERROR] {err}")
+                    await asyncio.sleep(1)
 
             for chat_id in accessible_chats:
                 trimmed_chat_id = chat_id[:-2]
@@ -94,6 +95,7 @@ async def search_and_forward():
                                 await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
                                 print(f"Message sent to user {user_id}: {message.text}")
                                 messages_sent[message_key] = True
+                                await asyncio.sleep(1)
 
                 except FloodWaitError as e:
                     wait_time = e.seconds
