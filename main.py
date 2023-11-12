@@ -69,6 +69,7 @@ async def search_and_forward():
                 except Exception as err:
                     print(f"[ERROR] {err}")
                     continue
+
             for chat_id in accessible_chats:
                 trimmed_chat_id = chat_id[:-2]
                 try:
@@ -102,15 +103,17 @@ async def search_and_forward():
                     if messages:
                         last_message_ids[trimmed_chat_id] = messages[0].id
 
-            num += 1
-            if num >= len(groups):
-                num = 0
-
         except Exception as e:
             print(f"Произошла ошибка: {e}")
             await asyncio.sleep(10)
 
+        finally:
+            num += 1
+            if num >= len(groups):
+                num = 0
+
         await asyncio.sleep(20)
+
 
 
 
