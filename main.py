@@ -112,7 +112,6 @@ async def search_and_forward():
 
         except Exception as e:
             print(f"Произошла ошибка: {e}")
-            await asyncio.sleep(10)
 
         await asyncio.sleep(20)
 
