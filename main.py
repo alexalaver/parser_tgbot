@@ -54,9 +54,9 @@ async def search_and_forward():
                 await asyncio.sleep(10)
                 continue
 
-            if await check_for_new_groups(groups_count):
-                groups_count = len(groups)
-                num = 0
+            # if await check_for_new_groups(groups_count):
+            #     groups_count = len(groups)
+            #     num = 0
 
             group = groups[num]
             user_id, chat_ids, keywords = group[0], group[2], group[5]
@@ -113,9 +113,6 @@ async def search_and_forward():
                 num = 0
 
         await asyncio.sleep(20)
-
-
-
 
 class Create_group(StatesGroup):
     create_group_1 = State()
