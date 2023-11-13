@@ -557,8 +557,7 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                 types.InlineKeyboardButton(cfg.back_button, callback_data='back_keyword')
             )
             await state.update_data(number_group=number_group)
-            message_ids = await callback_query.message.edit_caption(cfg.change_keyword_text, reply_markup=markup_inline)
-            await state.update_data(message_id=message_ids)
+            await callback_query.message.edit_caption(cfg.change_keyword_text, reply_markup=markup_inline)
             await Change_keyword.change_keyword_1.set()
 
 @dp.message_handler(state=Parsers_use.parsers_use_1)
@@ -587,10 +586,9 @@ async def change_keyword_1_func(message: types.Message, state: FSMContext):
                     try:
                         data = await state.get_data()
                         number_group = data.get("number_group")
-                        message_ids = data.get("message_ids")
                         db.update_keywords(text_lines, number_group)
                         group_name = db.get_group_name_number(number_group)
-                        await bot.edit_message_caption(message_id=message_ids, caption=cfg.correct_keyword_change(group_name), parse_mode=types.ParseMode.MARKDOWN)
+                        await message.answer(cfg.correct_keyword_change(group_name), parse_mode=types.ParseMode.MARKDOWN)
                         await state.finish()
                     except Exception as es:
                         await state.reset_state()
