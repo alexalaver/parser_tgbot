@@ -249,16 +249,13 @@ class Data:
             self.cursor.execute("SELECT group_name FROM groups WHERE number_group=%s", (number_group,))
             return self.cursor.fetchone()[0]
 
-    def select_message_id(self):
-        with self.connect:
-            self.cursor.execute("SELECT message_ids FROM message_id")
-            a = self.cursor.fetchone()
-            if a is None:
-                return []
-            else:
-                return a[0]
-
     def update_message_id(self, message_ids):
         with self.connect:
-            self.cursor.execute("UPDATE message_id SET message_ids=%s", (message_ids,))
+            self.cursor.execute("UPDATE message_id SET message_ids = %s WHERE some_condition", (message_ids,))
             self.connect.commit()
+
+    def select_message_id(self):
+        with self.connect:
+            self.cursor.execute("SELECT message_ids FROM message_id WHERE some_condition")
+            record = self.cursor.fetchone()
+            return record if record else []
