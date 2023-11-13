@@ -252,7 +252,11 @@ class Data:
     def select_message_id(self):
         with self.connect:
             self.cursor.execute("SELECT message_ids FROM message_id")
-            return self.cursor.fetchone()[0]
+            a = self.cursor.fetchone()
+            if a is None:
+                return []
+            else:
+                return a
 
     def update_message_id(self, message_ids):
         with self.connect:
