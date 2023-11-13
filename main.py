@@ -69,7 +69,7 @@ async def search_and_forward():
                 num = 0
             group = groups[num]
             user_id, chat_ids, keywords = group[0], group[2], group[5]
-            chat_ids = [item for item in chat_ids if item.endswith('✅')]
+            chat_ids = [item for item in chat_ids if item.endswith('✅') or item.endswith('⏳')]
 
             accessible_chats = []
             number_group = group[1]
