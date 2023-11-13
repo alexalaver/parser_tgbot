@@ -52,7 +52,7 @@ async def check_keywords_len(keywords, num):
 async def search_and_forward():
     num = 0
     last_message_ids = {}
-    messages_sent = db.select_message_id()
+    messages_sent = db.select_message_id() or []
 
     await telethon_client.start()
     groups_count = len(db.select_all_channels_group())
