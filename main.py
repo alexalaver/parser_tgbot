@@ -140,7 +140,7 @@ async def search_and_forward():
                                         message_text = f"Ключевое слово: {keyword}\n\nЧат: {trimmed_chat_id}\n\nСообщение от: {sender_identifier}\n\nТекст сообщения: {message.text}"
                                         await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
                                         print(f"Message sent to user {user_id}: {message.text}")
-                                        db.update_message_id(message_key)
+                                        db.update_message_id(messages_sent.append(message_key))
                                         await asyncio.sleep(2)
                                     break
 
