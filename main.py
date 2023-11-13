@@ -643,7 +643,7 @@ async def change_keyword_1_buttons(callback_query: types.CallbackQuery, state: F
             markup_inline.add(change_keywords)
             markup_inline.add(back_channels)
             await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
-            await state.reset_state()
+            await Parsers_use.parsers_use_1.set()
         else:
             await callback_query.answer(cfg.error_button_create_group)
 
