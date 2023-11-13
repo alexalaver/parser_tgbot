@@ -39,6 +39,16 @@ async def check_private_channel(channels, user_id):
     except Exception as e:
         await bot.send_message(cfg.admin_id, f"{fnc.nick_with_link('Пользователь', user_id)}, добавил закрытые чаты, вам необходимо подписаться на них.\n\n{channels}", parse_mode=types.ParseMode.MARKDOWN)
 
+async def check_keywords_len(keywords, groups, num):
+    group = groups[num]
+    keywords = group[5]
+    b = ['help1', 'help2', 'test1', 'help3', 'test2']
+    result = all(item in b for item in keywords)
+    if result:
+        return True
+    else:
+        return False
+
 async def search_and_forward():
     num = 0
     last_message_ids = {}
@@ -66,9 +76,16 @@ async def search_and_forward():
                 user_id, chat_ids, keywords = group[0], group[2], group[5]
                 chat_ids = [item for item in chat_ids if item.endswith('✅')]
 
+            if check_keywords_len(keywords, groups, num) is False:
+                groups = db.select_all_channels_group()
+                group = groups[num]
+                user_id, chat_ids, keywords = group[0], group[2], group[5]
+                chat_ids = [item for item in chat_ids if item.endswith('✅')]
+
             without_dostup = []
             accessible_chats = []
             number_group = group[1]
+
             for new_chat_id in chat_ids:
                 try:
                     await telethon_client.get_entity(new_chat_id[:-2])
