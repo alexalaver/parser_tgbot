@@ -113,10 +113,10 @@ async def search_and_forward():
                     new_channels = [new_callback if item == chat_id else item for item in all_chat_ids]
                     db.update_all_channels(number_group, new_channels)
                     await asyncio.sleep(2)
-
-            num += 1
-            if num >= len(groups):
-                num = 0
+                finally:
+                    num += 1
+                    if num >= len(groups):
+                        num = 0
 
         except Exception as e:
             print(f"Произошла ошибка: {e}")
