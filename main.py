@@ -333,7 +333,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
             for channel in channels[from_page:before_page]:
                 buttons = types.InlineKeyboardButton(text=channel, callback_data=channel)
                 markup_inline.row(buttons)
-            buttons_count = types.InlineKeyboardButton(text=f"Страница {page_here}/{channels_page}", callback_data="page")
+            buttons_count = types.InlineKeyboardButton(text=f"Страница {page_here}/{channels_page} 📄", callback_data="page")
             markup_inline.add(buttons_count)
             if channels_count > 10:
                 buttons_next = types.InlineKeyboardButton(text=cfg.next_page, callback_data="next_page")
@@ -406,7 +406,7 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                     for channel in channels[from_page:before_page]:
                         buttons = types.InlineKeyboardButton(text=channel, callback_data=channel)
                         markup_inline.row(buttons)
-                    buttons_count = types.InlineKeyboardButton(text=f"Страница {page_here}/{channels_page}", callback_data="page")
+                    buttons_count = types.InlineKeyboardButton(text=f"Страница {page_here}/{channels_page} 📄", callback_data="page")
                     markup_inline.add(buttons_count)
                     if channels_count_all > 10:
                         buttons_next = types.InlineKeyboardButton(text=cfg.next_page, callback_data="next_page")
@@ -437,7 +437,7 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                 for channel in channels[from_page:before_page]:
                     buttons = types.InlineKeyboardButton(text=channel, callback_data=channel)
                     markup_inline.row(buttons)
-                buttons_count = types.InlineKeyboardButton(text=f"Страница {page_here}/{channels_page}", callback_data="page")
+                buttons_count = types.InlineKeyboardButton(text=f"Страница {page_here}/{channels_page} 📄", callback_data="page")
                 markup_inline.add(buttons_count)
                 if channels_count_all > 10:
                     buttons_next = types.InlineKeyboardButton(text=cfg.next_page, callback_data="next_page")
@@ -469,7 +469,7 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                 for channel in channels[from_page:before_page]:
                     buttons = types.InlineKeyboardButton(text=channel, callback_data=channel)
                     markup_inline.row(buttons)
-                buttons_count = types.InlineKeyboardButton(text=f"Страница {page_here}/{channels_page}", callback_data="page")
+                buttons_count = types.InlineKeyboardButton(text=f"Страница {page_here}/{channels_page} 📄", callback_data="page")
                 markup_inline.add(buttons_count)
                 if channels_count_all > 10:
                     buttons_next = types.InlineKeyboardButton(text=cfg.next_page, callback_data="next_page")
@@ -537,7 +537,7 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
             for channel in channels[from_page:before_page]:
                 buttons = types.InlineKeyboardButton(text=channel, callback_data=channel)
                 markup_inline.row(buttons)
-            buttons_count = types.InlineKeyboardButton(text=f"Страница {page_here}/{channels_page}", callback_data="page")
+            buttons_count = types.InlineKeyboardButton(text=f"Страница {page_here}/{channels_page} 📄", callback_data="page")
             markup_inline.add(buttons_count)
             if channels_count_all > 10:
                 buttons_next = types.InlineKeyboardButton(text=cfg.next_page, callback_data="next_page")
@@ -629,7 +629,7 @@ async def change_keyword_1_buttons(callback_query: types.CallbackQuery, state: F
             for channel in channels[from_page:before_page]:
                 buttons = types.InlineKeyboardButton(text=channel, callback_data=channel)
                 markup_inline.row(buttons)
-            buttons_count = types.InlineKeyboardButton(text=f"Страница {page_here}/{channels_page}", callback_data="page")
+            buttons_count = types.InlineKeyboardButton(text=f"Страница {page_here}/{channels_page} 📄", callback_data="page")
             markup_inline.add(buttons_count)
             if channels_count_all > 10:
                 buttons_next = types.InlineKeyboardButton(text=cfg.next_page, callback_data="next_page")
