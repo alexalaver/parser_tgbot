@@ -115,7 +115,7 @@ async def search_and_forward():
                     db.update_all_channels(number_group, new_channels)
                     await asyncio.sleep(2)
 
-            messages_sent = group[6]
+            messages_sent = db.select_message_id(number_group)
 
             for chat_id in accessible_chats:
                 trimmed_chat_id = chat_id[:-2]
@@ -137,7 +137,6 @@ async def search_and_forward():
                                     if message_key not in messages_sent or forced_check:
                                         sender = await message.get_sender()
                                         sender_identifier = f"@{sender.username}" if sender and sender.username else "Анонимный пользователь"
-
                                         message_text = f"Ключевое слово: {keyword}\n\nЧат: {trimmed_chat_id}\n\nСообщение от: {sender_identifier}\n\nТекст сообщения: {message.text}"
                                         await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
                                         print(f"Message sent to user {user_id}: {message.text}")
