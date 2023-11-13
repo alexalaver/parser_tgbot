@@ -251,13 +251,11 @@ class Data:
 
     def update_message_id(self, message_ids):
         with self.connect:
-            message_ids_list = [msg_id[1] for msg_id in message_ids]
-            message_ids_array = list(map(int, message_ids_list))
-            self.cursor.execute("UPDATE message_id SET message_ids = %s", (message_ids_array,))
+            self.cursor.execute("UPDATE message_id SET message_ids = %s", (message_ids,))
             self.connect.commit()
 
     def select_message_id(self):
         with self.connect:
             self.cursor.execute("SELECT message_ids FROM message_id")
             record = self.cursor.fetchone()
-            return record if record else []
+            return record[0]
