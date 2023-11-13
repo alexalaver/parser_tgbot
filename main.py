@@ -125,18 +125,20 @@ async def search_and_forward():
 
                 try:
                     async for message in telethon_client.iter_messages(trimmed_chat_id, offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
-                        if message.text and any(keyword.lower() in message.text.lower() for keyword in keywords):
-                            message_key = (user_id, message.id)
-                            if message_key not in messages_sent or forced_check:
+                        if message.text:
+                            for keyword in keywords:
+                                if keyword.lower() in message.text.lower():
+                                    message_key = (user_id, message.id)
+                                    if message_key not in messages_sent or forced_check:
+                                        sender = await message.get_sender()
+                                        sender_identifier = f"@{sender.username}" if sender and sender.username else "Анонимный пользователь"
 
-                                sender = await message.get_sender()
-                                sender_identifier = f"@{sender.username}" if sender and sender.username else "Анонимный пользователь"
-
-                                message_text = f"Ключевое слово: {keywords}\n\nЧат: {trimmed_chat_id}\n\nСообщение от: {sender_identifier}\n\nТекст сообщение: {message.text}"
-                                await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
-                                print(f"Message sent to user {user_id}: {message.text}")
-                                messages_sent[message_key] = True
-                                await asyncio.sleep(1)
+                                        message_text = f"Ключевое слово: {keyword}\n\nЧат: {trimmed_chat_id}\n\nСообщение от: {sender_identifier}\n\nТекст сообщения: {message.text}"
+                                        await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
+                                        print(f"Message sent to user {user_id}: {message.text}")
+                                        messages_sent[message_key] = True
+                                        await asyncio.sleep(1)
+                                    break
 
                 except FloodWaitError as e:
                     wait_time = e.seconds
