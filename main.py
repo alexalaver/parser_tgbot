@@ -6,7 +6,7 @@ from datbas import Data
 from datetime import datetime
 from telethon import TelegramClient
 from telethon.sessions import StringSession
-from telethon.errors import FloodWaitError
+from telethon.errors import FloodWaitError, InviteHashExpiredError, ChannelPrivateError
 import functions as fnc
 import asyncio
 import config as cfg
@@ -88,13 +88,15 @@ async def search_and_forward():
                     new_callback = new_chat_id[:-1] + '✅'
                     new_channels = [new_callback if item == new_chat_id else item for item in all_channels]
                     db.update_all_channels(number_group, new_channels)
-                except Exception as err:
+                except InviteHashExpiredError:
+                    pass
+                except ChannelPrivateError as err:
                     print(f"[ERROR] {err}")
                     all_channels = db.select_channels_with_number(number_group)
                     new_callback = new_chat_id[:-1] + '⏳'
                     new_channels = [new_callback if item == new_chat_id else item for item in all_channels]
                     db.update_all_channels(number_group, new_channels)
-                    await asyncio.sleep(1)
+                    await asyncio.sleep(2)
 
             for chat_id in accessible_chats:
                 trimmed_chat_id = chat_id[:-2]
