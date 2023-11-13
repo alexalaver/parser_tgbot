@@ -142,7 +142,7 @@ async def search_and_forward():
                                         await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
                                         print(f"Message sent to user {user_id}: {message.text}")
                                         messages_sent.append(message_key[0])
-                                        db.update_all_message_ids(num, messages_sent)
+                                        db.update_all_message_ids(number_group, messages_sent)
                                         await asyncio.sleep(2)
                                     break
 
