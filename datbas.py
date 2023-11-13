@@ -259,3 +259,8 @@ class Data:
             self.cursor.execute("SELECT message_ids FROM message_id")
             record = self.cursor.fetchone()
             return record[0]
+
+    def update_all_message_ids(self, number_group, message_ids):
+        with self.connect:
+            self.cursor.execute("UPDATE groups SET message_ids=%s WHERE number_group=%s", (message_ids, number_group,))
+            self.connect.commit()

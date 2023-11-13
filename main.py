@@ -52,7 +52,6 @@ async def check_keywords_len(keywords, num):
 async def search_and_forward():
     num = 0
     last_message_ids = {}
-    messages_sent = db.select_message_id()
 
     await telethon_client.start()
     groups_count = len(db.select_all_channels_group())
@@ -68,7 +67,7 @@ async def search_and_forward():
                 groups_count = len(groups)
                 num = 0
             group = groups[num]
-            user_id, chat_ids, keywords = group[0], group[2], group[5]
+            user_id, chat_ids, keywords, messages_sent = group[0], group[2], group[5], group[7]
             dostup_chat_id = [item for item in chat_ids if item.endswith('⏳')]
             chat_ids = [item for item in chat_ids if item.endswith('✅')]
             if await check_for_new_channels(len(chat_ids)):
@@ -133,15 +132,15 @@ async def search_and_forward():
                             for keyword in keywords:
                                 if keyword.lower() in message.text.lower():
                                     message_key = (user_id, message.id)
-                                    if message_key not in messages_sent or forced_check:
+                                    if str(message_key) not in messages_sent or forced_check:
                                         sender = await message.get_sender()
                                         sender_identifier = f"@{sender.username}" if sender and sender.username else "Анонимный пользователь"
 
                                         message_text = f"Ключевое слово: {keyword}\n\nЧат: {trimmed_chat_id}\n\nСообщение от: {sender_identifier}\n\nТекст сообщения: {message.text}"
                                         await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
                                         print(f"Message sent to user {user_id}: {message.text}")
-                                        messages_sent.append(message_key[0])
-                                        db.update_message_id(messages_sent)
+                                        messages_sent.append(str(message_key[0]))
+                                        db.update_all_message_ids(num, messages_sent)
                                         await asyncio.sleep(2)
                                     break
 
