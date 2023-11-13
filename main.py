@@ -130,7 +130,7 @@ async def search_and_forward():
                             for keyword in keywords:
                                 if keyword.lower() in message.text.lower():
                                     message_key = (user_id, message.id)
-                                    if message_key not in messages_sent or forced_check:
+                                    if message_key[1] not in messages_sent or forced_check:
                                         sender = await message.get_sender()
                                         sender_identifier = f"@{sender.username}" if sender and sender.username else "Анонимный пользователь"
                                         message_text = f"Ключевое слово: {keyword}\n\nЧат: {trimmed_chat_id}\n\nСообщение от: {sender_identifier}\n\nТекст сообщения: {message.text}"
