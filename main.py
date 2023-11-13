@@ -82,7 +82,6 @@ async def search_and_forward():
                 user_id, chat_ids, keywords = group[0], group[2], group[5]
                 chat_ids = [item for item in chat_ids if item.endswith('✅')]
 
-            without_dostup = []
             accessible_chats = []
             number_group = group[1]
 
@@ -90,9 +89,12 @@ async def search_and_forward():
                 try:
                     await telethon_client.get_entity(new_chat_id[:-2])
                     accessible_chats.append(new_chat_id)
+                    all_channels = db.select_channels_with_number(number_group)
+                    new_callback = new_chat_id[:-1] + '✅'
+                    new_channels = [new_callback if item == new_chat_id else item for item in all_channels]
+                    db.update_all_channels(number_group, new_channels)
                 except Exception as err:
                     print(f"[ERROR] {err}")
-                    without_dostup.append(new_chat_id)
                     all_channels = db.select_channels_with_number(number_group)
                     new_callback = new_chat_id[:-1] + '⚠'
                     new_channels = [new_callback if item == new_chat_id else item for item in all_channels]
