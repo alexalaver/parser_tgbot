@@ -40,10 +40,10 @@ async def check_private_channel(channels, user_id):
         await bot.send_message(cfg.admin_id, f"{fnc.nick_with_link('Пользователь', user_id)}, добавил закрытые чаты, вам необходимо подписаться на них.\n\n{channels}", parse_mode=types.ParseMode.MARKDOWN)
 
 async def check_keywords_len(keywords, groups, num):
+    groups = db.select_all_channels_group()
     group = groups[num]
-    keywords = group[5]
-    b = ['help1', 'help2', 'test1', 'help3', 'test2']
-    result = all(item in b for item in keywords)
+    old_keywords = group[5]
+    result = all(item in keywords for item in old_keywords)
     if result:
         return True
     else:
@@ -76,11 +76,11 @@ async def search_and_forward():
                 user_id, chat_ids, keywords = group[0], group[2], group[5]
                 chat_ids = [item for item in chat_ids if item.endswith('✅')]
 
-            if await check_keywords_len(keywords, groups, num) is False:
+            if await check_keywords_len(keywords, groups, num) == False:
                 groups = db.select_all_channels_group()
                 group = groups[num]
                 user_id, chat_ids, keywords = group[0], group[2], group[5]
-                chat_ids = [item for item in chat_ids if item.endswith('✅')]
+                chat_ids = [item for item in chat_ids if item.endswith('⏳')]
 
             accessible_chats = []
             number_group = group[1]
@@ -401,7 +401,7 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                         new_callback = channel_name[:-1] + '✅'
                         new_channels = [new_callback if item == channel_name else item for item in all_channels]
                         db.update_all_channels(number_group, new_channels)
-                    elif channel_name[-1] == "⚠":
+                    elif channel_name[-1] == "⏳":
                         await callback_query.answer(cfg.error_dostup_chat, show_alert=True)
                     channels = db.select_channels_with_number(number_group)
                     markup_inline = types.InlineKeyboardMarkup(row_width=2)
