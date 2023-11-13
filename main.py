@@ -132,14 +132,14 @@ async def search_and_forward():
                             for keyword in keywords:
                                 if keyword.lower() in message.text.lower():
                                     message_key = (user_id, message.id)
-                                    if str(message_key) not in messages_sent or forced_check:
+                                    if message_key not in messages_sent or forced_check:
                                         sender = await message.get_sender()
                                         sender_identifier = f"@{sender.username}" if sender and sender.username else "Анонимный пользователь"
 
                                         message_text = f"Ключевое слово: {keyword}\n\nЧат: {trimmed_chat_id}\n\nСообщение от: {sender_identifier}\n\nТекст сообщения: {message.text}"
                                         await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
                                         print(f"Message sent to user {user_id}: {message.text}")
-                                        messages_sent.append(str(message_key[0]))
+                                        messages_sent.append(message_key[0])
                                         db.update_all_message_ids(num, messages_sent)
                                         await asyncio.sleep(2)
                                     break
