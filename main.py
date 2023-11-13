@@ -39,7 +39,7 @@ async def check_private_channel(channels, user_id):
     except Exception as e:
         await bot.send_message(cfg.admin_id, f"{fnc.nick_with_link('Пользователь', user_id)}, добавил закрытые чаты, вам необходимо подписаться на них.\n\n{channels}", parse_mode=types.ParseMode.MARKDOWN)
 
-async def check_keywords_len(keywords, groups, num):
+async def check_keywords_len(keywords, num):
     groups = db.select_all_channels_group()
     group = groups[num]
     old_keywords = group[5]
