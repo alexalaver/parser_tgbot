@@ -256,7 +256,7 @@ class Data:
             if a is None:
                 return []
             else:
-                return a
+                return a[0]
 
     def update_message_id(self, message_ids):
         with self.connect:
