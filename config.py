@@ -144,3 +144,4 @@ def correct_keyword_change(group_name):
     return f"Вы успешно изменили ключевые слова группы '{group_name}'"
 
 error_dostup_chat = "Нам нужно немного времени, чтобы добваить этот чат, так как он приватный."
+

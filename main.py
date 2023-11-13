@@ -52,7 +52,7 @@ async def check_keywords_len(keywords, num):
 async def search_and_forward():
     num = 0
     last_message_ids = {}
-    messages_sent = {}
+    messages_sent = db.select_message_id()
 
     await telethon_client.start()
     groups_count = len(db.select_all_channels_group())
@@ -119,7 +119,7 @@ async def search_and_forward():
             for chat_id in accessible_chats:
                 trimmed_chat_id = chat_id[:-2]
                 last_id = last_message_ids.get(trimmed_chat_id, 0)
-                messages_to_check = 100
+                messages_to_check = 30
 
                 forced_check = num == 0 and last_id == 0
 
@@ -140,7 +140,7 @@ async def search_and_forward():
                                         message_text = f"Ключевое слово: {keyword}\n\nЧат: {trimmed_chat_id}\n\nСообщение от: {sender_identifier}\n\nТекст сообщения: {message.text}"
                                         await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
                                         print(f"Message sent to user {user_id}: {message.text}")
-                                        messages_sent[message_key] = True
+                                        db.update_message_id(message_key)
                                         await asyncio.sleep(2)
                                     break
 

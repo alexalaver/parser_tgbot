@@ -248,3 +248,13 @@ class Data:
         with self.connect:
             self.cursor.execute("SELECT group_name FROM groups WHERE number_group=%s", (number_group,))
             return self.cursor.fetchone()[0]
+
+    def select_message_id(self):
+        with self.connect:
+            self.cursor.execute("SELECT message_ids FROM message_id")
+            return self.cursor.fetchone()[0]
+
+    def update_message_id(self, message_ids):
+        with self.connect:
+            self.cursor.execute("UPDATE message_id SET message_ids=%s", (message_ids,))
+            self.connect.commit()
