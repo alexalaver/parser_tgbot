@@ -81,6 +81,21 @@ async def search_and_forward():
             accessible_chats = []
             number_group = group[1]
 
+            for new_dostup_chat_id in dostup_chat_id:
+                try:
+                    await telethon_client.get_entity(new_dostup_chat_id[:-2])
+                    all_channels = db.select_channels_with_number(number_group)
+                    new_callback = new_dostup_chat_id[:-1] + '✅'
+                    new_channels = [new_callback if item == new_dostup_chat_id else item for item in all_channels]
+                    db.update_all_channels(number_group, new_channels)
+                except InviteHashExpiredError as errr:
+                    print(f"[ERROR INVITE] {errr}")
+                except ChannelPrivateError as err:
+                    print(f"[ERROR] {err}")
+
+                except Exception as erri:
+                    print(f"[ERROR EXCEPTION] {erri}")
+
             for new_chat_id in chat_ids:
                 try:
                     await telethon_client.get_entity(new_chat_id[:-2])
@@ -93,32 +108,13 @@ async def search_and_forward():
                     print(f"[ERROR INVITE] {errr}")
                 except ChannelPrivateError as err:
                     print(f"[ERROR] {err}")
+                    await asyncio.sleep(2)
+                except Exception as erri:
+                    print(f"[ERROR EXCEPTION] {erri}")
                     all_channels = db.select_channels_with_number(number_group)
                     new_callback = new_chat_id[:-1] + '⏳'
                     new_channels = [new_callback if item == new_chat_id else item for item in all_channels]
                     db.update_all_channels(number_group, new_channels)
-                    await asyncio.sleep(2)
-                except Exception as erri:
-                    print(f"[ERROR EXCEPTION] {erri}")
-
-            for new_dostup_chat_id in dostup_chat_id:
-                try:
-                    await telethon_client.get_entity(new_dostup_chat_id[:-2])
-                    all_channels = db.select_channels_with_number(number_group)
-                    new_callback = new_dostup_chat_id[:-1] + '✅'
-                    new_channels = [new_callback if item == new_dostup_chat_id else item for item in all_channels]
-                    db.update_all_channels(number_group, new_channels)
-                except InviteHashExpiredError as errr:
-                    print(f"[ERROR INVITE] {errr}")
-                except ChannelPrivateError as err:
-                    print(f"[ERROR] {err}")
-                    all_channels = db.select_channels_with_number(number_group)
-                    new_callback = new_dostup_chat_id[:-1] + '⏳'
-                    new_channels = [new_callback if item == new_dostup_chat_id else item for item in all_channels]
-                    db.update_all_channels(number_group, new_channels)
-                    await asyncio.sleep(2)
-                except Exception as erri:
-                    print(f"[ERROR EXCEPTION] {erri}")
 
             for chat_id in accessible_chats:
                 trimmed_chat_id = chat_id[:-2]
