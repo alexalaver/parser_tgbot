@@ -100,7 +100,7 @@ async def search_and_forward():
                 except FloodWaitError as e:
                     wait_time = e.seconds
                     print(f"Flood wait error on chat {trimmed_chat_id}. Sleeping for {wait_time} seconds.")
-                    await asyncio.sleep(wait_time)
+                    await asyncio.sleep(2)
                 except Exception as erri:
                     print(f"[ERROR EXCEPTION] {erri}")
                     new_callback = chat_id[:-1] + '⏳'
