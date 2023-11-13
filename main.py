@@ -6,7 +6,7 @@ from datbas import Data
 from datetime import datetime
 from telethon import TelegramClient
 from telethon.sessions import StringSession
-from telethon.errors import FloodWaitError, ChannelPrivateError, ChatAdminRequiredError, UserNotParticipantError
+from telethon.errors import FloodWaitError
 import functions as fnc
 import asyncio
 import config as cfg
@@ -76,7 +76,7 @@ async def search_and_forward():
                 user_id, chat_ids, keywords = group[0], group[2], group[5]
                 chat_ids = [item for item in chat_ids if item.endswith('✅')]
 
-            if check_keywords_len(keywords, groups, num) is False:
+            if await check_keywords_len(keywords, groups, num) is False:
                 groups = db.select_all_channels_group()
                 group = groups[num]
                 user_id, chat_ids, keywords = group[0], group[2], group[5]
