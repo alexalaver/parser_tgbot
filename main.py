@@ -95,7 +95,7 @@ async def search_and_forward():
                                 await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
                                 print(f"Message sent to user {user_id}: {message.text}")
                                 messages_sent[message_key] = True
-                                await asyncio.sleep(1)
+                                await asyncio.sleep(3)
 
                     new_callback = chat_id[:-1] + '✅'
                     new_channels = [new_callback if item == chat_id else item for item in all_chat_ids]
@@ -106,6 +106,7 @@ async def search_and_forward():
                             last_message_ids[trimmed_chat_id] = messages[0].id
                     except Exception as err:
                         print(f"Ошибка при получении сообщения из чата {trimmed_chat_id}: {err}")
+                        continue
                 except FloodWaitError as e:
                     wait_time = e.seconds
                     print(f"Flood wait error on chat {trimmed_chat_id}. Sleeping for {wait_time} seconds.")
