@@ -67,7 +67,7 @@ async def search_and_forward():
                 groups_count = len(groups)
                 num = 0
             group = groups[num]
-            user_id, chat_ids, keywords, messages_sent = group[0], group[2], group[5], group[7]
+            user_id, chat_ids, keywords = group[0], group[2], group[5]
             dostup_chat_id = [item for item in chat_ids if item.endswith('⏳')]
             chat_ids = [item for item in chat_ids if item.endswith('✅')]
             if await check_for_new_channels(len(chat_ids)):
@@ -114,6 +114,8 @@ async def search_and_forward():
                     new_channels = [new_callback if item == new_chat_id else item for item in all_channels]
                     db.update_all_channels(number_group, new_channels)
                     await asyncio.sleep(2)
+
+            messages_sent = group[6]
 
             for chat_id in accessible_chats:
                 trimmed_chat_id = chat_id[:-2]
