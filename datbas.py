@@ -251,11 +251,11 @@ class Data:
 
     def update_message_id(self, message_ids):
         with self.connect:
-            self.cursor.execute("UPDATE message_id SET message_ids = %s WHERE some_condition", (message_ids,))
+            self.cursor.execute("UPDATE message_id SET message_ids = %s", (message_ids,))
             self.connect.commit()
 
     def select_message_id(self):
         with self.connect:
-            self.cursor.execute("SELECT message_ids FROM message_id WHERE some_condition")
+            self.cursor.execute("SELECT message_ids FROM message_id")
             record = self.cursor.fetchone()
             return record if record else []
