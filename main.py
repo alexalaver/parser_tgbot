@@ -74,14 +74,13 @@ async def search_and_forward():
                 groups = db.select_all_channels_group()
                 group = groups[num]
                 user_id, chat_ids, keywords = group[0], group[2], group[5]
-                # chat_ids = [item for item in chat_ids if item.endswith('✅')]
-                chat_ids_new = [item for item in chat_ids if item.endswith('⚠')]
+                chat_ids = [item for item in chat_ids if item.endswith('✅')]
 
 
             accessible_chats = []
             number_group = group[1]
 
-            for new_chat_id in chat_ids_new:
+            for new_chat_id in chat_ids:
                 try:
                     await telethon_client.get_entity(new_chat_id[:-2])
                     accessible_chats.append(new_chat_id)
@@ -97,7 +96,7 @@ async def search_and_forward():
                     db.update_all_channels(number_group, new_channels)
                     await asyncio.sleep(1)
 
-            for chat_ids_new in accessible_chats:
+            for chat_id in accessible_chats:
                 trimmed_chat_id = chat_id[:-2]
                 last_id = last_message_ids.get(trimmed_chat_id, 0)
                 messages_to_check = 10
