@@ -76,11 +76,6 @@ async def search_and_forward():
                 user_id, chat_ids, keywords = group[0], group[2], group[5]
                 chat_ids = [item for item in chat_ids if item.endswith('✅')]
 
-            if await check_keywords_len(keywords, groups, num) == False:
-                groups = db.select_all_channels_group()
-                group = groups[num]
-                user_id, chat_ids, keywords = group[0], group[2], group[5]
-                chat_ids = [item for item in chat_ids if item.endswith('⏳')]
 
             accessible_chats = []
             number_group = group[1]
@@ -96,7 +91,7 @@ async def search_and_forward():
                 except Exception as err:
                     print(f"[ERROR] {err}")
                     all_channels = db.select_channels_with_number(number_group)
-                    new_callback = new_chat_id[:-1] + '⚠'
+                    new_callback = new_chat_id[:-1] + '⏳'
                     new_channels = [new_callback if item == new_chat_id else item for item in all_channels]
                     db.update_all_channels(number_group, new_channels)
                     await asyncio.sleep(1)
