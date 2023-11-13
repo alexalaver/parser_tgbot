@@ -100,9 +100,12 @@ async def search_and_forward():
                     new_callback = chat_id[:-1] + '✅'
                     new_channels = [new_callback if item == chat_id else item for item in all_chat_ids]
                     db.update_all_channels(number_group, new_channels)
-                    messages = await telethon_client.get_messages(trimmed_chat_id, limit=1)
-                    if messages:
-                        last_message_ids[trimmed_chat_id] = messages[0].id
+                    try:
+                        messages = await telethon_client.get_messages(trimmed_chat_id, limit=1)
+                        if messages:
+                            last_message_ids[trimmed_chat_id] = messages[0].id
+                    except Exception as err:
+                        print(f"Ошибка при получении сообщения из чата {trimmed_chat_id}: {err}")
                 except FloodWaitError as e:
                     wait_time = e.seconds
                     print(f"Flood wait error on chat {trimmed_chat_id}. Sleeping for {wait_time} seconds.")
@@ -113,10 +116,10 @@ async def search_and_forward():
                     new_channels = [new_callback if item == chat_id else item for item in all_chat_ids]
                     db.update_all_channels(number_group, new_channels)
                     await asyncio.sleep(2)
-                finally:
-                    num += 1
-                    if num >= len(groups):
-                        num = 0
+
+            num += 1
+            if num >= len(groups):
+                num = 0
 
         except Exception as e:
             print(f"Произошла ошибка: {e}")
