@@ -312,7 +312,6 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 await Create_group.create_group_1.set()
                 await callback_query.message.answer(cfg.create_group_text_1, parse_mode=types.ParseMode.MARKDOWN)
                 await callback_query.message.answer(cfg.create_group_text_2, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
-                await callback_query.answer(cfg.create_group_button_uved)
             else:
                 await callback_query.answer(cfg.error_group_5, show_alert=True)
         elif callback_query.data in db.select_group_name(user_id):
@@ -390,13 +389,11 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                 else:
                     channel_name = callback_query.data
                     if channel_name[-1] == "✅":
-                        await callback_query.answer(cfg.off_channels_uved)
                         all_channels = db.select_channels_with_number(number_group)
                         new_callback = channel_name[:-1] + '❌'
                         new_channels = [new_callback if item == channel_name else item for item in all_channels]
                         db.update_all_channels(number_group, new_channels)
                     elif channel_name[-1] == "❌":
-                        await callback_query.answer(cfg.on_channels_uved)
                         all_channels = db.select_channels_with_number(number_group)
                         new_callback = channel_name[:-1] + '✅'
                         new_channels = [new_callback if item == channel_name else item for item in all_channels]
@@ -426,7 +423,6 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
             if channels_page == page_here:
                 await callback_query.answer(cfg.error_page_next, show_alert=True)
             else:
-                await callback_query.answer(cfg.next_page_text)
                 channels = db.select_channels_with_number(number_group)
                 markup_inline = types.InlineKeyboardMarkup(row_width=2)
                 page_here = page_here + 1
@@ -458,7 +454,6 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
             if page_here == 1:
                 await callback_query.answer(cfg.error_page_old, show_alert=True)
             else:
-                await callback_query.answer(cfg.old_page_text)
                 channels = db.select_channels_with_number(number_group)
                 markup_inline = types.InlineKeyboardMarkup(row_width=2)
                 page_here = page_here - 1
@@ -485,8 +480,6 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                 markup_inline.add(change_keywords)
                 markup_inline.add(back_channels)
                 await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
-        elif callback_query.data == "page":
-            await callback_query.answer(cfg.page_text)
         elif callback_query.data == "back_channels":
             await state.reset_state()
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
@@ -499,7 +492,6 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
             btn_inline1 = types.InlineKeyboardButton(cfg.groups_add_button, callback_data='groups_add_button')
             markup_inline.add(btn_inline1)
             await callback_query.message.edit_caption(caption=cfg.parser_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
-            await callback_query.answer(cfg.back_text)
         elif callback_query.data == "pay_money_channels":
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
             btn_inline1 = types.InlineKeyboardButton(cfg.confirm_oplata, callback_data='confirm_oplata')
@@ -508,7 +500,6 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
             channels_len = len(channels)
             money_oplata = str(5 * int(channels_len))
             await callback_query.message.edit_caption(caption=cfg.oplata_chatov(channels_len, money_oplata), reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
-            await callback_query.answer(cfg.button_correct)
         elif callback_query.data == "confirm_oplata":
             balance = db.check_balance(user_id)
             channels_len = len(channels)
@@ -649,12 +640,11 @@ async def change_keyword_1_buttons(callback_query: types.CallbackQuery, state: F
             await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
             await Parsers_use.parsers_use_1.set()
         else:
-            await callback_query.answer(cfg.error_button_create_group)
+            await callback_query.answer(cfg.error_button_create_group, show_alert=True)
 
 @dp.message_handler(state=Create_group.create_group_1)
 async def create_group_func_1(message: types.Message, state: FSMContext):
     if message.chat.type == types.ChatType.PRIVATE:
-        user_id = message.from_user.id
         if message.text == cfg.cancel_creategroup:
             markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
             markup_reply.add(cfg.autoposting)
@@ -676,7 +666,7 @@ async def create_group_func_1(message: types.Message, state: FSMContext):
 @dp.callback_query_handler(state=Create_group.create_group_1)
 async def button_group_1(callback_query: types.CallbackQuery):
     if callback_query.data is not None:
-        await callback_query.answer(cfg.error_button_create_group)
+        await callback_query.answer(cfg.error_button_create_group, show_alert=True)
 
 @dp.message_handler(state=Create_group.create_group_2)
 async def create_group_func_2(message: types.Message, state: FSMContext):
@@ -714,7 +704,7 @@ async def create_group_func_2(message: types.Message, state: FSMContext):
 @dp.callback_query_handler(state=Create_group.create_group_2)
 async def button_group_2(callback_query: types.CallbackQuery):
     if callback_query.data is not None:
-        await callback_query.answer(cfg.error_button_create_group)
+        await callback_query.answer(cfg.error_button_create_group, show_alert=True)
 
 @dp.message_handler(state=Create_group.create_group_3)
 async def create_group_func_3(message: types.Message, state: FSMContext):
@@ -762,7 +752,7 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
 @dp.callback_query_handler(state=Create_group.create_group_3)
 async def button_group_2(callback_query: types.CallbackQuery):
     if callback_query.data is not None:
-        await callback_query.answer(cfg.error_button_create_group)
+        await callback_query.answer(cfg.error_button_create_group, show_alert=True)
 
 @dp.message_handler()
 async def other(message: types.Message):
