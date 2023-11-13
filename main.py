@@ -310,7 +310,6 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
             else:
                 await callback_query.answer(cfg.error_group_5, show_alert=True)
         elif callback_query.data in db.select_group_name(user_id):
-            await callback_query.answer(cfg.group_text_uved)
             await Parsers_use.parsers_use_1.set()
             number_group = db.select_number_group(user_id, callback_query.data)
             await state.update_data(number_group=number_group)
