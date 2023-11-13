@@ -238,3 +238,13 @@ class Data:
         with self.connect:
             self.cursor.execute("UPDATE groups SET off_channels=%s WHERE number_group=%s", (channels, number_group,))
             self.connect.commit()
+
+    def update_keywords(self, keyword, number_group):
+        with self.connect:
+            self.cursor.execute("UPDATE groups SET keyword=%s WHERE number_group=%s", (keyword, number_group,))
+            self.connect.commit()
+
+    def get_group_name_number(self, number_group):
+        with self.connect:
+            self.cursor.execute("SELECT group_name FROM groups WHERE number_group=%s", (number_group,))
+            return self.cursor.fetchone()[0]
