@@ -123,6 +123,10 @@ async def search_and_forward():
 
                 forced_check = num == 0 and last_id == 0
 
+                groups = db.select_all_channels_group()
+                group = groups[num]
+                keywords = group[5]
+
                 try:
                     async for message in telethon_client.iter_messages(trimmed_chat_id, offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
                         if message.text:
