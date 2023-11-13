@@ -119,7 +119,7 @@ async def search_and_forward():
             for chat_id in accessible_chats:
                 trimmed_chat_id = chat_id[:-2]
                 last_id = last_message_ids.get(trimmed_chat_id, 0)
-                messages_to_check = 10
+                messages_to_check = 100
 
                 forced_check = num == 0 and last_id == 0
 
@@ -157,7 +157,7 @@ async def search_and_forward():
             print(f"Произошла ошибка: {e}")
             await asyncio.sleep(10)
 
-        await asyncio.sleep(20)
+        await asyncio.sleep(5)
 
 
 
