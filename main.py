@@ -132,7 +132,7 @@ async def search_and_forward():
                                 sender = await message.get_sender()
                                 sender_identifier = f"@{sender.username}" if sender and sender.username else "Анонимный пользователь"
 
-                                message_text = f"{message.text}\n\nИз чата {trimmed_chat_id}\n\nСообщение от {sender_identifier}"
+                                message_text = f"Ключевое слово: {keywords}\n\nЧат: {trimmed_chat_id}\n\nСообщение от: {sender_identifier}\n\nТекст сообщение: {message.text}"
                                 await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
                                 print(f"Message sent to user {user_id}: {message.text}")
                                 messages_sent[message_key] = True
