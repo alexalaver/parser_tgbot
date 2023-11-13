@@ -400,7 +400,7 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                         new_channels = [new_callback if item == channel_name else item for item in all_channels]
                         db.update_all_channels(number_group, new_channels)
                     elif channel_name[-1] == "⚠":
-                        await callback_query.answer(cfg.error_dostup_chat)
+                        await callback_query.answer(cfg.error_dostup_chat, show_alert=True)
                     channels = db.select_channels_with_number(number_group)
                     markup_inline = types.InlineKeyboardMarkup(row_width=2)
                     for channel in channels[from_page:before_page]:
