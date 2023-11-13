@@ -69,6 +69,7 @@ async def search_and_forward():
                 num = 0
             group = groups[num]
             user_id, chat_ids, keywords = group[0], group[2], group[5]
+            dostup_chat_id = [item for item in chat_ids if item.endswith('⏳')]
             chat_ids = [item for item in chat_ids if item.endswith('✅')]
             if await check_for_new_channels(len(chat_ids)):
                 groups = db.select_all_channels_group()
@@ -95,6 +96,23 @@ async def search_and_forward():
                     all_channels = db.select_channels_with_number(number_group)
                     new_callback = new_chat_id[:-1] + '⏳'
                     new_channels = [new_callback if item == new_chat_id else item for item in all_channels]
+                    db.update_all_channels(number_group, new_channels)
+                    await asyncio.sleep(2)
+
+            for new_dostup_chat_id in dostup_chat_id:
+                try:
+                    await telethon_client.get_entity(new_dostup_chat_id[:-2])
+                    all_channels = db.select_channels_with_number(number_group)
+                    new_callback = new_dostup_chat_id[:-1] + '✅'
+                    new_channels = [new_callback if item == new_dostup_chat_id else item for item in all_channels]
+                    db.update_all_channels(number_group, new_channels)
+                except InviteHashExpiredError as errr:
+                    print(f"[ERROR INVITE] {errr}")
+                except ChannelPrivateError as err:
+                    print(f"[ERROR] {err}")
+                    all_channels = db.select_channels_with_number(number_group)
+                    new_callback = new_dostup_chat_id[:-1] + '⏳'
+                    new_channels = [new_callback if item == new_dostup_chat_id else item for item in all_channels]
                     db.update_all_channels(number_group, new_channels)
                     await asyncio.sleep(2)
 
