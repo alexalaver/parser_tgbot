@@ -71,10 +71,9 @@ async def search_and_forward():
             user_id, chat_ids, keywords = group[0], group[2], group[5]
             chat_ids = [item for item in chat_ids if item.endswith('✅') or item.endswith('⏳')]
 
-            accessible_chats = []
             number_group = group[1]
 
-            for chat_id in accessible_chats:
+            for chat_id in chat_ids:
                 trimmed_chat_id = chat_id[:-2]
                 last_id = last_message_ids.get(trimmed_chat_id, 0)
                 messages_to_check = 10
