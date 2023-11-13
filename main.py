@@ -88,8 +88,8 @@ async def search_and_forward():
                     new_callback = new_chat_id[:-1] + '✅'
                     new_channels = [new_callback if item == new_chat_id else item for item in all_channels]
                     db.update_all_channels(number_group, new_channels)
-                except InviteHashExpiredError:
-                    pass
+                except InviteHashExpiredError as errr:
+                    print(f"[ERROR INVITE] {errr}")
                 except ChannelPrivateError as err:
                     print(f"[ERROR] {err}")
                     all_channels = db.select_channels_with_number(number_group)
