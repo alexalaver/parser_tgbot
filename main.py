@@ -69,47 +69,46 @@ async def search_and_forward():
                 num = 0
             group = groups[num]
             user_id, chat_ids, keywords = group[0], group[2], group[5]
+            chat_ids = [item for item in chat_ids if item.endswith('✅')]
 
             accessible_chats = []
             number_group = group[1]
 
-            for chat_id in chat_ids:
-                try:
-                    entity = await telethon_client.get_entity(chat_id)
-                    chat_id = entity.id  # Получаем числовой ID канала
-                    accessible_chats.append(chat_id)
-                    # ... обновление данных канала в базе данных ...
-                except (ChannelPrivateError, InviteHashExpiredError) as e:
-                    print(f"Нет доступа или канал не найден: {e}")
-                except Exception as e:
-                    print(f"Ошибка: {e}")
-                    # ... обработка других исключений ...
-
             for chat_id in accessible_chats:
-                trimmed_chat_id = str(chat_id)
+                trimmed_chat_id = chat_id[:-2]
                 last_id = last_message_ids.get(trimmed_chat_id, 0)
                 messages_to_check = 10
 
                 forced_check = num == 0 and last_id == 0
 
                 try:
-                    async for message in telethon_client.iter_messages(chat_id, offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
+                    async for message in telethon_client.iter_messages(trimmed_chat_id, offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
                         if message.text and any(keyword.lower() in message.text.lower() for keyword in keywords):
                             message_key = (user_id, message.id)
                             if message_key not in messages_sent or forced_check:
+
                                 sender = await message.get_sender()
                                 sender_identifier = f"@{sender.username}" if sender and sender.username else "Анонимный пользователь"
 
-                                message_text = f"{message.text}\n\nИз канала {trimmed_chat_id}\n\nСообщение от {sender_identifier}"
+                                message_text = f"{message.text}\n\nИз чата {trimmed_chat_id}\n\nСообщение от {sender_identifier}"
                                 await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
-                                print(f"Сообщение отправлено пользователю {user_id}: {message.text}")
+                                print(f"Message sent to user {user_id}: {message.text}")
                                 messages_sent[message_key] = True
                                 await asyncio.sleep(1)
-
+                    new_callback = chat_id[:-1] + '✅'
+                    new_channels = [new_callback if item == chat_id else item for item in chat_ids]
+                    db.update_all_channels(number_group, new_channels)
                 except FloodWaitError as e:
                     wait_time = e.seconds
-                    print(f"Flood wait error on channel {trimmed_chat_id}. Sleeping for {wait_time} seconds.")
+                    print(f"Flood wait error on chat {trimmed_chat_id}. Sleeping for {wait_time} seconds.")
                     await asyncio.sleep(wait_time)
+                except Exception as erri:
+                    print(f"[ERROR EXCEPTION] {erri}")
+                    new_callback = chat_id[:-1] + '⏳'
+                    new_channels = [new_callback if item == chat_id else item for item in chat_ids]
+                    db.update_all_channels(number_group, new_channels)
+                    await asyncio.sleep(2)
+                    break
                 finally:
                     messages = await telethon_client.get_messages(trimmed_chat_id, limit=1)
                     if messages:
