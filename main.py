@@ -141,10 +141,6 @@ async def search_and_forward():
                                         await asyncio.sleep(2)
                                     break
 
-                    groups = db.select_all_channels_group()
-                    group = groups[num]
-                    keywords = group[5]
-
                 except FloodWaitError as e:
                     wait_time = e.seconds
                     print(f"Flood wait error on chat {trimmed_chat_id}. Sleeping for {wait_time} seconds.")
