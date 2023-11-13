@@ -98,6 +98,8 @@ async def search_and_forward():
                     new_channels = [new_callback if item == new_chat_id else item for item in all_channels]
                     db.update_all_channels(number_group, new_channels)
                     await asyncio.sleep(2)
+                except Exception as erri:
+                    print(f"[ERROR EXCEPTION] {erri}")
 
             for new_dostup_chat_id in dostup_chat_id:
                 try:
@@ -115,6 +117,8 @@ async def search_and_forward():
                     new_channels = [new_callback if item == new_dostup_chat_id else item for item in all_channels]
                     db.update_all_channels(number_group, new_channels)
                     await asyncio.sleep(2)
+                except Exception as erri:
+                    print(f"[ERROR EXCEPTION] {erri}")
 
             for chat_id in accessible_chats:
                 trimmed_chat_id = chat_id[:-2]
