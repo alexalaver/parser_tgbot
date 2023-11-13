@@ -71,6 +71,8 @@ async def search_and_forward():
             user_id, chat_ids, keywords = group[0], group[2], group[5]
             chat_ids = [item for item in chat_ids if item.endswith('✅') or item.endswith('⏳')]
 
+            all_chat_ids = group[2]
+
             number_group = group[1]
 
             for chat_id in chat_ids:
@@ -96,7 +98,7 @@ async def search_and_forward():
                                 await asyncio.sleep(1)
 
                     new_callback = chat_id[:-1] + '✅'
-                    new_channels = [new_callback if item == chat_id else item for item in chat_ids]
+                    new_channels = [new_callback if item == chat_id else item for item in all_chat_ids]
                     db.update_all_channels(number_group, new_channels)
                     messages = await telethon_client.get_messages(trimmed_chat_id, limit=1)
                     if messages:
@@ -108,7 +110,7 @@ async def search_and_forward():
                 except Exception as erri:
                     print(f"[ERROR EXCEPTION] {erri}")
                     new_callback = chat_id[:-1] + '⏳'
-                    new_channels = [new_callback if item == chat_id else item for item in chat_ids]
+                    new_channels = [new_callback if item == chat_id else item for item in all_chat_ids]
                     db.update_all_channels(number_group, new_channels)
                     await asyncio.sleep(2)
 
