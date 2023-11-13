@@ -94,9 +94,13 @@ async def search_and_forward():
                                 print(f"Message sent to user {user_id}: {message.text}")
                                 messages_sent[message_key] = True
                                 await asyncio.sleep(1)
+
                     new_callback = chat_id[:-1] + '✅'
                     new_channels = [new_callback if item == chat_id else item for item in chat_ids]
                     db.update_all_channels(number_group, new_channels)
+                    messages = await telethon_client.get_messages(trimmed_chat_id, limit=1)
+                    if messages:
+                        last_message_ids[trimmed_chat_id] = messages[0].id
                 except FloodWaitError as e:
                     wait_time = e.seconds
                     print(f"Flood wait error on chat {trimmed_chat_id}. Sleeping for {wait_time} seconds.")
@@ -107,10 +111,6 @@ async def search_and_forward():
                     new_channels = [new_callback if item == chat_id else item for item in chat_ids]
                     db.update_all_channels(number_group, new_channels)
                     await asyncio.sleep(2)
-                finally:
-                    messages = await telethon_client.get_messages(trimmed_chat_id, limit=1)
-                    if messages:
-                        last_message_ids[trimmed_chat_id] = messages[0].id
 
             num += 1
             if num >= len(groups):
