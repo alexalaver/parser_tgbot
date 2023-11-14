@@ -7,7 +7,7 @@ from datetime import datetime
 from telethon import TelegramClient
 from telethon.sessions import StringSession
 from telethon.errors import FloodWaitError, InviteHashExpiredError, ChannelPrivateError
-from telethon.functions.messages import CheckChatInviteRequest
+from telethon.tl.functions.messages import CheckChatInviteRequest
 import functions as fnc
 import asyncio
 import config as cfg
