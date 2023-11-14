@@ -49,6 +49,7 @@ async def check_keywords_len(keywords, num):
     else:
         return False
 
+
 async def search_and_forward():
     num = 0
     last_message_ids = {}
@@ -134,8 +135,8 @@ async def search_and_forward():
                                         sender = await message.get_sender()
                                         sender_identifier = sender.id if sender else "Анонимный пользователь"
                                         sender_first_name = sender.first_name if sender else "Анонимный пользователь"
-                                        message_text = f"Ключевое слово: {keyword}\n\nЧат: {trimmed_chat_id}\n\nСообщение от: <a href='tg://user?id={sender_identifier}'>{sender_first_name}</a>\n\nТекст сообщения:\n{message.text}"
-                                        await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
+                                        message_text = f"Ключевое слово: {keyword}\n\nЧат: {trimmed_chat_id}\n\nСообщение от: {fnc.nick_with_link(sender_first_name, sender_identifier)}\n\nТекст сообщения:\n{message.text}"
+                                        await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.MARKDOWN)
                                         print(f"Message sent to user {user_id}: {message.text}")
                                         messages_sent.append(message_key[1])
                                         db.update_all_message_ids(number_group, messages_sent)
