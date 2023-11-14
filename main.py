@@ -135,7 +135,7 @@ async def search_and_forward():
                                         sender = await message.get_sender()
                                         sender_identifier = f"@{sender.username}" if sender else "Анонимный пользователь"
                                         sender_first_name = sender.first_name if sender else "Анонимный пользователь"
-                                        link_message = f"https://t.me/{chat_id}/{message.id}"
+                                        link_message = f"<a href='https://t.me/{chat_id}/{message.id}'>Ссылка</a>"
                                         message_text = f"Обнаружено ключевое слово\n\nЧат: {trimmed_chat_id}\n\nПользователь: {sender_identifier}\n\nЗапрос: {keyword}\n\nСсылка на сообщение: {link_message}\n\nТекст:\n{message.text}"
                                         await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
                                         print(f"Message sent to user {user_id}: {message.text}")
