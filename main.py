@@ -150,8 +150,7 @@ async def search_and_forward():
                                             f"Текст сообщения:\n{escaped_message_text}"
                                         )
 
-                                        await bot.send_message(user_id, message_text,
-                                                               parse_mode=types.ParseMode.MARKDOWN_V2)
+                                        await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.MARKDOWN)
                                         print(f"Message sent to user {user_id}: {message.text}")
                                         messages_sent.append(message_key[1])
                                         db.update_all_message_ids(number_group, messages_sent)
