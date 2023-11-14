@@ -167,7 +167,7 @@ async def search_and_forward_close_group():
             new_chat = []
             for new_chat_ids in chat_ids:
                 try:
-                    chat = await telethon_client(CheckChatInviteRequest(new_chat_ids))
+                    chat = await telethon_client(CheckChatInviteRequest(new_chat_ids[:-2]))
                     new_chat.append(chat)
                 except Exception as era:
                     print(f"[CHAT NOT FOUND ERROR] {era}")
