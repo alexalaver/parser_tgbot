@@ -135,11 +135,18 @@ async def search_and_forward():
                                         sender = await message.get_sender()
                                         sender_identifier = sender.id if sender else "Анонимный пользователь"
                                         sender_first_name = sender.first_name if sender else "Анонимный пользователь"
-                                        escaped_message_text = message.text.replace('_', '\\_').replace('*','\\*').replace('[', '\\[').replace(']', '\\]').replace('(', '\\(').replace(')', '\\)')
+                                        def escape_markdown_v2(text):
+                                            escape_chars = '_*[]()~`>#+-=|{}.!'
+                                            return ''.join(
+                                                f'\\{char}' if char in escape_chars else char for char in text)
+
+                                        escaped_message_text = escape_markdown_v2(message.text)
+                                        escaped_sender_first_name = escape_markdown_v2(sender_first_name)
+
                                         message_text = (
                                             f"Ключевое слово: {keyword}\n\n"
                                             f"Чат: {trimmed_chat_id}\n\n"
-                                            f"Сообщение от: [{sender_first_name}](tg://user?id={sender_identifier})\n\n"
+                                            f"Сообщение от: [{escaped_sender_first_name}](tg://user?id={sender_identifier})\n\n"
                                             f"Текст сообщения:\n{escaped_message_text}"
                                         )
                                         await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.MARKDOWN_V2)
