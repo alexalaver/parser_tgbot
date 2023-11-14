@@ -169,6 +169,7 @@ async def search_and_forward_close_group():
                 try:
                     chat = await telethon_client(CheckChatInviteRequest(new_chat_ids[:-2]))
                     new_chat.append(chat)
+                    await asyncio.sleep(30)
                 except Exception as era:
                     print(f"[CHAT NOT FOUND ERROR] {era}")
             messages_sent = db.select_message_id(number_group)
