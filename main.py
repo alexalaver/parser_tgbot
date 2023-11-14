@@ -185,7 +185,7 @@ async def search_and_forward_close_group():
                                         print(f"Message sent to user {user_id}: {message.text}")
                                         messages_sent.append(message_key[1])
                                         db.update_all_message_ids(number_group, messages_sent)
-                                        await asyncio.sleep(65)
+                                        await asyncio.sleep(35)
                                     break
 
                 except FloodWaitError as e:
@@ -196,8 +196,8 @@ async def search_and_forward_close_group():
                     messages = await telethon_client.get_messages(trimmed_chat_id, limit=1)
                     if messages:
                         last_message_ids[trimmed_chat_id] = messages[0].id
-                    await asyncio.sleep(65)
-                await asyncio.sleep(65)
+                    await asyncio.sleep(35)
+                await asyncio.sleep(35)
             num += 1
             if num >= len(groups):
                 num = 0
