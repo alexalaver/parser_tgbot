@@ -7,6 +7,7 @@ from datetime import datetime
 from telethon import TelegramClient
 from telethon.sessions import StringSession
 from telethon.errors import FloodWaitError, InviteHashExpiredError, ChannelPrivateError
+from telethon.functions.messages import CheckChatInviteRequest
 import functions as fnc
 import asyncio
 import config as cfg
@@ -163,8 +164,15 @@ async def search_and_forward_close_group():
 
             number_group = group[1]
 
+            new_chat = []
+            for new_chat_ids in chat_ids:
+                try:
+                    chat = await telethon_client(CheckChatInviteRequest(new_chat_ids))
+                    new_chat.append(chat)
+                except Exception as era:
+                    print(f"[CHAT NOT FOUND ERROR] {era}")
             messages_sent = db.select_message_id(number_group)
-            for chat_id in chat_ids:
+            for chat_id in new_chat:
                 trimmed_chat_id = chat_id[:-2]
                 last_id = last_message_ids.get(trimmed_chat_id, 0)
                 messages_to_check = 30
@@ -185,7 +193,7 @@ async def search_and_forward_close_group():
                                         print(f"Message sent to user {user_id}: {message.text}")
                                         messages_sent.append(message_key[1])
                                         db.update_all_message_ids(number_group, messages_sent)
-                                        await asyncio.sleep(60)
+                                        await asyncio.sleep(3)
                                     break
 
                 except FloodWaitError as e:
@@ -196,7 +204,6 @@ async def search_and_forward_close_group():
                     messages = await telethon_client.get_messages(trimmed_chat_id, limit=1)
                     if messages:
                         last_message_ids[trimmed_chat_id] = messages[0].id
-                    await asyncio.sleep(60)
             num += 1
             if num >= len(groups):
                 num = 0
@@ -814,7 +821,7 @@ async def other(message: types.Message):
 
 
 async def on_startup(_):
-    asyncio.create_task(search_and_forward())
+    # asyncio.create_task(search_and_forward())
     asyncio.create_task(search_and_forward_close_group())
 
 if __name__ == "__main__":
