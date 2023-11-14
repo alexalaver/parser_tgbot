@@ -135,21 +135,8 @@ async def search_and_forward():
                                         sender = await message.get_sender()
                                         sender_identifier = sender.id if sender else "Анонимный пользователь"
                                         sender_first_name = sender.first_name if sender else "Анонимный пользователь"
-                                        def escape_markdown_v2(text):
-                                            escape_chars = '_*[]()~`>#+-=|{}.!'
-                                            return ''.join(
-                                                f'\\{char}' if char in escape_chars else char for char in text)
-
-                                        escaped_message_text = escape_markdown_v2(message.text)
-                                        escaped_sender_first_name = escape_markdown_v2(sender_first_name)
-
-                                        message_text = (
-                                            f"Ключевое слово: {keyword}\n\n"
-                                            f"Чат: {trimmed_chat_id}\n\n"
-                                            f"Сообщение от: [{escaped_sender_first_name}](tg://user?id={sender_identifier})\n\n"
-                                            f"Текст сообщения:\n{escaped_message_text}"
-                                        )
-                                        await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.MARKDOWN_V2)
+                                        message_text = f"Ключевое слово: {keyword}\n\nЧат: {trimmed_chat_id}\n\nСообщение от: <a href='tg://user?id={sender_identifier}'>Пользователя</a>\n\nТекст сообщения:\n{message.text}"
+                                        await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
                                         print(f"Message sent to user {user_id}: {message.text}")
                                         messages_sent.append(message_key[1])
                                         db.update_all_message_ids(number_group, messages_sent)
