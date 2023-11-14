@@ -823,7 +823,7 @@ async def other(message: types.Message):
 
 
 async def on_startup(_):
-    # asyncio.create_task(search_and_forward())
+    asyncio.create_task(search_and_forward())
     asyncio.create_task(search_and_forward_close_group())
 
 if __name__ == "__main__":
