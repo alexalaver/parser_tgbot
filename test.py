@@ -95,5 +95,5 @@
 #     print(f"test{str(i)}")
 
 a = ["https://t.me/+_xedHrVHkr85YzFh ⏳","https://t.me/+UOewsTV7LtxhOWYx ⏳","https://t.me/test2asodjas ✅","https://t.me/test4publiccc ✅","https://t.me/+Y2KY3rg483xkZTEx ⏳","https://t.me/test6publicc ✅","https://t.me/test6publiccc ✅","https://t.me/+XftdKHLmXXZjNTZh ⏳","https://t.me/+RIn2HNSK4YxhOWUx ⏳","https://t.me/+OixTZDaRnJoyMGNh ⏳"]
-chat_ids = [item for item in a if len(item) >= 1 and item[13] != '+']
+chat_ids = [item for item in a if len(item) >= 1 and item[13] == '+']
 print(chat_ids)
