@@ -135,8 +135,14 @@ async def search_and_forward():
                                         sender = await message.get_sender()
                                         sender_identifier = sender.id if sender else "Анонимный пользователь"
                                         sender_first_name = sender.first_name if sender else "Анонимный пользователь"
-                                        message_text = f"Ключевое слово: {keyword}\n\nЧат: {trimmed_chat_id}\n\nСообщение от: [{sender_first_name}](tg://user?id={sender_identifier})\n\nТекст сообщения:\n{message.text}"
-                                        await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.MARKDOWN)
+                                        escaped_message_text = message.text.replace('_', '\\_').replace('*','\\*').replace('[', '\\[').replace(']', '\\]').replace('(', '\\(').replace(')', '\\)')
+                                        message_text = (
+                                            f"Ключевое слово: {keyword}\n\n"
+                                            f"Чат: {trimmed_chat_id}\n\n"
+                                            f"Сообщение от: [{sender_first_name}](tg://user?id={sender_identifier})\n\n"
+                                            f"Текст сообщения:\n{escaped_message_text}"
+                                        )
+                                        await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.MARKDOWN_V2)
                                         print(f"Message sent to user {user_id}: {message.text}")
                                         messages_sent.append(message_key[1])
                                         db.update_all_message_ids(number_group, messages_sent)
