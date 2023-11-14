@@ -75,50 +75,14 @@ async def search_and_forward():
                 groups = db.select_all_channels_group()
                 group = groups[num]
                 user_id, chat_ids, keywords = group[0], group[2], group[5]
-                chat_ids = [item for item in chat_ids if item.endswith('✅')]
+                chat_ids = [item for item in chat_ids if item.endswith('✅') or item.endswith('⏳')]
 
 
-            accessible_chats = []
             number_group = group[1]
-
-            for new_dostup_chat_id in dostup_chat_id:
-                try:
-                    await telethon_client.get_entity(new_dostup_chat_id[:-2])
-                    all_channels = db.select_channels_with_number(number_group)
-                    new_callback = new_dostup_chat_id[:-1] + '✅'
-                    new_channels = [new_callback if item == new_dostup_chat_id else item for item in all_channels]
-                    db.update_all_channels(number_group, new_channels)
-                except InviteHashExpiredError as errr:
-                    print(f"[ERROR INVITE] {errr}")
-                except ChannelPrivateError as err:
-                    print(f"[ERROR] {err}")
-                except Exception as erri:
-                    print(f"[ERROR EXCEPTION] {erri}")
-
-            for new_chat_id in chat_ids:
-                try:
-                    await telethon_client.get_entity(new_chat_id[:-2])
-                    accessible_chats.append(new_chat_id)
-                    all_channels = db.select_channels_with_number(number_group)
-                    new_callback = new_chat_id[:-1] + '✅'
-                    new_channels = [new_callback if item == new_chat_id else item for item in all_channels]
-                    db.update_all_channels(number_group, new_channels)
-                except InviteHashExpiredError as errr:
-                    print(f"[ERROR INVITE] {errr}")
-                except ChannelPrivateError as err:
-                    print(f"[ERROR] {err}")
-                    await asyncio.sleep(2)
-                except Exception as erri:
-                    print(f"[ERROR EXCEPTION] {erri}")
-                    all_channels = db.select_channels_with_number(number_group)
-                    new_callback = new_chat_id[:-1] + '⏳'
-                    new_channels = [new_callback if item == new_chat_id else item for item in all_channels]
-                    db.update_all_channels(number_group, new_channels)
-                    await asyncio.sleep(2)
 
             messages_sent = db.select_message_id(number_group)
 
-            for chat_id in accessible_chats:
+            for chat_id in chat_ids:
                 trimmed_chat_id = chat_id[:-2]
                 last_id = last_message_ids.get(trimmed_chat_id, 0)
                 messages_to_check = 30
@@ -147,10 +111,19 @@ async def search_and_forward():
                     wait_time = e.seconds
                     print(f"Flood wait error on chat {trimmed_chat_id}. Sleeping for {wait_time} seconds.")
                     await asyncio.sleep(wait_time)
+                except Exception as erri:
+                    print(f"[ERROR EXCEPTION] {erri}")
+                    all_channels = db.select_channels_with_number(number_group)
+                    new_callback = chat_id[:-1] + '⏳'
+                    new_channels = [new_callback if item == chat_id else item for item in all_channels]
+                    db.update_all_channels(number_group, new_channels)
+                    await asyncio.sleep(2)
                 finally:
                     messages = await telethon_client.get_messages(trimmed_chat_id, limit=1)
                     if messages:
                         last_message_ids[trimmed_chat_id] = messages[0].id
+
+
 
             num += 1
             if num >= len(groups):
