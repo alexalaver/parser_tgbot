@@ -135,7 +135,7 @@ async def search_and_forward():
                                         sender = await message.get_sender()
                                         sender_identifier = sender.id if sender else "Анонимный пользователь"
                                         sender_first_name = sender.first_name if sender else "Анонимный пользователь"
-                                        message_text = f"Ключевое слово: {keyword}\n\nЧат: {trimmed_chat_id}\n\nСообщение от: \\[{sender_first_name}\\]\\(tg://user?id=<{sender_identifier}>\\)\n\nТекст сообщения:\n{message.text}"
+                                        message_text = f"Ключевое слово: {keyword}\n\nЧат: {trimmed_chat_id}\n\nСообщение от: \\[{sender_first_name}\\]\\(tg://user?id={sender_identifier}\\)\n\nТекст сообщения:\n{message.text}"
                                         await bot.send_message(user_id, message_text, parse_mode='MarkdownV2')
                                         print(f"Message sent to user {user_id}: {message.text}")
                                         messages_sent.append(message_key[1])
