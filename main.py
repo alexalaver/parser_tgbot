@@ -172,6 +172,7 @@ async def search_and_forward_close_group():
                     await asyncio.sleep(30)
                 except Exception as era:
                     print(f"[CHAT NOT FOUND ERROR] {era}")
+                    await asyncio.sleep(30)
             messages_sent = db.select_message_id(number_group)
             for chat_id in new_chat:
                 trimmed_chat_id = chat_id[:-2]
