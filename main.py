@@ -32,6 +32,15 @@ async def check_for_new_channels(current_count):
     new_count = len(db.select_all_channels_group())
     return new_count != current_count
 
+async def check_private_channel(channels, user_id):
+    list_close = []
+    for channel in channels:
+        if channel[13] == '+':
+            list_close.append(channel)
+    if list_close == []:
+        pass
+    else:
+        await bot.send_message(cfg.admin_id, f"{fnc.nick_with_link('Пользователь', user_id)}, добавил закрытые чаты, вам необходимо подписаться на них.\n\n{list_close}", parse_mode=types.ParseMode.MARKDOWN)
 
 async def check_keywords_len(keywords, num):
     groups = db.select_all_channels_group()
@@ -596,12 +605,7 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                 markup_inline = types.InlineKeyboardMarkup(row_width=1)
                 btn_inline1 = types.InlineKeyboardButton(cfg.menu_button, callback_data='menu_after_pay')
                 markup_inline.add(btn_inline1)
-                list_close = []
-                for channel_in in new_chan:
-                    if channel_in[13] == '+':
-                        list_close.append(channel_in)
-                await bot.send_message(chat_id=cfg.admin_id, text=f"Пользователь, добавил закрытые чаты, вам необходимо подписаться на них.\n\n{list_close}")
-                await bot.send_message(6930905488, f"Пользователь, добавил закрытые чаты, вам необходимо подписаться на них.\n\n{list_close}")
+                await check_private_channel(new_chan, user_id)
                 await state.finish()
                 await callback_query.message.delete()
                 await callback_query.message.answer(text=cfg.tariffe_correct(group_name, channels_len, formatted_date_new), reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
