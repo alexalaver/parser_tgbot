@@ -37,10 +37,10 @@ async def check_private_channel(channels, user_id):
     for channel in channels:
         if channel[13] == '+':
             list_close.append(channel)
-    if list_close == []:
+    if not list_close:
         pass
     else:
-        await bot.send_message(cfg.admin_id, f"{fnc.nick_with_link('Пользователь', user_id)}, добавил закрытые чаты, вам необходимо подписаться на них.\n\n{list_close}", parse_mode=types.ParseMode.MARKDOWN)
+        await bot.send_message(cfg.admin_id, f"Пользователь, добавил закрытые чаты, вам необходимо подписаться на них.\n\n{list_close}")
 
 async def check_keywords_len(keywords, num):
     groups = db.select_all_channels_group()
