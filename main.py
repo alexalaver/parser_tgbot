@@ -187,7 +187,7 @@ async def search_and_forward_close_group():
                         if message.text:
                             for keyword in keywords:
                                 if keyword.lower() in message.text.lower():
-                                    message_key = (chat_check_id, message.id)
+                                    message_key = [chat_check_id, message.id]
                                     if message_key not in messages_sent or forced_check:
                                         sender = await message.get_sender()
                                         sender_identifier = f"@{sender.username}" if sender else "Анонимный пользователь"

@@ -250,10 +250,8 @@ class Data:
             return self.cursor.fetchone()[0]
 
     def update_message_id(self, message_ids):
-        formatted_message_ids = list(message_ids)
-
         with self.connect:
-            self.cursor.execute("UPDATE message_id SET message_ids = %s", (formatted_message_ids,))
+            self.cursor.execute("UPDATE message_id SET message_ids = %s", (message_ids,))
             self.connect.commit()
 
     def select_message_id(self, number_group):
