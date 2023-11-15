@@ -177,7 +177,7 @@ async def search_and_forward_close_group():
                 trimmed_chat_ids = chat_id[:-2]
                 try:
                     chat_ad = await telethon_client.get_entity(trimmed_chat_ids)
-                    last_id = last_message_ids.get(chat_ad, 0)
+                    last_id = last_message_ids.get(trimmed_chat_ids, 0)
                     messages_to_check = 30
                     forced_check = num == 0 and last_id == 0
                     async for message in telethon_client.iter_messages(chat_ad, offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
