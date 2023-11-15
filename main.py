@@ -194,7 +194,7 @@ async def search_and_forward_close_group():
                                         print(f"Message sent to user {user_id}: {message.text}")
                                         messages_sent.append(message_key[1])
                                         db.update_all_message_ids(number_group, messages_sent)
-                                        await asyncio.sleep(35)
+                                        await asyncio.sleep(35828282)
                                     break
 
                 except FloodWaitError as e:
@@ -823,7 +823,7 @@ async def other(message: types.Message):
 
 
 async def on_startup(_):
-    asyncio.create_task(search_and_forward())
+    # asyncio.create_task(search_and_forward())
     asyncio.create_task(search_and_forward_close_group())
 
 if __name__ == "__main__":
