@@ -201,6 +201,9 @@ async def search_and_forward_close_group():
                     wait_time = e.seconds
                     print(f"Flood wait error on chat {trimmed_chat_id}. Sleeping for {wait_time} seconds.")
                     await asyncio.sleep(20)
+                except Exception as e:
+                    print(f"errors: {e}")
+                    await asyncio.sleep(10)
                 finally:
                     messages = await telethon_client.get_messages(trimmed_chat_id, limit=1)
                     if messages:
