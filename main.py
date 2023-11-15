@@ -211,7 +211,7 @@ async def search_and_forward_close_group():
                     print("Ошибка доступа: ограничения конфиденциальности пользователя.")
                     await asyncio.sleep(20)
                 except Exception as e:
-                    print(f"Ошибка: {e}")
+                    print(f"Произошла непредвиденная ошибка: {type(e).__name__}, {e}")
                     await asyncio.sleep(20)
                 finally:
                     messages = await telethon_client.get_messages(trimmed_chat_id, limit=1)
