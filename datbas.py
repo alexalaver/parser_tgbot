@@ -260,7 +260,14 @@ class Data:
             record = self.cursor.fetchone()
             return record[0]
 
-    def update_all_message_ids(self, number_group, message_ids):
+    def update_all_message_ids(self, number_group, message_key):
+        self.cursor.execute("SELECT message_ids FROM groups WHERE number_group = %s", (number_group,))
+        current_message_ids = self.cursor.fetchone()[0]
+
+        if current_message_ids is None:
+            current_message_ids = []
+
+        updated_message_ids = current_message_ids + [message_key]
         with self.connect:
-            self.cursor.execute("UPDATE groups SET message_ids=%s WHERE number_group=%s", (message_ids, number_group,))
+            self.cursor.execute("UPDATE groups SET message_ids = %s WHERE number_group = %s", (updated_message_ids, number_group))
             self.connect.commit()
