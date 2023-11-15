@@ -182,7 +182,7 @@ async def search_and_forward_close_group():
                     print(f"link - {trimmed_chat_ids}\nchat_id - {trimmed_chat_id}")
                     messages_to_check = 30
                     forced_check = num == 0 and last_id == 0
-                    async for message in telethon_client.iter_messages(trimmed_chat_id, offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
+                    async for message in telethon_client.iter_messages(chat_ad, offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
                         if message.text:
                             for keyword in keywords:
                                 if keyword.lower() in message.text.lower():
@@ -212,7 +212,7 @@ async def search_and_forward_close_group():
                     await asyncio.sleep(20)
                 except Exception as e:
                     print(f"Произошла непредвиденная ошибка: {type(e).__name__}, {e}")
-                    await asyncio.sleep(20)
+                    await asyncio.sleep(40)
                 finally:
                     messages = await telethon_client.get_messages(trimmed_chat_id, limit=1)
                     if messages:
