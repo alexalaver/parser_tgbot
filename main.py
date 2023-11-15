@@ -96,7 +96,7 @@ async def search_and_forward():
                         if message.text:
                             for keyword in keywords:
                                 if keyword.lower() in message.text.lower():
-                                    message_key = (chat_check_id, message.id)
+                                    message_key = [chat_check_id, message.id]
                                     if message_key not in messages_sent or forced_check:
                                         sender = await message.get_sender()
                                         if "http" in trimmed_chat_id:
@@ -107,7 +107,6 @@ async def search_and_forward():
                                         message_text = f"Обнаружено ключевое слово\n\nЧат: {trimmed_chat_id}\n\nПользователь: {sender_identifier}\n\nЗапрос: {keyword}\n\nСсылка на сообщение: {link_message}\n\nТекст:\n{message.text}"
                                         await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
                                         print(f"Message sent to user {user_id}: {message.text}")
-                                        messages_sent.append(message_key[1])
                                         db.update_all_message_ids(number_group, message_key)
                                         await asyncio.sleep(2)
                                         all_channels = db.select_channels_with_number(number_group)
