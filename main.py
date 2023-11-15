@@ -83,8 +83,6 @@ async def search_and_forward():
             number_group = group[1]
 
 
-            messages_sent = db.select_message_id(number_group)
-            print(messages_sent)
             for chat_id in chat_ids:
                 trimmed_chat_id = chat_id[:-2]
                 try:
@@ -98,7 +96,7 @@ async def search_and_forward():
                             for keyword in keywords:
                                 if keyword.lower() in message.text.lower():
                                     message_key = [chat_check_id, message.id]
-                                    print(message_key)
+                                    messages_sent = db.select_message_id(number_group)
                                     if message_key not in messages_sent or forced_check:
                                         sender = await message.get_sender()
                                         if "http" in trimmed_chat_id:
@@ -175,8 +173,6 @@ async def search_and_forward_close_group():
 
             number_group = group[1]
 
-            messages_sent = db.select_message_id(number_group)
-            print(messages_sent)
             for chat_id in chat_ids:
                 trimmed_chat_ids = chat_id[:-2]
                 try:
@@ -190,6 +186,7 @@ async def search_and_forward_close_group():
                             for keyword in keywords:
                                 if keyword.lower() in message.text.lower():
                                     message_key = [chat_check_id, message.id]
+                                    messages_sent = db.select_message_id(number_group)
                                     if message_key not in messages_sent or forced_check:
                                         sender = await message.get_sender()
                                         sender_identifier = f"@{sender.username}" if sender else "Анонимный пользователь"
