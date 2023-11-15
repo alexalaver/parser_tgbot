@@ -83,6 +83,7 @@ async def search_and_forward():
             number_group = group[1]
 
 
+            messages_sent = db.select_message_id(number_group) or []
             for chat_id in chat_ids:
                 trimmed_chat_id = chat_id[:-2]
                 try:
@@ -96,8 +97,7 @@ async def search_and_forward():
                             for keyword in keywords:
                                 if keyword.lower() in message.text.lower():
                                     message_key = [chat_check_id, message.id]
-                                    messages_sent = db.select_message_id(number_group)
-                                    if message_key not in messages_sent:
+                                    if message_key not in messages_sent or forced_check:
                                         sender = await message.get_sender()
                                         if "http" in trimmed_chat_id:
                                             link_message = f"{trimmed_chat_id}/{str(message.id)}"
@@ -173,12 +173,13 @@ async def search_and_forward_close_group():
 
             number_group = group[1]
 
+            messages_sent = db.select_message_id(number_group) or []
             for chat_id in chat_ids:
-                trimmed_chat_ids = trimmed_chat_id[:-2]
+                trimmed_chat_ids = chat_id[:-2]
                 try:
                     chat_ad = await telethon_client.get_entity(trimmed_chat_ids)
                     chat_check_id = chat_ad.id
-                    last_id = last_message_ids.get(chat_check_id, 0)
+                    last_id = last_message_ids.get(trimmed_chat_ids, 0)
                     messages_to_check = 30
                     forced_check = num == 0 and last_id == 0
                     async for message in telethon_client.iter_messages(chat_ad, offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
@@ -186,8 +187,7 @@ async def search_and_forward_close_group():
                             for keyword in keywords:
                                 if keyword.lower() in message.text.lower():
                                     message_key = [chat_check_id, message.id]
-                                    messages_sent = db.select_message_id(number_group)
-                                    if message_key not in messages_sent:
+                                    if message_key not in messages_sent or forced_check:
                                         sender = await message.get_sender()
                                         sender_identifier = f"@{sender.username}" if sender else "Анонимный пользователь"
                                         message_text = f"Обнаружено ключевое слово\n\nЧат: {trimmed_chat_ids}\n\nПользователь: {sender_identifier}\n\nЗапрос: {keyword}\n\nСсылка на сообщение: Чат закрыт.\n\nТекст:\n{message.text}"
@@ -199,6 +199,7 @@ async def search_and_forward_close_group():
                                         new_channels = [new_callback if item == chat_id else item for item in all_channels]
                                         db.update_all_channels(number_group, new_channels)
                                         await asyncio.sleep(50)
+
                                     break
 
                 except FloodWaitError as e:
