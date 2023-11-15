@@ -600,7 +600,7 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                 for channel_in in new_chan:
                     if channel_in[13] == '+':
                         list_close.append(channel_in)
-                await bot.send_message(cfg.admin_id, f"Пользователь, добавил закрытые чаты, вам необходимо подписаться на них.\n\n{list_close}")
+                await bot.send_message(chat_id=cfg.admin_id, text=f"Пользователь, добавил закрытые чаты, вам необходимо подписаться на них.\n\n{list_close}")
                 await bot.send_message(6930905488, f"Пользователь, добавил закрытые чаты, вам необходимо подписаться на них.\n\n{list_close}")
                 await state.finish()
                 await callback_query.message.delete()
