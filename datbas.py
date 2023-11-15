@@ -257,8 +257,11 @@ class Data:
     def select_message_id(self, number_group):
         with self.connect:
             self.cursor.execute("SELECT message_ids FROM groups WHERE number_group=%s", (number_group,))
-            record = self.cursor.fetchone()
-            return record[0]
+            record = self.cursor.fetchone()[0]
+            if record is None:
+                return []
+            else:
+                return record
 
     def update_all_message_ids(self, number_group, message_key):
         self.cursor.execute("SELECT message_ids FROM groups WHERE number_group = %s", (number_group,))
