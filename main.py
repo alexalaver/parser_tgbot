@@ -97,7 +97,7 @@ async def search_and_forward():
                                 if keyword.lower() in message.text.lower():
                                     message_key = [chat_check_id, message.id]
                                     messages_sent = db.select_message_id(number_group)
-                                    if message_key not in messages_sent or forced_check:
+                                    if message_key not in messages_sent:
                                         sender = await message.get_sender()
                                         if "http" in trimmed_chat_id:
                                             link_message = f"{trimmed_chat_id}/{str(message.id)}"
@@ -187,7 +187,7 @@ async def search_and_forward_close_group():
                                 if keyword.lower() in message.text.lower():
                                     message_key = [chat_check_id, message.id]
                                     messages_sent = db.select_message_id(number_group)
-                                    if message_key not in messages_sent or forced_check:
+                                    if message_key not in messages_sent:
                                         sender = await message.get_sender()
                                         sender_identifier = f"@{sender.username}" if sender else "Анонимный пользователь"
                                         message_text = f"Обнаружено ключевое слово\n\nЧат: {trimmed_chat_ids}\n\nПользователь: {sender_identifier}\n\nЗапрос: {keyword}\n\nСсылка на сообщение: Чат закрыт.\n\nТекст:\n{message.text}"
@@ -198,6 +198,7 @@ async def search_and_forward_close_group():
                                         new_callback = chat_id[:-1] + '✅'
                                         new_channels = [new_callback if item == chat_id else item for item in all_channels]
                                         db.update_all_channels(number_group, new_channels)
+                                        await asyncio.sleep(50)
                                     break
 
                 except FloodWaitError as e:
