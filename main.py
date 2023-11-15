@@ -33,11 +33,14 @@ async def check_for_new_channels(current_count):
     return new_count != current_count
 
 async def check_private_channel(channels, user_id):
-    try:
-        for channel in channels:
-            await telethon_client.get_entity(channel)
-    except Exception as e:
-        await bot.send_message(cfg.admin_id, f"{fnc.nick_with_link('Пользователь', user_id)}, добавил закрытые чаты, вам необходимо подписаться на них.\n\n{channels}", parse_mode=types.ParseMode.MARKDOWN)
+    list_close = []
+    for channel in channels:
+        if channel[13] == '+':
+            list_close.append(channel)
+    if list_close == []:
+        pass
+    else:
+        await bot.send_message(cfg.admin_id, f"{fnc.nick_with_link('Пользователь', user_id)}, добавил закрытые чаты, вам необходимо подписаться на них.\n\n{list_close}", parse_mode=types.ParseMode.MARKDOWN)
 
 async def check_keywords_len(keywords, num):
     groups = db.select_all_channels_group()
