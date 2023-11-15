@@ -84,6 +84,7 @@ async def search_and_forward():
 
 
             messages_sent = db.select_message_id(number_group)
+            print(messages_sent)
             for chat_id in chat_ids:
                 trimmed_chat_id = chat_id[:-2]
                 try:
@@ -174,6 +175,7 @@ async def search_and_forward_close_group():
             number_group = group[1]
 
             messages_sent = db.select_message_id(number_group)
+            print(messages_sent)
             for chat_id in chat_ids:
                 trimmed_chat_ids = chat_id[:-2]
                 try:
