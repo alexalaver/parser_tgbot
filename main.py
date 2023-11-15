@@ -88,7 +88,7 @@ async def search_and_forward():
                 try:
                     chat_select_id = await telethon_client.get_entity(trimmed_chat_id)
                     chat_check_id = chat_select_id.id
-                    last_id = last_message_ids.get(chat_check_id, 0)
+                    last_id = last_message_ids.get(trimmed_chat_id, 0)
                     messages_to_check = 30
                     forced_check = num == 0 and last_id == 0
                     async for message in telethon_client.iter_messages(trimmed_chat_id, offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
@@ -174,7 +174,7 @@ async def search_and_forward_close_group():
             number_group = group[1]
 
             for chat_id in chat_ids:
-                trimmed_chat_ids = chat_id[:-2]
+                trimmed_chat_ids = trimmed_chat_id[:-2]
                 try:
                     chat_ad = await telethon_client.get_entity(trimmed_chat_ids)
                     chat_check_id = chat_ad.id
