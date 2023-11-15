@@ -194,7 +194,6 @@ async def search_and_forward_close_group():
                                         await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
                                         print(f"Message sent to user {user_id}: {message.text}")
                                         db.update_all_message_ids(number_group, message_key)
-                                        await asyncio.sleep(50)
                                         all_channels = db.select_channels_with_number(number_group)
                                         new_callback = chat_id[:-1] + '✅'
                                         new_channels = [new_callback if item == chat_id else item for item in all_channels]
