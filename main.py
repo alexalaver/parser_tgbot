@@ -203,15 +203,15 @@ async def search_and_forward_close_group():
                     wait_time = e.seconds
                     print(f"Flood wait error on chat {trimmed_chat_id}. Sleeping for {wait_time} seconds.")
                     await asyncio.sleep(20)
-                except Exception as e:
-                    print(f"errors: {e}")
-                    await asyncio.sleep(10)
                 except ChannelPrivateError:
                     print("Ошибка доступа: канал закрыт и у меня нет к нему доступа.")
+                    await asyncio.sleep(20)
                 except ChatForbiddenError:
                     print("Ошибка доступа: я исключён из чата или покинул его.")
+                    await asyncio.sleep(20)
                 except UserPrivacyRestrictedError:
                     print("Ошибка доступа: ограничения конфиденциальности пользователя.")
+                    await asyncio.sleep(20)
                 finally:
                     messages = await telethon_client.get_messages(trimmed_chat_id, limit=1)
                     if messages:
