@@ -85,18 +85,16 @@ async def search_and_forward():
                     await telethon_client.get_entity(new_chat_id)
                     new_chats_list.append(new_chat_id)
                 except Exception as era:
-                    pass
+                    print('Нету доступа к чату или чат не действителен.')
 
 
             messages_sent = db.select_message_id(number_group)
-            for chat_id in chat_ids:
+            for chat_id in new_chats_list:
                 trimmed_chat_id = chat_id[:-2]
-                last_id = last_message_ids.get(trimmed_chat_id, 0)
-                messages_to_check = 30
-
-                forced_check = num == 0 and last_id == 0
-
                 try:
+                    last_id = last_message_ids.get(trimmed_chat_id, 0)
+                    messages_to_check = 30
+                    forced_check = num == 0 and last_id == 0
                     async for message in telethon_client.iter_messages(trimmed_chat_id, offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
                         if message.text:
                             for keyword in keywords:
@@ -179,7 +177,6 @@ async def search_and_forward_close_group():
                     chat_ad = await telethon_client.get_entity(trimmed_chat_ids)
                     trimmed_chat_id = chat_ad.id
                     last_id = last_message_ids.get(trimmed_chat_id, 0)
-                    print(f"link - {trimmed_chat_ids}\nchat_id - {trimmed_chat_id}")
                     messages_to_check = 30
                     forced_check = num == 0 and last_id == 0
                     async for message in telethon_client.iter_messages(chat_ad, offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
