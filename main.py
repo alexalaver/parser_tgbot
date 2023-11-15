@@ -107,8 +107,7 @@ async def search_and_forward():
                                         message_text = f"Обнаружено ключевое слово\n\nЧат: {trimmed_chat_id}\n\nПользователь: {sender_identifier}\n\nЗапрос: {keyword}\n\nСсылка на сообщение: {link_message}\n\nТекст:\n{message.text}"
                                         await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
                                         print(f"Message sent to user {user_id}: {message.text}")
-                                        messages_sent.append(message_key)
-                                        db.update_all_message_ids(number_group, messages_sent)
+                                        db.update_all_message_ids(number_group, message_key)
                                         await asyncio.sleep(2)
                                         all_channels = db.select_channels_with_number(number_group)
                                         new_callback = chat_id[:-1] + '✅'
@@ -194,8 +193,7 @@ async def search_and_forward_close_group():
                                         message_text = f"Обнаружено ключевое слово\n\nЧат: {trimmed_chat_ids}\n\nПользователь: {sender_identifier}\n\nЗапрос: {keyword}\n\nСсылка на сообщение: Чат закрыты.\n\nТекст:\n{message.text}"
                                         await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
                                         print(f"Message sent to user {user_id}: {message.text}")
-                                        messages_sent.append(message_key)
-                                        db.update_all_message_ids(number_group, messages_sent)
+                                        db.update_all_message_ids(number_group, message_key)
                                         await asyncio.sleep(60)
                                         all_channels = db.select_channels_with_number(number_group)
                                         new_callback = chat_id[:-1] + '✅'
