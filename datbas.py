@@ -267,7 +267,9 @@ class Data:
         if current_message_ids is None:
             current_message_ids = []
 
-        updated_message_ids = current_message_ids + [message_key]
+        updated_message_ids = current_message_ids + [[message_key[0], message_key[1]]]
+
         with self.connect:
-            self.cursor.execute("UPDATE groups SET message_ids = %s WHERE number_group = %s", (updated_message_ids, number_group))
+            self.cursor.execute("UPDATE groups SET message_ids = %s WHERE number_group = %s",
+                                (updated_message_ids, number_group))
             self.connect.commit()
