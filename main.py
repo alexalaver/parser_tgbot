@@ -114,6 +114,9 @@ async def search_and_forward():
                                         new_callback = chat_id[:-1] + '✅'
                                         new_channels = [new_callback if item == chat_id else item for item in all_channels]
                                         db.update_all_channels(number_group, new_channels)
+                                        messages = await telethon_client.get_messages(trimmed_chat_id, limit=1)
+                                        if messages:
+                                            last_message_ids[trimmed_chat_id] = messages[0].id
                                     break
 
                 except FloodWaitError as e:
@@ -127,13 +130,6 @@ async def search_and_forward():
                     new_channels = [new_callback if item == chat_id else item for item in all_channels]
                     db.update_all_channels(number_group, new_channels)
                     await asyncio.sleep(2)
-                    break
-                finally:
-                    messages = await telethon_client.get_messages(trimmed_chat_id, limit=1)
-                    if messages:
-                        last_message_ids[trimmed_chat_id] = messages[0].id
-
-
 
             num += 1
             if num >= len(groups):
