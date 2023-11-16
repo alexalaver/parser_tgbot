@@ -83,7 +83,6 @@ async def search_and_forward():
 
             number_group = group[1]
 
-            print(chat_ids)
             messages_sent = db.select_message_id(number_group)
             for chat_id in chat_ids:
                 trimmed_chat_id = chat_id[:-2]
@@ -99,7 +98,7 @@ async def search_and_forward():
                             for keyword in keywords:
                                 if keyword.lower() in message.text.lower():
                                     message_key = [chat_check_id, message.id]
-                                    if message_key not in messages_sent or forced_check:
+                                    if message_key not in messages_sent:
                                         sender = await message.get_sender()
                                         if "http" in trimmed_chat_id:
                                             link_message = f"{trimmed_chat_id}/{str(message.id)}"
@@ -196,7 +195,6 @@ async def search_and_forward_close_group():
                                     if message_key not in messages_sent:
                                         sender = await message.get_sender()
                                         sender_identifier = f"@{sender.username}" if sender else "Анонимный пользователь"
-                                        print(f"--------------\nnumber_group = {str(number_group)}\nchat - {trimmed_chat_ids}\nkeyword-{keyword}")
                                         message_text = f"Обнаружено ключевое слово\n\nЧат: {trimmed_chat_ids}\n\nПользователь: {sender_identifier}\n\nЗапрос: {keyword}\n\nСсылка на сообщение: Чат закрыт.\n\nТекст:\n{message.text}"
                                         await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
                                         print(f"Message sent to user {user_id}: {message.text}")
