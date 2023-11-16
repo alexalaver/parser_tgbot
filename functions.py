@@ -4,7 +4,7 @@ def nick_with_link(text, blink):
     return link(f"{text}", f"tg://user?id={blink}")
 
 def get_category(a):
-    if a == 10:
+    if 1 <= a <= 10:
         return 1
     elif 11 <= a <= 20:
         return 2

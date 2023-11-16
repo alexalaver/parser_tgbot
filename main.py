@@ -83,10 +83,10 @@ async def search_and_forward():
 
             number_group = group[1]
 
-            messages_sent = db.select_message_id(number_group)
             for chat_id in chat_ids:
                 trimmed_chat_id = chat_id[:-2]
                 exception_occurred = False
+                messages_sent = db.select_message_id(number_group)
                 try:
                     chat_select_id = await telethon_client.get_entity(trimmed_chat_id)
                     chat_check_id = chat_select_id.id
@@ -177,10 +177,10 @@ async def search_and_forward_close_group():
 
             number_group = group[1]
 
-            messages_sent = db.select_message_id(number_group)
             for chat_id in chat_ids:
                 trimmed_chat_ids = chat_id[:-2]
                 exception_occurred = False
+                messages_sent = db.select_message_id(number_group)
                 try:
                     chat_ad = await telethon_client.get_entity(trimmed_chat_ids)
                     chat_check_id = chat_ad.id
@@ -192,7 +192,7 @@ async def search_and_forward_close_group():
                             for keyword in keywords:
                                 if keyword.lower() in message.text.lower():
                                     message_key = [chat_check_id, message.id]
-                                    if message_key not in messages_sent:
+                                    if message_key not in messages_sent or forced_check:
                                         sender = await message.get_sender()
                                         sender_identifier = f"@{sender.username}" if sender else "Анонимный пользователь"
                                         message_text = f"Обнаружено ключевое слово\n\nЧат: {trimmed_chat_ids}\n\nПользователь: {sender_identifier}\n\nЗапрос: {keyword}\n\nСсылка на сообщение: Чат закрыт.\n\nТекст:\n{message.text}"
