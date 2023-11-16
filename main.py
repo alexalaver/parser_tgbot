@@ -126,6 +126,7 @@ async def search_and_forward():
                     new_channels = [new_callback if item == chat_id else item for item in all_channels]
                     db.update_all_channels(number_group, new_channels)
                     await asyncio.sleep(2)
+                    break
                 finally:
                     messages = await telethon_client.get_messages(trimmed_chat_id, limit=1)
                     if messages:
@@ -793,7 +794,7 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
             await message.answer(cfg.cancel_creategroup_text, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
         elif message.text:
             if 2 <= len(message.text) <= 1000:
-                if 10 <= len(text_lines) <= 50:
+                if 5 <= len(text_lines) <= 50:
                     try:
                         check_number_group = db.check_numbers_group()
                         new_number_group = check_number_group + 1
