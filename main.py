@@ -188,7 +188,7 @@ async def search_and_forward_close_group():
                     last_id = last_message_ids.get(trimmed_chat_ids, 0)
                     messages_to_check = 30
                     forced_check = num == 0 and last_id == 0
-                    async for message in telethon_client.iter_messages(trimmed_chat_ids, offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
+                    async for message in telethon_client.iter_messages(chat_check_id, offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
                         if message.text:
                             for keyword in keywords:
                                 if keyword.lower() in message.text.lower():
