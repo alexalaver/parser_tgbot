@@ -73,18 +73,18 @@ async def search_and_forward():
             group = groups[num]
             user_id, chat_ids, keywords = group[0], group[2], group[5]
             chat_ids = [item for item in chat_ids if item.endswith('✅')]
-            chat_ids = [item for item in chat_ids if len(item) != 13 and item[13] != '+']
+            chat_ids = [item for item in chat_ids if len(item) != 13 or item[13] != '+']
             if await check_for_new_channels(len(chat_ids)):
                 groups = db.select_all_channels_group()
                 group = groups[num]
                 user_id, chat_ids, keywords = group[0], group[2], group[5]
                 chat_ids = [item for item in chat_ids if item.endswith('✅')]
-                chat_ids = [item for item in chat_ids if len(item) != 13 and item[13] != '+']
+                chat_ids = [item for item in chat_ids if len(item) != 13 or item[13] != '+']
 
             number_group = group[1]
 
             print(chat_ids)
-            messages_sent = db.select_message_id(number_group) or []
+            messages_sent = db.select_message_id(number_group)
             for chat_id in chat_ids:
                 trimmed_chat_id = chat_id[:-2]
                 try:
