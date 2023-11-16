@@ -94,13 +94,13 @@ async def search_and_forward():
                     messages_to_check = 30
                     forced_check = num == 0 and last_id == 0
                     async for message in telethon_client.iter_messages(chat_check_id, offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
-                        print('yes')
                         if message.text:
                             for keyword in keywords:
                                 if keyword.lower() in message.text.lower():
                                     message_key = [chat_check_id, message.id]
                                     if message_key not in messages_sent or forced_check:
                                         sender = await message.get_sender()
+                                        print('yes')
                                         if "http" in trimmed_chat_id:
                                             link_message = f"{trimmed_chat_id}/{str(message.id)}"
                                         else:
