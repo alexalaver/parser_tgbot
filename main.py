@@ -98,9 +98,9 @@ async def search_and_forward():
                             for keyword in keywords:
                                 if keyword.lower() in message.text.lower():
                                     message_key = [chat_check_id, message.id]
+                                    print(f"message_key={message_key}")
                                     if message_key not in messages_sent or forced_check:
                                         sender = await message.get_sender()
-                                        print('yes')
                                         if "http" in trimmed_chat_id:
                                             link_message = f"{trimmed_chat_id}/{str(message.id)}"
                                         else:
