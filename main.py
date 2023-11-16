@@ -87,6 +87,7 @@ async def search_and_forward():
             messages_sent = db.select_message_id(number_group)
             for chat_id in chat_ids:
                 trimmed_chat_id = chat_id[:-2]
+                exception_occurred = False
                 try:
                     chat_select_id = await telethon_client.get_entity(trimmed_chat_id)
                     chat_check_id = chat_select_id.id
@@ -96,7 +97,6 @@ async def search_and_forward():
                     async for message in telethon_client.iter_messages(chat_check_id, offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
                         if message.text:
                             for keyword in keywords:
-                                print(f"keyword - {keyword}\n{message.text}")
                                 if keyword.lower() in message.text.lower():
                                     message_key = [chat_check_id, message.id]
                                     if message_key not in messages_sent or forced_check:
@@ -121,6 +121,7 @@ async def search_and_forward():
                     wait_time = e.seconds
                     print(f"Flood wait error on chat {trimmed_chat_id}. Sleeping for {wait_time} seconds.")
                     await asyncio.sleep(3)
+                    exception_occurred = True
                 except Exception as erri:
                     print(f"[ERROR EXCEPTION] {erri}")
                     all_channels = db.select_channels_with_number(number_group)
@@ -128,10 +129,14 @@ async def search_and_forward():
                     new_channels = [new_callback if item == chat_id else item for item in all_channels]
                     db.update_all_channels(number_group, new_channels)
                     await asyncio.sleep(2)
+                    exception_occurred = True
                 finally:
-                    messages = await telethon_client.get_messages(trimmed_chat_id, limit=1)
-                    if messages:
-                        last_message_ids[trimmed_chat_id] = messages[0].id
+                    if exception_occurred is False:
+                        messages = await telethon_client.get_messages(trimmed_chat_id, limit=1)
+                        if messages:
+                            last_message_ids[trimmed_chat_id] = messages[0].id
+                        else:
+                            pass
 
             num += 1
             if num >= len(groups):
@@ -176,6 +181,7 @@ async def search_and_forward_close_group():
             messages_sent = db.select_message_id(number_group)
             for chat_id in chat_ids:
                 trimmed_chat_ids = chat_id[:-2]
+                exception_occurred = False
                 try:
                     chat_ad = await telethon_client.get_entity(trimmed_chat_ids)
                     chat_check_id = chat_ad.id
@@ -205,18 +211,31 @@ async def search_and_forward_close_group():
                 except FloodWaitError as e:
                     print(f"Flood wait error on chat. Sleeping for seconds. {e}")
                     await asyncio.sleep(60)
+                    exception_occurred = True
                 except ChannelPrivateError:
                     print("Ошибка доступа: канал закрыт и у меня нет к нему доступа.")
                     await asyncio.sleep(60)
+                    exception_occurred = True
                 except ChatForbiddenError:
                     print("Ошибка доступа: я исключён из чата или покинул его.")
                     await asyncio.sleep(60)
+                    exception_occurred = True
                 except UserPrivacyRestrictedError:
                     print("Ошибка доступа: ограничения конфиденциальности пользователя.")
                     await asyncio.sleep(60)
+                    exception_occurred = True
                 except Exception as e:
                     print(f"Произошла непредвиденная ошибка: {type(e).__name__}, {e}")
                     await asyncio.sleep(60)
+                    exception_occurred = True
+                finally:
+                    if exception_occurred is False:
+                        messages = await telethon_client.get_messages(trimmed_chat_ids, limit=1)
+                        if messages:
+                            last_message_ids[trimmed_chat_ids] = messages[0].id
+                            await asyncio.sleep(60)
+                        else:
+                            pass
                 await asyncio.sleep(50)
             num += 1
             if num >= len(groups):
