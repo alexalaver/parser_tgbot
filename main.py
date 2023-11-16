@@ -180,7 +180,7 @@ async def search_and_forward_close_group():
                     last_id = last_message_ids.get(trimmed_chat_ids, 0)
                     messages_to_check = 30
                     forced_check = num == 0 and last_id == 0
-                    async for message in telethon_client.iter_messages(chat_ad, offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
+                    async for message in telethon_client.iter_messages(trimmed_chat_ids, offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
                         if message.text:
                             for keyword in keywords:
                                 if keyword.lower() in message.text.lower():
@@ -188,6 +188,7 @@ async def search_and_forward_close_group():
                                     if message_key not in messages_sent or forced_check:
                                         sender = await message.get_sender()
                                         sender_identifier = f"@{sender.username}" if sender else "Анонимный пользователь"
+                                        print(f"--------------\nnumber_group = {str(number_group)}\nchat - {trimmed_chat_ids}\nkeyword-{keyword}")
                                         message_text = f"Обнаружено ключевое слово\n\nЧат: {trimmed_chat_ids}\n\nПользователь: {sender_identifier}\n\nЗапрос: {keyword}\n\nСсылка на сообщение: Чат закрыт.\n\nТекст:\n{message.text}"
                                         await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
                                         print(f"Message sent to user {user_id}: {message.text}")
@@ -197,7 +198,6 @@ async def search_and_forward_close_group():
                                         new_channels = [new_callback if item == chat_id else item for item in all_channels]
                                         db.update_all_channels(number_group, new_channels)
                                         await asyncio.sleep(50)
-
                                     break
 
                 except FloodWaitError as e:
@@ -215,10 +215,6 @@ async def search_and_forward_close_group():
                 except Exception as e:
                     print(f"Произошла непредвиденная ошибка: {type(e).__name__}, {e}")
                     await asyncio.sleep(60)
-                finally:
-                    messages = await telethon_client.get_messages(trimmed_chat_ids, limit=1)
-                    if messages:
-                        last_message_ids[trimmed_chat_ids] = messages[0].id
                 await asyncio.sleep(50)
             num += 1
             if num >= len(groups):
