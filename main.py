@@ -294,7 +294,7 @@ async def panel_administration(message):
     if db.select_admin(user_id) > 0:
         markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
         markup_reply.add(cfg.add_chat_id_button, cfg.back_button)
-        await message.answer(cfg.panel_admin_text, markup_reply)
+        await message.answer(cfg.panel_admin_text, markup_reply, parse_mode=types.ParseMode.MARKDOWN)
         await Add_chat_ids.panel_adm.set()
     else:
         await message.answer(cfg.error_adm_dostup)
@@ -856,30 +856,30 @@ async def panel_adm(message: types.Message, state: FSMContext):
         markup_reply.add(cfg.parser)
         markup_reply.row(cfg.my_profile, cfg.support)
         markup_reply.add(cfg.admin_panel_button)
-        await message.answer(cfg.panel_admin_back_text)
+        await message.answer(cfg.panel_admin_back_text, parse_mode=types.ParseMode.MARKDOWN)
         await state.reset_state()
     elif message.text == cfg.add_chat_id_button:
         markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
         markup_reply.add(cfg.back_button)
-        await message.answer(cfg.write_number_group_text, reply_markup=markup_reply)
+        await message.answer(cfg.write_number_group_text, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
         await Add_chat_ids.add_ids_1.set()
     else:
-        await message.answer(cfg.error_text_in_state_panel)
+        await message.answer(cfg.error_text_in_state_panel, parse_mode=types.ParseMode.MARKDOWN)
 
 @dp.message_handler(state=Add_chat_ids.add_ids_1)
 async def add_chat_ids_num_1(message: types.Message, state: FSMContext):
     if message.text == cfg.back_button:
         markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
         markup_reply.add(cfg.add_chat_id_button, cfg.back_button)
-        await message.answer(cfg.panel_admin_back_text)
+        await message.answer(cfg.panel_admin_back_text, parse_mode=types.ParseMode.MARKDOWN)
         await Add_chat_ids.panel_adm.set()
     else:
         try:
             message_text = int(message.text)
             await state.update_data(number_group=message_text)
-            await message.answer(cfg.write_chat_ids_text)
+            await message.answer(cfg.write_chat_ids_text, parse_mode=types.ParseMode.MARKDOWN)
         except Exception as err:
-            await message.answer(cfg.error_write_number_group_text)
+            await message.answer(cfg.error_write_number_group_text, parse_mode=types.ParseMode.MARKDOWN)
             await Add_chat_ids.add_ids_1.set()
 
 @dp.message_handler(state=Add_chat_ids.add_ids_2)
@@ -887,23 +887,25 @@ async def add_chat_ids_num_2(message: types.Message, state: FSMContext):
     if message.text == cfg.back_button:
         markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
         markup_reply.add(cfg.add_chat_id_button, cfg.back_button)
-        await message.answer(cfg.panel_admin_back_text)
+        await message.answer(cfg.panel_admin_back_text, parse_mode=types.ParseMode.MARKDOWN)
         await Add_chat_ids.panel_adm.set()
     else:
         markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
         markup_reply.add(cfg.add_chat_id_button, cfg.back_button)
         textsing = message.text
         text_lines = textsing.strip().split('\n')
+        new_lst = []
         for lines in text_lines:
             try:
                 int(lines)
+                new_lst.append(int(lines))
             except Exception as err:
-                await message.answer(cfg.error_add_ids, reply_markup=markup_reply)
+                await message.answer(cfg.error_add_ids, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
                 await Add_chat_ids.panel_adm.set()
         data = await state.get_data()
         number_group = data.get("number_group")
-        db.add_chat_ids(number_group, text_lines)
-        await message.answer(cfg.correct_add_chat_ids, reply_markup=markup_reply)
+        db.add_chat_ids(int(number_group), new_lst)
+        await message.answer(cfg.correct_add_chat_ids, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
         await Add_chat_ids.panel_adm.set()
 
 
