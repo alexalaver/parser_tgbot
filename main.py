@@ -196,45 +196,45 @@ async def search_and_forward_close_group():
                                         message_text = f"Обнаружено ключевое слово\n\nЧат: {trimmed_chat_ids}\n\nПользователь: {sender_identifier}\n\nЗапрос: {keyword}\n\nСсылка на сообщение: Чат закрыт.\n\nТекст:\n{message.text}"
                                         await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
                                         print(f"Message sent to user {user_id}: {message.text}")
-                                        await asyncio.sleep(20)
+                                        await asyncio.sleep(2)
                                     break
 
                 except FloodWaitError as e:
                     print(f"Flood wait error on chat. Sleeping for seconds. {e}")
-                    await asyncio.sleep(20)
+                    await asyncio.sleep(2)
                     exception_occurred = True
                 except ChannelPrivateError:
                     print("Ошибка доступа: канал закрыт и у меня нет к нему доступа.")
-                    await asyncio.sleep(20)
+                    await asyncio.sleep(2)
                     exception_occurred = True
                 except ChatForbiddenError:
                     print("Ошибка доступа: я исключён из чата или покинул его.")
-                    await asyncio.sleep(20)
+                    await asyncio.sleep(2)
                     exception_occurred = True
                 except UserPrivacyRestrictedError:
                     print("Ошибка доступа: ограничения конфиденциальности пользователя.")
-                    await asyncio.sleep(20)
+                    await asyncio.sleep(2)
                     exception_occurred = True
                 except Exception as e:
                     print(f"Произошла непредвиденная ошибка: {type(e).__name__}, {e}")
-                    await asyncio.sleep(20)
+                    await asyncio.sleep(2)
                     exception_occurred = True
                 finally:
                     if exception_occurred is False:
                         messages = await telethon_client.get_messages(trimmed_chat_ids, limit=1)
                         if messages:
                             last_message_ids[trimmed_chat_ids] = messages[0].id
-                            await asyncio.sleep(20)
+                            await asyncio.sleep(2)
                         else:
                             pass
-                await asyncio.sleep(20)
+                await asyncio.sleep(2)
             num += 1
             if num >= len(groups):
                 num = 0
 
         except Exception as e:
             print(f"Произошла ошибка: {e}")
-            await asyncio.sleep(10)
+            await asyncio.sleep(2)
 
         await asyncio.sleep(5)
 
