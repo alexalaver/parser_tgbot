@@ -856,7 +856,7 @@ async def panel_adm(message: types.Message, state: FSMContext):
         markup_reply.add(cfg.parser)
         markup_reply.row(cfg.my_profile, cfg.support)
         markup_reply.add(cfg.admin_panel_button)
-        await message.answer(cfg.panel_admin_back_text, parse_mode=types.ParseMode.MARKDOWN)
+        await message.answer(cfg.panel_admin_back_text, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
         await state.reset_state()
     elif message.text == cfg.add_chat_id_button:
         markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
