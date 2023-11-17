@@ -7,6 +7,7 @@ from datetime import datetime
 from telethon import TelegramClient
 from telethon.sessions import StringSession
 from telethon.errors import FloodWaitError, ChannelPrivateError, ChatForbiddenError, UserPrivacyRestrictedError
+import socks
 import functions as fnc
 import asyncio
 import config as cfg
@@ -21,8 +22,7 @@ dp = Dispatcher(bot, storage=MemoryStorage())
 db = Data("192.168.1.37", "5432", "pars_db", "pars_user", "pars_pwd")
 
 
-telethon_client = TelegramClient(StringSession(cfg.STRING_SESSION), cfg.API_ID, cfg.API_HASH)
-
+telethon_client = TelegramClient(StringSession(cfg.STRING_SESSION), cfg.API_ID, cfg.API_HASH, proxy=(socks.SOCKS5, '94.127.136.113', 8000, 'pTzy1m', 'j9qMUT'))
 
 async def check_for_new_groups(current_count):
     new_count = len(db.select_all_channels_group())
