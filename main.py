@@ -877,6 +877,7 @@ async def add_chat_ids_num_1(message: types.Message, state: FSMContext):
             message_text = int(message.text)
             await state.update_data(number_group=message_text)
             await message.answer(cfg.write_chat_ids_text, parse_mode=types.ParseMode.MARKDOWN)
+            await Add_chat_ids.add_ids_2.set()
         except Exception as err:
             await message.answer(cfg.error_write_number_group_text, parse_mode=types.ParseMode.MARKDOWN)
             await Add_chat_ids.add_ids_1.set()
