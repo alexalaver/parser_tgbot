@@ -870,7 +870,7 @@ async def add_chat_ids_num_1(message: types.Message, state: FSMContext):
     if message.text == cfg.back_button:
         markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
         markup_reply.add(cfg.add_chat_id_button, cfg.back_button)
-        await message.answer(cfg.panel_admin_back_text, parse_mode=types.ParseMode.MARKDOWN)
+        await message.answer(cfg.panel_admin_back_text, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
         await Add_chat_ids.panel_adm.set()
     else:
         try:
@@ -886,7 +886,7 @@ async def add_chat_ids_num_2(message: types.Message, state: FSMContext):
     if message.text == cfg.back_button:
         markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
         markup_reply.add(cfg.add_chat_id_button, cfg.back_button)
-        await message.answer(cfg.panel_admin_back_text, parse_mode=types.ParseMode.MARKDOWN)
+        await message.answer(cfg.panel_admin_back_text, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
         await Add_chat_ids.panel_adm.set()
     else:
         markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
