@@ -22,7 +22,7 @@ dp = Dispatcher(bot, storage=MemoryStorage())
 db = Data("192.168.1.37", "5432", "pars_db", "pars_user", "pars_pwd")
 
 
-telethon_client = TelegramClient(StringSession(cfg.STRING_SESSION), cfg.API_ID, cfg.API_HASH, proxy=(socks.SOCKS5, '94.127.136.113', 8000, 'pTzy1m', 'j9qMUT'))
+telethon_client = TelegramClient(StringSession(cfg.STRING_SESSION), cfg.API_ID, cfg.API_HASH)
 
 async def check_for_new_groups(current_count):
     new_count = len(db.select_all_channels_group())
@@ -852,7 +852,7 @@ async def other(message: types.Message):
 
 
 async def on_startup(_):
-    asyncio.create_task(search_and_forward())
+    # asyncio.create_task(search_and_forward())
     asyncio.create_task(search_and_forward_close_group())
 
 if __name__ == "__main__":
