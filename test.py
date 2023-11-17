@@ -98,3 +98,6 @@
 # chat_ids = [item for item in a if len(item) >= 1 and item[13] == '+']
 # print(chat_ids)
 
+a = ["https://t.me/test2asodjas ✅","https://t.me/+RIn2HNSK4YxhOWUx ✅","https://t.me/test22222 ⏳","https://t.me/test222222 ⏳","https://t.me/test2222222 ⏳"]
+chat_ids = [item for item in a if len(item) < 13 or item[13] != '+']
+print(chat_ids)
