@@ -251,6 +251,11 @@ class Parsers_use(StatesGroup):
 class Change_keyword(StatesGroup):
     change_keyword_1 = State()
 
+class Add_chat_ids(StatesGroup):
+    panel_adm = State()
+    add_ids_1 = State()
+    add_ids_2 = State()
+
 async def profile(message):
     user_id = message.from_user.id
     markup_inline = types.InlineKeyboardMarkup(row_width=1, )
@@ -284,6 +289,16 @@ async def autoposting_send(message):
     markup_inline.add(btn_inline1, btn_inline2)
     await message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.autoposting_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
 
+async def panel_administration(message):
+    user_id = message.from_user.id
+    if db.select_admin(user_id) > 0:
+        markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
+        markup_reply.add(cfg.add_chat_id_button, cfg.back_button)
+        await message.answer(cfg.panel_admin_text, markup_reply)
+        await Add_chat_ids.panel_adm.set()
+    else:
+        await message.answer(cfg.error_adm_dostup)
+
 @dp.message_handler(commands=['start'])
 async def start(message: types.Message):
     if message.chat.type == types.ChatType.PRIVATE:
@@ -296,6 +311,8 @@ async def start(message: types.Message):
         markup_reply.add(cfg.autoposting)
         markup_reply.add(cfg.parser)
         markup_reply.row(cfg.my_profile, cfg.support)
+        if db.select_admin(user_id) > 0:
+            markup_reply.add(cfg.admin_panel_button)
 
         await message.answer('test', reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
         await profile(message)
@@ -831,6 +848,65 @@ async def button_group_2(callback_query: types.CallbackQuery):
     if callback_query.data is not None:
         await callback_query.answer(cfg.error_button_create_group, show_alert=True)
 
+@dp.message_handler(state=Add_chat_ids.panel_adm)
+async def panel_adm(message: types.Message, state: FSMContext):
+    if message.text == cfg.back_button:
+        markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+        markup_reply.add(cfg.autoposting)
+        markup_reply.add(cfg.parser)
+        markup_reply.row(cfg.my_profile, cfg.support)
+        markup_reply.add(cfg.admin_panel_button)
+        await message.answer(cfg.panel_admin_back_text)
+        await state.reset_state()
+    elif message.text == cfg.add_chat_id_button:
+        markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
+        markup_reply.add(cfg.back_button)
+        await message.answer(cfg.write_number_group_text, reply_markup=markup_reply)
+        await Add_chat_ids.add_ids_1.set()
+    else:
+        await message.answer(cfg.error_text_in_state_panel)
+
+@dp.message_handler(state=Add_chat_ids.add_ids_1)
+async def add_chat_ids_num_1(message: types.Message, state: FSMContext):
+    if message.text == cfg.back_button:
+        markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
+        markup_reply.add(cfg.add_chat_id_button, cfg.back_button)
+        await message.answer(cfg.panel_admin_back_text)
+        await Add_chat_ids.panel_adm.set()
+    else:
+        try:
+            message_text = int(message.text)
+            await state.update_data(number_group=message_text)
+            await message.answer(cfg.write_chat_ids_text)
+        except Exception as err:
+            await message.answer(cfg.error_write_number_group_text)
+            await Add_chat_ids.add_ids_1.set()
+
+@dp.message_handler(state=Add_chat_ids.add_ids_2)
+async def add_chat_ids_num_2(message: types.Message, state: FSMContext):
+    if message.text == cfg.back_button:
+        markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
+        markup_reply.add(cfg.add_chat_id_button, cfg.back_button)
+        await message.answer(cfg.panel_admin_back_text)
+        await Add_chat_ids.panel_adm.set()
+    else:
+        markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
+        markup_reply.add(cfg.add_chat_id_button, cfg.back_button)
+        textsing = message.text
+        text_lines = textsing.strip().split('\n')
+        for lines in text_lines:
+            try:
+                int(lines)
+            except Exception as err:
+                await message.answer(cfg.error_add_ids, reply_markup=markup_reply)
+                await Add_chat_ids.panel_adm.set()
+        data = await state.get_data()
+        number_group = data.get("number_group")
+        db.add_chat_ids(number_group, text_lines)
+        await message.answer(cfg.correct_add_chat_ids, reply_markup=markup_reply)
+        await Add_chat_ids.panel_adm.set()
+
+
 @dp.message_handler()
 async def other(message: types.Message):
     if message.chat.type == types.ChatType.PRIVATE:
@@ -842,6 +918,8 @@ async def other(message: types.Message):
             await parsers_send(message)
         elif message.text == cfg.autoposting:
             await autoposting_send(message)
+        elif message.text == cfg.admin_panel_button:
+            await panel_administration(message)
 
 
 async def on_startup(_):

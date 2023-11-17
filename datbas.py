@@ -273,3 +273,8 @@ class Data:
             self.cursor.execute("UPDATE groups SET message_ids = %s WHERE number_group = %s",
                                 (updated_message_ids, number_group))
             self.connect.commit()
+
+    def add_chat_ids(self, number_group, ids):
+        with self.connect:
+            self.cursor.execute("UPDATE groups SET channels_id=%s WHERE number_group=%s", (ids, number_group,))
+            self.connect.commit()
