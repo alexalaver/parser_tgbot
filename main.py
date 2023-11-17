@@ -203,38 +203,38 @@ async def search_and_forward_close_group():
                                         new_callback = chat_id[:-1] + '✅'
                                         new_channels = [new_callback if item == chat_id else item for item in all_channels]
                                         db.update_all_channels(number_group, new_channels)
-                                        await asyncio.sleep(50)
+                                        await asyncio.sleep(20)
                                     break
 
                 except FloodWaitError as e:
                     print(f"Flood wait error on chat. Sleeping for seconds. {e}")
-                    await asyncio.sleep(60)
+                    await asyncio.sleep(20)
                     exception_occurred = True
                 except ChannelPrivateError:
                     print("Ошибка доступа: канал закрыт и у меня нет к нему доступа.")
-                    await asyncio.sleep(60)
+                    await asyncio.sleep(20)
                     exception_occurred = True
                 except ChatForbiddenError:
                     print("Ошибка доступа: я исключён из чата или покинул его.")
-                    await asyncio.sleep(60)
+                    await asyncio.sleep(20)
                     exception_occurred = True
                 except UserPrivacyRestrictedError:
                     print("Ошибка доступа: ограничения конфиденциальности пользователя.")
-                    await asyncio.sleep(60)
+                    await asyncio.sleep(20)
                     exception_occurred = True
                 except Exception as e:
                     print(f"Произошла непредвиденная ошибка: {type(e).__name__}, {e}")
-                    await asyncio.sleep(60)
+                    await asyncio.sleep(20)
                     exception_occurred = True
                 finally:
                     if exception_occurred is False:
                         messages = await telethon_client.get_messages(trimmed_chat_ids, limit=1)
                         if messages:
                             last_message_ids[trimmed_chat_ids] = messages[0].id
-                            await asyncio.sleep(60)
+                            await asyncio.sleep(20)
                         else:
                             pass
-                await asyncio.sleep(50)
+                await asyncio.sleep(20)
             num += 1
             if num >= len(groups):
                 num = 0
