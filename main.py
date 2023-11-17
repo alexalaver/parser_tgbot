@@ -7,7 +7,6 @@ from datetime import datetime
 from telethon import TelegramClient
 from telethon.sessions import StringSession
 from telethon.errors import FloodWaitError, ChannelPrivateError, ChatForbiddenError, UserPrivacyRestrictedError
-import socks
 import functions as fnc
 import asyncio
 import config as cfg
@@ -294,7 +293,7 @@ async def panel_administration(message):
     if db.select_admin(user_id) > 0:
         markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
         markup_reply.add(cfg.add_chat_id_button, cfg.back_button)
-        await message.answer(cfg.panel_admin_text, markup_reply, parse_mode=types.ParseMode.MARKDOWN)
+        await message.answer(cfg.panel_admin_text, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
         await Add_chat_ids.panel_adm.set()
     else:
         await message.answer(cfg.error_adm_dostup)
