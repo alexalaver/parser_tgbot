@@ -176,22 +176,20 @@ async def search_and_forward_close_group():
                 chat_ids = [item for item in chat_ids if len(item) >= 13 and item[13] == '+']
 
             number_group = group[1]
-
-            for chat_id in chat_ids:
-                trimmed_chat_ids = chat_id[:-2]
+            ids_chating = [-4078334833, -4056371001, -4066133079, -4039465465, -4024273668, -4004407892]
+            for chat_id in ids_chating:
+                trimmed_chat_ids = chat_id
                 exception_occurred = False
                 messages_sent = db.select_message_id(number_group)
                 try:
-                    chat_ad = await telethon_client.get_entity(trimmed_chat_ids)
-                    chat_check_id = chat_ad.id
                     last_id = last_message_ids.get(trimmed_chat_ids, 0)
                     messages_to_check = 30
                     forced_check = num == 0 and last_id == 0
-                    async for message in telethon_client.iter_messages(chat_check_id, offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
+                    async for message in telethon_client.iter_messages(trimmed_chat_ids, offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
                         if message.text:
                             for keyword in keywords:
                                 if keyword.lower() in message.text.lower():
-                                    message_key = [chat_check_id, message.id]
+                                    message_key = [trimmed_chat_ids, message.id]
                                     if message_key not in messages_sent or forced_check:
                                         sender = await message.get_sender()
                                         sender_identifier = f"@{sender.username}" if sender else "Анонимный пользователь"
