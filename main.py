@@ -917,12 +917,12 @@ async def add_chat_ids_num_2(message: types.Message, state: FSMContext):
         data = await state.get_data()
         number_group = data.get("number_group")
         db.add_chat_ids(int(number_group), new_lst)
-        all_channels = db.select_channels_with_number(number_group)
-        channels_link = [item for item in all_channels if len(item) >= 13 and item[13] == '+']
-        for channel_link in channels_link:
-            new_callback = channel_link[:-1] + '✅'
-            new_channels = [new_callback if item == channel_link else item for item in all_channels]
-            db.update_all_channels(number_group, new_channels)
+        # all_channels = db.select_channels_with_number(number_group)
+        # channels_link = [item for item in all_channels if len(item) >= 13 and item[13] == '+']
+        # for channel_link in channels_link:
+        #     new_callback = channel_link[:-1] + '✅'
+        #     new_channels = [new_callback if item == channel_link else item for item in all_channels]
+        #     db.update_all_channels(number_group, new_channels)
         await message.answer(cfg.correct_add_chat_ids, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
         await Add_chat_ids.panel_adm.set()
 
