@@ -20,9 +20,6 @@ bot = Bot(cfg.TOKEN)
 dp = Dispatcher(bot, storage=MemoryStorage())
 db = Data("192.168.1.37", "5432", "pars_db", "pars_user", "pars_pwd")
 
-with TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH) as client:
-    print("StringSession:", client.session.save())
-
 telethon_client = TelegramClient(StringSession(cfg.STRING_SESSION), cfg.API_ID, cfg.API_HASH)
 
 async def check_for_new_groups(current_count):
