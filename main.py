@@ -36,7 +36,7 @@ async def check_private_channel(channels, user_id, number_group):
     if channels_link is None:
         pass
     else:
-        await bot.send_message(cfg.admin_id, f"{fnc.nick_with_link('Пользователь', user_id)}, добавил закрытые чаты, вам необходимо подписаться на них.\n\n{list_close}\n\nНомер группы - {str(number_group)}", parse_mode=types.ParseMode.MARKDOWN)
+        await bot.send_message(cfg.admin_id, f"{fnc.nick_with_link('Пользователь', user_id)}, добавил закрытые чаты, вам необходимо подписаться на них.\n\n{channels_link}\n\nНомер группы - {str(number_group)}", parse_mode=types.ParseMode.MARKDOWN)
 
 async def check_keywords_len(keywords, num):
     groups = db.select_all_channels_group()
