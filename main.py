@@ -746,11 +746,14 @@ async def change_keyword_1_buttons(callback_query: types.CallbackQuery, state: F
 @dp.message_handler(state=Create_group.create_group_1)
 async def create_group_func_1(message: types.Message, state: FSMContext):
     if message.chat.type == types.ChatType.PRIVATE:
+        user_id = message.from_user.id
         if message.text == cfg.cancel_creategroup:
             markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
             markup_reply.add(cfg.autoposting)
             markup_reply.add(cfg.parser)
             markup_reply.row(cfg.my_profile, cfg.support)
+            if db.select_admin(user_id) > 0:
+                markup_reply.add(cfg.admin_panel_button)
             await state.reset_state()
             await message.answer(cfg.cancel_creategroup_text, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
         elif message.text:
@@ -841,6 +844,8 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                         markup_reply.add(cfg.autoposting)
                         markup_reply.add(cfg.parser)
                         markup_reply.row(cfg.my_profile, cfg.support)
+                        if db.select_admin(user_id) > 0:
+                            markup_reply.add(cfg.admin_panel_button)
                         await message.answer(cfg.right_create_group, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
                         await state.finish()
                     except Exception as es:
