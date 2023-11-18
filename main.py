@@ -31,7 +31,7 @@ async def check_for_new_channels(current_count):
     new_count = len(db.select_all_channels_group())
     return new_count != current_count
 
-async def check_private_channel(channels, user_id):
+async def check_private_channel(channels, user_id, number_group):
     list_close = []
     for channel in channels:
         if channel[13] == '+':
@@ -39,7 +39,7 @@ async def check_private_channel(channels, user_id):
     if list_close == []:
         pass
     else:
-        await bot.send_message(cfg.admin_id, f"{fnc.nick_with_link('Пользователь', user_id)}, добавил закрытые чаты, вам необходимо подписаться на них.\n\n{list_close}", parse_mode=types.ParseMode.MARKDOWN)
+        await bot.send_message(cfg.admin_id, f"{fnc.nick_with_link('Пользователь', user_id)}, добавил закрытые чаты, вам необходимо подписаться на них.\n\n{list_close}\n\nНомер группы - {number_group}", parse_mode=types.ParseMode.MARKDOWN)
 
 async def check_keywords_len(keywords, num):
     groups = db.select_all_channels_group()
@@ -109,10 +109,6 @@ async def search_and_forward():
                                         print(f"Message sent to user {user_id}: {message.text}")
                                         db.update_all_message_ids(number_group, message_key)
                                         await asyncio.sleep(2)
-                                        all_channels = db.select_channels_with_number(number_group)
-                                        new_callback = chat_id[:-1] + '✅'
-                                        new_channels = [new_callback if item == chat_id else item for item in all_channels]
-                                        db.update_all_channels(number_group, new_channels)
                                     break
 
                 except FloodWaitError as e:
@@ -165,68 +161,70 @@ async def search_and_forward_close_group():
                 groups_count = len(groups)
                 num = 0
             group = groups[num]
-            user_id, chat_ids, keywords = group[0], group[2], group[5]
-            chat_ids = [item for item in chat_ids if item.endswith('✅')]
+            user_id, chat_ids, keywords, channels_link = group[0], group[7], group[5], group[2]
+            channels_link = [item for item in channels_link if item.endswith('✅')]
+            channels_link = [item for item in channels_link if len(item) >= 13 and item[13] == '+']
             if await check_for_new_channels(len(chat_ids)):
                 groups = db.select_all_channels_group()
                 group = groups[num]
-                user_id, chat_ids, keywords = group[0], group[2], group[5]
-                chat_ids = [item for item in chat_ids if item.endswith('✅') or item.endswith('⏳')]
-                chat_ids = [item for item in chat_ids if len(item) >= 13 and item[13] == '+']
+                user_id, chat_ids, keywords, channels_link = group[0], group[7], group[5], group[2]
+                channels_link = [item for item in channels_link if item.endswith('✅') or item.endswith('⏳')]
+                channels_link = [item for item in channels_link if len(item) >= 13 and item[13] == '+']
 
             number_group = group[1]
-            ids_chating = [-4078334833, -4056371001, -4066133079, -4039465465, -4024273668, -4004407892]
-            for chat_id in ids_chating:
-                trimmed_chat_ids = chat_id
-                exception_occurred = False
-                messages_sent = db.select_message_id(number_group)
-                try:
-                    last_id = last_message_ids.get(trimmed_chat_ids, 0)
-                    messages_to_check = 30
-                    forced_check = num == 0 and last_id == 0
-                    async for message in telethon_client.iter_messages(trimmed_chat_ids, offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
-                        if message.text:
-                            for keyword in keywords:
-                                if keyword.lower() in message.text.lower():
-                                    message_key = [trimmed_chat_ids, message.id]
-                                    if message_key not in messages_sent or forced_check:
-                                        sender = await message.get_sender()
-                                        sender_identifier = f"@{sender.username}" if sender else "Анонимный пользователь"
-                                        message_text = f"Обнаружено ключевое слово\n\nЧат: {trimmed_chat_ids}\n\nПользователь: {sender_identifier}\n\nЗапрос: {keyword}\n\nСсылка на сообщение: Чат закрыт.\n\nТекст:\n{message.text}"
-                                        await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
-                                        print(f"Message sent to user {user_id}: {message.text}")
-                                        await asyncio.sleep(2)
-                                    break
+            for chat_id in chat_ids:
+                for channel_link in channels_link:
+                    links = channel_link[:-2]
+                    trimmed_chat_ids = chat_id
+                    exception_occurred = False
+                    messages_sent = db.select_message_id(number_group)
+                    try:
+                        last_id = last_message_ids.get(trimmed_chat_ids, 0)
+                        messages_to_check = 30
+                        forced_check = num == 0 and last_id == 0
+                        async for message in telethon_client.iter_messages(trimmed_chat_ids, offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
+                            if message.text:
+                                for keyword in keywords:
+                                    if keyword.lower() in message.text.lower():
+                                        message_key = [trimmed_chat_ids, message.id]
+                                        if message_key not in messages_sent or forced_check:
+                                            sender = await message.get_sender()
+                                            sender_identifier = f"@{sender.username}" if sender else "Анонимный пользователь"
+                                            message_text = f"Обнаружено ключевое слово\n\nЧат: {links}\n\nПользователь: {sender_identifier}\n\nЗапрос: {keyword}\n\nСсылка на сообщение: Чат закрыт.\n\nТекст:\n{message.text}"
+                                            await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
+                                            print(f"Message sent to user {user_id}: {message.text}")
+                                            await asyncio.sleep(2)
+                                        break
 
-                except FloodWaitError as e:
-                    print(f"Flood wait error on chat. Sleeping for seconds. {e}")
+                    except FloodWaitError as e:
+                        print(f"Flood wait error on chat. Sleeping for seconds. {e}")
+                        await asyncio.sleep(2)
+                        exception_occurred = True
+                    except ChannelPrivateError:
+                        print("Ошибка доступа: канал закрыт и у меня нет к нему доступа.")
+                        await asyncio.sleep(2)
+                        exception_occurred = True
+                    except ChatForbiddenError:
+                        print("Ошибка доступа: я исключён из чата или покинул его.")
+                        await asyncio.sleep(2)
+                        exception_occurred = True
+                    except UserPrivacyRestrictedError:
+                        print("Ошибка доступа: ограничения конфиденциальности пользователя.")
+                        await asyncio.sleep(2)
+                        exception_occurred = True
+                    except Exception as e:
+                        print(f"Произошла непредвиденная ошибка: {type(e).__name__}, {e}")
+                        await asyncio.sleep(2)
+                        exception_occurred = True
+                    finally:
+                        if exception_occurred is False:
+                            messages = await telethon_client.get_messages(trimmed_chat_ids, limit=1)
+                            if messages:
+                                last_message_ids[trimmed_chat_ids] = messages[0].id
+                                await asyncio.sleep(2)
+                            else:
+                                pass
                     await asyncio.sleep(2)
-                    exception_occurred = True
-                except ChannelPrivateError:
-                    print("Ошибка доступа: канал закрыт и у меня нет к нему доступа.")
-                    await asyncio.sleep(2)
-                    exception_occurred = True
-                except ChatForbiddenError:
-                    print("Ошибка доступа: я исключён из чата или покинул его.")
-                    await asyncio.sleep(2)
-                    exception_occurred = True
-                except UserPrivacyRestrictedError:
-                    print("Ошибка доступа: ограничения конфиденциальности пользователя.")
-                    await asyncio.sleep(2)
-                    exception_occurred = True
-                except Exception as e:
-                    print(f"Произошла непредвиденная ошибка: {type(e).__name__}, {e}")
-                    await asyncio.sleep(2)
-                    exception_occurred = True
-                finally:
-                    if exception_occurred is False:
-                        messages = await telethon_client.get_messages(trimmed_chat_ids, limit=1)
-                        if messages:
-                            last_message_ids[trimmed_chat_ids] = messages[0].id
-                            await asyncio.sleep(2)
-                        else:
-                            pass
-                await asyncio.sleep(2)
             num += 1
             if num >= len(groups):
                 num = 0
@@ -629,7 +627,7 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                 markup_inline = types.InlineKeyboardMarkup(row_width=1)
                 btn_inline1 = types.InlineKeyboardButton(cfg.menu_button, callback_data='menu_after_pay')
                 markup_inline.add(btn_inline1)
-                await check_private_channel(new_chan, user_id)
+                await check_private_channel(new_chan, user_id, number_group)
                 await state.finish()
                 await callback_query.message.delete()
                 await callback_query.message.answer(text=cfg.tariffe_correct(group_name, channels_len, formatted_date_new), reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
@@ -926,7 +924,7 @@ async def other(message: types.Message):
 
 async def on_startup(_):
     asyncio.create_task(search_and_forward())
-    # asyncio.create_task(search_and_forward_close_group())
+    asyncio.create_task(search_and_forward_close_group())
 
 if __name__ == "__main__":
     executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
