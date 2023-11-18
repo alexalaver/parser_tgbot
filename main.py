@@ -230,7 +230,7 @@ async def search_and_forward_close_group():
                                     await asyncio.sleep(2)
                                 else:
                                     pass
-                        await asyncio.sleep(2)
+                        await asyncio.sleep(1)
             num += 1
             if num >= len(groups):
                 num = 0
@@ -239,7 +239,7 @@ async def search_and_forward_close_group():
             print(f"Произошла ошибка: {type(e).__name__}")
             await asyncio.sleep(2)
 
-        await asyncio.sleep(5)
+        await asyncio.sleep(1)
 
 
 
