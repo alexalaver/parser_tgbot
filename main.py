@@ -176,7 +176,6 @@ async def search_and_forward_close_group():
                         trimmed_chat_ids = chat_id
                         exception_occurred = False
                         messages_sent = db.select_message_id(number_group)
-                        print(messages_sent)
                         try:
                             last_id = last_message_ids.get(trimmed_chat_ids, 0)
                             messages_to_check = 30
@@ -193,6 +192,8 @@ async def search_and_forward_close_group():
                                                 await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
                                                 print(f"Message sent to user {user_id}: {message.text}")
                                                 await asyncio.sleep(2)
+                                            else:
+                                                print(messages_sent)
                                             break
 
                         except FloodWaitError as e:
