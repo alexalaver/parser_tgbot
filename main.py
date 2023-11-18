@@ -234,7 +234,7 @@ async def search_and_forward_close_group():
                 num = 0
 
         except Exception as e:
-            print(f"Произошла ошибка: {e}")
+            print(f"Произошла ошибка: {type(e).__name__}")
             await asyncio.sleep(2)
 
         await asyncio.sleep(5)
