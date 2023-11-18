@@ -214,9 +214,11 @@ async def search_and_forward_close_group():
                         except PeerIdInvalidError:
                             print("Ошибка ID: не найден ID")
                             await asyncio.sleep(2)
+                            exception_occurred = True
                         except ValueError:
                             print("Ошибка ID: не найден ID")
                             await asyncio.sleep(2)
+                            exception_occurred = True
                         except Exception as e:
                             print(f"Произошла непредвиденная ошибка: {type(e).__name__}, {e}")
                             await asyncio.sleep(2)
