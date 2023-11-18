@@ -39,7 +39,7 @@ async def check_private_channel(channels, user_id, number_group):
     if list_close == []:
         pass
     else:
-        await bot.send_message(cfg.admin_id, f"{fnc.nick_with_link('Пользователь', user_id)}, добавил закрытые чаты, вам необходимо подписаться на них.\n\n{list_close}\n\nНомер группы - {number_group}", parse_mode=types.ParseMode.MARKDOWN)
+        await bot.send_message(cfg.admin_id, f"{fnc.nick_with_link('Пользователь', user_id)}, добавил закрытые чаты, вам необходимо подписаться на них.\n\n{list_close}\n\nНомер группы - {str(number_group)}", parse_mode=types.ParseMode.MARKDOWN)
 
 async def check_keywords_len(keywords, num):
     groups = db.select_all_channels_group()
@@ -164,7 +164,7 @@ async def search_and_forward_close_group():
             user_id, chat_ids, keywords, channels_link = group[0], group[7], group[5], group[2]
             channels_link = [item for item in channels_link if item.endswith('✅')]
             channels_link = [item for item in channels_link if len(item) >= 13 and item[13] == '+']
-            if await check_for_new_channels(len(chat_ids)):
+            if await check_for_new_channels(len(channels_link)):
                 groups = db.select_all_channels_group()
                 group = groups[num]
                 user_id, chat_ids, keywords, channels_link = group[0], group[7], group[5], group[2]
