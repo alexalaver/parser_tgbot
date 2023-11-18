@@ -6,7 +6,7 @@ from datbas import Data
 from datetime import datetime
 from telethon import TelegramClient
 from telethon.sessions import StringSession
-from telethon.errors import FloodWaitError, ChannelPrivateError, ChatForbiddenError, UserPrivacyRestrictedError
+from telethon.errors import FloodWaitError, ChannelPrivateError, ChatForbiddenError, UserPrivacyRestrictedError, PeerIdInvalidError
 import functions as fnc
 import asyncio
 import config as cfg
@@ -172,59 +172,66 @@ async def search_and_forward_close_group():
                 channels_link = [item for item in channels_link if len(item) >= 13 and item[13] == '+']
 
             number_group = group[1]
-            for chat_id in chat_ids:
-                for channel_link in channels_link:
-                    links = channel_link[:-2]
-                    trimmed_chat_ids = chat_id
-                    exception_occurred = False
-                    messages_sent = db.select_message_id(number_group)
-                    try:
-                        last_id = last_message_ids.get(trimmed_chat_ids, 0)
-                        messages_to_check = 30
-                        forced_check = num == 0 and last_id == 0
-                        async for message in telethon_client.iter_messages(trimmed_chat_ids, offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
-                            if message.text:
-                                for keyword in keywords:
-                                    if keyword.lower() in message.text.lower():
-                                        message_key = [trimmed_chat_ids, message.id]
-                                        if message_key not in messages_sent or forced_check:
-                                            sender = await message.get_sender()
-                                            sender_identifier = f"@{sender.username}" if sender else "Анонимный пользователь"
-                                            message_text = f"Обнаружено ключевое слово\n\nЧат: {links}\n\nПользователь: {sender_identifier}\n\nЗапрос: {keyword}\n\nСсылка на сообщение: Чат закрыт.\n\nТекст:\n{message.text}"
-                                            await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
-                                            print(f"Message sent to user {user_id}: {message.text}")
-                                            await asyncio.sleep(2)
-                                        break
+            if chat_ids is not None:
+                for chat_id in chat_ids:
+                    for channel_link in channels_link:
+                        links = channel_link[:-2]
+                        trimmed_chat_ids = chat_id
+                        exception_occurred = False
+                        messages_sent = db.select_message_id(number_group)
+                        try:
+                            last_id = last_message_ids.get(trimmed_chat_ids, 0)
+                            messages_to_check = 30
+                            forced_check = num == 0 and last_id == 0
+                            async for message in telethon_client.iter_messages(trimmed_chat_ids, offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
+                                if message.text:
+                                    for keyword in keywords:
+                                        if keyword.lower() in message.text.lower():
+                                            message_key = [trimmed_chat_ids, message.id]
+                                            if message_key not in messages_sent or forced_check:
+                                                sender = await message.get_sender()
+                                                sender_identifier = f"@{sender.username}" if sender else "Анонимный пользователь"
+                                                message_text = f"Обнаружено ключевое слово\n\nЧат: {links}\n\nПользователь: {sender_identifier}\n\nЗапрос: {keyword}\n\nСсылка на сообщение: Чат закрыт.\n\nТекст:\n{message.text}"
+                                                await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
+                                                print(f"Message sent to user {user_id}: {message.text}")
+                                                await asyncio.sleep(2)
+                                            break
 
-                    except FloodWaitError as e:
-                        print(f"Flood wait error on chat. Sleeping for seconds. {e}")
+                        except FloodWaitError as e:
+                            print(f"Flood wait error on chat. Sleeping for seconds. {e}")
+                            await asyncio.sleep(2)
+                            exception_occurred = True
+                        except ChannelPrivateError:
+                            print("Ошибка доступа: канал закрыт и у меня нет к нему доступа.")
+                            await asyncio.sleep(2)
+                            exception_occurred = True
+                        except ChatForbiddenError:
+                            print("Ошибка доступа: я исключён из чата или покинул его.")
+                            await asyncio.sleep(2)
+                            exception_occurred = True
+                        except UserPrivacyRestrictedError:
+                            print("Ошибка доступа: ограничения конфиденциальности пользователя.")
+                            await asyncio.sleep(2)
+                            exception_occurred = True
+                        except PeerIdInvalidError:
+                            print("Ошибка ID: не найден ID")
+                            await asyncio.sleep(2)
+                        except ValueError:
+                            print("Ошибка ID: не найден ID")
+                            await asyncio.sleep(2)
+                        except Exception as e:
+                            print(f"Произошла непредвиденная ошибка: {type(e).__name__}, {e}")
+                            await asyncio.sleep(2)
+                            exception_occurred = True
+                        finally:
+                            if exception_occurred is False:
+                                messages = await telethon_client.get_messages(trimmed_chat_ids, limit=1)
+                                if messages:
+                                    last_message_ids[trimmed_chat_ids] = messages[0].id
+                                    await asyncio.sleep(2)
+                                else:
+                                    pass
                         await asyncio.sleep(2)
-                        exception_occurred = True
-                    except ChannelPrivateError:
-                        print("Ошибка доступа: канал закрыт и у меня нет к нему доступа.")
-                        await asyncio.sleep(2)
-                        exception_occurred = True
-                    except ChatForbiddenError:
-                        print("Ошибка доступа: я исключён из чата или покинул его.")
-                        await asyncio.sleep(2)
-                        exception_occurred = True
-                    except UserPrivacyRestrictedError:
-                        print("Ошибка доступа: ограничения конфиденциальности пользователя.")
-                        await asyncio.sleep(2)
-                        exception_occurred = True
-                    except Exception as e:
-                        print(f"Произошла непредвиденная ошибка: {type(e).__name__}, {e}")
-                        await asyncio.sleep(2)
-                        exception_occurred = True
-                    finally:
-                        if exception_occurred is False:
-                            messages = await telethon_client.get_messages(trimmed_chat_ids, limit=1)
-                            if messages:
-                                last_message_ids[trimmed_chat_ids] = messages[0].id
-                                await asyncio.sleep(2)
-                            else:
-                                pass
-                    await asyncio.sleep(2)
             num += 1
             if num >= len(groups):
                 num = 0

@@ -278,3 +278,12 @@ class Data:
         with self.connect:
             self.cursor.execute("UPDATE groups SET channels_id=%s WHERE number_group=%s", (ids, number_group,))
             self.connect.commit()
+
+    def select_chat_ids(self, number_group):
+        with self.connect:
+            self.cursor.execute("SELECT channels_id WHERE number_group=%s", (number_group,))
+            a = self.cursor.fetchone()
+            if a is None:
+                return None
+            else:
+                return a[0]
