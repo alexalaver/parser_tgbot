@@ -169,13 +169,13 @@ async def search_and_forward_close_group():
                 channels_link = [item for item in channels_link if len(item) >= 13 and item[13] == '+']
 
             number_group = group[1]
+            messages_sent = db.select_message_id(number_group)
             if chat_ids:
                 for chat_id in chat_ids:
                     for channel_link in channels_link:
                         links = channel_link[:-2]
                         trimmed_chat_ids = chat_id
                         exception_occurred = False
-                        messages_sent = db.select_message_id(number_group)
                         try:
                             last_id = last_message_ids.get(trimmed_chat_ids, 0)
                             messages_to_check = 30
