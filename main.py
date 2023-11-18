@@ -634,13 +634,15 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                 markup_inline = types.InlineKeyboardMarkup(row_width=1)
                 btn_inline1 = types.InlineKeyboardButton(cfg.menu_button, callback_data='menu_after_pay')
                 markup_inline.add(btn_inline1)
-                # channels_link = [item for item in new_channels if len(item) >= 13 and item[13] == '+']
-                # new_chender = []
-                # for channel_link in channels_link:
-                #     new_callback = channel_link[:-1] + '⏳'
-                #     new_chendel = [new_callback if item == channel_link else item for item in new_channels]
-                #     new_chender.append(new_chendel)
-                # db.update_all_channels(number_group, new_chender)
+                all_channels = db.select_channels_with_number(number_group)
+                updated_a = []
+                for b in all_channels:
+                    if b[13] == '+' and len(b) >= 13:
+                        new_b = b[:-2] + '⏳'
+                    else:
+                        new_b = b
+                    updated_a.append(new_b)
+                db.update_all_channels(number_group, updated_a)
                 await check_private_channel(new_chan, user_id, number_group)
                 await state.finish()
                 await callback_query.message.delete()
@@ -911,18 +913,21 @@ async def add_chat_ids_num_2(message: types.Message, state: FSMContext):
             try:
                 int(lines)
                 new_lst.append(int(lines))
-            except Exception as err:
+            except Exception:
                 await message.answer(cfg.error_add_ids, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
                 await Add_chat_ids.panel_adm.set()
         data = await state.get_data()
         number_group = data.get("number_group")
         db.add_chat_ids(int(number_group), new_lst)
-        # all_channels = db.select_channels_with_number(number_group)
-        # channels_link = [item for item in all_channels if len(item) >= 13 and item[13] == '+']
-        # for channel_link in channels_link:
-        #     new_callback = channel_link[:-1] + '✅'
-        #     new_channels = [new_callback if item == channel_link else item for item in all_channels]
-        #     db.update_all_channels(number_group, new_channels)
+        all_channels = db.select_channels_with_number(number_group)
+        updated_a = []
+        for b in all_channels:
+            if b[13] == '+' and len(b) >= 13:
+                new_b = b[:-2] + '✅'
+            else:
+                new_b = b
+            updated_a.append(new_b)
+        db.update_all_channels(number_group, updated_a)
         await message.answer(cfg.correct_add_chat_ids, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
         await Add_chat_ids.panel_adm.set()
 
