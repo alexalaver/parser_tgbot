@@ -634,12 +634,13 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                 markup_inline = types.InlineKeyboardMarkup(row_width=1)
                 btn_inline1 = types.InlineKeyboardButton(cfg.menu_button, callback_data='menu_after_pay')
                 markup_inline.add(btn_inline1)
-                channels_link = [item for item in new_channels if len(item) >= 13 and item[13] == '+']
-                new_chendel = []
-                for channel_link in channels_link:
-                    new_callback = channel_link[:-1] + '⏳'
-                    new_chendel = [new_callback if item == channel_link else item for item in new_channels]
-                db.update_all_channels(number_group, new_chendel)
+                # channels_link = [item for item in new_channels if len(item) >= 13 and item[13] == '+']
+                # new_chender = []
+                # for channel_link in channels_link:
+                #     new_callback = channel_link[:-1] + '⏳'
+                #     new_chendel = [new_callback if item == channel_link else item for item in new_channels]
+                #     new_chender.append(new_chendel)
+                # db.update_all_channels(number_group, new_chender)
                 await check_private_channel(new_chan, user_id, number_group)
                 await state.finish()
                 await callback_query.message.delete()
