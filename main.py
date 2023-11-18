@@ -169,7 +169,7 @@ async def search_and_forward_close_group():
                 channels_link = [item for item in channels_link if len(item) >= 13 and item[13] == '+']
 
             number_group = group[1]
-            if chat_ids is not None:
+            if chat_ids:
                 for chat_id in chat_ids:
                     for channel_link in channels_link:
                         links = channel_link[:-2]
@@ -631,6 +631,12 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                 markup_inline = types.InlineKeyboardMarkup(row_width=1)
                 btn_inline1 = types.InlineKeyboardButton(cfg.menu_button, callback_data='menu_after_pay')
                 markup_inline.add(btn_inline1)
+                all_channels = db.select_channels_with_number(number_group)
+                channels_link = [item for item in all_channels if len(item) >= 13 and item[13] == '+']
+                for channel_link in channels_link:
+                    new_callback = channel_link[:-1] + '⏳'
+                    new_channels = [new_callback if item == channel_link else item for item in all_channels]
+                    db.update_all_channels(number_group, new_channels)
                 await check_private_channel(new_chan, user_id, number_group)
                 await state.finish()
                 await callback_query.message.delete()
@@ -907,6 +913,12 @@ async def add_chat_ids_num_2(message: types.Message, state: FSMContext):
         data = await state.get_data()
         number_group = data.get("number_group")
         db.add_chat_ids(int(number_group), new_lst)
+        all_channels = db.select_channels_with_number(number_group)
+        channels_link = [item for item in all_channels if len(item) >= 13 and item[13] == '+']
+        for channel_link in channels_link:
+            new_callback = channel_link[:-1] + '✅'
+            new_channels = [new_callback if item == channel_link else item for item in all_channels]
+            db.update_all_channels(number_group, new_channels)
         await message.answer(cfg.correct_add_chat_ids, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
         await Add_chat_ids.panel_adm.set()
 
