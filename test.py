@@ -98,6 +98,6 @@
 # chat_ids = [item for item in a if len(item) >= 1 and item[13] == '+']
 # print(chat_ids)
 
-a = ["https://t.me/test2asodjas ✅","https://t.me/+RIn2HNSK4YxhOWUx ✅","https://t.me/test22222 ⏳","https://t.me/test222222 ⏳","https://t.me/test2222222 ⏳"]
-chat_ids = [item for item in a if len(item) < 13 or item[13] != '+']
-print(chat_ids)
+a = ["https://t.me/+a3UxfURmNGA0Zjgy ✅","https://t.me/+F5C9DROFADo4NWNi ✅","https://t.me/+OF5wBCw4OTsxZjMy ✅","https://t.me/+lKwO7uUR26ZkZjU6 ✅","https://t.me/+kaLhqGj2EHg3NjFi ✅","https://t.me/+seW1RLuAcPJhYjNi ⏳","@jivichatt ✅"]
+channels_link = [item for item in a if len(item) >= 13 and item[13] == '+']
+print(channels_link)
