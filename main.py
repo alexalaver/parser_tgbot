@@ -634,7 +634,7 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                 btn_inline1 = types.InlineKeyboardButton(cfg.menu_button, callback_data='menu_after_pay')
                 markup_inline.add(btn_inline1)
                 all_channels = db.select_channels_with_number(number_group)
-                updated_a = [x[:-2] + '⏳' if len(x) >= 13 and x[13] == '+' else x for x in all_channels]
+                updated_a = [x[:-1] + '⏳' if len(x) >= 13 and x[13] == '+' else x for x in all_channels]
                 db.update_all_channels(number_group, updated_a)
                 await check_private_channel(new_chan, user_id, number_group)
                 await state.finish()
@@ -926,7 +926,7 @@ async def add_chat_ids_num_2(message: types.Message, state: FSMContext):
         number_group = data.get("number_group")
         db.add_chat_ids(int(number_group), new_lst)
         all_channels = db.select_channels_with_number(number_group)
-        updated_a = [x[:-2] + '✅' if len(x) >= 13 and x[13] == '+' else x for x in all_channels]
+        updated_a = [x[:-1] + '✅' if len(x) >= 13 and x[13] == '+' else x for x in all_channels]
         db.update_all_channels(number_group, updated_a)
         await message.answer(cfg.correct_add_chat_ids, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
         await Add_chat_ids.panel_adm.set()
