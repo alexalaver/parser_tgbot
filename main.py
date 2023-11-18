@@ -780,6 +780,8 @@ async def create_group_func_2(message: types.Message, state: FSMContext):
             markup_reply.add(cfg.autoposting)
             markup_reply.add(cfg.parser)
             markup_reply.row(cfg.my_profile, cfg.support)
+            if db.select_admin(user_id) > 0:
+                markup_reply.add(cfg.admin_panel_button)
             await state.reset_state()
             await message.answer(cfg.cancel_creategroup_text, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
         elif message.text:
@@ -795,6 +797,8 @@ async def create_group_func_2(message: types.Message, state: FSMContext):
                         markup_reply.add(cfg.autoposting)
                         markup_reply.add(cfg.parser)
                         markup_reply.row(cfg.my_profile, cfg.support)
+                        if db.select_admin(user_id) > 0:
+                            markup_reply.add(cfg.admin_panel_button)
                         await message.answer(cfg.error_create_group, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
                         print(f"[ERROR] {es}")
                 else:
@@ -819,6 +823,8 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
             markup_reply.add(cfg.autoposting)
             markup_reply.add(cfg.parser)
             markup_reply.row(cfg.my_profile, cfg.support)
+            if db.select_admin(user_id) > 0:
+                markup_reply.add(cfg.admin_panel_button)
             await state.reset_state()
             await message.answer(cfg.cancel_creategroup_text, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
         elif message.text:
@@ -843,6 +849,8 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                         markup_reply.add(cfg.autoposting)
                         markup_reply.add(cfg.parser)
                         markup_reply.row(cfg.my_profile, cfg.support)
+                        if db.select_admin(user_id) > 0:
+                            markup_reply.add(cfg.admin_panel_button)
                         await message.answer(cfg.error_create_group, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
                         print(f"[ERROR] {es}")
                 else:
