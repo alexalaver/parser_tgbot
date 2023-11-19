@@ -284,6 +284,6 @@ class Data:
             self.cursor.execute("SELECT channels_id WHERE number_group=%s", (number_group,))
             a = self.cursor.fetchone()
             if a is None:
-                return None
+                return []
             else:
                 return a[0]
