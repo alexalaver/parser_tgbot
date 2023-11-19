@@ -162,14 +162,13 @@ async def search_and_forward_close_group():
             group = groups[num]
             user_id, chat_ids, keywords, channels_link = group[0], group[7], group[5], group[2]
             channels_link = [item for item in channels_link if len(item) >= 13 and item[13] == '+']
-            print(channels_link)
             if await check_for_new_channels(len(channels_link)):
                 groups = db.select_all_channels_group()
                 group = groups[num]
                 user_id, chat_ids, keywords, channels_link = group[0], group[7], group[5], group[2]
                 channels_link = [item for item in channels_link if len(item) >= 13 and item[13] == '+']
-            print(f"test3")
             number_group = group[1]
+            print(number_group)
             if chat_ids != []:
                 for chat_id in chat_ids:
                     index_chat_id = int(chat_id[0])
