@@ -169,7 +169,7 @@ async def search_and_forward_close_group():
                     index_chat_id = int(chat_id[0])
                     links_1 = channels_link[index_chat_id]
                     links_2 = links_1[-1]
-                    if links_2 != "✅":
+                    if links_2 == "✅":
                         trimmed_chat_ids = int(chat_id[2:])
                         print(trimmed_chat_ids)
                         exception_occurred = False
