@@ -6,7 +6,7 @@ TOKEN = "6597828235:AAH60BBRislfPCqwBeGsiYMBEjXuBrHujZ0"
 
 API_ID = "23041155"
 API_HASH = "b667ea6c10ca8d523ffeae49a2ed6e90"
-STRING_SESSION = ""
+STRING_SESSION = "1ApWapzMBu6TFsC2-S3cr4DSttRPlxBHncrmU5KK6zz536ci7WBnE4i7nKMHaEx9X_J3M2yg6HlZqZ10srPgPuCsBki6450JbJwtD6IJSxDA1gajeM8posluziGuhtmiMsQdfJU0XjBIoeJFnCm1HGaDVlqBmQS-76vmYcXDQzlJyXG-mo-H0tg8pzxbDnooEUfp8NZN1lP_-d5ZxtuRWTm0Ol35y6efhWD9ihHxLwi7StPmb4ZdHIgu0l047mcY24j9dxnHcR48h7y_GrN9JmPjugFMuSIEiicS4SALqgWlPHIouY4sA0Jb1xX08bhRahqVd3NPQLCEZtqdgWc-sOX8HqM2PeWw="
 def profile(profile_id, balance):
     return f"*Ваш идентификатор: *{profile_id}\n*Текущий баланс: *{balance}"
 
