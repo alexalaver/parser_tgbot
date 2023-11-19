@@ -98,6 +98,18 @@
 # chat_ids = [item for item in a if len(item) >= 1 and item[13] == '+']
 # print(chat_ids)
 
-a = ["https://t.me/+a3UxfURmNGA0Zjgy ✅","https://t.me/+F5C9DROFADo4NWNi ✅","https://t.me/+OF5wBCw4OTsxZjMy ✅","https://t.me/+lKwO7uUR26ZkZjU6 ✅","https://t.me/+kaLhqGj2EHg3NjFi ✅","https://t.me/+seW1RLuAcPJhYjNi ⏳","@jivichatt ✅"]
-channels_link = [item for item in a if len(item) >= 13 and item[13] == '+']
-print(channels_link)
+# a = ["https://t.me/+a3UxfURmNGA0Zjgy ✅","https://t.me/+F5C9DROFADo4NWNi ✅","https://t.me/+OF5wBCw4OTsxZjMy ✅","https://t.me/+lKwO7uUR26ZkZjU6 ✅","https://t.me/+kaLhqGj2EHg3NjFi ✅","https://t.me/+seW1RLuAcPJhYjNi ⏳","@jivichatt ✅"]
+# channels_link = [item for item in a if len(item) >= 13 and item[13] == '+']
+# print(channels_link)
+
+# a = '1. hello bro'
+# print(a[3:])
+
+a = ["https://t.me/+OixTZDaRnJoyMGNh ✅", "https://t.me/+Y2KY3rg483xkZTEx ✅", "https://t.me/+RIn2HNSK4YxhOWUx ✅", "https://t.me/+AACeCS2QF4BiODM6 ✅", "https://t.me/+qgMQu0WCBhphNzg0 ✅"]
+b = ["1. 4654646", "4. 6545654", "3. 4654645"]  # Предполагаем, что все элементы преобразованы в строки
+
+for item in b:
+    index = int(item.split('.')[0]) - 1  # Вычисляем индекс (уменьшаем на 1, так как индексация в Python начинается с 0)
+    a[index] = a[index].replace("✅", "X")  # Заменяем "✅" на "X"
+
+print(a)

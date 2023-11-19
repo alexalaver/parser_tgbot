@@ -167,11 +167,10 @@ async def search_and_forward_close_group():
 
             number_group = group[1]
             if chat_ids:
-                for channel_link in channels_link:
-                    if channel_link[-1] == "❌":
-                        break
-                    for chat_id in chat_ids:
-                        links = channel_link[:-2]
+                for chat_id in chat_ids:
+                    index_chat_id = int(chat_id[1])
+                    if channels_link[index_chat_id][-1] != "❌":
+                        links = channels_link[index_chat_id][:-2]
                         trimmed_chat_ids = chat_id
                         exception_occurred = False
                         messages_sent = db.select_message_id(number_group)
@@ -915,19 +914,22 @@ async def add_chat_ids_num_2(message: types.Message, state: FSMContext):
         textsing = message.text
         text_lines = textsing.strip().split('\n')
         new_lst = []
+        data = await state.get_data()
+        number_group = data.get("number_group")
         for lines in text_lines:
             try:
-                int(lines)
-                new_lst.append(int(lines))
+                int(lines[3:])
+                new_lst.append(lines)
+                all_channels = db.select_channels_with_number(number_group)
+                index = int(lines.split(')')[0]) - 1
+                all_channels[index] = all_channels[index].replace("⏳", "✅")
+                db.update_all_channels(number_group, all_channels)
             except Exception:
                 await message.answer(cfg.error_add_ids, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
                 await Add_chat_ids.panel_adm.set()
-        data = await state.get_data()
-        number_group = data.get("number_group")
+        old_chat_list = db.select_chat_ids(number_group) or []
+        new_lst = old_chat_list + new_lst
         db.add_chat_ids(int(number_group), new_lst)
-        all_channels = db.select_channels_with_number(number_group)
-        updated_a = [x[:-1] + '✅' if len(x) >= 13 and x[13] == '+' else x for x in all_channels]
-        db.update_all_channels(number_group, updated_a)
         await message.answer(cfg.correct_add_chat_ids, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
         await Add_chat_ids.panel_adm.set()
 
