@@ -171,6 +171,7 @@ async def search_and_forward_close_group():
             number_group = group[1]
             if chat_ids != []:
                 for chat_id in chat_ids:
+                    print(chat_id)
                     index_chat_id = int(chat_id[0])
                     print(index_chat_id)
                     links_1 = channels_link[index_chat_id - 1]
