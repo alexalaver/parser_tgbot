@@ -281,7 +281,7 @@ class Data:
 
     def select_chat_ids(self, number_group):
         with self.connect:
-            self.cursor.execute("SELECT channels_id WHERE number_group=%s", (number_group,))
+            self.cursor.execute("SELECT channels_id FROM groups WHERE number_group=%s", (number_group,))
             a = self.cursor.fetchone()
             if a is None:
                 return []
