@@ -4,8 +4,8 @@ TOKEN = "6597828235:AAH60BBRislfPCqwBeGsiYMBEjXuBrHujZ0"
 #
 # STRING_SESSION = '1ApWapzMBuzpEhsLOLVqODnYizulpyqZLTBfbFnDX0um5LbrpS8qzrIW2sfEObNnC0WFrJZYBsFs7-mtdoUtosSG8_fvVMLRLwADcI2rK457moLW6LJZrigSBPKR-PQh8YPcK_Y-rOx9uQDvVTYdfb1J5U9BXQpTldcUkdw4Kb1gpet7h5RvXc0ptXsHYmKriLUUPRyjr3S0BggBiPQfbMr3KVU-W0tvaU0LYQEr5mCVGBPCTE2hbcFuCM-VSY3F3JShihkEVXbemG0auV9XtfLHUisXv2Ukv6FsmGsqdWWlPL3Vu3cXtNG4N9PHU9QaKbG1Ep1HNSvXl55HL7gubTnjPrBzFzQM='
 
-API_ID = ""
-API_HASH = ""
+API_ID = "23041155"
+API_HASH = "b667ea6c10ca8d523ffeae49a2ed6e90"
 STRING_SESSION = ""
 def profile(profile_id, balance):
     return f"*Ваш идентификатор: *{profile_id}\n*Текущий баланс: *{balance}"
