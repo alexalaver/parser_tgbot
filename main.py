@@ -167,8 +167,9 @@ async def search_and_forward_close_group():
             if chat_ids != []:
                 for chat_id in chat_ids:
                     index_chat_id = int(chat_id[1])
-                    if channels_link[index_chat_id][-1] != "❌":
-                        links = channels_link[index_chat_id][:-2]
+                    links_1 = channels_link[index_chat_id]
+                    links_2 = links_1[-1]
+                    if links_2 != "❌":
                         trimmed_chat_ids = int(chat_id[3:])
                         exception_occurred = False
                         messages_sent = db.select_message_id(number_group)
@@ -184,7 +185,7 @@ async def search_and_forward_close_group():
                                             if message_key not in messages_sent:
                                                 sender = await message.get_sender()
                                                 sender_identifier = f"@{sender.username}" if sender else "Анонимный пользователь"
-                                                message_text = f"Обнаружено ключевое слово\n\nЧат: {links}\n\nПользователь: {sender_identifier}\n\nЗапрос: {keyword}\n\nСсылка на сообщение: Чат закрыт.\n\nТекст:\n{message.text}"
+                                                message_text = f"Обнаружено ключевое слово\n\nЧат: {links_1[:-2]}\n\nПользователь: {sender_identifier}\n\nЗапрос: {keyword}\n\nСсылка на сообщение: Чат закрыт.\n\nТекст:\n{message.text}"
                                                 await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
                                                 print(f"Message sent to user {user_id}: {message.text}")
                                                 db.update_all_message_ids(number_group, message_key)
