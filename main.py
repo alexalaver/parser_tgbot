@@ -171,7 +171,7 @@ async def search_and_forward_close_group():
                     index_chat_id = int(chat_id[1])
                     if channels_link[index_chat_id][-1] != "❌":
                         links = channels_link[index_chat_id][:-2]
-                        trimmed_chat_ids = chat_id
+                        trimmed_chat_ids = int(chat_id)
                         exception_occurred = False
                         messages_sent = db.select_message_id(number_group)
                         try:
@@ -927,7 +927,7 @@ async def add_chat_ids_num_2(message: types.Message, state: FSMContext):
             except Exception:
                 await message.answer(cfg.error_add_ids, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
                 await Add_chat_ids.panel_adm.set()
-        old_chat_list = db.select_chat_ids(number_group)
+        old_chat_list = db.select_chat_ids(number_group) or []
         new_lst = old_chat_list + new_lst
         db.add_chat_ids(int(number_group), new_lst)
         await message.answer(cfg.correct_add_chat_ids, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
