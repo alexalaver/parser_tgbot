@@ -171,7 +171,7 @@ async def search_and_forward_close_group():
                     index_chat_id = int(chat_id[1])
                     if channels_link[index_chat_id][-1] != "❌":
                         links = channels_link[index_chat_id][:-2]
-                        trimmed_chat_ids = int(chat_id)
+                        trimmed_chat_ids = int(chat_id[3:])
                         exception_occurred = False
                         messages_sent = db.select_message_id(number_group)
                         try:
