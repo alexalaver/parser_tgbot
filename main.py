@@ -168,7 +168,7 @@ async def search_and_forward_close_group():
                 user_id, chat_ids, keywords, channels_link = group[0], group[7], group[5], group[2]
                 channels_link = [item for item in channels_link if len(item) >= 13 and item[13] == '+']
             number_group = group[1]
-            print(number_group)
+            print(chat_ids)
             if chat_ids != []:
                 for chat_id in chat_ids:
                     index_chat_id = int(chat_id[0])
