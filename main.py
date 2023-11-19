@@ -176,6 +176,7 @@ async def search_and_forward_close_group():
                     links_2 = links_1[-1]
                     if links_2 == "✅":
                         trimmed_chat_ids = int(chat_id[3:])
+                        print(f"{trimmed_chat_ids}, IF")
                         exception_occurred = False
                         messages_sent = db.select_message_id(number_group)
                         try:
