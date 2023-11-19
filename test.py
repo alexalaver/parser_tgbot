@@ -105,11 +105,14 @@
 # a = '1. hello bro'
 # print(a[3:])
 
-a = ["https://t.me/+OixTZDaRnJoyMGNh ✅", "https://t.me/+Y2KY3rg483xkZTEx ✅", "https://t.me/+RIn2HNSK4YxhOWUx ✅", "https://t.me/+AACeCS2QF4BiODM6 ✅", "https://t.me/+qgMQu0WCBhphNzg0 ✅"]
-b = ["1. 4654646", "4. 6545654", "3. 4654645"]  # Предполагаем, что все элементы преобразованы в строки
+# a = ["https://t.me/+OixTZDaRnJoyMGNh ✅", "https://t.me/+Y2KY3rg483xkZTEx ✅", "https://t.me/+RIn2HNSK4YxhOWUx ✅", "https://t.me/+AACeCS2QF4BiODM6 ✅", "https://t.me/+qgMQu0WCBhphNzg0 ✅"]
+# b = ["1. 4654646", "4. 6545654", "3. 4654645"]  # Предполагаем, что все элементы преобразованы в строки
+#
+# for item in b:
+#     index = int(item.split('.')[0]) - 1  # Вычисляем индекс (уменьшаем на 1, так как индексация в Python начинается с 0)
+#     a[index] = a[index].replace("✅", "X")  # Заменяем "✅" на "X"
+#
+# print(a)
 
-for item in b:
-    index = int(item.split('.')[0]) - 1  # Вычисляем индекс (уменьшаем на 1, так как индексация в Python начинается с 0)
-    a[index] = a[index].replace("✅", "X")  # Заменяем "✅" на "X"
-
-print(a)
+# a = "1) hello"
+# print(a[3:])
