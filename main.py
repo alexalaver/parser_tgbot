@@ -20,8 +20,8 @@ bot = Bot(cfg.TOKEN)
 dp = Dispatcher(bot, storage=MemoryStorage())
 db = Data("192.168.1.37", "5432", "pars_db", "pars_user", "pars_pwd")
 
-# with TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH) as client:
-#     print("String Session:", client.session.save())
+with TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH) as client:
+    print("String Session:", client.session.save())
 
 telethon_client = TelegramClient(StringSession(cfg.STRING_SESSION), cfg.API_ID, cfg.API_HASH)
 
@@ -38,7 +38,7 @@ async def check_private_channel(channels, user_id, number_group):
     if channels_link is None:
         pass
     else:
-        await bot.send_message(cfg.admin_id, f"{fnc.nick_with_link('Пользователь', user_id)}, добавил закрытые чаты, вам необходимо подписаться на них.\n\n{channels}\n\nНомер группы - {str(number_group)}", parse_mode=types.ParseMode.MARKDOWN)
+        await bot.send_message(cfg.admin_id, f"{fnc.nick_with_link('Пользователь', user_id)}, добавил закрытые чаты, вам необходимо подписаться на них.\n\n{channels_link}\n\nНомер группы - {str(number_group)}", parse_mode=types.ParseMode.MARKDOWN)
 
 async def check_keywords_len(keywords, num):
     groups = db.select_all_channels_group()
@@ -161,10 +161,12 @@ async def search_and_forward_close_group():
                 num = 0
             group = groups[num]
             user_id, chat_ids, keywords, channels_link = group[0], group[7], group[5], group[2]
+            channels_link = [item for item in channels_link if len(item) >= 13 and item[13] == '+']
             if await check_for_new_channels(len(channels_link)):
                 groups = db.select_all_channels_group()
                 group = groups[num]
                 user_id, chat_ids, keywords, channels_link = group[0], group[7], group[5], group[2]
+                channels_link = [item for item in channels_link if len(item) >= 13 and item[13] == '+']
 
             number_group = group[1]
             if chat_ids != []:
