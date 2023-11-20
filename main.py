@@ -319,32 +319,34 @@ async def process_phone(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['phone'] = message.text
 
-    # Создаем экземпляр клиента здесь и используем его для отправки кода
-    with TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH) as client:
-        try:
-            result = await client.send_code_request(data['phone'])
-            data['phone_code_hash'] = result.phone_code_hash
-            await Form.next()
-            await message.reply("Код отправлен. Введите код из сообщения Telegram.")
-        except Exception as e:
-            await message.reply(f'Ошибка: {e}')
-            await state.finish()
+    client = TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH)
+    await client.connect()
+
+    try:
+        await client.send_code_request(data['phone'])
+        await Form.next()
+        await message.reply("Код отправлен. Введите код из сообщения Telegram.")
+    except Exception as e:
+        await message.reply(f'Ошибка: {e}')
+        await state.finish()
 
 @dp.message_handler(state=Form.code)
 async def process_code(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['code'] = message.text
 
-    # Создаем экземпляр клиента здесь и используем его для аутентификации
-    with TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH) as client:
-        try:
-            await client.sign_in(data['phone'], data['code'], phone_code_hash=data['phone_code_hash'])
-            string_session = client.session.save()
-            await message.reply(f'Ваша StringSession: {string_session}')
-        except Exception as e:
-            await message.reply(f'Ошибка: {e}')
-        finally:
-            await state.finish()
+    client = TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH)
+    await client.connect()
+
+    try:
+        await client.sign_in(data['phone'], data['code'])
+        string_session = client.session.save()
+        await message.reply(f'Ваша StringSession: {string_session}')
+    except Exception as e:
+        await message.reply(f'Ошибка: {e}')
+    finally:
+        await client.disconnect()
+        await state.finish()
 
 #...................
 
