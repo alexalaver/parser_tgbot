@@ -324,18 +324,21 @@ async def process_phone(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['phone'] = message.text
 
-    with TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH) as client:
-        await client.connect()
-        try:
+    try:
+        with TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH) as client:
+            await client.connect()
+            logger.info("Клиент Telethon подключен")
+
             result = await client.send_code_request(data['phone'])
             data['phone_code_hash'] = result.phone_code_hash
+            logger.info(f"Код подтверждения отправлен на номер {data['phone']}")
+
             await Form.next()
             await message.reply("Код отправлен. Введите код из сообщения Telegram.")
-            logger.info("Код подтверждения отправлен")
-        except Exception as e:
-            logger.error(f'Ошибка при отправке кода: {e}')
-            await message.reply(f'Ошибка: {e}')
-            await state.finish()
+    except Exception as e:
+        logger.error(f'Ошибка в process_phone: {e}')
+        await message.reply(f'Ошибка: {e}')
+        await state.finish()
 
 @dp.message_handler(state=Form.code)
 async def process_code(message: types.Message, state: FSMContext):
