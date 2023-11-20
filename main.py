@@ -304,6 +304,60 @@ async def panel_administration(message):
     else:
         await message.answer(cfg.error_adm_dostup)
 
+#..............
+bot = Bot(token=BOT_TOKEN)
+dp = Dispatcher(bot)
+dp.middleware.setup(LoggingMiddleware())
+
+class Form(StatesGroup):
+    phone = State()
+    code = State()
+
+@dp.message_handler(commands=['get_session'])
+async def send_welcome(message: types.Message):
+    await message.reply("Привет! Отправьте свой номер телефона для получения StringSession.")
+    await Form.phone.set()
+
+@dp.message_handler(state=Form.phone)
+async def process_phone(message: types.Message, state: FSMContext):
+    async with state.proxy() as data:
+        data['phone'] = message.text
+
+    client = TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH)
+    await client.connect()
+
+    try:
+        await client.send_code_request(data['phone'])
+        await Form.next()
+        await message.reply("Код отправлен. Введите код из сообщения Telegram.")
+    except Exception as e:
+        await message.reply(f'Ошибка: {e}')
+        await state.finish()
+
+@dp.message_handler(state=Form.code)
+async def process_code(message: types.Message, state: FSMContext):
+    async with state.proxy() as data:
+        data['code'] = message.text
+
+    client = TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH)
+    await client.connect()
+
+    try:
+        await client.sign_in(data['phone'], data['code'])
+        string_session = client.session.save()
+        await message.reply(f'Ваша StringSession: {string_session}')
+    except Exception as e:
+        await message.reply(f'Ошибка: {e}')
+    finally:
+        await client.disconnect()
+        await state.finish()
+
+if __name__ == '__main__':
+    executor.start_polling(dp, skip_updates=True)
+
+#...................
+
+
 @dp.message_handler(commands=['start'])
 async def start(message: types.Message):
     if message.chat.type == types.ChatType.PRIVATE:
