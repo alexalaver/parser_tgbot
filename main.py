@@ -314,22 +314,6 @@ async def send_welcome(message: types.Message):
     await message.reply("Привет! Отправьте свой номер телефона для получения StringSession.")
     await Form.phone.set()
 
-@dp.message_handler(state=Form.code)
-async def process_code(message: types.Message, state: FSMContext):
-    async with state.proxy() as data:
-        data['code'] = message.text
-
-    # Создаем экземпляр клиента здесь и используем его для аутентификации
-    with TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH) as client:
-        try:
-            await client.sign_in(data['phone'], data['code'], phone_code_hash=data['phone_code_hash'])
-            string_session = client.session.save()
-            await message.reply(f'Ваша StringSession: {string_session}')
-        except Exception as e:
-            await message.reply(f'Ошибка: {e}')
-        finally:
-            await state.finish()
-
 @dp.message_handler(state=Form.phone)
 async def process_phone(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
@@ -345,6 +329,22 @@ async def process_phone(message: types.Message, state: FSMContext):
         except Exception as e:
             logger.error(f'Ошибка при отправке кода: {e}')
             await message.reply(f'Ошибка: {e}')
+            await state.finish()
+
+@dp.message_handler(state=Form.code)
+async def process_code(message: types.Message, state: FSMContext):
+    async with state.proxy() as data:
+        data['code'] = message.text
+
+    # Создаем экземпляр клиента здесь и используем его для аутентификации
+    with TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH) as client:
+        try:
+            await client.sign_in(data['phone'], data['code'], phone_code_hash=data['phone_code_hash'])
+            string_session = client.session.save()
+            await message.reply(f'Ваша StringSession: {string_session}')
+        except Exception as e:
+            await message.reply(f'Ошибка: {e}')
+        finally:
             await state.finish()
 
 #...................
