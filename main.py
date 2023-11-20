@@ -306,12 +306,9 @@ async def panel_administration(message):
     else:
         await message.answer(cfg.error_adm_dostup)
 
-client = TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH)
-
 class Form(StatesGroup):
     phone = State()
     code = State()
-    phone_code_hash = State()  # Добавляем состояние для хранения phone_code_hash
 
 @dp.message_handler(commands=['get_session'])
 async def send_welcome(message: types.Message):
@@ -323,30 +320,32 @@ async def process_phone(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['phone'] = message.text
 
-    await client.connect()
-
-    try:
-        result = await client.send_code_request(data['phone'])
-        data['phone_code_hash'] = result.phone_code_hash
-        await Form.next()
-        await message.reply("Код отправлен. Введите код из сообщения Telegram.")
-    except Exception as e:
-        await message.reply(f'Ошибка: {e}')
-        await state.finish()
+    with TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH) as client:
+        await client.connect()
+        try:
+            result = await client.send_code_request(data['phone'])
+            data['phone_code_hash'] = result.phone_code_hash
+            await Form.next()
+            await message.reply("Код отправлен. Введите код из сообщения Telegram.")
+        except Exception as e:
+            await message.reply(f'Ошибка: {e}')
+            await state.finish()
 
 @dp.message_handler(state=Form.code)
 async def process_code(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['code'] = message.text
 
-    try:
-        await client.sign_in(data['phone'], data['code'], phone_code_hash=data['phone_code_hash'])
-        string_session = client.session.save()
-        await message.reply(f'Ваша StringSession: {string_session}')
-    except Exception as e:
-        await message.reply(f'Ошибка: {e}')
-    finally:
-        await state.finish()
+    with TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH) as client:
+        await client.connect()
+        try:
+            await client.sign_in(data['phone'], data['code'], phone_code_hash=data['phone_code_hash'])
+            string_session = client.session.save()
+            await message.reply(f'Ваша StringSession: {string_session}')
+        except Exception as e:
+            await message.reply(f'Ошибка: {e}')
+        finally:
+            await state.finish()
 
 #...................
 
