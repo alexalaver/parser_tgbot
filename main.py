@@ -323,7 +323,8 @@ async def process_phone(message: types.Message, state: FSMContext):
     await client.connect()
 
     try:
-        await client.send_code_request(data['phone'])
+        result = await client.send_code_request(data['phone'])
+        data['phone_code_hash'] = result.phone_code_hash  # Сохраняем phone_code_hash
         await Form.next()
         await message.reply("Код отправлен. Введите код из сообщения Telegram.")
     except Exception as e:
@@ -339,7 +340,8 @@ async def process_code(message: types.Message, state: FSMContext):
     await client.connect()
 
     try:
-        await client.sign_in(data['phone'], data['code'])
+        # Используем сохраненный phone_code_hash для аутентификации
+        await client.sign_in(data['phone'], data['code'], phone_code_hash=data['phone_code_hash'])
         string_session = client.session.save()
         await message.reply(f'Ваша StringSession: {string_session}')
     except Exception as e:
