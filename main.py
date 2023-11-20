@@ -318,12 +318,14 @@ async def send_welcome(message: types.Message):
     await message.reply("Привет! Отправьте свой номер телефона для получения StringSession.")
     await Form.phone.set()
 
+client = TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH)
+
+
 @dp.message_handler(state=Form.phone)
 async def process_phone(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['phone'] = message.text
 
-    client = TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH)
     await client.connect()
 
     try:
@@ -340,11 +342,9 @@ async def process_code(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['code'] = message.text
 
-    client = TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH)
     await client.connect()
 
     try:
-        # Используем сохраненный phone_code_hash при вызове sign_in
         await client.sign_in(data['phone'], data['code'], phone_code_hash=data['phone_code_hash'])
         string_session = client.session.save()
         await message.reply(f'Ваша StringSession: {string_session}')
