@@ -2,6 +2,7 @@ from aiogram import Bot, Dispatcher, types, executor
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher.storage import FSMContext
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from datbas import Data
 from datetime import datetime
 from telethon import TelegramClient
@@ -18,6 +19,7 @@ logger = logging.getLogger(__name__)
 
 bot = Bot(cfg.TOKEN)
 dp = Dispatcher(bot, storage=MemoryStorage())
+dp.middleware.setup(LoggingMiddleware())
 db = Data("192.168.1.37", "5432", "pars_db", "pars_user", "pars_pwd")
 
 # with TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH) as client:
@@ -308,6 +310,7 @@ async def panel_administration(message):
 class Form(StatesGroup):
     phone = State()
     code = State()
+    phone_code_hash = State()  # Добавляем состояние для хранения phone_code_hash
 
 @dp.message_handler(commands=['get_session'])
 async def send_welcome(message: types.Message):
@@ -318,34 +321,37 @@ async def send_welcome(message: types.Message):
 async def process_phone(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['phone'] = message.text
-        logger.info(f"Получен номер телефона: {data['phone']}")
 
-    with TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH) as client:
-        try:
-            result = await client.send_code_request(data['phone'])
-            data['phone_code_hash'] = result.phone_code_hash
-            await Form.next()
-            await message.reply("Код отправлен. Введите код из сообщения Telegram.")
-        except Exception as e:
-            logger.error(f'Ошибка при отправке кода: {e}')
-            await message.reply(f'Ошибка: {e}')
-            await state.finish()
+    client = TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH)
+    await client.connect()
+
+    try:
+        result = await client.send_code_request(data['phone'])
+        data['phone_code_hash'] = result.phone_code_hash  # Сохраняем phone_code_hash
+        await Form.code.set()  # Переходим к следующему состоянию
+        await message.reply("Код отправлен. Введите код из сообщения Telegram.")
+    except Exception as e:
+        await message.reply(f'Ошибка: {e}')
+        await state.finish()
 
 @dp.message_handler(state=Form.code)
 async def process_code(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['code'] = message.text
 
-    # Создаем экземпляр клиента здесь и используем его для аутентификации
-    with TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH) as client:
-        try:
-            await client.sign_in(data['phone'], data['code'], phone_code_hash=data['phone_code_hash'])
-            string_session = client.session.save()
-            await message.reply(f'Ваша StringSession: {string_session}')
-        except Exception as e:
-            await message.reply(f'Ошибка: {e}')
-        finally:
-            await state.finish()
+    client = TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH)
+    await client.connect()
+
+    try:
+        # Используем сохраненный phone_code_hash для вызова sign_in
+        await client.sign_in(data['phone'], data['code'], phone_code_hash=data['phone_code_hash'])
+        string_session = client.session.save()
+        await message.reply(f'Ваша StringSession: {string_session}')
+    except Exception as e:
+        await message.reply(f'Ошибка: {e}')
+    finally:
+        await client.disconnect()
+        await state.finish()
 
 #...................
 
