@@ -306,6 +306,7 @@ async def panel_administration(message):
     else:
         await message.answer(cfg.error_adm_dostup)
 
+client = TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH)
 
 class Form(StatesGroup):
     phone = State()
@@ -322,13 +323,12 @@ async def process_phone(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['phone'] = message.text
 
-    client = TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH)
     await client.connect()
 
     try:
         result = await client.send_code_request(data['phone'])
-        data['phone_code_hash'] = result.phone_code_hash  # Сохраняем phone_code_hash
-        await Form.code.set()  # Переходим к следующему состоянию
+        data['phone_code_hash'] = result.phone_code_hash
+        await Form.next()
         await message.reply("Код отправлен. Введите код из сообщения Telegram.")
     except Exception as e:
         await message.reply(f'Ошибка: {e}')
@@ -339,18 +339,13 @@ async def process_code(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['code'] = message.text
 
-    client = TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH)
-    await client.connect()
-
     try:
-        # Используем сохраненный phone_code_hash для вызова sign_in
         await client.sign_in(data['phone'], data['code'], phone_code_hash=data['phone_code_hash'])
         string_session = client.session.save()
         await message.reply(f'Ваша StringSession: {string_session}')
     except Exception as e:
         await message.reply(f'Ошибка: {e}')
     finally:
-        await client.disconnect()
         await state.finish()
 
 #...................
