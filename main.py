@@ -321,17 +321,18 @@ async def send_welcome(message: types.Message):
 @dp.message_handler(state=Form.phone)
 async def process_phone(message: types.Message, state: FSMContext):
     logger.info("Начало обработки номера телефона")
+    phone_number = message.text
     async with state.proxy() as data:
-        data['phone'] = message.text
+        data['phone'] = phone_number
 
     try:
-        async with TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH) as client:
+        async with TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH, phone_number=phone_number) as client:
             await client.connect()
             logger.info("Клиент Telethon подключен")
 
-            result = await client.send_code_request(data['phone'])
+            result = await client.send_code_request(phone_number)
             data['phone_code_hash'] = result.phone_code_hash
-            logger.info(f"Код подтверждения отправлен на номер {data['phone']}")
+            logger.info(f"Код подтверждения отправлен на номер {phone_number}")
 
             await Form.code.set()
             await message.reply("Код отправлен. Введите код из сообщения Telegram.")
