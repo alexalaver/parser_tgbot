@@ -304,10 +304,6 @@ async def panel_administration(message):
     else:
         await message.answer(cfg.error_adm_dostup)
 
-#..............
-bot = Bot(token=BOT_TOKEN)
-dp = Dispatcher(bot)
-dp.middleware.setup(LoggingMiddleware())
 
 class Form(StatesGroup):
     phone = State()
