@@ -318,49 +318,41 @@ async def send_welcome(message: types.Message):
     await message.reply("Привет! Отправьте свой номер телефона для получения StringSession.")
     await Form.phone.set()
 
-client = TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH)
-
 @dp.message_handler(state=Form.phone)
 async def process_phone(message: types.Message, state: FSMContext):
-    logger.info("Начало обработки номера телефона")
-    phone_number = message.text
     async with state.proxy() as data:
-        data['phone'] = phone_number
+        data['phone'] = message.text
+
+    client = TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH)
+    await client.connect()
 
     try:
-        async with client as client_connected:
-            await client_connected.connect()
-            logger.info("Клиент Telethon подключен")
-
-            result = await client_connected.send_code_request(phone_number)
-            data['phone_code_hash'] = result.phone_code_hash
-            logger.info(f"Код подтверждения отправлен на номер {phone_number}")
-
-            await Form.code.set()
-            await message.reply("Код отправлен. Введите код из сообщения Telegram.")
+        result = await client.send_code_request(data['phone'])
+        data['phone_code_hash'] = result.phone_code_hash  # Сохраняем phone_code_hash
+        await Form.code.set()  # Переходим к следующему состоянию
+        await message.reply("Код отправлен. Введите код из сообщения Telegram.")
     except Exception as e:
-        logger.error(f'Ошибка в process_phone: {e}')
         await message.reply(f'Ошибка: {e}')
         await state.finish()
 
 @dp.message_handler(state=Form.code)
 async def process_code(message: types.Message, state: FSMContext):
-    logger.info("Начало обработки кода подтверждения")
     async with state.proxy() as data:
         data['code'] = message.text
 
-    with TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH) as client:
-        await client.connect()
-        try:
-            await client.sign_in(data['phone'], data['code'], phone_code_hash=data['phone_code_hash'])
-            string_session = client.session.save()
-            await message.reply(f'Ваша StringSession: {string_session}')
-            logger.info("StringSession успешно создан")
-        except Exception as e:
-            logger.error(f'Ошибка при обработке кода подтверждения: {e}')
-            await message.reply(f'Ошибка: {e}')
-        finally:
-            await state.finish()
+    client = TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH)
+    await client.connect()
+
+    try:
+        # Используем сохраненный phone_code_hash при вызове sign_in
+        await client.sign_in(data['phone'], data['code'], phone_code_hash=data['phone_code_hash'])
+        string_session = client.session.save()
+        await message.reply(f'Ваша StringSession: {string_session}')
+    except Exception as e:
+        await message.reply(f'Ошибка: {e}')
+    finally:
+        await client.disconnect()
+        await state.finish()
 
 #...................
 
