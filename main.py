@@ -325,7 +325,7 @@ async def process_phone(message: types.Message, state: FSMContext):
         data['phone'] = message.text
 
     try:
-        with TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH) as client:
+        async with TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH) as client:
             await client.connect()
             logger.info("Клиент Telethon подключен")
 
@@ -333,7 +333,7 @@ async def process_phone(message: types.Message, state: FSMContext):
             data['phone_code_hash'] = result.phone_code_hash
             logger.info(f"Код подтверждения отправлен на номер {data['phone']}")
 
-            await Form.next()
+            await Form.code.set()
             await message.reply("Код отправлен. Введите код из сообщения Telegram.")
     except Exception as e:
         logger.error(f'Ошибка в process_phone: {e}')
