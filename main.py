@@ -306,17 +306,21 @@ async def panel_administration(message):
     else:
         await message.answer(cfg.error_adm_dostup)
 
+#.....................
+
 class Form(StatesGroup):
     phone = State()
     code = State()
 
 @dp.message_handler(commands=['get_session'])
 async def send_welcome(message: types.Message):
+    logger.info("Обработка команды /start")
     await message.reply("Привет! Отправьте свой номер телефона для получения StringSession.")
     await Form.phone.set()
 
 @dp.message_handler(state=Form.phone)
 async def process_phone(message: types.Message, state: FSMContext):
+    logger.info("Начало обработки номера телефона")
     async with state.proxy() as data:
         data['phone'] = message.text
 
@@ -327,12 +331,15 @@ async def process_phone(message: types.Message, state: FSMContext):
             data['phone_code_hash'] = result.phone_code_hash
             await Form.next()
             await message.reply("Код отправлен. Введите код из сообщения Telegram.")
+            logger.info("Код подтверждения отправлен")
         except Exception as e:
+            logger.error(f'Ошибка при отправке кода: {e}')
             await message.reply(f'Ошибка: {e}')
             await state.finish()
 
 @dp.message_handler(state=Form.code)
 async def process_code(message: types.Message, state: FSMContext):
+    logger.info("Начало обработки кода подтверждения")
     async with state.proxy() as data:
         data['code'] = message.text
 
@@ -342,7 +349,9 @@ async def process_code(message: types.Message, state: FSMContext):
             await client.sign_in(data['phone'], data['code'], phone_code_hash=data['phone_code_hash'])
             string_session = client.session.save()
             await message.reply(f'Ваша StringSession: {string_session}')
+            logger.info("StringSession успешно создан")
         except Exception as e:
+            logger.error(f'Ошибка при обработке кода подтверждения: {e}')
             await message.reply(f'Ошибка: {e}')
         finally:
             await state.finish()
