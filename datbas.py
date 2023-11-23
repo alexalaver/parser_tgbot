@@ -287,3 +287,8 @@ class Data:
                 return []
             else:
                 return a[0]
+
+    def save_photo(self, photo):
+        with self.connect:
+            self.cursor.execute("INSERT INTO images(image) VALUES(%)", (photo,))
+            self.connect.commit()

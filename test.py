@@ -118,9 +118,6 @@
 # print(a[3:])
 import logging
 from aiogram import Bot, Dispatcher, types, executor
-from aiogram.dispatcher import FSMContext
-from aiogram.dispatcher.filters.state import State, StatesGroup
-from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from telethon import TelegramClient
 from telethon.sessions import StringSession
 
@@ -131,52 +128,59 @@ api_hash = '772e2f003782fc07b0089b0b38c7087c'
 logging.basicConfig(level=logging.INFO)
 
 bot = Bot(token=API_TOKEN)
-dp = Dispatcher(bot, storage=MemoryStorage())
-
-class AuthState(StatesGroup):
-    phone = State()
-    code = State()
-    phone_code_hash = State()
+dp = Dispatcher(bot)
 
 telethon_client = TelegramClient(StringSession(), api_id, api_hash)
 
-async def connect_telethon_client():
-    if not telethon_client.is_connected():
-        await telethon_client.connect()
+# Словарь для хранения временных данных пользователей
+user_data = {}
+
 
 @dp.message_handler(commands='start')
 async def cmd_start(message: types.Message):
-    await connect_telethon_client()
-    await AuthState.phone.set()
     await message.reply("Пожалуйста, отправьте свой номер телефона в формате +123456789")
+    user_data[message.from_user.id] = {'state': 'awaiting_phone'}
 
-@dp.message_handler(state=AuthState.phone)
-async def process_phone(message: types.Message, state: FSMContext):
+
+@dp.message_handler(lambda message: user_data.get(message.from_user.id, {}).get('state') == 'awaiting_phone')
+async def process_phone(message: types.Message):
+    phone = message.text
+    user_data[message.from_user.id] = {'state': 'awaiting_code', 'phone': phone}
+
+    if not telethon_client.is_connected():
+        await telethon_client.connect()
+
     try:
-        result = await telethon_client.send_code_request(phone=message.text)
-        async with state.proxy() as data:
-            data['phone'] = message.text
-            data['phone_code_hash'] = result.phone_code_hash
-        await AuthState.next()
+        result = await telethon_client.send_code_request(phone)
+        user_data[message.from_user.id]['phone_code_hash'] = result.phone_code_hash
         await message.reply("Теперь отправьте код, который вы получили от Telegram")
     except Exception as e:
         logging.error(f"Ошибка при отправке кода: {e}")
         await message.reply("Произошла ошибка при отправке кода, пожалуйста, попробуйте еще раз.")
 
-@dp.message_handler(state=AuthState.code)
-async def process_code(message: types.Message, state: FSMContext):
-    async with state.proxy() as data:
-        phone = data['phone']
-        phone_code_hash = data['phone_code_hash']
+
+@dp.message_handler(lambda message: user_data.get(message.from_user.id, {}).get('state') == 'awaiting_code')
+async def process_code(message: types.Message):
+    user_id = message.from_user.id
+    phone = user_data[user_id]['phone']
+    phone_code_hash = user_data[user_id]['phone_code_hash']
+    code = message.text
+
     try:
-        await telethon_client.sign_in(phone=phone, code=message.text, phone_code_hash=phone_code_hash)
+        await telethon_client.sign_in(phone, code, phone_code_hash=phone_code_hash)
         string_session = telethon_client.session.save()
         await message.reply(f"Аутентификация успешна! Ваш StringSession: {string_session}")
     except Exception as e:
         logging.error(f"Ошибка при аутентификации: {e}")
         await message.reply(f"Ошибка аутентификации: {e}")
 
+@dp.message_handler()
+async def texts(message: types.Message):
+    if message.forward_from or message.forward_from_chat:
+        forwarded_message_id = message.message_id
+        await message.reply(f"ID пересланного сообщения с фото: {forwarded_message_id}")
+    else:
+        await bot.send_message(chat_id=message.from_user.id, text="1", reply_to_message_id=21711)
+
 if __name__ == '__main__':
     executor.start_polling(dp)
-
-
