@@ -13,6 +13,7 @@ import asyncio
 import config as cfg
 import logging
 import io
+import requests
 import datetime
 
 logging.basicConfig(level=logging.INFO)
@@ -27,6 +28,8 @@ db = Data("192.168.1.37", "5432", "pars_db", "pars_user", "pars_pwd")
 #     print("String Session:", client.session.save())
 
 telethon_client = TelegramClient(StringSession(cfg.STRING_SESSION), cfg.API_ID, cfg.API_HASH)
+
+IMGUR_CLIENT_ID = '20ac8bfb25f0afe'
 
 async def check_for_new_groups(current_count):
     new_count = len(db.select_all_channels_group())
@@ -942,6 +945,11 @@ async def add_chat_ids_num_2(message: types.Message, state: FSMContext):
         await message.answer(cfg.correct_add_chat_ids, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
         await Add_chat_ids.panel_adm.set()
 
+def upload_to_imgur(image_url):
+    headers = {"Authorization": f"Client-ID {IMGUR_CLIENT_ID}"}
+    data = {"image": image_url}
+    response = requests.post("https://api.imgur.com/3/image", headers=headers, data=data)
+    return response.json()["data"]["link"]
 
 @dp.message_handler()
 async def other(message: types.Message):
@@ -956,13 +964,13 @@ async def other(message: types.Message):
             await autoposting_send(message)
         elif message.text == cfg.admin_panel_button:
             await panel_administration(message)
-        elif message.photo:
-            # Чтение фотографии в двоичном формате
-            with open('temp_photo.jpg', 'rb') as file:
-                photo_data = file.read()
-            db.save_photo(photo_data)
-            await message.answer("успешно")
 
+@dp.message_handler(content_types=['photo'])
+async def handle_photos(message: types.Message):
+    await message.photo[-1].download(destination_file='temp.jpg')
+    with open('temp.jpg', 'rb') as file:
+        url = upload_to_imgur(file)
+        await message.reply(f"Ваша фотография загружена на Imgur: {url}")
 
 async def on_startup(_):
     asyncio.create_task(search_and_forward())
