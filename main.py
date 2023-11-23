@@ -949,7 +949,16 @@ def upload_to_imgur(image_url):
     headers = {"Authorization": f"Client-ID {IMGUR_CLIENT_ID}"}
     data = {"image": image_url}
     response = requests.post("https://api.imgur.com/3/image", headers=headers, data=data)
-    return response.json()["data"]["link"]
+    response_data = response.json()
+
+    # Логирование для дебага
+    print("Ответ от Imgur API:", response_data)
+
+    if 'link' in response_data["data"]:
+        return response_data["data"]["link"]
+    else:
+        # Возвращаем None или обрабатываем ошибку по-другому
+        return None
 
 @dp.message_handler()
 async def other(message: types.Message):
