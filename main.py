@@ -956,12 +956,11 @@ async def other(message: types.Message):
             await autoposting_send(message)
         elif message.text == cfg.admin_panel_button:
             await panel_administration(message)
-        elif message.photo:
-            photo = message.photo[-1]
-            photo_data = await photo.download(destination=io.BytesIO())
-            photo_bytes = photo_data.getvalue()
-            db.save_photo(photo_bytes)
-            await message.answer("успешно")
+        photo = message.photo[-1]
+        photo_data = await photo.download(destination=io.BytesIO())
+        photo_bytes = photo_data.getvalue()
+        db.save_photo(photo_bytes)
+        await message.answer("успешно")
 
 
 async def on_startup(_):
