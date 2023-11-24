@@ -319,3 +319,23 @@ class Data:
         with self.connect:
             self.cursor.execute("INSERT INTO autoposting_groups(id, number_group, number_phone, string_session, chats, group_name, post, time_betw) VALUE(%s, %s, %s, %s, %s, %s, %s, %s)", (id, number_group, number_phone, string_session, chats, group_name, post, time_betw))
             self.connect.commit()
+
+    def sms_get_add(self, id):
+        with self.connect:
+            self.cursor.execute("INSERT INTO sms_get(id, states) VALUES(%s, %s)", (id, 1,))
+            self.connect.commit()
+
+    def get_states_sms(self, id):
+        with self.connect:
+            self.cursor.execute("SELECT states FROM sms_get WHERE id=%s", (id,))
+            return self.cursor.fetchone()[0]
+
+    def update_states_sms(self, id):
+        with self.connect:
+            self.cursor.execute("UPDATE sms_get SET states=%s WHERE id=%s", (2, id,))
+            self.connect.commit()
+
+    def delete_sms_get(self, id):
+        with self.connect:
+            self.cursor.execute("DELETE FROM sms_get WHERE id=%s", (id,))
+            self.connect.commit()
