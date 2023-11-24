@@ -980,7 +980,6 @@ async def process_phone(message: types.Message, state: FSMContext):
     user_id = message.from_user.id
     if db.get_states_sms(user_id) == 1:
         phone = message.text
-        user_data[message.from_user.id] = {'state': 'awaiting_code', 'phone': phone}
         await state.update_data(phone=phone)
         if not client.is_connected():
             await client.connect()
