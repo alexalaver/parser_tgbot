@@ -500,10 +500,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
             btn1_inline = types.InlineKeyboardButton(cfg.add_account_button, callback_query="add_account")
             btn2_inline = types.InlineKeyboardButton(cfg.back_button, callback_query="back_autoposting_menu")
             markup_inline.add(btn1_inline, btn2_inline)
-            if group_names is None:
-                text = cfg.without_account_text
-            else:
-                text = cfg.account_menu_text
+            text = cfg.account_menu_text
             await callback_query.message.edit_caption(caption=text, reply_markup=markup_inline)
         elif callback_query.data == "add_account":
             number_group = db.check_numbers_autoposting_group(user_id)
