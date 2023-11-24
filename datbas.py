@@ -288,7 +288,34 @@ class Data:
             else:
                 return a[0]
 
-    def save_photo(self, photo):
+
+    def select_autoposting_group_name(self, id):
         with self.connect:
-            self.cursor.execute("INSERT INTO images(image) VALUES(%)", (photo,))
+            self.cursor.execute("SELECT group_name FROM autoposting_groups WHERE id=%s", (id,))
+            a = self.cursor.fetchall()
+            result_list = [item[0] for item in a]
+            return result_list
+
+    def check_numbers_autoposting_group(self, id):
+        with self.connect:
+            self.cursor.execute("SELECT id FROM autoposting_groups WHERE id=%s", (id,))
+            a = self.cursor.fetchall()
+            b = [row for row in a]
+            if a is None:
+                return 0
+            else:
+                return len(b)
+
+    def check_numbers_account_autoposting(self):
+        with self.connect:
+            self.cursor.execute("SELECT number_group FROM autoposting_groups ORDER BY number_group DESC LIMIT 1;")
+            a = self.cursor.fetchone()
+            if a is None:
+                return 0
+            else:
+                return a[0]
+
+    def add_autoposting_account(self, id, number_group, number_phone, string_session, chats, group_name, post, time_betw):
+        with self.connect:
+            self.cursor.execute("INSERT INTO autoposting_groups(id, number_group, number_phone, string_session, chats, group_name, post, time_betw) VALUE(%s, %s, %s, %s, %s, %s, %s, %s)", (id, number_group, number_phone, string_session, chats, group_name, post, time_betw))
             self.connect.commit()

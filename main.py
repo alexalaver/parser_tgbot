@@ -12,8 +12,6 @@ import functions as fnc
 import asyncio
 import config as cfg
 import logging
-import io
-import requests
 import datetime
 
 logging.basicConfig(level=logging.INFO)
@@ -28,8 +26,9 @@ db = Data("192.168.1.37", "5432", "pars_db", "pars_user", "pars_pwd")
 #     print("String Session:", client.session.save())
 
 telethon_client = TelegramClient(StringSession(cfg.STRING_SESSION), cfg.API_ID, cfg.API_HASH)
+client = TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH)
+user_data = {}
 
-IMGUR_CLIENT_ID = '20ac8bfb25f0afe'
 
 async def check_for_new_groups(current_count):
     new_count = len(db.select_all_channels_group())
@@ -256,6 +255,13 @@ class Create_group(StatesGroup):
     create_group_2 = State()
     create_group_3 = State()
 
+class Create_account_autoposting(StatesGroup):
+    create_autoposting_1 = State()
+    create_autoposting_2 = State()
+    create_autoposting_3 = State()
+    create_autoposting_4 = State()
+    create_autoposting_5 = State()
+
 class Parsers_use(StatesGroup):
     parsers_use_1 = State()
 
@@ -296,8 +302,7 @@ async def parsers_send(message):
 async def autoposting_send(message):
     markup_inline = types.InlineKeyboardMarkup(row_width=1)
     btn_inline1 = types.InlineKeyboardButton(cfg.account_button, callback_data='accounts_button')
-    btn_inline2 = types.InlineKeyboardButton(cfg.posts_button, callback_data='posts_button')
-    markup_inline.add(btn_inline1, btn_inline2)
+    markup_inline.add(btn_inline1)
     await message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.autoposting_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
 
 async def panel_administration(message):
@@ -484,6 +489,33 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
             btn_inline1 = types.InlineKeyboardButton(cfg.groups_add_button, callback_data='groups_add_button')
             markup_inline.add(btn_inline1)
             await callback_query.message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.parser_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+        elif callback_query.data == "accounts_button":
+            markup_inline = types.InlineKeyboardMarkup(row_width=1)
+            user_id = callback_query.from_user.id
+            group_names = db.select_autoposting_group_name(user_id)
+            max_buttons = 5
+            for i in range(min(max_buttons, len(group_names))):
+                button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
+                markup_inline.add(button)
+            btn1_inline = types.InlineKeyboardButton(cfg.add_account_button, callback_query="add_account")
+            btn2_inline = types.InlineKeyboardButton(cfg.back_button, callback_query="back_autoposting_menu")
+            markup_inline.add(btn1_inline, btn2_inline)
+            if group_names is None:
+                text = cfg.without_account_text
+            else:
+                text = cfg.account_menu_text
+            await callback_query.message.edit_caption(caption=text, reply_markup=markup_inline)
+        elif callback_query.data == "add_account":
+            number_group = db.check_numbers_autoposting_group(user_id)
+            if int(number_group) < 5:
+                markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
+                markup_reply.add(cfg.cancel_creategroup)
+                await Create_account_autoposting.create_autoposting_1.set()
+                user_data[callback_query.message.from_user.id] = {'state': 'awaiting_phone'}
+                await callback_query.message.answer(cfg.create_account_autoposting_1, parse_mode=types.ParseMode.MARKDOWN)
+                await callback_query.message.answer(cfg.create_account_autoposting_2, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
+            else:
+                await callback_query.answer(cfg.error_autoposting_group_5, show_alert=True)
 
 
 @dp.callback_query_handler(state=Parsers_use.parsers_use_1)
@@ -945,20 +977,180 @@ async def add_chat_ids_num_2(message: types.Message, state: FSMContext):
         await message.answer(cfg.correct_add_chat_ids, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
         await Add_chat_ids.panel_adm.set()
 
-def upload_to_imgur(image_url):
-    headers = {"Authorization": f"Client-ID {IMGUR_CLIENT_ID}"}
-    data = {"image": image_url}
-    response = requests.post("https://api.imgur.com/3/image", headers=headers, data=data)
-    response_data = response.json()
+@dp.message_handler(lambda message: user_data.get(message.from_user.id, {}).get('state') == 'awaiting_phone', state=Create_account_autoposting.create_autoposting_1)
+async def process_phone(message: types.Message, state: FSMContext):
+    phone = message.text
+    user_data[message.from_user.id] = {'state': 'awaiting_code', 'phone': phone}
+    await state.update_data(phone=phone)
+    if not client.is_connected():
+        await client.connect()
 
-    # Логирование для дебага
-    print("Ответ от Imgur API:", response_data)
+    try:
+        result = await client.send_code_request(phone)
+        user_data[message.from_user.id]['phone_code_hash'] = result.phone_code_hash
+        await message.reply("Теперь отправьте код, который вы получили от Telegram")
+    except Exception as e:
+        logging.error(f"Ошибка при отправке кода: {e}")
+        await message.reply("Произошла ошибка при отправке кода, пожалуйста, попробуйте еще раз ввести номер телефона:")
 
-    if 'link' in response_data["data"]:
-        return response_data["data"]["link"]
-    else:
-        # Возвращаем None или обрабатываем ошибку по-другому
-        return None
+
+@dp.message_handler(lambda message: user_data.get(message.from_user.id, {}).get('state') == 'awaiting_code', state=Create_account_autoposting.create_autoposting_1)
+async def process_code(message: types.Message, state: FSMContext):
+    user_id = message.from_user.id
+    phone = user_data[user_id]['phone']
+    phone_code_hash = user_data[user_id]['phone_code_hash']
+    code = message.text
+
+    try:
+        await client.sign_in(phone, code, phone_code_hash=phone_code_hash)
+        string_session = client.session.save()
+        await state.update_data(string_session=string_session)
+        await message.answer(cfg.create_account_autoposting_3)
+        await Create_account_autoposting.create_autoposting_2.set()
+    except Exception as e:
+        user_id = message.from_user.id
+        markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+        markup_reply.add(cfg.autoposting)
+        markup_reply.add(cfg.parser)
+        markup_reply.row(cfg.my_profile, cfg.support)
+        if db.select_admin(user_id) > 0:
+            markup_reply.add(cfg.admin_panel_button)
+        logging.error(f"Ошибка при аутентификации: {e}")
+        await message.reply(f"Ошибка аутентификации: {e}", reply_markup=markup_reply)
+        await state.reset_state()
+
+@dp.message_handler(state=Create_account_autoposting.create_autoposting_1)
+async def cancel_process_state(message: types.Message, state: FSMContext):
+    if message.chat.type == types.ChatType.PRIVATE:
+        if message.text == cfg.back_button:
+            user_id = message.from_user.id
+            markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+            markup_reply.add(cfg.autoposting)
+            markup_reply.add(cfg.parser)
+            markup_reply.row(cfg.my_profile, cfg.support)
+            if db.select_admin(user_id) > 0:
+                markup_reply.add(cfg.admin_panel_button)
+            await message.answer(cfg.back_text, reply_markup=markup_reply)
+            await state.reset_state()
+
+@dp.message_handler(state=Create_account_autoposting.create_autoposting_2)
+async def group_name_autoposting(message: types.Message, state: FSMContext):
+    if message.chat.type == types.ChatType.PRIVATE:
+        if message.text == cfg.back_button:
+            user_id = message.from_user.id
+            markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+            markup_reply.add(cfg.autoposting)
+            markup_reply.add(cfg.parser)
+            markup_reply.row(cfg.my_profile, cfg.support)
+            if db.select_admin(user_id) > 0:
+                markup_reply.add(cfg.admin_panel_button)
+            await message.answer(cfg.back_text, reply_markup=markup_reply)
+            await state.reset_state()
+        else:
+            if 3 <= len(message.text) <= 15:
+                await state.update_data(group_name=message.text)
+                await message.answer(cfg.create_account_autoposting_4)
+                await Create_account_autoposting.create_autoposting_3.set()
+            else:
+                await message.answer("Минимальная длина названия аккаунта, должна быть 3, максимальная 15, попробуйте ещё раз:")
+
+@dp.message_handler(state=Create_account_autoposting.create_autoposting_3)
+async def group_post_autoposting(message: types.Message, state: FSMContext):
+    if message.chat.type == types.ChatType.PRIVATE:
+        if message.text == cfg.back_button:
+            user_id = message.from_user.id
+            markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+            markup_reply.add(cfg.autoposting)
+            markup_reply.add(cfg.parser)
+            markup_reply.row(cfg.my_profile, cfg.support)
+            if db.select_admin(user_id) > 0:
+                markup_reply.add(cfg.admin_panel_button)
+            await message.answer(cfg.back_text, reply_markup=markup_reply)
+            await state.reset_state()
+        else:
+            if message.forward_from or message.forward_from_chat:
+                await state.update_data(forwarded_message_id=message.forward_from_message_id)
+                await message.answer(cfg.create_account_autoposting_5)
+                await Create_account_autoposting.create_autoposting_4.set()
+            else:
+                await message.answer("Вы должны переслать сообщение из канала, попробуйте ещё раз:")
+
+@dp.message_handler(state=Create_account_autoposting.create_autoposting_4)
+async def autoposting_time_betw(message: types.Message, state: FSMContext):
+    if message.chat.type == types.ChatType.PRIVATE:
+        if message.text == cfg.back_button:
+            user_id = message.from_user.id
+            markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+            markup_reply.add(cfg.autoposting)
+            markup_reply.add(cfg.parser)
+            markup_reply.row(cfg.my_profile, cfg.support)
+            if db.select_admin(user_id) > 0:
+                markup_reply.add(cfg.admin_panel_button)
+            await message.answer(cfg.back_text, reply_markup=markup_reply)
+            await state.reset_state()
+        else:
+            if int(message.text):
+                await state.update_data(time_betw=message.text)
+                await message.answer(cfg.create_account_autoposting_6)
+                await Create_account_autoposting.create_autoposting_5.set()
+            else:
+                await message.answer("Ошибка! Промежуток времени должен быть цифрой, повторите ещё раз:")
+
+
+@dp.message_handler(state=Create_account_autoposting.create_autoposting_5)
+async def group_chats_autoposting(message: types.Message, state: FSMContext):
+    if message.chat.type == types.ChatType.PRIVATE:
+        user_id = message.from_user.id
+        textsing = message.text
+        text_line = textsing.strip().split('\n')
+        text_lines = list(dict.fromkeys([element + ' ⚠' for element in text_line]))
+        if message.text == cfg.back_button:
+            user_id = message.from_user.id
+            markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+            markup_reply.add(cfg.autoposting)
+            markup_reply.add(cfg.parser)
+            markup_reply.row(cfg.my_profile, cfg.support)
+            if db.select_admin(user_id) > 0:
+                markup_reply.add(cfg.admin_panel_button)
+            await message.answer(cfg.back_text, reply_markup=markup_reply)
+            await state.reset_state()
+        else:
+            if 2 <= len(message.text) <= 1000:
+                if 5 <= len(text_lines) <= 50:
+                    try:
+                        check_number_group = db.check_numbers_account_autoposting()
+                        new_number_group = check_number_group + 1
+                        data = await state.get_data()
+                        phone = data.get('phone')
+                        string_session = data.get('string_session')
+                        group_name = data.get('group_name')
+                        forwarded_message_id = data.get('forwarded_message_id')
+                        time_betw = data.get('time_betw')
+                        db.add_autoposting_account(user_id, new_number_group, phone, string_session, text_lines, group_name, forwarded_message_id, time_betw)
+                        markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+                        markup_reply.add(cfg.autoposting)
+                        markup_reply.add(cfg.parser)
+                        markup_reply.row(cfg.my_profile, cfg.support)
+                        if db.select_admin(user_id) > 0:
+                            markup_reply.add(cfg.admin_panel_button)
+                        await message.answer(cfg.right_create_group, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
+                        await state.finish()
+                    except Exception as es:
+                        await state.reset_state()
+                        markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+                        markup_reply.add(cfg.autoposting)
+                        markup_reply.add(cfg.parser)
+                        markup_reply.row(cfg.my_profile, cfg.support)
+                        if db.select_admin(user_id) > 0:
+                            markup_reply.add(cfg.admin_panel_button)
+                        await message.answer(cfg.error_create_group, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
+                        print(f"[ERROR] {es}")
+                else:
+                    await message.answer(cfg.error_len_channels_create, parse_mode=types.ParseMode.MARKDOWN)
+            else:
+                await message.answer(cfg.error_len_channels, parse_mode=types.ParseMode.MARKDOWN)
+
+
 
 @dp.message_handler()
 async def other(message: types.Message):
@@ -973,13 +1165,6 @@ async def other(message: types.Message):
             await autoposting_send(message)
         elif message.text == cfg.admin_panel_button:
             await panel_administration(message)
-
-@dp.message_handler(content_types=['photo'])
-async def handle_photos(message: types.Message):
-    await message.photo[-1].download(destination_file='temp.jpg')
-    with open('temp.jpg', 'rb') as file:
-        url = upload_to_imgur(file)
-        await message.reply(f"Ваша фотография загружена на Imgur: {url}")
 
 async def on_startup(_):
     asyncio.create_task(search_and_forward())

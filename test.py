@@ -184,3 +184,76 @@ async def texts(message: types.Message):
 
 if __name__ == '__main__':
     executor.start_polling(dp)
+#..........................
+# from aiogram import Bot, Dispatcher, types
+# from aiogram.utils import executor
+# from telethon import TelegramClient, events, sync
+# from telethon.sessions import StringSession
+#
+# # aiogram setup
+# bot_token = '6597828235:AAH60BBRislfPCqwBeGsiYMBEjXuBrHujZ0'  # замените на токен вашего бота
+# bot = Bot(token=bot_token)
+# dp = Dispatcher(bot)
+#
+# # Telethon setup
+# api_id = '20150090'  # замените на ваш API ID
+# api_hash = '772e2f003782fc07b0089b0b38c7087c'  # замените на ваш API Hash
+# string_session = "1ApWapzMBu3JD22F5p0-vpoitpRKOCpQYkpAINC56K2EogaxO-pWTyz36aplFYgzQpTtnSfR_1EEPREMe006opnzOlYKLstOxMFgBn4utXS6D1D7VNu0bFvmnNF4q3DhbzsvjA90UGB3zn_NOdcPwjHirX-JxkBH6t8viu9eOsVYZQ3qmT5SOey6B0-4VXnRmAD0pXQVyneA2UhYDmc_c2i2EkNf8P6i0xEwq0E3k8VzdstkGzbuQhdW39ewoqcBrRdtdiSTyTJWN1VZmyohPUbK7or5a4Dxt_knvTM3OmnqjoV4VlGZeq0FjR9wd8XFykRVAqKb2TeFFnCrGFyNLOFNulsfqL4E="
+# telethon_client = TelegramClient(StringSession(string_session), api_id, api_hash)
+#
+# # Хранение информации о последнем пересланном сообщении
+# last_forwarded_message = {}
+#
+# @dp.message_handler(commands=['start'])
+# async def start(message: types.Message):
+#     await message.answer("Привет! Перешли мне сообщение, и я сохраню его ID.")
+#
+# @dp.message_handler(content_types=types.ContentTypes.ANY)
+# async def handle_message(message: types.Message):
+#     if message.forward_from or message.forward_from_chat:
+#         last_forwarded_message[message.from_user.id] = {
+#             'message_id': message.forward_from_message_id,
+#             'chat_id': message.forward_from_chat.id if message.forward_from_chat else message.chat.id
+#         }
+#         await message.answer("Сообщение сохранено!")
+#
+# @dp.message_handler(commands=['send'])
+# async def send_message(message: types.Message):
+#     user_id = message.from_user.id
+#     if user_id in last_forwarded_message:
+#         args = message.get_args().split()
+#         if args:
+#             channel_identifier = args[0]  # Это может быть ID или имя канала
+#             forwarded_msg_info = last_forwarded_message[user_id]
+#
+#             try:
+#                 print(f"Пытаюсь переслать сообщение в {channel_identifier}")
+#                 entity = await telethon_client.get_input_entity(channel_identifier)
+#                 await telethon_client.forward_messages(
+#                     entity=entity,
+#                     messages=forwarded_msg_info['message_id'],
+#                     from_peer=forwarded_msg_info['chat_id']
+#                 )
+#                 await message.answer(f"Сообщение переслано в {channel_identifier}!")
+#             except Exception as e:
+#                 print(f"Ошибка при пересылке: {e}")
+#                 await message.answer(f"Ошибка при пересылке: {e}")
+#         else:
+#             await message.answer("Укажите канал после команды /send.")
+#     else:
+#         await message.answer("Нет сохраненных сообщений для пересылки.")
+#
+#
+# # Запуск Telethon клиента
+# async def run_telethon_client():
+#     await telethon_client.start()
+#     await telethon_client.run_until_disconnected()
+#
+# # Запуск aiogram и Telethon
+# if __name__ == '__main__':
+#     from aiogram import executor
+#     from asyncio import get_event_loop
+#
+#     loop = get_event_loop()
+#     loop.create_task(run_telethon_client())
+#     executor.start_polling(dp, skip_updates=True)
