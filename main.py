@@ -906,7 +906,7 @@ async def button_group_2(callback_query: types.CallbackQuery):
 
 @dp.message_handler(state=Add_chat_ids.panel_adm)
 async def panel_adm(message: types.Message, state: FSMContext):
-    if message.text == cfg.back_button:
+    if message.text == cfg.cancel_creategroup:
         markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
         markup_reply.add(cfg.autoposting)
         markup_reply.add(cfg.parser)
@@ -924,7 +924,7 @@ async def panel_adm(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=Add_chat_ids.add_ids_1)
 async def add_chat_ids_num_1(message: types.Message, state: FSMContext):
-    if message.text == cfg.back_button:
+    if message.text == cfg.cancel_creategroup:
         markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
         markup_reply.add(cfg.add_chat_id_button, cfg.back_button)
         await message.answer(cfg.cancel_add_ids, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
@@ -941,7 +941,7 @@ async def add_chat_ids_num_1(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=Add_chat_ids.add_ids_2)
 async def add_chat_ids_num_2(message: types.Message, state: FSMContext):
-    if message.text == cfg.back_button:
+    if message.text == cfg.cancel_creategroup:
         markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
         markup_reply.add(cfg.add_chat_id_button, cfg.back_button)
         await message.answer(cfg.cancel_add_ids, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
@@ -976,7 +976,7 @@ async def add_chat_ids_num_2(message: types.Message, state: FSMContext):
 @dp.message_handler(state=Create_account_autoposting.create_autoposting_1)
 async def process_phone(message: types.Message, state: FSMContext):
     user_id = message.from_user.id
-    if message.text == cfg.back_button:
+    if message.text == cfg.cancel_creategroup:
         user_id = message.from_user.id
         markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
         markup_reply.add(cfg.autoposting)
@@ -1007,7 +1007,7 @@ async def process_phone(message: types.Message, state: FSMContext):
 @dp.message_handler(state=Create_account_autoposting.create_autoposting_1)
 async def process_code(message: types.Message, state: FSMContext):
     user_id = message.from_user.id
-    if message.text == cfg.back_button:
+    if message.text == cfg.cancel_creategroup:
         user_id = message.from_user.id
         markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
         markup_reply.add(cfg.autoposting)
@@ -1045,7 +1045,7 @@ async def process_code(message: types.Message, state: FSMContext):
 @dp.message_handler(state=Create_account_autoposting.create_autoposting_2)
 async def group_name_autoposting(message: types.Message, state: FSMContext):
     if message.chat.type == types.ChatType.PRIVATE:
-        if message.text == cfg.back_button:
+        if message.text == cfg.cancel_creategroup:
             user_id = message.from_user.id
             markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
             markup_reply.add(cfg.autoposting)
@@ -1066,7 +1066,7 @@ async def group_name_autoposting(message: types.Message, state: FSMContext):
 @dp.message_handler(state=Create_account_autoposting.create_autoposting_3)
 async def group_post_autoposting(message: types.Message, state: FSMContext):
     if message.chat.type == types.ChatType.PRIVATE:
-        if message.text == cfg.back_button:
+        if message.text == cfg.cancel_creategroup:
             user_id = message.from_user.id
             markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
             markup_reply.add(cfg.autoposting)
@@ -1087,7 +1087,7 @@ async def group_post_autoposting(message: types.Message, state: FSMContext):
 @dp.message_handler(state=Create_account_autoposting.create_autoposting_4)
 async def autoposting_time_betw(message: types.Message, state: FSMContext):
     if message.chat.type == types.ChatType.PRIVATE:
-        if message.text == cfg.back_button:
+        if message.text == cfg.cancel_creategroup:
             user_id = message.from_user.id
             markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
             markup_reply.add(cfg.autoposting)
@@ -1113,7 +1113,7 @@ async def group_chats_autoposting(message: types.Message, state: FSMContext):
         textsing = message.text
         text_line = textsing.strip().split('\n')
         text_lines = list(dict.fromkeys([element + ' ⚠' for element in text_line]))
-        if message.text == cfg.back_button:
+        if message.text == cfg.cancel_creategroup:
             user_id = message.from_user.id
             markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
             markup_reply.add(cfg.autoposting)
