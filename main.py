@@ -491,12 +491,12 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
             await callback_query.message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.parser_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
         elif callback_query.data == "accounts_button":
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
-            user_id = callback_query.from_user.id
-            group_names = db.select_autoposting_group_name(user_id)
-            max_buttons = 5
-            for i in range(min(max_buttons, len(group_names))):
-                button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
-                markup_inline.add(button)
+            # user_id = callback_query.from_user.id
+            # group_names = db.select_autoposting_group_name(user_id)
+            # max_buttons = 5
+            # for i in range(min(max_buttons, len(group_names))):
+            #     button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
+            #     markup_inline.add(button)
             btn1_inline = types.InlineKeyboardButton(cfg.add_account_button, callback_query="add_account")
             btn2_inline = types.InlineKeyboardButton(cfg.back_button, callback_query="back_autoposting_menu")
             markup_inline.add(btn1_inline, btn2_inline)
