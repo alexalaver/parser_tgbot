@@ -27,8 +27,6 @@ db = Data("192.168.1.37", "5432", "pars_db", "pars_user", "pars_pwd")
 
 telethon_client = TelegramClient(StringSession(cfg.STRING_SESSION), cfg.API_ID, cfg.API_HASH)
 client = TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH)
-user_data = {}
-
 
 async def check_for_new_groups(current_count):
     new_count = len(db.select_all_channels_group())
@@ -510,6 +508,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 await Create_account_autoposting.create_autoposting_1.set()
                 user_data[callback_query.message.from_user.id] = {'state': 'awaiting_phone'}
                 db.delete_sms_get(user_id)
+                db.sms_get_add(user_id)
                 await callback_query.message.answer(cfg.create_account_autoposting_1, parse_mode=types.ParseMode.MARKDOWN)
                 await callback_query.message.answer(cfg.create_account_autoposting_2, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
             else:
