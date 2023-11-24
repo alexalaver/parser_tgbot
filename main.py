@@ -506,7 +506,6 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
                 markup_reply.add(cfg.cancel_creategroup)
                 await Create_account_autoposting.create_autoposting_1.set()
-                user_data[callback_query.message.from_user.id] = {'state': 'awaiting_phone'}
                 db.delete_sms_get(user_id)
                 db.sms_get_add(user_id)
                 await callback_query.message.answer(cfg.create_account_autoposting_1, parse_mode=types.ParseMode.MARKDOWN)
