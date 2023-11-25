@@ -1020,6 +1020,7 @@ async def process_code(message: types.Message, state: FSMContext):
         await state.reset_state()
         await client.disconnect()
     else:
+        print('right 1')
         if db.get_states_sms(user_id) == 2:
             print('right 1')
             data = await state.get_data()
