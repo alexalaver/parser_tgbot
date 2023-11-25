@@ -1021,16 +1021,21 @@ async def process_code(message: types.Message, state: FSMContext):
         await client.disconnect()
     else:
         if db.get_states_sms(user_id) == 2:
+            print('right 1')
             data = await state.get_data()
             phone = data.get("phone")
             phone_code_hash = data.get("phone_code_hash")
             code = message.text
-
+            print('right 2')
             try:
+                print('right 3')
                 await client.sign_in(phone, code, phone_code_hash=phone_code_hash)
                 string_session = client.session.save()
+                print('right 4')
                 await state.update_data(string_session=string_session)
+                print('right 5')
                 await message.answer(cfg.create_account_autoposting_3)
+                print('right 6')
                 await Create_account_autoposting.create_autoposting_2.set()
             except Exception as e:
                 user_id = message.from_user.id
