@@ -986,6 +986,7 @@ async def process_phone(message: types.Message, state: FSMContext):
             markup_reply.add(cfg.admin_panel_button)
         await message.answer(cfg.back_text, reply_markup=markup_reply)
         await state.reset_state()
+        await client.disconnect()
     else:
         if db.get_states_sms(user_id) == 1:
             phone = message.text
@@ -1017,6 +1018,7 @@ async def process_code(message: types.Message, state: FSMContext):
             markup_reply.add(cfg.admin_panel_button)
         await message.answer(cfg.back_text, reply_markup=markup_reply)
         await state.reset_state()
+        await client.disconnect()
     else:
         if db.get_states_sms(user_id) == 2:
             data = await state.get_data()
@@ -1041,6 +1043,7 @@ async def process_code(message: types.Message, state: FSMContext):
                 logging.error(f"Ошибка при аутентификации: {e}")
                 await message.reply(f"Ошибка аутентификации: {e}", reply_markup=markup_reply)
                 await state.reset_state()
+                await client.disconnect()
 
 @dp.message_handler(state=Create_account_autoposting.create_autoposting_2)
 async def group_name_autoposting(message: types.Message, state: FSMContext):
