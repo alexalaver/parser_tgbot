@@ -1003,24 +1003,7 @@ async def process_phone(message: types.Message, state: FSMContext):
             except Exception as e:
                 logging.error(f"Ошибка при отправке кода: {e}")
                 await message.reply("Произошла ошибка при отправке кода, пожалуйста, попробуйте еще раз ввести номер телефона:")
-
-
-@dp.message_handler(state=Create_account_autoposting.create_autoposting_1)
-async def process_code(message: types.Message, state: FSMContext):
-    user_id = message.from_user.id
-    if message.text == cfg.cancel_creategroup:
-        user_id = message.from_user.id
-        markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
-        markup_reply.add(cfg.autoposting)
-        markup_reply.add(cfg.parser)
-        markup_reply.row(cfg.my_profile, cfg.support)
-        if db.select_admin(user_id) > 0:
-            markup_reply.add(cfg.admin_panel_button)
-        await message.answer(cfg.back_text, reply_markup=markup_reply)
-        await state.reset_state()
-        await client.disconnect()
-    else:
-        if db.get_states_sms(user_id) == 2:
+        elif db.get_states_sms(user_id) == 2:
             await message.answer("right 1")
             data = await state.get_data()
             phone = data.get("phone")
@@ -1049,6 +1032,7 @@ async def process_code(message: types.Message, state: FSMContext):
                 await message.reply(f"Ошибка аутентификации: {e}", reply_markup=markup_reply)
                 await state.reset_state()
                 await client.disconnect()
+
 
 @dp.message_handler(state=Create_account_autoposting.create_autoposting_2)
 async def group_name_autoposting(message: types.Message, state: FSMContext):
