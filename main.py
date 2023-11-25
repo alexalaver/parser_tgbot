@@ -26,7 +26,7 @@ db = Data("192.168.1.37", "5432", "pars_db", "pars_user", "pars_pwd")
 #     print("String Session:", client.session.save())
 
 telethon_client = TelegramClient(StringSession(cfg.STRING_SESSION), cfg.API_ID, cfg.API_HASH)
-# client = TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH)
+client = TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH)
 
 async def check_for_new_groups(current_count):
     new_count = len(db.select_all_channels_group())
@@ -986,16 +986,16 @@ async def process_phone(message: types.Message, state: FSMContext):
             markup_reply.add(cfg.admin_panel_button)
         await message.answer(cfg.back_text, reply_markup=markup_reply)
         await state.reset_state()
-        await telethon_client.disconnect()
+        await client.disconnect()
     else:
         if db.get_states_sms(user_id) == 1:
             phone = message.text
             await state.update_data(phone=phone)
-            if not telethon_client.is_connected():
-                await telethon_client.connect()
+            if not client.is_connected():
+                await client.connect()
 
             try:
-                result = await telethon_client.send_code_request(phone)
+                result = await client.send_code_request(phone)
                 phone_code_hash = result.phone_code_hash
                 await state.update_data(phone_code_hash=phone_code_hash)
                 db.update_states_sms(user_id)
@@ -1018,7 +1018,7 @@ async def process_code(message: types.Message, state: FSMContext):
             markup_reply.add(cfg.admin_panel_button)
         await message.answer(cfg.back_text, reply_markup=markup_reply)
         await state.reset_state()
-        await telethon_client.disconnect()
+        await client.disconnect()
     else:
         print('right 1')
         if db.get_states_sms(user_id) == 2:
@@ -1030,8 +1030,8 @@ async def process_code(message: types.Message, state: FSMContext):
             print('right 2')
             try:
                 print('right 3')
-                await telethon_client.sign_in(phone, code, phone_code_hash=phone_code_hash)
-                string_session = telethon_client.session.save()
+                await client.sign_in(phone, code, phone_code_hash=phone_code_hash)
+                string_session = client.session.save()
                 print('right 4')
                 await state.update_data(string_session=string_session)
                 print('right 5')
@@ -1049,7 +1049,7 @@ async def process_code(message: types.Message, state: FSMContext):
                 logging.error(f"Ошибка при аутентификации: {e}")
                 await message.reply(f"Ошибка аутентификации: {e}", reply_markup=markup_reply)
                 await state.reset_state()
-                await telethon_client.disconnect()
+                await client.disconnect()
 
 @dp.message_handler(state=Create_account_autoposting.create_autoposting_2)
 async def group_name_autoposting(message: types.Message, state: FSMContext):
