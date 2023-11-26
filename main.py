@@ -1008,12 +1008,15 @@ async def process_phone(message: types.Message, state: FSMContext):
             phone = data.get("phone")
             phone_code_hash = data.get("phone_code_hash")
             code = message.text
+            if not client.is_connected():
+                await client.connect()
             try:
                 await client.sign_in(phone, code, phone_code_hash=phone_code_hash)
                 string_session = client.session.save()
                 await state.update_data(string_session=string_session)
                 await message.answer(cfg.create_account_autoposting_3)
                 await Create_account_autoposting.create_autoposting_2.set()
+                await client.disconnect()
             except Exception as e:
                 user_id = message.from_user.id
                 markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
