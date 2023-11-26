@@ -976,8 +976,6 @@ async def add_chat_ids_num_2(message: types.Message, state: FSMContext):
 @dp.message_handler(state=Create_account_autoposting.create_autoposting_1)
 async def process_phone(message: types.Message, state: FSMContext):
     user_id = message.from_user.id
-    phone = None
-    phone_code_hash = None
     if message.text == cfg.cancel_creategroup:
         user_id = message.from_user.id
         markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
@@ -998,7 +996,8 @@ async def process_phone(message: types.Message, state: FSMContext):
             try:
                 result = await client.send_code_request(phone)
                 phone_code_hash = result.phone_code_hash
-                await message.answer(phone_code_hash)
+                await state.update_data(phone_code_hash=phone_code_hash)
+                await state.update_data(phone=phone)
                 db.update_states_sms(user_id)
                 await message.reply("Теперь отправьте код, который вы получили от Telegram")
             except Exception as e:
@@ -1006,6 +1005,9 @@ async def process_phone(message: types.Message, state: FSMContext):
                 await message.reply("Произошла ошибка при отправке кода, пожалуйста, попробуйте еще раз ввести номер телефона:")
         elif db.get_states_sms(user_id) == 2:
             code = message.text
+            data = await state.get_data()
+            phone_code_hash = data.get("phone_code_hash")
+            phone = data.get("phone")
             if not client.is_connected():
                 await client.connect()
             try:
