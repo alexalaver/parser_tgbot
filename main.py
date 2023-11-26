@@ -973,11 +973,11 @@ async def add_chat_ids_num_2(message: types.Message, state: FSMContext):
         await message.answer(cfg.correct_add_chat_ids, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
         await Add_chat_ids.panel_adm.set()
 
+user_data = {}
+
 @dp.message_handler(state=Create_account_autoposting.create_autoposting_1)
 async def process_phone(message: types.Message, state: FSMContext):
     user_id = message.from_user.id
-    phone_code_hash = None
-    phone = None
     if message.text == cfg.cancel_creategroup:
         user_id = message.from_user.id
         markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
@@ -992,12 +992,13 @@ async def process_phone(message: types.Message, state: FSMContext):
     else:
         if db.get_states_sms(user_id) == 1:
             phone = message.text
+            user_data[message.from_user.id] = {'phone': phone}
             if not client.is_connected():
                 await client.connect()
 
             try:
                 result = await client.send_code_request(phone)
-                phone_code_hash = result.phone_code_hash
+                user_data[message.from_user.id]['phone_code_hash'] = result.phone_code_hash
                 db.update_states_sms(user_id)
                 await message.reply("Теперь отправьте код, который вы получили от Telegram")
             except Exception as e:
@@ -1008,6 +1009,8 @@ async def process_phone(message: types.Message, state: FSMContext):
             if not client.is_connected():
                 await client.connect()
             try:
+                phone = user_data[user_id]['phone']
+                phone_code_hash = user_data[user_id]['phone_code_hash']
                 await client.sign_in(phone, code, phone_code_hash=phone_code_hash)
                 string_session = client.session.save()
                 await state.update_data(string_session=string_session)
