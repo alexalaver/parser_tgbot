@@ -1004,21 +1004,15 @@ async def process_phone(message: types.Message, state: FSMContext):
                 logging.error(f"Ошибка при отправке кода: {e}")
                 await message.reply("Произошла ошибка при отправке кода, пожалуйста, попробуйте еще раз ввести номер телефона:")
         elif db.get_states_sms(user_id) == 2:
-            await message.answer("right 1")
             data = await state.get_data()
             phone = data.get("phone")
             phone_code_hash = data.get("phone_code_hash")
             code = message.text
-            await message.answer("right 2")
             try:
-                await message.answer("right 3")
                 await client.sign_in(phone, code, phone_code_hash=phone_code_hash)
                 string_session = client.session.save()
-                await message.answer("right 4")
                 await state.update_data(string_session=string_session)
-                await message.answer("right 5")
                 await message.answer(cfg.create_account_autoposting_3)
-                await message.answer("right 6")
                 await Create_account_autoposting.create_autoposting_2.set()
             except Exception as e:
                 user_id = message.from_user.id
