@@ -26,7 +26,7 @@ db = Data("192.168.1.37", "5432", "pars_db", "pars_user", "pars_pwd")
 #     print("String Session:", client.session.save())
 
 # telethon_client = TelegramClient(StringSession(cfg.STRING_SESSION), cfg.API_ID, cfg.API_HASH)
-client = TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH)
+client = TelegramClient('session_name', cfg.API_ID, cfg.API_HASH)
 
 async def check_for_new_groups(current_count):
     new_count = len(db.select_all_channels_group())
