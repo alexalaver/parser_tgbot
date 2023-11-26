@@ -1036,6 +1036,7 @@ async def process_phone(message: types.Message, state: FSMContext):
         await client.connect()
 
     try:
+        await state.update_data(phone=phone)
         result = await client.send_code_request(phone)
         user_data[message.from_user.id]['phone_code_hash'] = result.phone_code_hash
         await message.reply("Теперь отправьте код, который вы получили от Telegram")
