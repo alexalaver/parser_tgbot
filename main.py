@@ -426,7 +426,7 @@ async def rembalance_user(message: types.Message):
             await message.answer(cfg.error_adm_dostup, parse_mode=types.ParseMode.MARKDOWN)
 
 
-
+user_data = {}
 #Функционал открытых inline кнопок
 @dp.callback_query_handler()
 async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContext):
@@ -505,9 +505,9 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
             if int(number_group) < 5:
                 markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
                 markup_reply.add(cfg.cancel_creategroup)
-                await Create_account_autoposting.create_autoposting_1.set()
-                db.delete_sms_get(user_id)
-                db.sms_get_add(user_id)
+                user_data[callback_query.from_user.id] = {'state': 'awaiting_phone'}
+                # db.delete_sms_get(user_id)
+                # db.sms_get_add(user_id)
                 await callback_query.message.answer(cfg.create_account_autoposting_1, parse_mode=types.ParseMode.MARKDOWN)
                 await callback_query.message.answer(cfg.create_account_autoposting_2, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
             else:
@@ -973,12 +973,93 @@ async def add_chat_ids_num_2(message: types.Message, state: FSMContext):
         await message.answer(cfg.correct_add_chat_ids, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
         await Add_chat_ids.panel_adm.set()
 
-user_data = {}
+# @dp.message_handler(state=Create_account_autoposting.create_autoposting_1)
+# async def process_phone(message: types.Message, state: FSMContext):
+#     user_id = message.from_user.id
+#     phone = None
+#     phone_code_hash = None
+#     if message.text == cfg.cancel_creategroup:
+#         user_id = message.from_user.id
+#         markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+#         markup_reply.add(cfg.autoposting)
+#         markup_reply.add(cfg.parser)
+#         markup_reply.row(cfg.my_profile, cfg.support)
+#         if db.select_admin(user_id) > 0:
+#             markup_reply.add(cfg.admin_panel_button)
+#         await message.answer(cfg.back_text, reply_markup=markup_reply)
+#         await state.reset_state()
+#         await client.disconnect()
+#     else:
+#         if db.get_states_sms(user_id) == 1:
+#             phone = message.text
+#             if not client.is_connected():
+#                 await client.connect()
+#
+#             try:
+#                 result = await client.send_code_request(phone)
+#                 phone_code_hash = result.phone_code_hash
+#                 db.update_states_sms(user_id)
+#                 await message.reply("Теперь отправьте код, который вы получили от Telegram")
+#             except Exception as e:
+#                 logging.error(f"Ошибка при отправке кода: {e}")
+#                 await message.reply("Произошла ошибка при отправке кода, пожалуйста, попробуйте еще раз ввести номер телефона:")
+#         elif db.get_states_sms(user_id) == 2:
+#             code = message.text
+#             if not client.is_connected():
+#                 await client.connect()
+#             try:
+#                 await client.sign_in(phone, code, phone_code_hash=phone_code_hash)
+#                 string_session = client.session.save()
+#                 await state.update_data(string_session=string_session)
+#                 await message.answer(cfg.create_account_autoposting_3)
+#                 await Create_account_autoposting.create_autoposting_2.set()
+#                 await client.disconnect()
+#             except Exception as e:
+#                 user_id = message.from_user.id
+#                 markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+#                 markup_reply.add(cfg.autoposting)
+#                 markup_reply.add(cfg.parser)
+#                 markup_reply.row(cfg.my_profile, cfg.support)
+#                 if db.select_admin(user_id) > 0:
+#                     markup_reply.add(cfg.admin_panel_button)
+#                 logging.error(f"Ошибка при аутентификации: {e}")
+#                 await message.reply(f"Ошибка аутентификации: {e}", reply_markup=markup_reply)
+#                 await state.reset_state()
+#                 await client.disconnect()
 
-@dp.message_handler(state=Create_account_autoposting.create_autoposting_1)
+@dp.message_handler(lambda message: user_data.get(message.from_user.id, {}).get('state') == 'awaiting_phone')
 async def process_phone(message: types.Message, state: FSMContext):
+    phone = message.text
+    user_data[message.from_user.id] = {'state': 'awaiting_code', 'phone': phone}
+
+    if not client.is_connected():
+        await client.connect()
+
+    try:
+        result = await client.send_code_request(phone)
+        user_data[message.from_user.id]['phone_code_hash'] = result.phone_code_hash
+        await message.reply("Теперь отправьте код, который вы получили от Telegram")
+    except Exception as e:
+        logging.error(f"Ошибка при отправке кода: {e}")
+        await message.reply("Произошла ошибка при отправке кода, пожалуйста, попробуйте еще раз:")
+
+
+@dp.message_handler(lambda message: user_data.get(message.from_user.id, {}).get('state') == 'awaiting_code')
+async def process_code(message: types.Message, state: FSMContext):
     user_id = message.from_user.id
-    if message.text == cfg.cancel_creategroup:
+    phone = user_data[user_id]['phone']
+    phone_code_hash = user_data[user_id]['phone_code_hash']
+    code = message.text
+
+    try:
+        await client.sign_in(phone, code, phone_code_hash=phone_code_hash)
+        string_session = client.session.save()
+        await Create_account_autoposting.create_autoposting_2.set()
+        await state.update_data(string_session=string_session)
+        await message.answer(cfg.create_account_autoposting_3)
+        await Create_account_autoposting.create_autoposting_2.set()
+        await client.disconnect()
+    except Exception as e:
         user_id = message.from_user.id
         markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
         markup_reply.add(cfg.autoposting)
@@ -986,50 +1067,10 @@ async def process_phone(message: types.Message, state: FSMContext):
         markup_reply.row(cfg.my_profile, cfg.support)
         if db.select_admin(user_id) > 0:
             markup_reply.add(cfg.admin_panel_button)
-        await message.answer(cfg.back_text, reply_markup=markup_reply)
+        logging.error(f"Ошибка при аутентификации: {e}")
+        await message.reply(f"Ошибка аутентификации: {e}", reply_markup=markup_reply)
         await state.reset_state()
         await client.disconnect()
-    else:
-        if db.get_states_sms(user_id) == 1:
-            phone = message.text
-            user_data[message.from_user.id] = {'phone': phone}
-            if not client.is_connected():
-                await client.connect()
-
-            try:
-                result = await client.send_code_request(phone)
-                user_data[message.from_user.id]['phone_code_hash'] = result.phone_code_hash
-                db.update_states_sms(user_id)
-                await message.reply("Теперь отправьте код, который вы получили от Telegram")
-            except Exception as e:
-                logging.error(f"Ошибка при отправке кода: {e}")
-                await message.reply("Произошла ошибка при отправке кода, пожалуйста, попробуйте еще раз ввести номер телефона:")
-        elif db.get_states_sms(user_id) == 2:
-            code = message.text
-            if not client.is_connected():
-                await client.connect()
-            try:
-                phone = user_data[user_id]['phone']
-                phone_code_hash = user_data[user_id]['phone_code_hash']
-                await client.sign_in(phone, code, phone_code_hash=phone_code_hash)
-                string_session = client.session.save()
-                await state.update_data(string_session=string_session)
-                await message.answer(cfg.create_account_autoposting_3)
-                await Create_account_autoposting.create_autoposting_2.set()
-                await client.disconnect()
-            except Exception as e:
-                user_id = message.from_user.id
-                markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
-                markup_reply.add(cfg.autoposting)
-                markup_reply.add(cfg.parser)
-                markup_reply.row(cfg.my_profile, cfg.support)
-                if db.select_admin(user_id) > 0:
-                    markup_reply.add(cfg.admin_panel_button)
-                logging.error(f"Ошибка при аутентификации: {e}")
-                await message.reply(f"Ошибка аутентификации: {e}", reply_markup=markup_reply)
-                await state.reset_state()
-                await client.disconnect()
-
 
 @dp.message_handler(state=Create_account_autoposting.create_autoposting_2)
 async def group_name_autoposting(message: types.Message, state: FSMContext):
