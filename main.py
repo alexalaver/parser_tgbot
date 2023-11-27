@@ -972,10 +972,10 @@ async def add_chat_ids_num_2(message: types.Message, state: FSMContext):
         await message.answer(cfg.correct_add_chat_ids, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
         await Add_chat_ids.panel_adm.set()
 
+client = TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH)
 @dp.message_handler(state=Create_account_autoposting.create_autoposting_1)
 async def process_phone(message: types.Message, state: FSMContext):
     user_id = message.from_user.id
-    client = TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH)
     if message.text == cfg.cancel_creategroup:
         user_id = message.from_user.id
         markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
