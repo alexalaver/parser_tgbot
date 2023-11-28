@@ -2,7 +2,7 @@ import datetime
 import os
 import time
 
-from ..tl import types
+from telethon.tl import types
 from .memory import MemorySession, _SentFileType
 from .. import utils
 from ..crypto import AuthKey

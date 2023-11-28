@@ -13,6 +13,7 @@ import asyncio
 import config as cfg
 import logging
 import datetime
+import socks
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -972,7 +973,11 @@ async def add_chat_ids_num_2(message: types.Message, state: FSMContext):
         await message.answer(cfg.correct_add_chat_ids, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
         await Add_chat_ids.panel_adm.set()
 
-client = TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH)
+
+host = "168.181.53.247"
+port = "8000"
+proxy = (socks.SOCKS5, host, port)
+client = TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH, proxy=proxy)
 @dp.message_handler(state=Create_account_autoposting.create_autoposting_1)
 async def process_phone(message: types.Message, state: FSMContext):
     user_id = message.from_user.id
