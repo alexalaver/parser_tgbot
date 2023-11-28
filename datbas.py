@@ -317,7 +317,7 @@ class Data:
 
     def add_autoposting_account(self, id, number_group, number_phone, string_session, chats, group_name, post, time_betw):
         with self.connect:
-            self.cursor.execute("INSERT INTO autoposting_groups(id, number_group, number_phone, string_session, chats, group_name, post, time_betw) VALUE(%s, %s, %s, %s, %s, %s, %s, %s)", (id, number_group, number_phone, string_session, chats, group_name, post, time_betw))
+            self.cursor.execute("INSERT INTO autoposting_groups(id, number_group, number_phone, string_session, chats, group_name, post, time_betw) VALUES(%s, %s, %s, %s, %s, %s, %s, %s)", (id, number_group, number_phone, string_session, chats, group_name, post, time_betw))
             self.connect.commit()
 
     def sms_get_add(self, id):
