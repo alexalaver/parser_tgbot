@@ -978,7 +978,7 @@ async def add_chat_ids_num_2(message: types.Message, state: FSMContext):
 
 host = "168.181.53.247"
 port = 8000
-proxy = (socks.SOCKS5, host, port)
+proxy = (socks.SOCKS5, host, port, "st7zNT")
 client = TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH, proxy=proxy, connection=ConnectionTcpMTProxyRandomizedIntermediate)
 @dp.message_handler(state=Create_account_autoposting.create_autoposting_1)
 async def process_phone(message: types.Message, state: FSMContext):

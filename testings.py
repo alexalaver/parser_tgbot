@@ -18,10 +18,10 @@ dp.middleware.setup(LoggingMiddleware())
 
 proxy_host = '168.181.53.247'  # IP-адрес прокси-сервера
 proxy_port = 8000  # Порт прокси-сервера
-
+proxy_secret = "st7zNT"
 client = TelegramClient(StringSession(), API_ID, API_HASH,
                         connection=ConnectionTcpMTProxyRandomizedIntermediate,
-                        proxy=(proxy_host, proxy_port))
+                        proxy=(proxy_host, proxy_port, proxy_secret))
 # Определение состояний для FSM
 class VerificationState(StatesGroup):
     waiting_for_phone_number = State()
