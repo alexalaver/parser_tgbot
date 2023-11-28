@@ -13,8 +13,9 @@ dp.middleware.setup(LoggingMiddleware())
 
 client = TelegramClient(StringSession(), API_ID, API_HASH)
 
-# Глобальная переменная для хранения phone_code_hash
+# Глобальные переменные для хранения phone_code_hash и phone_number
 phone_code_hash = None
+phone_number = None
 
 @dp.message_handler(commands=['start', 'help'])
 async def send_welcome(message: types.Message):
@@ -26,26 +27,31 @@ async def cancel_handler(message: types.Message):
 
 @dp.message_handler()
 async def process_message(message: types.Message):
-    global phone_code_hash  # Объявляем переменную как глобальную
+    global phone_code_hash, phone_number
 
     if not client.is_connected():
         await client.connect()
 
     if message.text.startswith('+'):  # Предполагаем, что это номер телефона
+        phone_number = message.text  # Сохраняем номер телефона
         try:
-            result = await client.send_code_request(message.text)
+            result = await client.send_code_request(phone_number)
             await message.reply("Отправьте код, который вы получили от Telegram.")
             phone_code_hash = result.phone_code_hash
         except Exception as e:
             await message.reply(f"Ошибка: {e}")
 
-    else:  # Предполагаем, что это код подтверждения
+    elif phone_code_hash and phone_number:  # Предполагаем, что это код подтверждения
         try:
-            await client.sign_in(message.text, phone_code_hash=phone_code_hash)
+            await client.sign_in(phone_number, message.text, phone_code_hash=phone_code_hash)
             string_session = client.session.save()
             await message.reply(f"Ваш Session String: {string_session}")
+            phone_code_hash = None  # Сбрасываем phone_code_hash после использования
+            phone_number = None  # Сбрасываем phone_number после использования
         except Exception as e:
             await message.reply(f"Ошибка аутентификации: {e}")
+    else:
+        await message.reply("Пожалуйста, сначала отправьте свой номер телефона.")
 
 if __name__ == '__main__':
     from aiogram import executor
