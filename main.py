@@ -271,15 +271,18 @@ async def autoposting_forward():
             current_date = datetime.datetime.now()
             formated_base = datetime.datetime.strptime(date_betw, "%Y-%m-%d %H:%M:%S")
             if current_date > formated_base:
+                await telethon_client_autoposting.start()
                 for chat_id in chat_ids:
                     trimmed_chat_id = chat_id[:-2]
                     try:
                         await telethon_client_autoposting.forward_messages(entity=trimmed_chat_id, messages=message_id, from_peer=user_id)
                         await bot.send_message(f"Рекламный пост, успешно отправлен в чат {chat_id}")
+                        await asyncio.sleep(5)
                     except RPCError as err:
                         print(f"[ERROR RPCError] {err}")
                     except Exception as erri:
                         print(f"[ERROR EXCEPTION] {erri}")
+                await telethon_client_autoposting.disconnect()
             else:
                 current_date = datetime.datetime.now()
                 time_in_60_minutes = current_date + timedelta(minutes=int(time_betw))
