@@ -1235,7 +1235,8 @@ async def other(message: types.Message):
         elif message.text == cfg.admin_panel_button:
             await panel_administration(message)
         else:
-            await message.answer(message.forward_from_message_id)
+            if message.forward_from or message.forward_from_chat:
+                await message.answer(message.forward_from_message_id)
 
 
 async def on_startup(_):
