@@ -273,7 +273,7 @@ async def autoposting_forward():
             if current_date > formated_base:
                 await telethon_client_autoposting.start()
                 for chat_id in chat_ids:
-                    trimmed_chat_id = chat_id[:-2]
+                    trimmed_chat_id = chat_id
                     try:
                         await telethon_client_autoposting.forward_messages(entity=trimmed_chat_id, messages=message_id, from_peer=user_id)
                         await bot.send_message(f"Рекламный пост, успешно отправлен в чат {chat_id}")
