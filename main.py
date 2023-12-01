@@ -1234,11 +1234,15 @@ async def other(message: types.Message):
             await autoposting_send(message)
         elif message.text == cfg.admin_panel_button:
             await panel_administration(message)
+        else:
+            if message.forward_from or message.forward_from_chat:
+                await message.answer(message.forward_from_message_id)
+
 
 async def on_startup(_):
     asyncio.create_task(search_and_forward())
     asyncio.create_task(search_and_forward_close_group())
-    asyncio.create_task(autoposting_forward())
+    # asyncio.create_task(autoposting_forward())
 
 if __name__ == "__main__":
     executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
