@@ -330,9 +330,9 @@ class Data:
             self.cursor.execute("SELECT states FROM sms_get WHERE id=%s", (id,))
             return self.cursor.fetchone()[0]
 
-    def update_states_sms(self, id):
+    def update_states_sms(self, id, num):
         with self.connect:
-            self.cursor.execute("UPDATE sms_get SET states=%s WHERE id=%s", (2, id,))
+            self.cursor.execute("UPDATE sms_get SET states=%s WHERE id=%s", (num, id,))
             self.connect.commit()
 
     def delete_sms_get(self, id):

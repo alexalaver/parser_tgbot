@@ -120,6 +120,7 @@ import logging
 from aiogram import Bot, Dispatcher, types, executor
 from telethon import TelegramClient
 from telethon.sessions import StringSession
+import socks
 
 API_TOKEN = '6597828235:AAH60BBRislfPCqwBeGsiYMBEjXuBrHujZ0'
 api_id = '20150090'
@@ -130,8 +131,7 @@ logging.basicConfig(level=logging.INFO)
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher(bot)
 
-telethon_client = TelegramClient(StringSession(), api_id, api_hash)
-
+telethon_client = TelegramClient(StringSession(), api_id, api_hash,)
 # Словарь для хранения временных данных пользователей
 user_data = {}
 
