@@ -1236,7 +1236,8 @@ async def other(message: types.Message):
             await panel_administration(message)
         else:
             if message.forward_from or message.forward_from_chat:
-                await message.answer(message.forward_from_message_id)
+                forwarded_message_id = message.message_id
+                await message.reply(f'ID этого пересланного сообщения: {forwarded_message_id}')
 
 
 async def on_startup(_):
