@@ -4,10 +4,10 @@ from aiogram.dispatcher.storage import FSMContext
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from datbas import Data
-from datetime import datetime
+from datetime import datetime, timedelta
 from telethon import TelegramClient
 from telethon.sessions import StringSession
-from telethon.errors import FloodWaitError, ChannelPrivateError, ChatForbiddenError, UserPrivacyRestrictedError, PeerIdInvalidError, SessionPasswordNeededError, PhoneCodeExpiredError, PhoneNumberUnoccupiedError
+from telethon.errors import FloodWaitError, ChannelPrivateError, ChatForbiddenError, UserPrivacyRestrictedError, PeerIdInvalidError, SessionPasswordNeededError, PhoneCodeExpiredError, PhoneNumberUnoccupiedError, RPCError
 import functions as fnc
 import asyncio
 import config as cfg
@@ -29,6 +29,10 @@ telethon_client = TelegramClient(StringSession(cfg.STRING_SESSION), cfg.API_ID, 
 
 async def check_for_new_groups(current_count):
     new_count = len(db.select_all_channels_group())
+    return new_count != current_count
+
+async def check_for_new_autoposting_groups(current_count):
+    new_count = len(db.select_all_channels_autoposting_group())
     return new_count != current_count
 
 async def check_for_new_channels(current_count):
@@ -245,6 +249,49 @@ async def search_and_forward_close_group():
 
         await asyncio.sleep(1)
 
+async def autoposting_forward():
+    num = 0
+
+    groups_count = len(db.select_all_channels_autoposting_group())
+
+    while True:
+        try:
+            groups = db.select_all_channels_autoposting_group()
+            if not groups:
+                await asyncio.sleep(10)
+                continue
+
+            if await check_for_new_autoposting_groups(groups_count):
+                groups_count = len(groups)
+                num = 0
+            group = groups[num]
+            user_id, chat_ids, string_session, message_id, time_betw, date_betw, number_group = group[0], group[4], group[3], group[7], group[8], group[9], group[1]
+
+            telethon_client_autoposting = TelegramClient(StringSession(string_session), cfg.API_ID, cfg.API_HASH)
+            current_date = datetime.datetime.now()
+            formated_base = datetime.datetime.strptime(time_betw, "%Y-%m-%d %H:%M:%S")
+            if current_date > formated_base:
+                for chat_id in chat_ids:
+                    trimmed_chat_id = chat_id[:-2]
+                    try:
+                        await telethon_client_autoposting.forward_messages(entity=trimmed_chat_id, messages=message_id, from_peer=user_id)
+                    except RPCError as err:
+                        print(f"[ERROR RPCError] {err}")
+                    except Exception as erri:
+                        print(f"[ERROR EXCEPTION] {erri}")
+            else:
+                current_date = datetime.datetime.now()
+                time_in_60_minutes = current_date + timedelta(minutes=int(time_betw))
+                db.update_date_betw(time_in_60_minutes, number_group)
+
+            num += 1
+            if num >= len(groups):
+                num = 0
+
+        except Exception as e:
+            print(f"Произошла ошибка: {e}")
+
+        await asyncio.sleep(1)
 
 
 class Create_group(StatesGroup):
@@ -1103,9 +1150,15 @@ async def autoposting_time_betw(message: types.Message, state: FSMContext):
             await state.reset_state()
         else:
             if int(message.text):
-                await state.update_data(time_betw=message.text)
-                await message.answer(cfg.create_account_autoposting_6)
-                await Create_account_autoposting.create_autoposting_5.set()
+                if int(message.text) >= 60:
+                    current_time = datetime.now()
+                    time_in_60_minutes = current_time + timedelta(minutes=60)
+                    await state.update_data(time_betw=int(message.text))
+                    await state.update_data(date_betw=time_in_60_minutes)
+                    await message.answer(cfg.create_account_autoposting_6)
+                    await Create_account_autoposting.create_autoposting_5.set()
+                else:
+                    await message.answer(cfg.minimum_time_error)
             else:
                 await message.answer("Ошибка! Промежуток времени должен быть цифрой, повторите ещё раз:")
 
@@ -1139,7 +1192,8 @@ async def group_chats_autoposting(message: types.Message, state: FSMContext):
                         group_name = data.get('group_name')
                         forwarded_message_id = data.get('forwarded_message_id')
                         time_betw = data.get('time_betw')
-                        db.add_autoposting_account(user_id, new_number_group, phone, string_session, text_lines, group_name, forwarded_message_id, time_betw)
+                        date_betw = data.get('date_betw')
+                        db.add_autoposting_account(user_id, new_number_group, phone, string_session, text_lines, group_name, forwarded_message_id, time_betw, date_betw)
                         markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
                         markup_reply.add(cfg.autoposting)
                         markup_reply.add(cfg.parser)

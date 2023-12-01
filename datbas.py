@@ -315,9 +315,9 @@ class Data:
             else:
                 return a[0]
 
-    def add_autoposting_account(self, id, number_group, number_phone, string_session, chats, group_name, post, time_betw):
+    def add_autoposting_account(self, id, number_group, number_phone, string_session, chats, group_name, post, time_betw, date_betw):
         with self.connect:
-            self.cursor.execute("INSERT INTO autoposting_groups(id, number_group, number_phone, string_session, chats, group_name, post, time_betw) VALUES(%s, %s, %s, %s, %s, %s, %s, %s)", (id, number_group, number_phone, string_session, chats, group_name, post, time_betw))
+            self.cursor.execute("INSERT INTO autoposting_groups(id, number_group, number_phone, string_session, chats, group_name, post, time_betw, date_betw) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)", (id, number_group, number_phone, string_session, chats, group_name, post, time_betw, date_betw))
             self.connect.commit()
 
     def sms_get_add(self, id):
@@ -338,4 +338,15 @@ class Data:
     def delete_sms_get(self, id):
         with self.connect:
             self.cursor.execute("DELETE FROM sms_get WHERE id=%s", (id,))
+            self.connect.commit()
+
+    def select_all_channels_autoposting_group(self):
+        with self.connect:
+            self.cursor.execute("SELECT * FROM autoposting_groups") # WHERE data_end IS NOT NULL
+            a = self.cursor.fetchall()
+            return a
+
+    def update_date_betw(self, data, number_group):
+        with self.connect:
+            self.cursor.execute("UPDATE autoposting_groups SET date_betw=%s WHERE number_group=%s", (data, number_group,))
             self.connect.commit()
