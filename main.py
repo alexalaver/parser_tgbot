@@ -7,15 +7,12 @@ from datbas import Data
 from datetime import datetime
 from telethon import TelegramClient
 from telethon.sessions import StringSession
-from telethon.network import ConnectionTcpMTProxyRandomizedIntermediate
 from telethon.errors import FloodWaitError, ChannelPrivateError, ChatForbiddenError, UserPrivacyRestrictedError, PeerIdInvalidError, SessionPasswordNeededError, PhoneCodeExpiredError, PhoneNumberUnoccupiedError
 import functions as fnc
 import asyncio
 import config as cfg
-
 import logging
 import datetime
-import socks
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -1004,8 +1001,10 @@ async def process_phone(message: types.Message, state: FSMContext):
                 await client.connect()
 
             try:
-                await client.send_code_request(phone)
+                result = await client.send_code_request(phone)
+                phone_code_hash = result.phone_code_hash
                 await state.update_data(phone=phone)
+                await state.update_data(phone_code_hash=phone_code_hash)
                 db.update_states_sms(user_id, 2)
                 await message.reply("Теперь отправьте код, который вы получили от Telegram")
             except Exception as e:
@@ -1015,8 +1014,10 @@ async def process_phone(message: types.Message, state: FSMContext):
             code = message.text
             data = await state.get_data()
             phone = data.get("phone")
+            phone_code_hash = data.get("phone_code_hash")
             try:
-                await client.sign_in(phone, message.text)
+
+                await client.sign_in(phone, code, phone_code_hash=phone_code_hash)
                 string_session = client.session.save()
                 await state.update_data(string_session=string_session)
                 await Create_account_autoposting.create_autoposting_2.set()
