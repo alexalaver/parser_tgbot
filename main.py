@@ -275,6 +275,7 @@ async def autoposting_forward():
                     trimmed_chat_id = chat_id[:-2]
                     try:
                         await telethon_client_autoposting.forward_messages(entity=trimmed_chat_id, messages=message_id, from_peer=user_id)
+                        await bot.send_message(f"Рекламный пост, успешно отправлен в чат {chat_id}")
                     except RPCError as err:
                         print(f"[ERROR RPCError] {err}")
                     except Exception as erri:
