@@ -264,18 +264,19 @@ async def autoposting_forward():
             if await check_for_new_autoposting_groups(groups_count):
                 groups_count = len(groups)
                 num = 0
+
             group = groups[num]
             user_id, chat_ids, string_session, message_id, time_betw, date_betw, number_group = group[0], group[4], group[3], group[7], group[8], group[9], group[1]
-
             telethon_client_autoposting = TelegramClient(StringSession(string_session), cfg.API_ID, cfg.API_HASH)
             current_date = datetime.datetime.now()
             formated_base = datetime.datetime.strptime(date_betw, "%Y-%m-%d %H:%M:%S")
+
             if current_date > formated_base:
                 await telethon_client_autoposting.start()
                 for chat_id in chat_ids:
-                    trimmed_chat_id = chat_id
                     try:
-                        await telethon_client_autoposting.forward_messages(entity=trimmed_chat_id, messages=message_id, from_peer=user_id)
+                        await telethon_client_autoposting.forward_messages(entity=chat_id, messages=message_id,
+                                                                           from_peer=user_id)
                         await bot.send_message(f"Рекламный пост, успешно отправлен в чат {chat_id}")
                         await asyncio.sleep(5)
                     except RPCError as err:
@@ -285,7 +286,7 @@ async def autoposting_forward():
                 await telethon_client_autoposting.disconnect()
             else:
                 current_date = datetime.datetime.now()
-                time_in_60_minutes = current_date + timedelta(minutes=int(time_betw))
+                time_in_60_minutes = current_date + datetime.timedelta(minutes=int(time_betw))
                 db.update_date_betw(time_in_60_minutes, number_group)
 
             num += 1
@@ -296,7 +297,6 @@ async def autoposting_forward():
             print(f"Произошла ошибка: {e}")
 
         await asyncio.sleep(1)
-
 
 class Create_group(StatesGroup):
     create_group_1 = State()
