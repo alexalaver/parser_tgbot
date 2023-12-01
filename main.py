@@ -267,26 +267,25 @@ async def autoposting_forward():
 
             group = groups[num]
             user_id, chat_ids, string_session, message_id, time_betw, date_betw, number_group = group[0], group[4], group[3], group[7], group[8], group[9], group[1]
-            telethon_client_autoposting = TelegramClient(StringSession(string_session), cfg.API_ID, cfg.API_HASH)
-            current_date = datetime.datetime.now()
-            formated_base = datetime.datetime.strptime(date_betw, "%Y-%m-%d %H:%M:%S")
 
-            if current_date > formated_base:
-                await telethon_client_autoposting.start()
-                for chat_id in chat_ids:
-                    try:
-                        await telethon_client_autoposting.forward_messages(entity=chat_id, messages=int(message_id), from_peer=user_id)
-                        await bot.send_message(f"Рекламный пост, успешно отправлен в чат {chat_id}")
-                        await asyncio.sleep(5)
-                    except RPCError as err:
-                        print(f"[ERROR RPCError] {err}")
-                    except Exception as erri:
-                        print(f"[ERROR EXCEPTION] {erri}")
-                await telethon_client_autoposting.disconnect()
-            else:
+            async with TelegramClient(StringSession(string_session), cfg.API_ID, cfg.API_HASH) as telethon_client_autoposting:
                 current_date = datetime.datetime.now()
-                time_in_60_minutes = current_date + datetime.timedelta(minutes=int(time_betw))
-                db.update_date_betw(time_in_60_minutes, number_group)
+                formated_base = datetime.datetime.strptime(date_betw, "%Y-%m-%d %H:%M:%S")
+
+                if current_date > formated_base:
+                    for chat_id in chat_ids:
+                        try:
+                            await telethon_client_autoposting.forward_messages(entity=chat_id, messages=int(message_id), from_peer=user_id)
+                            await bot.send_message(f"Рекламный пост, успешно отправлен в чат {chat_id}")
+                            await asyncio.sleep(5)
+                        except RPCError as err:
+                            print(f"[ERROR RPCError] {err}")
+                        except Exception as erri:
+                            print(f"[ERROR EXCEPTION] {erri}")
+
+                else:
+                    time_in_60_minutes = current_date + datetime.timedelta(minutes=int(time_betw))
+                    db.update_date_betw(time_in_60_minutes, number_group)
 
             num += 1
             if num >= len(groups):
