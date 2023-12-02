@@ -25,6 +25,7 @@ db = Data("192.168.1.37", "5432", "pars_db", "pars_user", "pars_pwd")
 # with TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH) as client:
 #     print("String Session:", client.session.save())
 
+client = TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH)
 telethon_client = TelegramClient(StringSession(cfg.STRING_SESSION), cfg.API_ID, cfg.API_HASH)
 
 async def check_for_new_groups(current_count):
@@ -1318,8 +1319,6 @@ async def add_chat_ids_num_2(message: types.Message, state: FSMContext):
         await message.answer(cfg.correct_add_chat_ids, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
         await Add_chat_ids.panel_adm.set()
 
-session = StringSession()
-client = TelegramClient(session, cfg.API_ID, cfg.API_HASH)
 @dp.message_handler(state=Create_account_autoposting.create_autoposting_1)
 async def process_phone(message: types.Message, state: FSMContext):
     user_id = message.from_user.id
