@@ -779,9 +779,9 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
         elif callback_query.data == "back_channels":
             await state.reset_state()
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
-            btn_inline1 = types.InlineKeyboardButton(cfg.parser_groups_text, callback_data='groups_parser')
+            btn_inline1 = types.InlineKeyboardButton(cfg.groups_button, callback_data='groups_parser')
             markup_inline.add(btn_inline1)
-            await callback_query.message.edit_caption(caption=cfg.parser_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+            await callback_query.message.edit_caption(caption=cfg.parser_groups_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
         elif callback_query.data == "pay_money_channels":
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
             btn_inline1 = types.InlineKeyboardButton(cfg.confirm_oplata, callback_data='confirm_oplata')
