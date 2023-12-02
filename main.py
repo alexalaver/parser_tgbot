@@ -513,6 +513,11 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
             btn_inline1 = types.InlineKeyboardButton(cfg.groups_button, callback_data='groups_parser')
             markup_inline.add(btn_inline1)
             await callback_query.message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.parser_groups_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+        elif callback_query.data == "menu_after_pay_autoposting":
+            markup_inline = types.InlineKeyboardMarkup(row_width=1)
+            btn_inline1 = types.InlineKeyboardButton(cfg.account_button, callback_data='accounts_button')
+            markup_inline.add(btn_inline1)
+            await callback_query.message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.autoposting_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
 
 @dp.callback_query_handler(state=Parser_groups_button.select_groups_button)
 async def parser_group_button(callback_query: types.CallbackQuery, state: FSMContext):
@@ -927,7 +932,7 @@ async def account_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                     back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels')
                     markup_inline.add(change_keywords)
                     markup_inline.add(back_channels)
-                    await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+                    await callback_query.message.edit_caption(caption=cfg.account_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
         elif callback_query.data == "next_page":
             if channels_page == page_here:
                 await callback_query.answer(cfg.error_page_next, show_alert=True)
@@ -957,7 +962,7 @@ async def account_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                 back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels')
                 markup_inline.add(change_keywords)
                 markup_inline.add(back_channels)
-                await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+                await callback_query.message.edit_caption(caption=cfg.account_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
         elif callback_query.data == "old_page":
             print(f"{channels_count}\n{page_here}\n{from_page}\n{before_page}")
             if page_here == 1:
@@ -988,7 +993,7 @@ async def account_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                 back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels')
                 markup_inline.add(change_keywords)
                 markup_inline.add(back_channels)
-                await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+                await callback_query.message.edit_caption(caption=cfg.account_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
         elif callback_query.data == "back_channels":
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
             user_id = callback_query.from_user.id
@@ -1010,7 +1015,7 @@ async def account_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
             markup_inline.add(btn_inline1, btn_inline2)
             channels_len = len(channels)
             money_oplata = str(5 * int(channels_len))
-            await callback_query.message.edit_caption(caption=cfg.oplata_chatov(channels_len, money_oplata), reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+            await callback_query.message.edit_caption(caption=cfg.oplata_chatov_autoposting(channels_len, money_oplata), reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
         elif callback_query.data == "confirm_oplata":
             balance = db.check_balance(user_id)
             channels_len = len(channels)
@@ -1030,7 +1035,7 @@ async def account_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                 markup_inline.add(btn_inline1)
                 await state.finish()
                 await callback_query.message.delete()
-                await callback_query.message.answer(text=cfg.tariffe_correct(group_name, channels_len, formatted_date_new), reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+                await callback_query.message.answer(text=cfg.tariffe_correct_autoposting(group_name, channels_len, formatted_date_new), reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
             else:
                 await callback_query.answer(text=cfg.tariffe_error, show_alert=True)
         elif callback_query.data == "back_oplata":
@@ -1052,7 +1057,7 @@ async def account_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
             back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels')
             markup_inline.add(change_keywords)
             markup_inline.add(back_channels)
-            await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+            await callback_query.message.edit_caption(caption=cfg.account_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
         elif callback_query.data == "back_sostoyanie":
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
             btn_inline1 = types.InlineKeyboardButton(cfg.account_button, callback_data='accounts_button')
