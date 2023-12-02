@@ -1021,13 +1021,8 @@ async def add_chat_ids_num_2(message: types.Message, state: FSMContext):
         await message.answer(cfg.correct_add_chat_ids, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
         await Add_chat_ids.panel_adm.set()
 
-
-async def start_telegram_session():
-    session = StringSession()
-    client = TelegramClient(session, cfg.API_ID, cfg.API_HASH)
-    await client.connect()
-    return client
-
+session = StringSession()
+client = TelegramClient(session, cfg.API_ID, cfg.API_HASH)
 @dp.message_handler(state=Create_account_autoposting.create_autoposting_1)
 async def process_phone(message: types.Message, state: FSMContext):
     user_id = message.from_user.id
@@ -1035,8 +1030,6 @@ async def process_phone(message: types.Message, state: FSMContext):
     markup_reply.add(cfg.autoposting)
     markup_reply.add(cfg.parser)
     markup_reply.row(cfg.my_profile, cfg.support)
-    session = StringSession()
-    client = TelegramClient(session, cfg.API_ID, cfg.API_HASH)
     await client.connect()
     if db.select_admin(user_id) > 0:
         markup_reply.add(cfg.admin_panel_button)
