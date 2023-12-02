@@ -777,11 +777,18 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                 markup_inline.add(back_channels)
                 await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
         elif callback_query.data == "back_channels":
-            await state.reset_state()
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
-            btn_inline1 = types.InlineKeyboardButton(cfg.groups_button, callback_data='groups_parser')
-            markup_inline.add(btn_inline1)
-            await callback_query.message.edit_caption(caption=cfg.parser_groups_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+            group_names = db.select_group_name(user_id)
+            max_buttons = 5
+            for i in range(min(max_buttons, len(group_names))):
+                button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
+                markup_inline.add(button)
+
+            btn_inline1 = types.InlineKeyboardButton(cfg.groups_add_button, callback_data='groups_add_button')
+            btn_inline2 = types.InlineKeyboardButton(cfg.back_button, callback_data='back_groups_parser')
+            markup_inline.add(btn_inline1, btn_inline2)
+            await callback_query.message.edit_caption(caption=cfg.parser_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+            await Parser_groups_button.select_groups_button.set()
         elif callback_query.data == "pay_money_channels":
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
             btn_inline1 = types.InlineKeyboardButton(cfg.confirm_oplata, callback_data='confirm_oplata')
