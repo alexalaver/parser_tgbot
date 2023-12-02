@@ -892,11 +892,11 @@ async def change_keyword_1_func(message: types.Message, state: FSMContext):
                 await message.answer(cfg.error_len_keyword, parse_mode=types.ParseMode.MARKDOWN)
 
 @dp.callback_query_handler(state=Change_keyword.change_keyword_1)
-async def change_keyword_1_buttons(callback_query: types.CallbackQuery, state: FSMContext):
+async def change_keyword_1_buttons(callback_query: types.CallbackQuery):
     if callback_query.message.chat.type == types.ChatType.PRIVATE:
         if callback_query.data == "back_keyword":
-            markup_inline = types.InlineKeyboardMarkup(row_width=1)
             user_id = callback_query.from_user.id
+            markup_inline = types.InlineKeyboardMarkup(row_width=1)
             group_names = db.select_group_name(user_id)
             max_buttons = 5
             for i in range(min(max_buttons, len(group_names))):
@@ -904,9 +904,10 @@ async def change_keyword_1_buttons(callback_query: types.CallbackQuery, state: F
                 markup_inline.add(button)
 
             btn_inline1 = types.InlineKeyboardButton(cfg.groups_add_button, callback_data='groups_add_button')
-            markup_inline.add(btn_inline1)
+            btn_inline2 = types.InlineKeyboardButton(cfg.back_button, callback_data='back_groups_parser')
+            markup_inline.add(btn_inline1, btn_inline2)
+            await Parser_groups_button.select_groups_button.set()
             await callback_query.message.edit_caption(caption=cfg.parser_text,reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
-            await state.reset_state()
         else:
             await callback_query.answer(cfg.error_button_create_group, show_alert=True)
 
