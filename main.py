@@ -311,6 +311,9 @@ class Create_account_autoposting(StatesGroup):
 class Parsers_use(StatesGroup):
     parsers_use_1 = State()
 
+class Account_use(StatesGroup):
+    account_use_1 = State()
+
 class Change_keyword(StatesGroup):
     change_keyword_1 = State()
 
@@ -604,7 +607,7 @@ async def accounts_button_1_button(callback_query: types.CallbackQuery, state: F
             else:
                 await callback_query.answer(cfg.error_autoposting_group_5, show_alert=True)
         elif callback_query.data in db.select_account_name(user_id):
-            await Parsers_use.parsers_use_1.set()
+            await Account_use.account_use_1.set()
             number_group = db.select_number_account(user_id, callback_query.data)
             await state.update_data(number_group=number_group)
             channels = db.select_chats_account(user_id, callback_query.data)
@@ -628,14 +631,14 @@ async def accounts_button_1_button(callback_query: types.CallbackQuery, state: F
                 buttons_next = types.InlineKeyboardButton(text=cfg.next_page, callback_data="next_page")
                 buttons_old = types.InlineKeyboardButton(text=cfg.old_page, callback_data="old_page")
                 markup_inline.row(buttons_old, buttons_next)
-            if db.check_date_tarife(user_id, callback_query.data) is None:
+            if db.check_date_tarife_account(user_id, callback_query.data) is None:
                 pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels')
                 markup_inline.add(pay_money_buttons)
             change_keywords = types.InlineKeyboardButton(text=cfg.change_keyword_button, callback_data='change_keyword')
             back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels')
             markup_inline.add(change_keywords)
             markup_inline.add(back_channels)
-            await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+            await callback_query.message.edit_caption(caption=cfg.account_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
         elif callback_query.data == "back_sostoyanie":
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
             btn_inline1 = types.InlineKeyboardButton(cfg.account_button, callback_data='accounts_button')

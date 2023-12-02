@@ -370,3 +370,9 @@ class Data:
             self.cursor.execute("SELECT chats FROM autoposting_groups WHERE id=%s AND group_name=%s", (id, group_name,))
             a = self.cursor.fetchone()[0]
             return a
+
+    def check_date_tarife_account(self, id, group_name):
+        with self.connect:
+            self.cursor.execute("SELECT data_end FROM autoposting_groups WHERE id=%s AND group_name=%s", (id, group_name,))
+            a = self.cursor.fetchone()[0]
+            return a
