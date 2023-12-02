@@ -588,7 +588,7 @@ async def accounts_button_1_button(callback_query: types.CallbackQuery, state: F
         user_id = callback_query.from_user.id
         if callback_query.data == "back_autoposting_menu":
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
-            markup_inline.add(types.InlineKeyboardButton(cfg.account_button, callback_data='account_button'))
+            markup_inline.add(types.InlineKeyboardButton(cfg.account_button, callback_data='accounts_button'))
             await callback_query.message.edit_caption(caption=cfg.autoposting_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
             await state.finish()
         elif callback_query.data == "add_account":
