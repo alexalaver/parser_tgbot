@@ -1066,7 +1066,7 @@ async def process_phone(message: types.Message, state: FSMContext):
             phone = data.get("phone")
             phone_code_hash = data.get("phone_code_hash")
             try:
-                await client.sign_in(phone, code, phone_code_hash=phone_code_hash)
+                await client.sign_in(phone, int(code), phone_code_hash=phone_code_hash)
                 string_session = client.session.save()
                 await state.update_data(string_session=string_session)
                 await Create_account_autoposting.create_autoposting_2.set()
