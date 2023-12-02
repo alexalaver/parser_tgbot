@@ -319,6 +319,12 @@ class Add_chat_ids(StatesGroup):
     add_ids_1 = State()
     add_ids_2 = State()
 
+class Accounts_button(StatesGroup):
+    select_accounts_button = State()
+
+class Parser_groups_button(StatesGroup):
+    select_groups_button = State()
+
 async def profile(message):
     user_id = message.from_user.id
     markup_inline = types.InlineKeyboardMarkup(row_width=1, )
@@ -334,16 +340,8 @@ async def supports_send(message):
 
 async def parsers_send(message):
     markup_inline = types.InlineKeyboardMarkup(row_width=1)
-    user_id = message.from_user.id
-    group_names = db.select_group_name(user_id)
-    max_buttons = 5
-    for i in range(min(max_buttons, len(group_names))):
-        button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
-        markup_inline.add(button)
-
-    btn_inline1 = types.InlineKeyboardButton(cfg.groups_add_button, callback_data='groups_add_button')
-    markup_inline.add(btn_inline1)
-    await message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.parser_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+    markup_inline.add(types.InlineKeyboardButton(cfg.groups_button, callback_data='groups_parser'))
+    await message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.parser_groups_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
 
 async def autoposting_send(message):
     markup_inline = types.InlineKeyboardMarkup(row_width=1)
@@ -480,7 +478,49 @@ async def rembalance_user(message: types.Message):
 async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContext):
     if callback_query.message.chat.type == types.ChatType.PRIVATE:
         user_id = callback_query.from_user.id
-        if callback_query.data == "groups_add_button":
+        if callback_query.data == "accounts_button":
+            markup_inline = types.InlineKeyboardMarkup(row_width=1)
+            user_id = callback_query.from_user.id
+            group_names = db.select_autoposting_group_name(user_id)
+            max_buttons = 5
+            for i in range(min(max_buttons, len(group_names))):
+                button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
+                markup_inline.add(button)
+            btn1_inline = types.InlineKeyboardButton(cfg.add_account_button, callback_data="add_account")
+            btn2_inline = types.InlineKeyboardButton(cfg.back_button, callback_data="back_autoposting_menu")
+            markup_inline.add(btn1_inline, btn2_inline)
+            text = cfg.account_menu_text
+            await callback_query.message.edit_caption(caption=text, reply_markup=markup_inline)
+            await Accounts_button.select_accounts_button.set()
+        elif callback_query.data == "groups_parser":
+            markup_inline = types.InlineKeyboardMarkup(row_width=1)
+            group_names = db.select_group_name(user_id)
+            max_buttons = 5
+            for i in range(min(max_buttons, len(group_names))):
+                button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
+                markup_inline.add(button)
+
+            btn_inline1 = types.InlineKeyboardButton(cfg.groups_add_button, callback_data='groups_add_button')
+            btn_inline2 = types.InlineKeyboardButton(cfg.back_button, callback_data='back_groups_parser')
+            markup_inline.add(btn_inline1, btn_inline2)
+            await callback_query.message.edit_caption(cfg.parser_text, reply_markup=markup_inline)
+            await Parser_groups_button.select_groups_button.set()
+        elif callback_query.data == "menu_after_pay":
+            markup_inline = types.InlineKeyboardMarkup(row_width=1)
+            btn_inline1 = types.InlineKeyboardButton(cfg.groups_button, callback_data='groups_parser')
+            markup_inline.add(btn_inline1)
+            await callback_query.message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.parser_groups_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+
+@dp.callback_query_handler(state=Parser_groups_button.select_groups_button)
+async def parser_group_button(callback_query: types.CallbackQuery, state: FSMContext):
+    if callback_query.message.chat.type == types.ChatType.PRIVATE:
+        user_id = callback_query.from_user.id
+        if callback_query.data == "back_groups_parser":
+            markup_inline = types.InlineKeyboardMarkup(row_width=1)
+            markup_inline.add(types.InlineKeyboardButton(cfg.groups_button, callback_data='groups_parser'))
+            await callback_query.message.edit_caption(caption=cfg.parser_groups_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+            await state.finish()
+        elif callback_query.data == "groups_add_button":
             number_group = db.check_number_group(user_id)
             if int(number_group) < 5:
                 markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
@@ -523,31 +563,34 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
             markup_inline.add(change_keywords)
             markup_inline.add(back_channels)
             await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
-        elif callback_query.data == "menu_after_pay":
+        elif callback_query.data == "back_sostoyanie":
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
-            user_id = callback_query.from_user.id
-            group_names = db.select_group_name(user_id)
-            max_buttons = 5
-            for i in range(min(max_buttons, len(group_names))):
-                button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
-                markup_inline.add(button)
-
-            btn_inline1 = types.InlineKeyboardButton(cfg.groups_add_button, callback_data='groups_add_button')
+            btn_inline1 = types.InlineKeyboardButton(cfg.groups_button, callback_data='groups_parser')
             markup_inline.add(btn_inline1)
-            await callback_query.message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.parser_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
-        elif callback_query.data == "accounts_button":
+            await callback_query.message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.parser_groups_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+            await state.reset_state()
+
+@dp.message_handler(state=Parser_groups_button.select_groups_button)
+async def parsers_groups_1_text(message: types.Message, state: FSMContext):
+    if message.chat.type == types.ChatType.PRIVATE:
+        if message.text == "/cancel":
+            await message.answer(cfg.cancel_sostoyanie, parse_mode=types.ParseMode.MARKDOWN)
+            await state.reset_state()
+        else:
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
-            user_id = callback_query.from_user.id
-            group_names = db.select_autoposting_group_name(user_id)
-            max_buttons = 5
-            for i in range(min(max_buttons, len(group_names))):
-                button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
-                markup_inline.add(button)
-            btn1_inline = types.InlineKeyboardButton(cfg.add_account_button, callback_data="add_account")
-            btn2_inline = types.InlineKeyboardButton(cfg.back_button, callback_data="back_autoposting_menu")
-            markup_inline.add(btn1_inline, btn2_inline)
-            text = cfg.account_menu_text
-            await callback_query.message.edit_caption(caption=text, reply_markup=markup_inline)
+            btn1_inline = types.InlineKeyboardButton(cfg.back_button, callback_data="back_sostoyanie")
+            markup_inline.add(btn1_inline)
+            await message.answer(cfg.error_parsers_texts, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+
+@dp.callback_query_handler(state=Accounts_button.select_accounts_button)
+async def accounts_button_1_button(callback_query: types.CallbackQuery, state: FSMContext):
+    if callback_query.message.chat.type == types.ChatType.PRIVATE:
+        user_id = callback_query.from_user.id
+        if callback_query.data == "back_autoposting_menu":
+            markup_inline = types.InlineKeyboardMarkup(row_width=1)
+            markup_inline.add(types.InlineKeyboardButton(cfg.account_button, callback_data='account_button'))
+            await callback_query.message.edit_caption(caption=cfg.autoposting_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+            await state.finish()
         elif callback_query.data == "add_account":
             number_group = db.check_numbers_autoposting_group(user_id)
             if int(number_group) < 5:
@@ -560,7 +603,57 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 await callback_query.message.answer(cfg.create_account_autoposting_2, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
             else:
                 await callback_query.answer(cfg.error_autoposting_group_5, show_alert=True)
+        elif callback_query.data in db.select_account_name(user_id):
+            await Parsers_use.parsers_use_1.set()
+            number_group = db.select_number_account(user_id, callback_query.data)
+            await state.update_data(number_group=number_group)
+            channels = db.select_chats_account(user_id, callback_query.data)
+            markup_inline = types.InlineKeyboardMarkup(row_width=2)
+            channels_count = len(channels)
+            channels_page = fnc.get_category(channels_count)
+            page_here = 1
+            from_page = 0
+            before_page = 10
+            await state.update_data(channels_count=channels_count)
+            await state.update_data(channels_page=channels_page)
+            await state.update_data(page_here=page_here)
+            await state.update_data(from_page=from_page)
+            await state.update_data(before_page=before_page)
+            for channel in channels[from_page:before_page]:
+                buttons = types.InlineKeyboardButton(text=channel, callback_data=channel)
+                markup_inline.row(buttons)
+            buttons_count = types.InlineKeyboardButton(text=f"Страница {page_here}/{channels_page} 📄", callback_data="page")
+            markup_inline.add(buttons_count)
+            if channels_count > 10:
+                buttons_next = types.InlineKeyboardButton(text=cfg.next_page, callback_data="next_page")
+                buttons_old = types.InlineKeyboardButton(text=cfg.old_page, callback_data="old_page")
+                markup_inline.row(buttons_old, buttons_next)
+            if db.check_date_tarife(user_id, callback_query.data) is None:
+                pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels')
+                markup_inline.add(pay_money_buttons)
+            change_keywords = types.InlineKeyboardButton(text=cfg.change_keyword_button, callback_data='change_keyword')
+            back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels')
+            markup_inline.add(change_keywords)
+            markup_inline.add(back_channels)
+            await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+        elif callback_query.data == "back_sostoyanie":
+            markup_inline = types.InlineKeyboardMarkup(row_width=1)
+            btn_inline1 = types.InlineKeyboardButton(cfg.account_button, callback_data='accounts_button')
+            markup_inline.add(btn_inline1)
+            await callback_query.message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.autoposting_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+            await state.reset_state()
 
+@dp.message_handler(state=Accounts_button.select_accounts_button)
+async def accounts_button_1_text(message: types.Message, state: FSMContext):
+    if message.chat.type == types.ChatType.PRIVATE:
+        if message.text == "/cancel":
+            await message.answer(cfg.cancel_sostoyanie, parse_mode=types.ParseMode.MARKDOWN)
+            await state.reset_state()
+        else:
+            markup_inline = types.InlineKeyboardMarkup(row_width=1)
+            btn1_inline = types.InlineKeyboardButton(cfg.back_button, callback_data="back_sostoyanie")
+            markup_inline.add(btn1_inline)
+            await message.answer(cfg.error_autoposting_texts, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
 
 @dp.callback_query_handler(state=Parsers_use.parsers_use_1)
 async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMContext):
@@ -683,13 +776,7 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
         elif callback_query.data == "back_channels":
             await state.reset_state()
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
-            group_names = db.select_group_name(user_id)
-            max_buttons = 5
-            for i in range(min(max_buttons, len(group_names))):
-                button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
-                markup_inline.add(button)
-
-            btn_inline1 = types.InlineKeyboardButton(cfg.groups_add_button, callback_data='groups_add_button')
+            btn_inline1 = types.InlineKeyboardButton(cfg.parser_groups_text, callback_data='groups_parser')
             markup_inline.add(btn_inline1)
             await callback_query.message.edit_caption(caption=cfg.parser_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
         elif callback_query.data == "pay_money_channels":
@@ -749,16 +836,9 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
             await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
         elif callback_query.data == "back_sostoyanie":
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
-            user_id = callback_query.from_user.id
-            group_names = db.select_group_name(user_id)
-            max_buttons = 5
-            for i in range(min(max_buttons, len(group_names))):
-                button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
-                markup_inline.add(button)
-
-            btn_inline1 = types.InlineKeyboardButton(cfg.groups_add_button, callback_data='groups_add_button')
+            btn_inline1 = types.InlineKeyboardButton(cfg.groups_button, callback_data='groups_parser')
             markup_inline.add(btn_inline1)
-            await callback_query.message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.parser_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+            await callback_query.message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.parser_groups_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
             await state.reset_state()
         elif callback_query.data == "change_keyword":
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
@@ -1048,7 +1128,7 @@ async def process_phone(message: types.Message, state: FSMContext):
                 await state.update_data(phone=phone)
                 await state.update_data(phone_code_hash=phone_code_hash)
                 db.update_states_sms(user_id, 2)
-                await message.reply("Теперь отправьте код, который вы получили от Telegram")
+                await message.reply("Теперь отправьте код, который вы получили от Telegram.\n\nВажно! Пожалуйста, НЕ присылай мне код как есть (иначе он сразу перестанет действовать). Пришли мне его, разделив цифры пробелами или любыми другими символами. Например, 123 45 или 1 2345 или 123a45, где 12345 - это сам код, который ты получил от Телеграма.")
             except Exception as e:
                 logging.error(f"Ошибка при отправке кода: {e}")
                 await message.reply("Произошла ошибка при отправке кода, пожалуйста, попробуйте еще раз ввести номер телефона:")

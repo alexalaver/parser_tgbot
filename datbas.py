@@ -308,12 +308,13 @@ class Data:
 
     def check_numbers_account_autoposting(self):
         with self.connect:
-            self.cursor.execute("SELECT number_group FROM autoposting_groups ORDER BY number_group DESC LIMIT 1;")
-            a = self.cursor.fetchone()
+            self.cursor.execute("SELECT id FROM autoposting_groups WHERE id=%s", (id,))
+            a = self.cursor.fetchall()
+            b = [row for row in a]
             if a is None:
                 return 0
             else:
-                return a[0]
+                return len(b)
 
     def add_autoposting_account(self, id, number_group, number_phone, string_session, chats, group_name, post, time_betw, date_betw):
         with self.connect:
@@ -342,7 +343,7 @@ class Data:
 
     def select_all_channels_autoposting_group(self):
         with self.connect:
-            self.cursor.execute("SELECT * FROM autoposting_groups") # WHERE data_end IS NOT NULL
+            self.cursor.execute("SELECT * FROM autoposting_groups")
             a = self.cursor.fetchall()
             return a
 
@@ -350,3 +351,22 @@ class Data:
         with self.connect:
             self.cursor.execute("UPDATE autoposting_groups SET date_betw=%s WHERE number_group=%s", (data, number_group,))
             self.connect.commit()
+
+    def select_account_name(self, id):
+        with self.connect:
+            self.cursor.execute("SELECT group_name FROM autoposting_groups WHERE id=%s", (id,))
+            a = self.cursor.fetchall()
+            result_list = [item[0] for item in a]
+            return result_list
+
+    def select_number_account(self, id, group_name):
+        with self.connect:
+            self.cursor.execute("SELECT number_group FROM autoposting_groups WHERE id=%s AND group_name=%s", (id, group_name,))
+            a = self.cursor.fetchone()[0]
+            return a
+
+    def select_chats_account(self, id, group_name):
+        with self.connect:
+            self.cursor.execute("SELECT chats FROM autoposting_groups WHERE id=%s AND group_name=%s", (id, group_name,))
+            a = self.cursor.fetchone()[0]
+            return a
