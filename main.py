@@ -1146,7 +1146,7 @@ async def autoposting_time_betw(message: types.Message, state: FSMContext):
         else:
             if int(message.text):
                 if int(message.text) >= 60:
-                    current_time = datetime.now()
+                    current_time = datetime.datetime.now()
                     time_in_60_minutes = current_time + timedelta(minutes=60)
                     await state.update_data(time_betw=int(message.text))
                     await state.update_data(date_betw=time_in_60_minutes)
