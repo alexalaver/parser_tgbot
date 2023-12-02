@@ -871,6 +871,207 @@ async def parsers_use_1_text(message: types.Message, state: FSMContext):
             markup_inline.add(btn1_inline)
             await message.answer(cfg.error_parsers_texts, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
 
+@dp.callback_query_handler(state=Account_use.account_use_1)
+async def account_use_1_button(callback_query: types.CallbackQuery, state: FSMContext):
+    if callback_query.message.chat.type == types.ChatType.PRIVATE:
+        user_id = callback_query.from_user.id
+        data = await state.get_data()
+        number_group = data.get('number_group')
+        channels = db.select_chats_account_with_number(number_group)
+        check_tarife = db.check_date_tarife_account_for_number(number_group)
+        group_name = db.select_account_name_for_number_group(user_id, number_group)
+        channels_count_all = len(channels)
+        channels_count = data.get("channels_count")
+        channels_page = data.get("channels_page")
+        page_here = data.get("page_here")
+        from_page = data.get("from_page")
+        before_page = data.get("before_page")
+        if callback_query.data in channels:
+            if check_tarife is None:
+                await callback_query.answer(text=cfg.error_oplata, show_alert=True)
+            else:
+                current_data = datetime.datetime.now()
+                formated_check_date_tarife = datetime.datetime.strptime(check_tarife, "%Y-%m-%d %H:%M:%S")
+                if current_data >= formated_check_date_tarife:
+                    db.delete_old_tariffe(user_id, number_group)
+                    await callback_query.answer(text=cfg.error_oplata, show_alert=True)
+                else:
+                    channel_name = callback_query.data
+                    if channel_name[-1] == "✅":
+                        all_channels = db.select_chats_account_with_number(number_group)
+                        new_callback = channel_name[:-1] + '❌'
+                        new_channels = [new_callback if item == channel_name else item for item in all_channels]
+                        db.update_all_chats_account(number_group, new_channels)
+                    elif channel_name[-1] == "❌":
+                        all_channels = db.select_chats_account_with_number(number_group)
+                        new_callback = channel_name[:-1] + '✅'
+                        new_channels = [new_callback if item == channel_name else item for item in all_channels]
+                        db.update_all_chats_account(number_group, new_channels)
+                    elif channel_name[-1] == "⏳":
+                        await callback_query.answer(cfg.error_dostup_chat, show_alert=True)
+                    channels = db.select_chats_account_with_number(number_group)
+                    markup_inline = types.InlineKeyboardMarkup(row_width=2)
+                    for channel in channels[from_page:before_page]:
+                        buttons = types.InlineKeyboardButton(text=channel, callback_data=channel)
+                        markup_inline.row(buttons)
+                    buttons_count = types.InlineKeyboardButton(text=f"Страница {page_here}/{channels_page} 📄", callback_data="page")
+                    markup_inline.add(buttons_count)
+                    if channels_count_all > 10:
+                        buttons_next = types.InlineKeyboardButton(text=cfg.next_page, callback_data="next_page")
+                        buttons_old = types.InlineKeyboardButton(text=cfg.old_page, callback_data="old_page")
+                        markup_inline.row(buttons_old, buttons_next)
+                    if db.check_date_tarife_for_number(number_group) is None:
+                        pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels')
+                        markup_inline.add(pay_money_buttons)
+                    change_keywords = types.InlineKeyboardButton(text=cfg.change_keyword_button, callback_data='change_keyword')
+                    back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels')
+                    markup_inline.add(change_keywords)
+                    markup_inline.add(back_channels)
+                    await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+        elif callback_query.data == "next_page":
+            if channels_page == page_here:
+                await callback_query.answer(cfg.error_page_next, show_alert=True)
+            else:
+                channels = db.select_chats_account_with_number(number_group)
+                markup_inline = types.InlineKeyboardMarkup(row_width=2)
+                page_here = page_here + 1
+                await state.update_data(page_here=page_here)
+                await state.update_data(channels_count=channels_count)
+                from_page = from_page + 10
+                before_page = before_page + 10
+                await state.update_data(from_page=from_page)
+                await state.update_data(before_page=before_page)
+                for channel in channels[from_page:before_page]:
+                    buttons = types.InlineKeyboardButton(text=channel, callback_data=channel)
+                    markup_inline.row(buttons)
+                buttons_count = types.InlineKeyboardButton(text=f"Страница {page_here}/{channels_page} 📄", callback_data="page")
+                markup_inline.add(buttons_count)
+                if channels_count_all > 10:
+                    buttons_next = types.InlineKeyboardButton(text=cfg.next_page, callback_data="next_page")
+                    buttons_old = types.InlineKeyboardButton(text=cfg.old_page, callback_data="old_page")
+                    markup_inline.row(buttons_old, buttons_next)
+                if db.check_date_tarife_account_for_number(number_group) is None:
+                    pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels')
+                    markup_inline.add(pay_money_buttons)
+                change_keywords = types.InlineKeyboardButton(text=cfg.change_keyword_button, callback_data='change_keyword')
+                back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels')
+                markup_inline.add(change_keywords)
+                markup_inline.add(back_channels)
+                await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+        elif callback_query.data == "old_page":
+            print(f"{channels_count}\n{page_here}\n{from_page}\n{before_page}")
+            if page_here == 1:
+                await callback_query.answer(cfg.error_page_old, show_alert=True)
+            else:
+                channels = db.select_chats_account_with_number(number_group)
+                markup_inline = types.InlineKeyboardMarkup(row_width=2)
+                page_here = page_here - 1
+                before_page = before_page - 10
+                from_page = from_page - 10
+                await state.update_data(from_page=from_page)
+                await state.update_data(before_page=before_page)
+                await state.update_data(page_here=page_here)
+                await state.update_data(channels_count=channels_count)
+                for channel in channels[from_page:before_page]:
+                    buttons = types.InlineKeyboardButton(text=channel, callback_data=channel)
+                    markup_inline.row(buttons)
+                buttons_count = types.InlineKeyboardButton(text=f"Страница {page_here}/{channels_page} 📄", callback_data="page")
+                markup_inline.add(buttons_count)
+                if channels_count_all > 10:
+                    buttons_next = types.InlineKeyboardButton(text=cfg.next_page, callback_data="next_page")
+                    buttons_old = types.InlineKeyboardButton(text=cfg.old_page, callback_data="old_page")
+                    markup_inline.row(buttons_old, buttons_next)
+                if db.check_date_tarife_account_for_number(number_group) is None:
+                    pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels')
+                    markup_inline.add(pay_money_buttons)
+                change_keywords = types.InlineKeyboardButton(text=cfg.change_keyword_button,callback_data='change_keyword')
+                back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels')
+                markup_inline.add(change_keywords)
+                markup_inline.add(back_channels)
+                await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+        elif callback_query.data == "back_channels":
+            markup_inline = types.InlineKeyboardMarkup(row_width=1)
+            user_id = callback_query.from_user.id
+            group_names = db.select_autoposting_group_name(user_id)
+            max_buttons = 5
+            for i in range(min(max_buttons, len(group_names))):
+                button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
+                markup_inline.add(button)
+            btn1_inline = types.InlineKeyboardButton(cfg.add_account_button, callback_data="add_account")
+            btn2_inline = types.InlineKeyboardButton(cfg.back_button, callback_data="back_autoposting_menu")
+            markup_inline.add(btn1_inline, btn2_inline)
+            text = cfg.account_menu_text
+            await callback_query.message.edit_caption(caption=text, reply_markup=markup_inline)
+            await Accounts_button.select_accounts_button.set()
+        elif callback_query.data == "pay_money_channels":
+            markup_inline = types.InlineKeyboardMarkup(row_width=1)
+            btn_inline1 = types.InlineKeyboardButton(cfg.confirm_oplata, callback_data='confirm_oplata')
+            btn_inline2 = types.InlineKeyboardButton(cfg.back_button, callback_data='back_oplata')
+            markup_inline.add(btn_inline1, btn_inline2)
+            channels_len = len(channels)
+            money_oplata = str(5 * int(channels_len))
+            await callback_query.message.edit_caption(caption=cfg.oplata_chatov(channels_len, money_oplata), reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+        elif callback_query.data == "confirm_oplata":
+            balance = db.check_balance(user_id)
+            channels_len = len(channels)
+            money_oplata = 5 * int(channels_len)
+            if balance >= money_oplata:
+                channels = db.select_chats_account_with_number(number_group)
+                new_channels = [newer[:-2] + " ✅" for newer in channels]
+                db.update_all_chats_account(number_group, new_channels)
+                db.update_balance(user_id, money_oplata)
+                channels_len = len(channels)
+                current_data = datetime.datetime.now()
+                new_date = current_data + datetime.timedelta(days=30)
+                formatted_date_new = new_date.strftime("%Y-%m-%d %H:%M:%S")
+                db.add_date_tariffe_autoposting(user_id, formatted_date_new, number_group)
+                markup_inline = types.InlineKeyboardMarkup(row_width=1)
+                btn_inline1 = types.InlineKeyboardButton(cfg.menu_button, callback_data='menu_after_pay_autoposting')
+                markup_inline.add(btn_inline1)
+                await state.finish()
+                await callback_query.message.delete()
+                await callback_query.message.answer(text=cfg.tariffe_correct(group_name, channels_len, formatted_date_new), reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+            else:
+                await callback_query.answer(text=cfg.tariffe_error, show_alert=True)
+        elif callback_query.data == "back_oplata":
+            channels = db.select_chats_account_with_number(number_group)
+            markup_inline = types.InlineKeyboardMarkup(row_width=2)
+            for channel in channels[from_page:before_page]:
+                buttons = types.InlineKeyboardButton(text=channel, callback_data=channel)
+                markup_inline.row(buttons)
+            buttons_count = types.InlineKeyboardButton(text=f"Страница {page_here}/{channels_page} 📄", callback_data="page")
+            markup_inline.add(buttons_count)
+            if channels_count_all > 10:
+                buttons_next = types.InlineKeyboardButton(text=cfg.next_page, callback_data="next_page")
+                buttons_old = types.InlineKeyboardButton(text=cfg.old_page, callback_data="old_page")
+                markup_inline.row(buttons_old, buttons_next)
+            if db.check_date_tarife_account_for_number(number_group) is None:
+                pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels')
+                markup_inline.add(pay_money_buttons)
+            change_keywords = types.InlineKeyboardButton(text=cfg.change_keyword_button, callback_data='change_keyword')
+            back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels')
+            markup_inline.add(change_keywords)
+            markup_inline.add(back_channels)
+            await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+        elif callback_query.data == "back_sostoyanie":
+            markup_inline = types.InlineKeyboardMarkup(row_width=1)
+            btn_inline1 = types.InlineKeyboardButton(cfg.account_button, callback_data='accounts_button')
+            markup_inline.add(btn_inline1)
+            await callback_query.message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.autoposting_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+            await state.reset_state()
+
+@dp.message_handler(state=Account_use.account_use_1)
+async def account_use_1_texts(message: types.Message, state: FSMContext):
+    if message.chat.type == types.ChatType.PRIVATE:
+        if message.text == "/cancel":
+            await message.answer(cfg.cancel_sostoyanie, parse_mode=types.ParseMode.MARKDOWN)
+            await state.reset_state()
+        else:
+            markup_inline = types.InlineKeyboardMarkup(row_width=1)
+            btn1_inline = types.InlineKeyboardButton(cfg.back_button, callback_data="back_sostoyanie")
+            markup_inline.add(btn1_inline)
+            await message.answer(cfg.error_autoposting_texts, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+
 @dp.message_handler(state=Change_keyword.change_keyword_1)
 async def change_keyword_1_func(message: types.Message, state: FSMContext):
     if message.chat.type == types.ChatType.PRIVATE:

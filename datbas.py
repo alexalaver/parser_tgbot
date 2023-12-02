@@ -376,3 +376,34 @@ class Data:
             self.cursor.execute("SELECT data_end FROM autoposting_groups WHERE id=%s AND group_name=%s", (id, group_name,))
             a = self.cursor.fetchone()[0]
             return a
+
+    def select_chats_account_with_number(self, number_group):
+        with self.connect:
+            self.cursor.execute("SELECT channels FROM autoposting_groups WHERE number_group=%s", (number_group,))
+            a = self.cursor.fetchone()[0]
+            return a
+
+    def check_date_tarife_account_for_number(self, number_group):
+        with self.connect:
+            self.cursor.execute("SELECT data_end FROM autoposting_groups WHERE number_group=%s", (number_group,))
+            a = self.cursor.fetchone()
+            if a is None:
+                return None
+            else:
+                return a[0]
+
+    def select_account_name_for_number_group(self, id, number_group):
+        with self.connect:
+            self.cursor.execute("SELECT group_name FROM autoposting_groups WHERE id=%s AND number_group=%s", (id, number_group,))
+            a = self.cursor.fetchone()[0]
+            return a
+
+    def update_all_chats_account(self, number_group, channels):
+        with self.connect:
+            self.cursor.execute("UPDATE autoposting_groups SET channels=%s WHERE number_group=%s", (channels, number_group,))
+            self.connect.commit()
+
+    def add_date_tariffe_autoposting(self, id, data, number_group):
+        with self.connect:
+            self.cursor.execute("UPDATE autoposting_groups SET data_end=%s WHERE id=%s AND number_group=%s", (data, id, number_group,))
+            self.connect.commit()
