@@ -379,7 +379,7 @@ class Data:
 
     def select_chats_account_with_number(self, number_group):
         with self.connect:
-            self.cursor.execute("SELECT channels FROM autoposting_groups WHERE number_group=%s", (number_group,))
+            self.cursor.execute("SELECT chats FROM autoposting_groups WHERE number_group=%s", (number_group,))
             a = self.cursor.fetchone()[0]
             return a
 
@@ -400,7 +400,7 @@ class Data:
 
     def update_all_chats_account(self, number_group, channels):
         with self.connect:
-            self.cursor.execute("UPDATE autoposting_groups SET channels=%s WHERE number_group=%s", (channels, number_group,))
+            self.cursor.execute("UPDATE autoposting_groups SET chats=%s WHERE number_group=%s", (channels, number_group,))
             self.connect.commit()
 
     def add_date_tariffe_autoposting(self, id, data, number_group):
