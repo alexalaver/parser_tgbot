@@ -1060,12 +1060,12 @@ async def process_phone(message: types.Message, state: FSMContext):
                 logging.error(f"Ошибка при отправке кода: {e}")
                 await message.reply("Произошла ошибка при отправке кода, пожалуйста, попробуйте еще раз ввести номер телефона:")
         elif db.get_states_sms(user_id) == 2:
-            code = message.text
+            code_spaces = message.text
+            code = code_spaces.replace(" ", "")
             data = await state.get_data()
             phone = data.get("phone")
             phone_code_hash = data.get("phone_code_hash")
             try:
-
                 await client.sign_in(phone, code, phone_code_hash=phone_code_hash)
                 string_session = client.session.save()
                 await state.update_data(string_session=string_session)
@@ -1239,7 +1239,7 @@ async def other(message: types.Message):
 async def on_startup(_):
     asyncio.create_task(search_and_forward())
     asyncio.create_task(search_and_forward_close_group())
-    asyncio.create_task(autoposting_forward())
+    # asyncio.create_task(autoposting_forward())
 
 if __name__ == "__main__":
     executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
