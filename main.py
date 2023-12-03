@@ -656,10 +656,8 @@ async def Button_account_post(callback_query: types.CallbackQuery, state: FSMCon
         user_id = callback_query.from_user.id
         if callback_query.data == "back_autoposting_account":
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
-            data = await state.get_data()
-            number_account = data.get("number_account")
             user_id = callback_query.from_user.id
-            group_names = db.select_autoposting_post_name_for_number(user_id, number_account)
+            group_names = db.select_autoposting_group_name(user_id)
             max_buttons = 5
             for i in range(min(max_buttons, len(group_names))):
                 button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
@@ -667,8 +665,7 @@ async def Button_account_post(callback_query: types.CallbackQuery, state: FSMCon
             btn1_inline = types.InlineKeyboardButton(cfg.add_account_button, callback_data="add_account")
             btn2_inline = types.InlineKeyboardButton(cfg.back_button, callback_data="back_autoposting_menu")
             markup_inline.add(btn1_inline, btn2_inline)
-            text = cfg.account_menu_text
-            await callback_query.message.edit_caption(caption="аккаунты", reply_markup=markup_inline)
+            await callback_query.message.edit_caption(caption=cfg.account_menu_text, reply_markup=markup_inline)
             await Accounts_button.select_accounts_button.set()
         elif callback_query.data in db.select_autoposting_post_name(user_id):
             await Account_use.account_use_1.set()
