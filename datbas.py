@@ -316,9 +316,9 @@ class Data:
             else:
                 return len(b)
 
-    def add_autoposting_account(self, id, number_group, number_phone, string_session, chats, group_name, post, time_betw, date_betw):
+    def add_autoposting_account(self, id, number_group, number_phone, string_session, group_name):
         with self.connect:
-            self.cursor.execute("INSERT INTO autoposting_groups(id, number_group, number_phone, string_session, chats, group_name, post, time_betw, date_betw) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)", (id, number_group, number_phone, string_session, chats, group_name, post, time_betw, date_betw))
+            self.cursor.execute("INSERT INTO autoposting_groups(id, number_group, number_phone, string_session, group_name) VALUES(%s, %s, %s, %s, %s)", (id, number_group, number_phone, string_session, group_name))
             self.connect.commit()
 
     def sms_get_add(self, id):
@@ -392,15 +392,15 @@ class Data:
             else:
                 return a[0]
 
-    def select_account_name_for_number_group(self, id, number_group):
+    def select_account_name_for_number_group(self, id, number_post):
         with self.connect:
-            self.cursor.execute("SELECT group_name FROM autoposting_groups WHERE id=%s AND number_group=%s", (id, number_group,))
+            self.cursor.execute("SELECT post FROM autoposting_post WHERE id=%s AND number_post=%s", (id, number_post,))
             a = self.cursor.fetchone()[0]
             return a
 
-    def update_all_chats_account(self, number_group, channels):
+    def update_all_chats_account(self, number_post, channels):
         with self.connect:
-            self.cursor.execute("UPDATE autoposting_groups SET chats=%s WHERE number_group=%s", (channels, number_group,))
+            self.cursor.execute("UPDATE autoposting_post SET chats=%s WHERE number_post=%s", (channels, number_post,))
             self.connect.commit()
 
     def add_date_tariffe_autoposting(self, id, data, number_group):
@@ -420,3 +420,37 @@ class Data:
             self.cursor.execute("SELECT number_post FROM autoposting_post WHERE id=%s AND post=%s", (id, account_name,))
             a = self.cursor.fetchone()[0]
             return a
+
+    def select_account_number(self, id, group_name):
+        with self.connect:
+            self.cursor.execute("SELECT number_group FROM autoposting_groups WHERE id=%s AND group_name=%s", (id, group_name,))
+            a = self.cursor.fetchall()
+            return a[0]
+
+    def select_autoposting_post_name_for_number(self, id, number_account):
+        with self.connect:
+            self.cursor.execute("SELECT post FROM autoposting_post WHERE id=%s AND number_account=%s", (id, number_account,))
+            a = self.cursor.fetchall()
+            result_list = [item[0] for item in a]
+            return result_list
+
+    def check_numbers_account_post(self):
+        with self.connect:
+            self.cursor.execute("SELECT id FROM autoposting_post WHERE id=%s", (id,))
+            a = self.cursor.fetchall()
+            b = [row for row in a]
+            if a is None:
+                return 0
+            else:
+                return len(b)
+
+    def add_post_account(self, id, post, string_session, chats, time_betw, number_post):
+        with self.connect:
+            self.cursor.execute("INSERT INTO autoposting_post(id, post, string_session, chats, time_betw, number_post) VALUES(%s, %s, %s, %s, %s, %s)", (id, post, string_session, chats, time_betw, number_post,))
+            self.connect.commit()
+
+    def get_string_session(self, number_account):
+        with self.connect:
+            self.cursor.execute("SELECT string_session FROM autoposting_groups WHERE number_group=%s", (number_account,))
+            a = self.cursor.fetchone()
+            return a[0]
