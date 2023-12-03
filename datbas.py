@@ -365,27 +365,27 @@ class Data:
             a = self.cursor.fetchone()[0]
             return a
 
-    def select_chats_account(self, id, group_name):
+    def select_chats_post(self, id, post_id):
         with self.connect:
-            self.cursor.execute("SELECT chats FROM autoposting_groups WHERE id=%s AND group_name=%s", (id, group_name,))
+            self.cursor.execute("SELECT chats FROM autoposting_post WHERE id=%s AND post=%s", (id, post_id,))
             a = self.cursor.fetchone()[0]
             return a
 
-    def check_date_tarife_account(self, id, group_name):
+    def check_date_tarife_account(self, id, post_id):
         with self.connect:
-            self.cursor.execute("SELECT data_end FROM autoposting_groups WHERE id=%s AND group_name=%s", (id, group_name,))
+            self.cursor.execute("SELECT data_end FROM autoposting_post WHERE id=%s AND post=%s", (id, post_id,))
             a = self.cursor.fetchone()[0]
             return a
 
-    def select_chats_account_with_number(self, number_group):
+    def select_chats_account_with_number(self, number_post):
         with self.connect:
-            self.cursor.execute("SELECT chats FROM autoposting_groups WHERE number_group=%s", (number_group,))
+            self.cursor.execute("SELECT chats FROM autoposting_post WHERE number_post=%s", (number_post,))
             a = self.cursor.fetchone()[0]
             return a
 
-    def check_date_tarife_account_for_number(self, number_group):
+    def check_date_tarife_account_for_number(self, number_post):
         with self.connect:
-            self.cursor.execute("SELECT data_end FROM autoposting_groups WHERE number_group=%s", (number_group,))
+            self.cursor.execute("SELECT data_end FROM autoposting_post WHERE number_post=%s", (number_post,))
             a = self.cursor.fetchone()
             if a is None:
                 return None
@@ -407,3 +407,16 @@ class Data:
         with self.connect:
             self.cursor.execute("UPDATE autoposting_groups SET data_end=%s WHERE id=%s AND number_group=%s", (data, id, number_group,))
             self.connect.commit()
+
+    def select_autoposting_post_name(self, id):
+        with self.connect:
+            self.cursor.execute("SELECT post FROM autoposting_post WHERE id=%s", (id,))
+            a = self.cursor.fetchall()
+            result_list = [item[0] for item in a]
+            return result_list
+
+    def select_number_post(self, id, account_name):
+        with self.connect:
+            self.cursor.execute("SELECT number_post FROM autoposting_post WHERE id=%s AND post=%s", (id, account_name,))
+            a = self.cursor.fetchone()[0]
+            return a

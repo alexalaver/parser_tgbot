@@ -188,3 +188,7 @@ def oplata_chatov_autoposting(chat, money):
     return f"В вашем аккаунте, {chat} чатов, 1 чат = 5$, итого вы должны {money}$, нажмите кнопку 'Подтвердить покупку', если согласны с условиями."
 def tariffe_correct_autoposting(group_name, chats, data):
     return f"Успешно! Вы оплатили аккаунт под названием '{group_name}' которая состоит из {chats} чатов. Оплата действует до '{data}'"
+
+add_post_button = "Добавить пост"
+
+post_text = "посты"

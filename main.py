@@ -329,6 +329,9 @@ class Accounts_button(StatesGroup):
 class Parser_groups_button(StatesGroup):
     select_groups_button = State()
 
+class Account_post_button(StatesGroup):
+    account_post_button_1 = State()
+
 async def profile(message):
     user_id = message.from_user.id
     markup_inline = types.InlineKeyboardMarkup(row_width=1, )
@@ -494,7 +497,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
             btn2_inline = types.InlineKeyboardButton(cfg.back_button, callback_data="back_autoposting_menu")
             markup_inline.add(btn1_inline, btn2_inline)
             text = cfg.account_menu_text
-            await callback_query.message.edit_caption(caption=text, reply_markup=markup_inline)
+            await callback_query.message.edit_caption(caption="аккаунты", reply_markup=markup_inline)
             await Accounts_button.select_accounts_button.set()
         elif callback_query.data == "groups_parser":
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
@@ -613,10 +616,60 @@ async def accounts_button_1_button(callback_query: types.CallbackQuery, state: F
             else:
                 await callback_query.answer(cfg.error_autoposting_group_5, show_alert=True)
         elif callback_query.data in db.select_account_name(user_id):
+            markup_inline = types.InlineKeyboardMarkup(row_width=1)
+            user_id = callback_query.from_user.id
+            group_names = db.select_autoposting_post_name(user_id)
+            max_buttons = 5
+            for i in range(min(max_buttons, len(group_names))):
+                button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
+                markup_inline.add(button)
+            btn1_inline = types.InlineKeyboardButton(cfg.add_post_button, callback_data="add_post")
+            btn2_inline = types.InlineKeyboardButton(cfg.back_button, callback_data="back_autoposting_account")
+            markup_inline.add(btn1_inline, btn2_inline)
+            await callback_query.message.edit_caption(caption=cfg.account_text_use, reply_markup=markup_inline)
+            await Account_post_button.account_post_button_1.set()
+        elif callback_query.data == "back_sostoyanie":
+            markup_inline = types.InlineKeyboardMarkup(row_width=1)
+            btn_inline1 = types.InlineKeyboardButton(cfg.account_button, callback_data='accounts_button')
+            markup_inline.add(btn_inline1)
+            await callback_query.message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.autoposting_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+            await state.reset_state()
+
+@dp.message_handler(state=Accounts_button.select_accounts_button)
+async def accounts_button_1_text(message: types.Message, state: FSMContext):
+    if message.chat.type == types.ChatType.PRIVATE:
+        if message.text == "/cancel":
+            await message.answer(cfg.cancel_sostoyanie, parse_mode=types.ParseMode.MARKDOWN)
+            await state.reset_state()
+        else:
+            markup_inline = types.InlineKeyboardMarkup(row_width=1)
+            btn1_inline = types.InlineKeyboardButton(cfg.back_button, callback_data="back_sostoyanie")
+            markup_inline.add(btn1_inline)
+            await message.answer(cfg.error_autoposting_texts, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+
+@dp.callback_query_handler(state=Account_post_button.account_post_button_1)
+async def Button_account_post(callback_query: types.CallbackQuery, state: FSMContext):
+    if callback_query.message.chat.type == types.ChatType.PRIVATE:
+        user_id = callback_query.from_user.id
+        if callback_query.data == "back_autoposting_account":
+            markup_inline = types.InlineKeyboardMarkup(row_width=1)
+            user_id = callback_query.from_user.id
+            group_names = db.select_autoposting_group_name(user_id)
+            max_buttons = 5
+            for i in range(min(max_buttons, len(group_names))):
+                button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
+                markup_inline.add(button)
+            btn1_inline = types.InlineKeyboardButton(cfg.add_account_button, callback_data="add_account")
+            btn2_inline = types.InlineKeyboardButton(cfg.back_button, callback_data="back_autoposting_menu")
+            markup_inline.add(btn1_inline, btn2_inline)
+            text = cfg.account_menu_text
+            await callback_query.message.edit_caption(caption="аккаунты", reply_markup=markup_inline)
+            await Accounts_button.select_accounts_button.set()
+        elif callback_query.data in db.select_autoposting_post_name(user_id):
             await Account_use.account_use_1.set()
-            number_group = db.select_number_account(user_id, callback_query.data)
+            number_group = db.select_number_post(user_id, callback_query.data)
             await state.update_data(number_group=number_group)
-            channels = db.select_chats_account(user_id, callback_query.data)
+            channels = db.select_chats_post(user_id, callback_query.data)
             markup_inline = types.InlineKeyboardMarkup(row_width=2)
             channels_count = len(channels)
             channels_page = fnc.get_category(channels_count)
@@ -645,15 +698,9 @@ async def accounts_button_1_button(callback_query: types.CallbackQuery, state: F
             markup_inline.add(change_keywords)
             markup_inline.add(back_channels)
             await callback_query.message.edit_caption(caption=cfg.account_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
-        elif callback_query.data == "back_sostoyanie":
-            markup_inline = types.InlineKeyboardMarkup(row_width=1)
-            btn_inline1 = types.InlineKeyboardButton(cfg.account_button, callback_data='accounts_button')
-            markup_inline.add(btn_inline1)
-            await callback_query.message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.autoposting_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
-            await state.reset_state()
 
-@dp.message_handler(state=Accounts_button.select_accounts_button)
-async def accounts_button_1_text(message: types.Message, state: FSMContext):
+@dp.message_handler(state=Account_post_button.account_post_button_1)
+async def accounts_button_post_1_text(message: types.Message, state: FSMContext):
     if message.chat.type == types.ChatType.PRIVATE:
         if message.text == "/cancel":
             await message.answer(cfg.cancel_sostoyanie, parse_mode=types.ParseMode.MARKDOWN)
