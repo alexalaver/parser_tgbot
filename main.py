@@ -617,8 +617,8 @@ async def accounts_button_1_button(callback_query: types.CallbackQuery, state: F
             else:
                 await callback_query.answer(cfg.error_autoposting_group_5, show_alert=True)
         elif callback_query.data in db.select_account_name(user_id):
-            number_account = str(db.select_account_number(user_id, callback_query.data))
-            await state.update_data(number_account)
+            number_account = db.select_account_number(user_id, callback_query.data)
+            await state.update_data(number_account=number_account)
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
             user_id = callback_query.from_user.id
             group_names = db.select_autoposting_post_name_for_number(user_id, number_account)
