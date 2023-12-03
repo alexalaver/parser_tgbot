@@ -424,7 +424,7 @@ class Data:
     def select_account_number(self, id, group_name):
         with self.connect:
             self.cursor.execute("SELECT number_group FROM autoposting_groups WHERE id=%s AND group_name=%s", (id, group_name,))
-            a = self.cursor.fetchall()
+            a = self.cursor.fetchone()
             return a[0]
 
     def select_autoposting_post_name_for_number(self, id, number_account):
