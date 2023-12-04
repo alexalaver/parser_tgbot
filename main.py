@@ -732,7 +732,7 @@ async def add_post_func_text_1(message: types.Message, state: FSMContext):
             await state.reset_state()
         else:
             if message.forward_from or message.forward_from_chat:
-                await state.update_data(forwarded_message_id=message.forward_from_message_id)
+                await state.update_data(forwarded_message_id=message.message_id)
                 await message.answer(cfg.create_account_post_2)
                 await Add_post.add_post_2.set()
             else:
