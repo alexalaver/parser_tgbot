@@ -1034,9 +1034,8 @@ async def account_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
     if callback_query.message.chat.type == types.ChatType.PRIVATE:
         user_id = callback_query.from_user.id
         data = await state.get_data()
-        number_group = data.get('number_group')
+        number_group = data.get('number_account')
         channels = db.select_chats_account_with_number(number_group)
-        await callback_query.message.answer(channels)
         check_tarife = db.check_date_tarife_account_for_number(number_group)
         group_name = db.select_account_name_for_number_group(user_id, number_group)
         channels_count_all = len(channels)
