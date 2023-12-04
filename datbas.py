@@ -380,7 +380,7 @@ class Data:
     def select_chats_account_with_number(self, number_post):
         with self.connect:
             self.cursor.execute("SELECT chats FROM autoposting_post WHERE number_post=%s", (number_post,))
-            a = self.cursor.fetchone()[0]
+            a = self.cursor.fetchone()
             return a
 
     def check_date_tarife_account_for_number(self, number_post):

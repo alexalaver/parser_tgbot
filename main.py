@@ -799,7 +799,7 @@ async def add_post_func_text_3(message: types.Message, state: FSMContext):
                         markup_reply.row(cfg.my_profile, cfg.support)
                         if db.select_admin(user_id) > 0:
                             markup_reply.add(cfg.admin_panel_button)
-                        await message.answer(cfg.right_create_group, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
+                        await message.answer(cfg.right_create_post, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
                         await state.finish()
                     except Exception as es:
                         await state.reset_state()
@@ -1036,6 +1036,7 @@ async def account_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
         data = await state.get_data()
         number_group = data.get('number_group')
         channels = db.select_chats_account_with_number(number_group)
+        await callback_query.message.answer(channels)
         check_tarife = db.check_date_tarife_account_for_number(number_group)
         group_name = db.select_account_name_for_number_group(user_id, number_group)
         channels_count_all = len(channels)
