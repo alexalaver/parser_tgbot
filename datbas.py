@@ -436,7 +436,7 @@ class Data:
 
     def check_numbers_account_post(self):
         with self.connect:
-            self.cursor.execute("SELECT id FROM autoposting_post WHERE id=%s", (id,))
+            self.cursor.execute("SELECT id FROM autoposting_post")
             a = self.cursor.fetchall()
             b = [row for row in a]
             if a is None:
