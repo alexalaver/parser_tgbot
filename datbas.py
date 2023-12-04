@@ -405,7 +405,7 @@ class Data:
 
     def add_date_tariffe_autoposting(self, id, data, number_group):
         with self.connect:
-            self.cursor.execute("UPDATE autoposting_groups SET data_end=%s WHERE id=%s AND number_group=%s", (data, id, number_group,))
+            self.cursor.execute("UPDATE autoposting_post SET data_end=%s WHERE id=%s AND number_post=%s", (data, id, number_group,))
             self.connect.commit()
 
     def select_autoposting_post_name(self, id):
