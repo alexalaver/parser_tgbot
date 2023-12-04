@@ -4,7 +4,7 @@ from aiogram.dispatcher.storage import FSMContext
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from datbas import Data
-from datetime import datetime, timedelta
+from datetime import timedelta
 from telethon import TelegramClient
 from telethon.sessions import StringSession
 from telethon.errors import FloodWaitError, ChannelPrivateError, ChatForbiddenError, UserPrivacyRestrictedError, PeerIdInvalidError, SessionPasswordNeededError, PhoneCodeExpiredError, PhoneNumberUnoccupiedError, RPCError
@@ -268,7 +268,7 @@ async def autoposting_forward():
             async with TelegramClient(StringSession(string_session), cfg.API_ID, cfg.API_HASH) as telethon_client_autoposting:
                 current_date = datetime.datetime.now()
                 current_date = current_date.strftime("%Y-%m-%d %H:%M:%S")
-                formated_base = datetime.datetime.strptime(date_betw, "%Y-%m-%d %H:%M:%S")
+                formated_base = datetime.datetime.strftime(date_betw, "%Y-%m-%d %H:%M:%S")
 
                 if current_date > formated_base:
                     for chat_id in chat_ids:
