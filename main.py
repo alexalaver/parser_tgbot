@@ -673,6 +673,8 @@ async def Button_account_post(callback_query: types.CallbackQuery, state: FSMCon
             markup_inline = types.InlineKeyboardMarkup(row_width=2)
             channels_count = len(channels)
             channels_page = fnc.get_category(channels_count)
+            number_post = db.select_number_post(user_id, callback_query.data)
+            await state.update_data(number_post=number_post)
             page_here = 1
             from_page = 0
             before_page = 10
@@ -1034,8 +1036,7 @@ async def account_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
     if callback_query.message.chat.type == types.ChatType.PRIVATE:
         user_id = callback_query.from_user.id
         data = await state.get_data()
-        number_group = data.get('number_account')
-        print(number_group)
+        number_group = data.get('number_post')
         channels = db.select_chats_account_with_number(number_group)
         check_tarife = db.check_date_tarife_account_for_number(number_group)
         group_name = db.select_account_name_for_number_group(number_group)
