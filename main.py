@@ -1037,7 +1037,7 @@ async def account_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
         number_group = data.get('number_account')
         channels = db.select_chats_account_with_number(number_group)
         check_tarife = db.check_date_tarife_account_for_number(number_group)
-        group_name = db.select_account_name_for_number_group(user_id, number_group)
+        group_name = db.select_account_name_for_number_group(number_group)
         channels_count_all = len(channels)
         channels_count = data.get("channels_count")
         channels_page = data.get("channels_page")

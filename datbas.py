@@ -381,7 +381,7 @@ class Data:
         with self.connect:
             self.cursor.execute("SELECT chats FROM autoposting_post WHERE number_post=%s", (number_post,))
             a = self.cursor.fetchone()
-            return a
+            return a[0]
 
     def check_date_tarife_account_for_number(self, number_post):
         with self.connect:
@@ -392,11 +392,11 @@ class Data:
             else:
                 return a[0]
 
-    def select_account_name_for_number_group(self, id, number_post):
+    def select_account_name_for_number_group(self, number_post):
         with self.connect:
-            self.cursor.execute("SELECT post FROM autoposting_post WHERE id=%s AND number_post=%s", (id, number_post,))
-            a = self.cursor.fetchone()[0]
-            return a
+            self.cursor.execute("SELECT post FROM autoposting_post WHERE number_post=%s", (number_post,))
+            a = self.cursor.fetchone()
+            return a[0]
 
     def update_all_chats_account(self, number_post, channels):
         with self.connect:
