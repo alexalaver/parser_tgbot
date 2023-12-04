@@ -274,7 +274,7 @@ async def autoposting_forward():
                 for chat_id in chat_ids:
                     formated_chat_id = chat_id[:-2]
                     try:
-                        await telethon_client_autoposting.forward_messages(entity=formated_chat_id, messages=int(message_id), from_peer=formated_chat_id)
+                        await telethon_client_autoposting.forward_messages(entity=formated_chat_id, messages=int(message_id), from_peer="@testthreepublic")
                         await bot.send_message(user_id, f"Рекламный пост, успешно отправлен в чат {formated_chat_id}")
                         await asyncio.sleep(5)
                     except RPCError as err:
