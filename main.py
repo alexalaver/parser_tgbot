@@ -783,16 +783,22 @@ async def add_post_func_text_3(message: types.Message, state: FSMContext):
             await state.reset_state()
         else:
             if 2 <= len(message.text) <= 1000:
-                if 5 <= len(text_lines) <= 50:
+                if 1 <= len(text_lines) <= 10:
                     try:
                         check_number_post = db.check_numbers_account_post()
                         new_number_post = check_number_post + 1
                         data = await state.get_data()
+                        print('RIGHT 1')
                         number_account = data.get("number_account")
+                        print('RIGHT 2')
                         string_session = db.get_string_session(number_account)
+                        print('RIGHT 3')
                         time_betw = data.get("time_betw")
+                        print('RIGHT 4')
                         forwarded_message_id = data.get("forwarded_message_id")
-                        db.add_post_account(user_id, forwarded_message_id, string_session, text_lines, time_betw, new_number_post)
+                        print('RIGHT 5')
+                        db.add_post_account(user_id, forwarded_message_id, string_session, text_lines, time_betw, new_number_post, number_account)
+                        print('RIGHT 6')
                         markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
                         markup_reply.add(cfg.autoposting)
                         markup_reply.add(cfg.parser)
@@ -809,11 +815,10 @@ async def add_post_func_text_3(message: types.Message, state: FSMContext):
                         markup_reply.row(cfg.my_profile, cfg.support)
                         if db.select_admin(user_id) > 0:
                             markup_reply.add(cfg.admin_panel_button)
-                        await message.answer(cfg.error_create_group, reply_markup=markup_reply,
-                                             parse_mode=types.ParseMode.MARKDOWN)
+                        await message.answer(cfg.error_create_post, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
                         print(f"[ERROR] {es}")
                 else:
-                    await message.answer(cfg.error_len_channels_create, parse_mode=types.ParseMode.MARKDOWN)
+                    await message.answer(cfg.error_len_chat_post_create, parse_mode=types.ParseMode.MARKDOWN)
             else:
                 await message.answer(cfg.error_len_channels, parse_mode=types.ParseMode.MARKDOWN)
 
