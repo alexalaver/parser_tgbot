@@ -349,7 +349,7 @@ class Data:
 
     def update_date_betw(self, data, number_group):
         with self.connect:
-            self.cursor.execute("UPDATE autoposting_groups SET date_betw=%s WHERE number_group=%s", (data, number_group,))
+            self.cursor.execute("UPDATE autoposting_post SET date_betw=%s WHERE number_post=%s", (data, number_group,))
             self.connect.commit()
 
     def select_account_name(self, id):
