@@ -792,6 +792,8 @@ async def add_post_func_text_3(message: types.Message, state: FSMContext):
                         string_session = db.get_string_session(number_account)
                         time_betw = data.get("time_betw")
                         forwarded_message_id = data.get("forwarded_message_id")
+                        current_time = datetime.now()
+                        time_in_60_minutes = current_time + timedelta(minutes=time_betw)
                         db.add_post_account(user_id, forwarded_message_id, string_session, text_lines, time_betw, new_number_post, number_account)
                         markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
                         markup_reply.add(cfg.autoposting)
@@ -1558,7 +1560,7 @@ async def group_name_autoposting(message: types.Message, state: FSMContext):
                 check_number_group = db.check_numbers_account_autoposting()
                 new_number_group = check_number_group + 1
                 db.add_autoposting_account(user_id, new_number_group, phone, string_session, group_name)
-                await message.answer(cfg.create_account_autoposting_4)
+                await message.answer(cfg.create_account_right)
                 await state.finish()
             else:
                 await message.answer("Минимальная длина названия аккаунта, должна быть 3, максимальная 15, попробуйте ещё раз:")
