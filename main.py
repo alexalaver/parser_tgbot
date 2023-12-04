@@ -254,7 +254,6 @@ async def autoposting_forward():
     num = 0
 
     groups_count = len(db.select_all_channels_autoposting_post())
-    await client.start()
     while True:
         try:
             groups = db.select_all_channels_autoposting_post()
