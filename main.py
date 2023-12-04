@@ -253,21 +253,17 @@ async def search_and_forward_close_group():
 async def autoposting_forward():
     num = 0
 
-    groups_count = len(db.select_all_channels_autoposting_group())
+    groups_count = len(db.select_all_channels_autoposting_post())
 
     while True:
         try:
-            groups = db.select_all_channels_autoposting_group()
+            groups = db.select_all_channels_autoposting_post()
             if not groups:
                 await asyncio.sleep(10)
                 continue
 
-            if await check_for_new_autoposting_groups(groups_count):
-                groups_count = len(groups)
-                num = 0
-
             group = groups[num]
-            user_id, chat_ids, string_session, message_id, time_betw, date_betw, number_group = group[0], group[4], group[3], group[7], group[8], group[9], group[1]
+            user_id, chat_ids, string_session, message_id, time_betw, date_betw, number_group = group[0], group[3], group[2], group[1], group[5], group[6], group[7]
 
             async with TelegramClient(StringSession(string_session), cfg.API_ID, cfg.API_HASH) as telethon_client_autoposting:
                 current_date = datetime.datetime.now()
@@ -276,8 +272,8 @@ async def autoposting_forward():
                 if current_date > formated_base:
                     for chat_id in chat_ids:
                         try:
-                            await telethon_client_autoposting.forward_messages(entity=chat_id, messages=int(message_id), from_peer="@parsersi_bot")
-                            await bot.send_message(f"Рекламный пост, успешно отправлен в чат {chat_id}")
+                            await telethon_client_autoposting.forward_messages(entity=chat_id, messages=int(message_id), from_peer=chat_id)
+                            await bot.send_message(user_id, f"Рекламный пост, успешно отправлен в чат {chat_id}")
                             await asyncio.sleep(5)
                         except RPCError as err:
                             print(f"[ERROR RPCError] {err}")
@@ -1584,7 +1580,7 @@ async def other(message: types.Message):
 async def on_startup(_):
     asyncio.create_task(search_and_forward())
     asyncio.create_task(search_and_forward_close_group())
-    # asyncio.create_task(autoposting_forward())
+    asyncio.create_task(autoposting_forward())
 
 if __name__ == "__main__":
     executor.start_polling(dp, skip_updates=True, on_startup=on_startup)

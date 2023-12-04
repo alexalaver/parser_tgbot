@@ -454,3 +454,9 @@ class Data:
             self.cursor.execute("SELECT string_session FROM autoposting_groups WHERE number_group=%s", (number_account,))
             a = self.cursor.fetchone()
             return a[0]
+
+    def select_all_channels_autoposting_post(self):
+        with self.connect:
+            self.cursor.execute("SELECT * FROM autoposting_post")
+            a = self.cursor.fetchall()
+            return a
