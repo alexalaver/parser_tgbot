@@ -1077,9 +1077,7 @@ async def account_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                     if db.check_date_tarife_for_number(number_group) is None:
                         pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels')
                         markup_inline.add(pay_money_buttons)
-                    change_keywords = types.InlineKeyboardButton(text=cfg.change_keyword_button, callback_data='change_keyword')
                     back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels')
-                    markup_inline.add(change_keywords)
                     markup_inline.add(back_channels)
                     await callback_query.message.edit_caption(caption=cfg.account_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
         elif callback_query.data == "next_page":
@@ -1107,9 +1105,7 @@ async def account_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                 if db.check_date_tarife_account_for_number(number_group) is None:
                     pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels')
                     markup_inline.add(pay_money_buttons)
-                change_keywords = types.InlineKeyboardButton(text=cfg.change_keyword_button, callback_data='change_keyword')
                 back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels')
-                markup_inline.add(change_keywords)
                 markup_inline.add(back_channels)
                 await callback_query.message.edit_caption(caption=cfg.account_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
         elif callback_query.data == "old_page":
@@ -1138,9 +1134,7 @@ async def account_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
                 if db.check_date_tarife_account_for_number(number_group) is None:
                     pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels')
                     markup_inline.add(pay_money_buttons)
-                change_keywords = types.InlineKeyboardButton(text=cfg.change_keyword_button,callback_data='change_keyword')
                 back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels')
-                markup_inline.add(change_keywords)
                 markup_inline.add(back_channels)
                 await callback_query.message.edit_caption(caption=cfg.account_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
         elif callback_query.data == "back_channels":
@@ -1207,9 +1201,7 @@ async def account_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
             if db.check_date_tarife_account_for_number(number_group) is None:
                 pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels')
                 markup_inline.add(pay_money_buttons)
-            change_keywords = types.InlineKeyboardButton(text=cfg.change_keyword_button, callback_data='change_keyword')
             back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels')
-            markup_inline.add(change_keywords)
             markup_inline.add(back_channels)
             await callback_query.message.edit_caption(caption=cfg.account_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
         elif callback_query.data == "back_sostoyanie":
