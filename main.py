@@ -267,8 +267,8 @@ async def autoposting_forward():
 
             async with TelegramClient(StringSession(string_session), cfg.API_ID, cfg.API_HASH) as telethon_client_autoposting:
                 current_date = datetime.datetime.now()
-                current_date = current_date.strftime("%Y-%m-%d %H:%M:%S")
-                formated_base = datetime.datetime.strftime(date_betw, "%Y-%m-%d %H:%M:%S")
+                # current_date = current_date.strftime("%Y-%m-%d %H:%M:%S")
+                formated_base = datetime.datetime.strptime(date_betw, "%Y-%m-%d %H:%M:%S")
 
                 if current_date > formated_base:
                     for chat_id in chat_ids:
