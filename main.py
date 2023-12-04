@@ -282,8 +282,10 @@ async def autoposting_forward():
                             print(f"[ERROR EXCEPTION] {erri}")
 
                 else:
-                    time_in_60_minutes = current_date + datetime.timedelta(minutes=int(time_betw))
-                    db.update_date_betw(time_in_60_minutes, number_group)
+                    current_data = datetime.datetime.now()
+                    time_in_60_minutes = current_data + datetime.timedelta(minutes=time_betw)
+                    formatted_date_new = time_in_60_minutes.strftime("%Y-%m-%d %H:%M:%S")
+                    db.update_date_betw(formatted_date_new, number_group)
 
             num += 1
             if num >= len(groups):
