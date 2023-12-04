@@ -695,9 +695,7 @@ async def Button_account_post(callback_query: types.CallbackQuery, state: FSMCon
             if db.check_date_tarife_account(user_id, callback_query.data) is None:
                 pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels')
                 markup_inline.add(pay_money_buttons)
-            change_keywords = types.InlineKeyboardButton(text=cfg.change_keyword_button, callback_data='change_keyword')
             back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels')
-            markup_inline.add(change_keywords)
             markup_inline.add(back_channels)
             await callback_query.message.edit_caption(caption=cfg.account_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
         elif callback_query.data == "add_post":
