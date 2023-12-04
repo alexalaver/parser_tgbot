@@ -788,7 +788,7 @@ async def add_post_func_text_3(message: types.Message, state: FSMContext):
                         string_session = db.get_string_session(number_account)
                         time_betw = data.get("time_betw")
                         forwarded_message_id = data.get("forwarded_message_id")
-                        current_time = datetime.now()
+                        current_time = datetime.datetime.now()
                         date_betw = current_time + timedelta(minutes=time_betw)
                         db.add_post_account(user_id, forwarded_message_id, string_session, text_lines, time_betw, new_number_post, number_account, date_betw)
                         markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
