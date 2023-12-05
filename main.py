@@ -269,10 +269,10 @@ async def search_and_forward_close_group():
 async def autoposting_forward():
     num = 0
 
-    groups_count = len(db.select_all_channels_autoposting_post())
+    groups_count = len(db.select_all_channels_autoposting_post_not_null())
     while True:
         try:
-            groups = db.select_all_channels_autoposting_post()
+            groups = db.select_all_channels_autoposting_post_not_null()
             if not groups:
                 await asyncio.sleep(10)
                 continue
