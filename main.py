@@ -262,31 +262,34 @@ async def autoposting_forward():
                 continue
 
             group = groups[num]
-            user_id, chat_ids, string_session, message_id, time_betw, date_betw, number_group = group[0], group[3], group[2], group[1], group[5], group[6], group[7]
+            user_id, chat_ids, string_session, message_id, time_betw, date_betw, number_group, data_end, channel_tag = group[0], group[3], group[2], group[1], group[5], group[6], group[7], group[4], group[9]
+            chat_ids = [item for item in chat_ids if item.endswith('✅')]
+            current_date = datetime.datetime.now()
+            formated_base = datetime.datetime.strptime(data_end, "%Y-%m-%d %H:%M:%S")
+            if formated_base > current_date and chat_ids != []:
+                async with TelegramClient(StringSession(string_session), cfg.API_ID, cfg.API_HASH) as telethon_client_autoposting:
+                    # current_date = datetime.datetime.now()
+                    # current_date = current_date.strftime("%Y-%m-%d %H:%M:%S")
+                    # formated_base = datetime.datetime.strptime(date_betw, "%Y-%m-%d %H:%M:%S")
 
-            async with TelegramClient(StringSession(string_session), cfg.API_ID, cfg.API_HASH) as telethon_client_autoposting:
-                current_date = datetime.datetime.now()
-                # current_date = current_date.strftime("%Y-%m-%d %H:%M:%S")
-                formated_base = datetime.datetime.strptime(date_betw, "%Y-%m-%d %H:%M:%S")
+                    # if current_date < formated_base:
+                    for chat_id in chat_ids:
+                        formated_chat_id = chat_id[:-2]
+                        try:
+                            await telethon_client_autoposting.forward_messages(entity=formated_chat_id, messages=int(message_id), from_peer=channel_tag)
+                            await bot.send_message(user_id, f"Рекламный пост, успешно отправлен в чат {formated_chat_id}")
+                            await asyncio.sleep(5)
+                        except RPCError as err:
+                            print(f"[ERROR RPCError] {err}")
+                        except Exception as erri:
+                            print(f"[ERROR EXCEPTION] {erri}")
 
-                # if current_date < formated_base:
-                for chat_id in chat_ids:
-                    formated_chat_id = chat_id[:-2]
-                    try:
-                        await telethon_client_autoposting.forward_messages(entity=formated_chat_id, messages=int(message_id), from_peer="@parsersi_bot")
-                        await bot.send_message(user_id, f"Рекламный пост, успешно отправлен в чат {formated_chat_id}")
-                        await asyncio.sleep(5)
-                    except RPCError as err:
-                        print(f"[ERROR RPCError] {err}")
-                    except Exception as erri:
-                        print(f"[ERROR EXCEPTION] {erri}")
-
-                # else:
-                #     current_data = datetime.datetime.now()
-                #     # current_data = current_data.strftime("%Y-%m-%d %H:%M:%S")
-                #     time_in_60_minutes = current_data + datetime.timedelta(minutes=time_betw)
-                #     formatted_date_new = time_in_60_minutes.strftime("%Y-%m-%d %H:%M:%S")
-                #     db.update_date_betw(formatted_date_new, number_group)
+                    # else:
+                    #     current_data = datetime.datetime.now()
+                    #     # current_data = current_data.strftime("%Y-%m-%d %H:%M:%S")
+                    #     time_in_60_minutes = current_data + datetime.timedelta(minutes=time_betw)
+                    #     formatted_date_new = time_in_60_minutes.strftime("%Y-%m-%d %H:%M:%S")
+                    #     db.update_date_betw(formatted_date_new, number_group)
 
             num += 1
             if num >= len(groups):
@@ -731,7 +734,10 @@ async def add_post_func_text_1(message: types.Message, state: FSMContext):
             await state.reset_state()
         else:
             if message.forward_from or message.forward_from_chat:
-                await state.update_data(forwarded_message_id=message.message_id)
+                channel_message_id = message.forward_from_message_id if message.forward_from_message_id else None
+                channel_tag = message.forward_from_chat.username if message.forward_from_chat else None
+                await state.update_data(forwarded_message_id=channel_message_id,
+                                        channel_tag=channel_tag)
                 await message.answer(cfg.create_account_post_2)
                 await Add_post.add_post_2.set()
             else:
@@ -792,7 +798,8 @@ async def add_post_func_text_3(message: types.Message, state: FSMContext):
                         string_session = db.get_string_session(number_account)
                         time_betw = data.get("time_betw")
                         forwarded_message_id = data.get("forwarded_message_id")
-                        db.add_post_account(user_id, forwarded_message_id, string_session, text_lines, time_betw, new_number_post, number_account)
+                        channel_tag = data.get("channel_tag")
+                        db.add_post_account(user_id, forwarded_message_id, string_session, text_lines, time_betw, new_number_post, number_account, channel_tag)
                         markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
                         markup_reply.add(cfg.autoposting)
                         markup_reply.add(cfg.parser)
