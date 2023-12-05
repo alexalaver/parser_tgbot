@@ -466,3 +466,24 @@ class Data:
             self.cursor.execute("SELECT time_betw FROM autoposting_post WHERE number_post=%s", (number_post,))
             a = self.cursor.fetchone()
             return a[0]
+
+    def select_all_channels_autoposting_post_not_null(self):
+        with self.connect:
+            self.cursor.execute("SELECT * FROM autoposting_post WHERE data_end IS NOT NULL")
+            a = self.cursor.fetchall()
+            return a
+
+    def delete_data_end_post(self, number_post):
+        with self.connect:
+            self.cursor.execute("UPDATE autoposting_post SET data_end=Null WHERE number_post=%s", (number_post,))
+            self.connect.commit()
+
+    def update_chats_post(self, chats, number_post):
+        with self.connect:
+            self.cursor.execute("UPDATE autoposting_post SET chats=%s WHERE number_post=%s", (chats, number_post,))
+            self.connect.commit()
+
+    def delete_data_end_group(self, number_group):
+        with self.connect:
+            self.cursor.execute("UPDATE groups SET data_end=Null WHERE number_group=%s", (number_group,))
+            self.connect.commit()

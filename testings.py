@@ -1,6 +1,3 @@
-a = ['asdasd', 'dasda', 'asdad ✅']
-chat_ids = [item for item in a if item.endswith('✅')]
-if chat_ids == []:
-    print('si si')
-else:
-    print("not si")
+a = ['asdasd ✅', 'dasda ✅', 'asdad ✅']
+a = [s.replace('✅', 'X') for s in a]
+print(a)
