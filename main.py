@@ -264,32 +264,33 @@ async def autoposting_forward():
             group = groups[num]
             user_id, chat_ids, string_session, message_id, time_betw, date_betw, number_group, data_end, channel_tag = group[0], group[3], group[2], group[1], group[5], group[6], group[7], group[4], group[9]
             chat_ids = [item for item in chat_ids if item.endswith('✅')]
-            current_date = datetime.datetime.now()
-            formated_base = datetime.datetime.strptime(data_end, "%Y-%m-%d %H:%M:%S")
-            if formated_base > current_date and chat_ids != []:
-                async with TelegramClient(StringSession(string_session), cfg.API_ID, cfg.API_HASH) as telethon_client_autoposting:
-                    # current_date = datetime.datetime.now()
-                    # current_date = current_date.strftime("%Y-%m-%d %H:%M:%S")
-                    # formated_base = datetime.datetime.strptime(date_betw, "%Y-%m-%d %H:%M:%S")
+            if data_end is not None:
+                current_date = datetime.datetime.now()
+                formated_base = datetime.datetime.strptime(data_end, "%Y-%m-%d %H:%M:%S")
+                if formated_base > current_date and chat_ids != []:
+                    async with TelegramClient(StringSession(string_session), cfg.API_ID, cfg.API_HASH) as telethon_client_autoposting:
+                        # current_date = datetime.datetime.now()
+                        # current_date = current_date.strftime("%Y-%m-%d %H:%M:%S")
+                        # formated_base = datetime.datetime.strptime(date_betw, "%Y-%m-%d %H:%M:%S")
 
-                    # if current_date < formated_base:
-                    for chat_id in chat_ids:
-                        formated_chat_id = chat_id[:-2]
-                        try:
-                            await telethon_client_autoposting.forward_messages(entity=formated_chat_id, messages=int(message_id), from_peer=channel_tag)
-                            await bot.send_message(user_id, f"Рекламный пост, успешно отправлен в чат {formated_chat_id}")
-                            await asyncio.sleep(5)
-                        except RPCError as err:
-                            print(f"[ERROR RPCError] {err}")
-                        except Exception as erri:
-                            print(f"[ERROR EXCEPTION] {erri}")
+                        # if current_date < formated_base:
+                        for chat_id in chat_ids:
+                            formated_chat_id = chat_id[:-2]
+                            try:
+                                await telethon_client_autoposting.forward_messages(entity=formated_chat_id, messages=int(message_id), from_peer=channel_tag)
+                                await bot.send_message(user_id, f"Рекламный пост, успешно отправлен в чат {formated_chat_id}")
+                                await asyncio.sleep(5)
+                            except RPCError as err:
+                                print(f"[ERROR RPCError] {err}")
+                            except Exception as erri:
+                                print(f"[ERROR EXCEPTION] {erri}")
 
-                    # else:
-                    #     current_data = datetime.datetime.now()
-                    #     # current_data = current_data.strftime("%Y-%m-%d %H:%M:%S")
-                    #     time_in_60_minutes = current_data + datetime.timedelta(minutes=time_betw)
-                    #     formatted_date_new = time_in_60_minutes.strftime("%Y-%m-%d %H:%M:%S")
-                    #     db.update_date_betw(formatted_date_new, number_group)
+                        # else:
+                        #     current_data = datetime.datetime.now()
+                        #     # current_data = current_data.strftime("%Y-%m-%d %H:%M:%S")
+                        #     time_in_60_minutes = current_data + datetime.timedelta(minutes=time_betw)
+                        #     formatted_date_new = time_in_60_minutes.strftime("%Y-%m-%d %H:%M:%S")
+                        #     db.update_date_betw(formatted_date_new, number_group)
 
             num += 1
             if num >= len(groups):
