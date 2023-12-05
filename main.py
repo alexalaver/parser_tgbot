@@ -1411,7 +1411,7 @@ async def button_group_2(callback_query: types.CallbackQuery):
 
 @dp.message_handler(state=Add_chat_ids.panel_adm)
 async def panel_adm(message: types.Message, state: FSMContext):
-    if message.text == cfg.cancel_creategroup:
+    if message.text == cfg.back_button:
         markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
         markup_reply.add(cfg.autoposting)
         markup_reply.add(cfg.parser)
