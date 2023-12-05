@@ -308,7 +308,7 @@ class Data:
 
     def check_numbers_account_autoposting(self):
         with self.connect:
-            self.cursor.execute("SELECT id FROM autoposting_groups WHERE id=%s")
+            self.cursor.execute("SELECT id FROM autoposting_groups")
             a = self.cursor.fetchall()
             b = [row for row in a]
             if a is None:
