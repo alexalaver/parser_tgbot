@@ -736,13 +736,15 @@ async def add_post_func_text_1(message: types.Message, state: FSMContext):
             await message.answer(cfg.back_text, reply_markup=markup_reply)
             await state.reset_state()
         else:
-            if message.forward_from or message.forward_from_chat:
+            try:
                 channel_message_id = message.forward_from_message_id if message.forward_from_message_id else None
                 channel_tag = message.forward_from_chat.username if message.forward_from_chat else None
                 await state.update_data(forwarded_message_id=channel_message_id,
                                         channel_tag=channel_tag)
                 await message.answer(cfg.create_account_post_2)
                 await Add_post.add_post_2.set()
+            except Exception as er:
+                print(f"ERROR {er}")
             else:
                 await message.answer("Вы должны переслать сообщение из канала, попробуйте ещё раз:")
 
