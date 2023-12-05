@@ -1572,6 +1572,15 @@ async def group_name_autoposting(message: types.Message, state: FSMContext):
             await state.reset_state()
         else:
             if 3 <= len(message.text) <= 15:
+                user_id = message.from_user.id
+                first_name = message.from_user.first_name
+                username = message.from_user.username
+                if (not db.check_user(user_id)):
+                    db.add_user(user_id, first_name, username)
+                markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+                markup_reply.add(cfg.autoposting)
+                markup_reply.add(cfg.parser)
+                markup_reply.row(cfg.my_profile, cfg.support)
                 data = await state.get_data()
                 phone = data.get('phone')
                 string_session = data.get('string_session')
@@ -1579,7 +1588,7 @@ async def group_name_autoposting(message: types.Message, state: FSMContext):
                 check_number_group = db.check_numbers_account_autoposting()
                 new_number_group = check_number_group + 1
                 db.add_autoposting_account(user_id, new_number_group, phone, string_session, group_name)
-                await message.answer(cfg.create_account_right)
+                await message.answer(cfg.create_account_right, reply_markup=markup_reply)
                 await state.finish()
             else:
                 await message.answer("Минимальная длина названия аккаунта, должна быть 3, максимальная 15, попробуйте ещё раз:")
