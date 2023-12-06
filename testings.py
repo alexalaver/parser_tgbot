@@ -1,3 +1,5 @@
-a = ['asdasd ✅', 'dasda ✅', 'asdad ✅']
-a = [s.replace('✅', 'X') for s in a]
-print(a)
+a = "434134aa"
+if int(a):
+    print('right')
+else:
+    print('no right')

