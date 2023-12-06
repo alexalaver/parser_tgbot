@@ -404,7 +404,7 @@ async def start(message: types.Message):
         if db.select_admin(user_id) > 0:
             markup_reply.add(cfg.admin_panel_button)
 
-        await message.answer('test', reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
+        await message.answer(cfg.start_text(first_name), reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
         await profile(message)
 
 @dp.message_handler(commands=['addadmin'])

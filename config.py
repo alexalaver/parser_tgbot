@@ -6,6 +6,9 @@ TOKEN = "6597828235:AAH60BBRislfPCqwBeGsiYMBEjXuBrHujZ0"
 # API_ID = "29417722"
 # API_HASH = "f36b74ca41ddf04e820413794d6d6463"
 
+def start_text(first_name):
+    return f"📱 Добро пожаловать, {first_name}. Воспользуйтесь контекстным меню для взаимодействия с ботом."
+
 API_ID = "20150090"
 API_HASH = "772e2f003782fc07b0089b0b38c7087c"
 STRING_SESSION = "1AZWarzgBu3NDe6W93eVVKZnqY6sw9kXmJtoM5QSx6s6YRQaAaSBX6qqydY_7r6HwKxPnIBCH9Wlk8S8UJyTuT1-Dh6eQzpZ1CiRA2EflQy0qJ69_mX6fd7fcobA1kl5nmP_B9SBJolaGP7cKS8SEbyKBuA2M9jwnsjSU9FdzJpDIluvR6dZ3UelmustACgRv8ipTpogfzTguWa8mZ0MvCOfMKBVKYc6b1BSv4FgLNRALrPm4WxI2nx2mbovhfd3TjDU4Tb0fOsfExXYUx1g6RS1Mnp6dket2zNSa7l7daiTn541L7a2hTaHNJ2BhP2i7V5Tbf5gZBnYZVIGqLBDcaHH8V7thdcQ="
