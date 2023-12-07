@@ -609,6 +609,21 @@ async def parsers_groups_1_text(message: types.Message, state: FSMContext):
         if message.text == "/cancel":
             await message.answer(cfg.cancel_sostoyanie, parse_mode=types.ParseMode.MARKDOWN)
             await state.reset_state()
+        elif message.text == cfg.my_profile:
+            await profile(message)
+            await state.finish()
+        elif message.text == cfg.support:
+            await supports_send(message)
+            await state.finish()
+        elif message.text == cfg.parser:
+            await parsers_send(message)
+            await state.finish()
+        elif message.text == cfg.autoposting:
+            await autoposting_send(message)
+            await state.finish()
+        elif message.text == cfg.admin_panel_button:
+            await panel_administration(message)
+            await state.finish()
         else:
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
             btn1_inline = types.InlineKeyboardButton(cfg.back_button, callback_data="back_sostoyanie")
@@ -664,6 +679,21 @@ async def accounts_button_1_text(message: types.Message, state: FSMContext):
         if message.text == "/cancel":
             await message.answer(cfg.cancel_sostoyanie, parse_mode=types.ParseMode.MARKDOWN)
             await state.reset_state()
+        elif message.text == cfg.my_profile:
+            await profile(message)
+            await state.finish()
+        elif message.text == cfg.support:
+            await supports_send(message)
+            await state.finish()
+        elif message.text == cfg.parser:
+            await parsers_send(message)
+            await state.finish()
+        elif message.text == cfg.autoposting:
+            await autoposting_send(message)
+            await state.finish()
+        elif message.text == cfg.admin_panel_button:
+            await panel_administration(message)
+            await state.finish()
         else:
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
             btn1_inline = types.InlineKeyboardButton(cfg.back_button, callback_data="back_sostoyanie")
@@ -730,6 +760,21 @@ async def accounts_button_post_1_text(message: types.Message, state: FSMContext)
         if message.text == "/cancel":
             await message.answer(cfg.cancel_sostoyanie, parse_mode=types.ParseMode.MARKDOWN)
             await state.reset_state()
+        elif message.text == cfg.my_profile:
+            await profile(message)
+            await state.finish()
+        elif message.text == cfg.support:
+            await supports_send(message)
+            await state.finish()
+        elif message.text == cfg.parser:
+            await parsers_send(message)
+            await state.finish()
+        elif message.text == cfg.autoposting:
+            await autoposting_send(message)
+            await state.finish()
+        elif message.text == cfg.admin_panel_button:
+            await panel_administration(message)
+            await state.finish()
         else:
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
             btn1_inline = types.InlineKeyboardButton(cfg.back_button, callback_data="back_sostoyanie")
@@ -1046,6 +1091,21 @@ async def parsers_use_1_text(message: types.Message, state: FSMContext):
         if message.text == "/cancel":
             await message.answer(cfg.cancel_sostoyanie, parse_mode=types.ParseMode.MARKDOWN)
             await state.reset_state()
+        elif message.text == cfg.my_profile:
+            await profile(message)
+            await state.finish()
+        elif message.text == cfg.support:
+            await supports_send(message)
+            await state.finish()
+        elif message.text == cfg.parser:
+            await parsers_send(message)
+            await state.finish()
+        elif message.text == cfg.autoposting:
+            await autoposting_send(message)
+            await state.finish()
+        elif message.text == cfg.admin_panel_button:
+            await panel_administration(message)
+            await state.finish()
         else:
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
             btn1_inline = types.InlineKeyboardButton(cfg.back_button, callback_data="back_sostoyanie")
@@ -1244,6 +1304,21 @@ async def account_use_1_texts(message: types.Message, state: FSMContext):
         if message.text == "/cancel":
             await message.answer(cfg.cancel_sostoyanie, parse_mode=types.ParseMode.MARKDOWN)
             await state.reset_state()
+        elif message.text == cfg.my_profile:
+            await profile(message)
+            await state.finish()
+        elif message.text == cfg.support:
+            await supports_send(message)
+            await state.finish()
+        elif message.text == cfg.parser:
+            await parsers_send(message)
+            await state.finish()
+        elif message.text == cfg.autoposting:
+            await autoposting_send(message)
+            await state.finish()
+        elif message.text == cfg.admin_panel_button:
+            await panel_administration(message)
+            await state.finish()
         else:
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
             btn1_inline = types.InlineKeyboardButton(cfg.back_button, callback_data="back_sostoyanie")
