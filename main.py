@@ -63,7 +63,6 @@ async def search_and_forward():
     last_message_ids = {}
 
     await telethon_client.start()
-    groups_count = len(db.select_all_channels_group())
 
     while True:
         try:
@@ -72,19 +71,10 @@ async def search_and_forward():
                 await asyncio.sleep(10)
                 continue
 
-            if await check_for_new_groups(groups_count):
-                groups_count = len(groups)
-                num = 0
             group = groups[num]
             user_id, chat_idn, keywords, data_end, group_name = group[0], group[2], group[5], group[3], group[4]
             chat_ids = [item for item in chat_idn if item.endswith('✅')]
             chat_ids = [item for item in chat_ids if len(item) < 13 or item[13] != '+']
-            if await check_for_new_channels(len(chat_ids)):
-                groups = db.select_all_channels_group()
-                group = groups[num]
-                user_id, chat_ids, keywords = group[0], group[2], group[5]
-                chat_ids = [item for item in chat_ids if item.endswith('✅')]
-                chat_ids = [item for item in chat_ids if len(item) < 13 or item[13] != '+']
 
             number_group = group[1]
 
@@ -162,7 +152,6 @@ async def search_and_forward_close_group():
     last_message_ids = {}
 
     await telethon_client.start()
-    groups_count = len(db.select_all_channels_group())
 
     while True:
         try:
@@ -171,17 +160,9 @@ async def search_and_forward_close_group():
                 await asyncio.sleep(10)
                 continue
 
-            if await check_for_new_groups(groups_count):
-                groups_count = len(groups)
-                num = 0
             group = groups[num]
             user_id, chat_ids, keywords, channelss_link, data_end, group_name = group[0], group[7], group[5], group[2], group[3], group[4]
             channels_link = [item for item in channelss_link if len(item) >= 13 and item[13] == '+']
-            if await check_for_new_channels(len(channels_link)):
-                groups = db.select_all_channels_group()
-                group = groups[num]
-                user_id, chat_ids, keywords, channels_link = group[0], group[7], group[5], group[2]
-                channels_link = [item for item in channels_link if len(item) >= 13 and item[13] == '+']
             number_group = group[1]
             current_date = datetime.datetime.now()
             formated_base = datetime.datetime.strptime(data_end, "%Y-%m-%d %H:%M:%S")
