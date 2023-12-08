@@ -539,7 +539,8 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
                 markup_inline.add(button)
             btn1_inline = types.InlineKeyboardButton(cfg.add_post_button, callback_data="add_post")
-            markup_inline.add(btn1_inline)
+            btn2_inline = types.InlineKeyboardButton(cfg.back_button, callback_query="back_autoposting_account")
+            markup_inline.add(btn1_inline, btn2_inline)
             await callback_query.message.edit_caption(caption=cfg.posts_right_text, reply_markup=markup_inline)
         elif callback_query.data == "groups_add_button":
             number_group = db.check_number_group(user_id)
