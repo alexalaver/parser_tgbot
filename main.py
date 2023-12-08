@@ -357,7 +357,7 @@ async def parsers_send(message):
         button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
         markup_inline.add(button)
 
-    btn_inline1 = types.InlineKeyboardButton(cfg.groups_add_button, callback_data='groups_add_button')
+    btn_inline1 = types.InlineKeyboardButton(cfg.groups_add_button, callback_data='groups_add_button_parser')
     markup_inline.add(btn_inline1)
     await message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.parser_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
 
@@ -517,7 +517,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
             btn_inline1 = types.InlineKeyboardButton(cfg.account_button, callback_data='accounts_button')
             markup_inline.add(btn_inline1)
             await callback_query.message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.autoposting_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
-        elif callback_query.data == "groups_add_button":
+        elif callback_query.data == "groups_add_button_parser":
             number_group_parser = db.check_number_group(user_id)
             if int(number_group_parser) < 5:
                 markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
@@ -623,8 +623,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels_parser')
                     markup_inline.add(change_keywords)
                     markup_inline.add(back_channels)
-                    await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline,
-                                                              parse_mode=types.ParseMode.MARKDOWN)
+                    await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
         elif callback_query.data == "next_page_parser":
             if channels_page_parser == page_here_parser:
                 await callback_query.answer(cfg.error_page_next, show_alert=True)
@@ -641,8 +640,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 for channel in channels[from_page_parser:before_page_parser]:
                     buttons = types.InlineKeyboardButton(text=channel, callback_data=channel)
                     markup_inline.row(buttons)
-                buttons_count = types.InlineKeyboardButton(text=f"Страница {page_here_parser}/{channels_page_parser} 📄",
-                                                           callback_data="page_parser")
+                buttons_count = types.InlineKeyboardButton(text=f"Страница {page_here_parser}/{channels_page_parser} 📄", callback_data="page_parser")
                 markup_inline.add(buttons_count)
                 if channels_count_all_parser > 10:
                     buttons_next = types.InlineKeyboardButton(text=cfg.next_page, callback_data="next_page_parser")
@@ -707,8 +705,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
             markup_inline.add(btn_inline1, btn_inline2)
             channels_len = len(channels_parser)
             money_oplata = str(5 * int(channels_len))
-            await callback_query.message.edit_caption(caption=cfg.oplata_chatov(channels_len, money_oplata),
-                                                      reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+            await callback_query.message.edit_caption(caption=cfg.oplata_chatov(channels_len, money_oplata), reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
         elif callback_query.data == "confirm_oplata_parser":
             balance = db.check_balance(user_id)
             channels_len = len(channels_parser)
@@ -733,9 +730,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 await check_private_channel(new_chan, user_id, number_group_parser)
                 await state.finish()
                 await callback_query.message.delete()
-                await callback_query.message.answer(
-                    text=cfg.tariffe_correct(group_name_parser, channels_len, formatted_date_new),
-                    reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+                await callback_query.message.answer(text=cfg.tariffe_correct(group_name_parser, channels_len, formatted_date_new), reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
             else:
                 await callback_query.answer(text=cfg.tariffe_error, show_alert=True)
         elif callback_query.data == "back_oplata_parser":
