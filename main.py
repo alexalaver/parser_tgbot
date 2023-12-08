@@ -369,9 +369,8 @@ async def autoposting_send(message):
     for i in range(min(max_buttons, len(group_names))):
         button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
         markup_inline.add(button)
-    btn1_inline = types.InlineKeyboardButton(cfg.add_account_button, callback_data="add_account")
+    btn1_inline = types.InlineKeyboardButton(cfg.add_account_button, callback_data="add_account_autoposting")
     markup_inline.add(btn1_inline)
-    await Accounts_button.select_accounts_button.set()
     if group_names is None:
         text = cfg.accounts_left_text
     else:
