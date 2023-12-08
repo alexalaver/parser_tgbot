@@ -365,18 +365,40 @@ async def supports_send(message):
     markup_inline = types.InlineKeyboardMarkup(row_width=1)
     btn_inline1 = types.InlineKeyboardButton(cfg.support, callback_data='support', url=f"tg://user?id={cfg.admin_id}")
     markup_inline.add(btn_inline1)
-    await message.answer("При индивидуальных запросах или возникновение трудностей, обратитесь по контакту ниже", reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+    await message.answer(cfg.support_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
 
 async def parsers_send(message):
+    user_id = message.from_user.id
     markup_inline = types.InlineKeyboardMarkup(row_width=1)
-    markup_inline.add(types.InlineKeyboardButton(cfg.groups_button, callback_data='groups_parser'))
-    await message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.parser_groups_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+    group_names = db.select_group_name(user_id)
+    max_buttons = 5
+    for i in range(min(max_buttons, len(group_names))):
+        button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
+        markup_inline.add(button)
+
+    btn_inline1 = types.InlineKeyboardButton(cfg.groups_add_button, callback_data='groups_add_button')
+    btn_inline2 = types.InlineKeyboardButton(cfg.back_button, callback_data='back_groups_parser')
+    markup_inline.add(btn_inline1, btn_inline2)
+    await Parser_groups_button.select_groups_button.set()
+    await message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.parser_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
 
 async def autoposting_send(message):
     markup_inline = types.InlineKeyboardMarkup(row_width=1)
-    btn_inline1 = types.InlineKeyboardButton(cfg.account_button, callback_data='accounts_button')
-    markup_inline.add(btn_inline1)
-    await message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.autoposting_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+    user_id = message.from_user.id
+    group_names = db.select_autoposting_group_name(user_id)
+    max_buttons = 5
+    for i in range(min(max_buttons, len(group_names))):
+        button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
+        markup_inline.add(button)
+    btn1_inline = types.InlineKeyboardButton(cfg.add_account_button, callback_data="add_account")
+    btn2_inline = types.InlineKeyboardButton(cfg.back_button, callback_data="back_autoposting_menu")
+    markup_inline.add(btn1_inline, btn2_inline)
+    await Accounts_button.select_accounts_button.set()
+    if group_names is None:
+        text = cfg.accounts_left_text
+    else:
+        text = cfg.accounts_right_text
+    await message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
 
 async def panel_administration(message):
     user_id = message.from_user.id
@@ -507,33 +529,7 @@ async def rembalance_user(message: types.Message):
 async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContext):
     if callback_query.message.chat.type == types.ChatType.PRIVATE:
         user_id = callback_query.from_user.id
-        if callback_query.data == "accounts_button":
-            markup_inline = types.InlineKeyboardMarkup(row_width=1)
-            user_id = callback_query.from_user.id
-            group_names = db.select_autoposting_group_name(user_id)
-            max_buttons = 5
-            for i in range(min(max_buttons, len(group_names))):
-                button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
-                markup_inline.add(button)
-            btn1_inline = types.InlineKeyboardButton(cfg.add_account_button, callback_data="add_account")
-            btn2_inline = types.InlineKeyboardButton(cfg.back_button, callback_data="back_autoposting_menu")
-            markup_inline.add(btn1_inline, btn2_inline)
-            await callback_query.message.edit_caption(caption=cfg.account_menu_text, reply_markup=markup_inline)
-            await Accounts_button.select_accounts_button.set()
-        elif callback_query.data == "groups_parser":
-            markup_inline = types.InlineKeyboardMarkup(row_width=1)
-            group_names = db.select_group_name(user_id)
-            max_buttons = 5
-            for i in range(min(max_buttons, len(group_names))):
-                button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
-                markup_inline.add(button)
-
-            btn_inline1 = types.InlineKeyboardButton(cfg.groups_add_button, callback_data='groups_add_button')
-            btn_inline2 = types.InlineKeyboardButton(cfg.back_button, callback_data='back_groups_parser')
-            markup_inline.add(btn_inline1, btn_inline2)
-            await callback_query.message.edit_caption(cfg.parser_text, reply_markup=markup_inline)
-            await Parser_groups_button.select_groups_button.set()
-        elif callback_query.data == "menu_after_pay":
+        if callback_query.data == "menu_after_pay":
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
             btn_inline1 = types.InlineKeyboardButton(cfg.groups_button, callback_data='groups_parser')
             markup_inline.add(btn_inline1)
@@ -664,7 +660,7 @@ async def accounts_button_1_button(callback_query: types.CallbackQuery, state: F
             btn1_inline = types.InlineKeyboardButton(cfg.add_post_button, callback_data="add_post")
             btn2_inline = types.InlineKeyboardButton(cfg.back_button, callback_data="back_autoposting_account")
             markup_inline.add(btn1_inline, btn2_inline)
-            await callback_query.message.edit_caption(caption=cfg.post_text, reply_markup=markup_inline)
+            await callback_query.message.edit_caption(caption=cfg.posts_right_text, reply_markup=markup_inline)
             await Account_post_button.account_post_button_1.set()
         elif callback_query.data == "back_sostoyanie":
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
@@ -1684,6 +1680,8 @@ async def other(message: types.Message):
             await autoposting_send(message)
         elif message.text == cfg.admin_panel_button:
             await panel_administration(message)
+        else:
+            await message.answer(cfg.unknown_command_text)
 
 
 async def on_startup(_):
