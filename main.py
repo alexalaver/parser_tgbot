@@ -593,11 +593,19 @@ async def parser_group_button(callback_query: types.CallbackQuery, state: FSMCon
             markup_inline.add(back_channels)
             await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
         elif callback_query.data == "back_sostoyanie":
+            user_id = callback_query.from_user.id
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
-            btn_inline1 = types.InlineKeyboardButton(cfg.groups_button, callback_data='groups_parser')
-            markup_inline.add(btn_inline1)
-            await callback_query.message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.parser_groups_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
-            await state.reset_state()
+            group_names = db.select_group_name(user_id)
+            max_buttons = 5
+            for i in range(min(max_buttons, len(group_names))):
+                button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
+                markup_inline.add(button)
+            btn_inline1 = types.InlineKeyboardButton(cfg.groups_add_button, callback_data='groups_add_button')
+            btn_inline2 = types.InlineKeyboardButton(cfg.back_button, callback_data='back_groups_parser')
+            markup_inline.add(btn_inline1, btn_inline2)
+            await Parser_groups_button.select_groups_button.set()
+            await callback_query.message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.parser_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+            await Parser_groups_button.select_groups_button.set()
 
 @dp.message_handler(state=Parser_groups_button.select_groups_button)
 async def parsers_groups_1_text(message: types.Message, state: FSMContext):
@@ -664,10 +672,22 @@ async def accounts_button_1_button(callback_query: types.CallbackQuery, state: F
             await Account_post_button.account_post_button_1.set()
         elif callback_query.data == "back_sostoyanie":
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
-            btn_inline1 = types.InlineKeyboardButton(cfg.account_button, callback_data='accounts_button')
-            markup_inline.add(btn_inline1)
-            await callback_query.message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.autoposting_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
-            await state.reset_state()
+            user_id = callback_query.from_user.id
+            group_names = db.select_autoposting_group_name(user_id)
+            max_buttons = 5
+            for i in range(min(max_buttons, len(group_names))):
+                button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
+                markup_inline.add(button)
+            btn1_inline = types.InlineKeyboardButton(cfg.add_account_button, callback_data="add_account")
+            btn2_inline = types.InlineKeyboardButton(cfg.back_button, callback_data="back_autoposting_menu")
+            markup_inline.add(btn1_inline, btn2_inline)
+            await Accounts_button.select_accounts_button.set()
+            if group_names is None:
+                text = cfg.accounts_left_text
+            else:
+                text = cfg.accounts_right_text
+            await callback_query.message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+            await Accounts_button.select_accounts_button.set()
 
 @dp.message_handler(state=Accounts_button.select_accounts_button)
 async def accounts_button_1_text(message: types.Message, state: FSMContext):
@@ -749,6 +769,24 @@ async def Button_account_post(callback_query: types.CallbackQuery, state: FSMCon
             markup_reply.add("Отменить")
             await callback_query.message.answer(cfg.create_account_post_1, reply_markup=markup_reply)
             await Add_post.add_post_1.set()
+        elif callback_query.data == "back_sostoyanie":
+            markup_inline = types.InlineKeyboardMarkup(row_width=1)
+            user_id = callback_query.from_user.id
+            group_names = db.select_autoposting_group_name(user_id)
+            max_buttons = 5
+            for i in range(min(max_buttons, len(group_names))):
+                button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
+                markup_inline.add(button)
+            btn1_inline = types.InlineKeyboardButton(cfg.add_account_button, callback_data="add_account")
+            btn2_inline = types.InlineKeyboardButton(cfg.back_button, callback_data="back_autoposting_menu")
+            markup_inline.add(btn1_inline, btn2_inline)
+            await Accounts_button.select_accounts_button.set()
+            if group_names is None:
+                text = cfg.accounts_left_text
+            else:
+                text = cfg.accounts_right_text
+            await callback_query.message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+            await Accounts_button.select_accounts_button.set()
 
 @dp.message_handler(state=Account_post_button.account_post_button_1)
 async def accounts_button_post_1_text(message: types.Message, state: FSMContext):
@@ -1067,11 +1105,20 @@ async def parsers_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
             markup_inline.add(back_channels)
             await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
         elif callback_query.data == "back_sostoyanie":
+            user_id = callback_query.from_user.id
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
-            btn_inline1 = types.InlineKeyboardButton(cfg.groups_button, callback_data='groups_parser')
-            markup_inline.add(btn_inline1)
-            await callback_query.message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.parser_groups_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
-            await state.reset_state()
+            group_names = db.select_group_name(user_id)
+            max_buttons = 5
+            for i in range(min(max_buttons, len(group_names))):
+                button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
+                markup_inline.add(button)
+
+            btn_inline1 = types.InlineKeyboardButton(cfg.groups_add_button, callback_data='groups_add_button')
+            btn_inline2 = types.InlineKeyboardButton(cfg.back_button, callback_data='back_groups_parser')
+            markup_inline.add(btn_inline1, btn_inline2)
+            await Parser_groups_button.select_groups_button.set()
+            await callback_query.message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.parser_text,reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+            await Parser_groups_button.select_groups_button.set()
         elif callback_query.data == "change_keyword":
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
             markup_inline.add(
@@ -1289,10 +1336,22 @@ async def account_use_1_button(callback_query: types.CallbackQuery, state: FSMCo
             await callback_query.message.edit_caption(caption=cfg.account_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
         elif callback_query.data == "back_sostoyanie":
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
-            btn_inline1 = types.InlineKeyboardButton(cfg.account_button, callback_data='accounts_button')
-            markup_inline.add(btn_inline1)
-            await callback_query.message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.autoposting_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
-            await state.reset_state()
+            user_id = callback_query.from_user.id
+            group_names = db.select_autoposting_group_name(user_id)
+            max_buttons = 5
+            for i in range(min(max_buttons, len(group_names))):
+                button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
+                markup_inline.add(button)
+            btn1_inline = types.InlineKeyboardButton(cfg.add_account_button, callback_data="add_account")
+            btn2_inline = types.InlineKeyboardButton(cfg.back_button, callback_data="back_autoposting_menu")
+            markup_inline.add(btn1_inline, btn2_inline)
+            await Accounts_button.select_accounts_button.set()
+            if group_names is None:
+                text = cfg.accounts_left_text
+            else:
+                text = cfg.accounts_right_text
+            await callback_query.message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+            await Accounts_button.select_accounts_button.set()
 
 @dp.message_handler(state=Account_use.account_use_1)
 async def account_use_1_texts(message: types.Message, state: FSMContext):

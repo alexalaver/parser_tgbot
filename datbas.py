@@ -487,3 +487,9 @@ class Data:
         with self.connect:
             self.cursor.execute("UPDATE groups SET data_end=Null WHERE number_group=%s", (number_group,))
             self.connect.commit()
+
+    def check_autoposting_group_name(self, id):
+        with self.connect:
+            self.cursor.execute("SELECT group_name FROM autoposting_groups WHERE id=%s", (id,))
+            a = self.cursor.fetcone()
+            return a
