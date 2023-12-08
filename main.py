@@ -506,6 +506,16 @@ async def rembalance_user(message: types.Message):
 async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContext):
     if callback_query.message.chat.type == types.ChatType.PRIVATE:
         user_id = callback_query.from_user.id
+        number_group_parser = None
+        channels_parser = None
+        check_tarife_parser = None
+        group_name_parser = None
+        channels_count_all_parser = None
+        channels_count_parser = None
+        channels_page_parser = None
+        page_here_parser = None
+        from_page_parser = None
+        before_page_parser = None
         if callback_query.data == "menu_after_pay_parser":
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
             btn_inline1 = types.InlineKeyboardButton(cfg.groups_button, callback_data='groups_parser')
@@ -528,7 +538,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 await callback_query.answer(cfg.error_group_5, show_alert=True)
         elif callback_query.data in db.select_group_name(user_id):
             number_group_parser = db.select_number_group(user_id, callback_query.data)
-            await state.update_data(number_group_parser=number_group_parser)
+            number_group_parser=number_group_parser
             channels_parser = db.select_channels(user_id, callback_query.data)
             markup_inline = types.InlineKeyboardMarkup(row_width=2)
             channels_count_parser= len(channels_parser)
@@ -536,11 +546,11 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
             page_here_parser = 1
             from_page_parser = 0
             before_page_parser = 10
-            await state.update_data(channels_count_parser=channels_count_parser)
-            await state.update_data(channels_page_parser=channels_page_parser)
-            await state.update_data(page_here_parser=page_here_parser)
-            await state.update_data(from_page_parser=from_page_parser)
-            await state.update_data(before_page_parser=before_page_parser)
+            channels_count_parser=channels_count_parser
+            channels_page_parser=channels_page_parser
+            page_here_parser=page_here_parser
+            from_page_parser=from_page_parser
+            before_page_parser=before_page_parser
             for channel in channels_parser[from_page_parser:before_page_parser]:
                 buttons = types.InlineKeyboardButton(text=channel, callback_data=channel)
                 markup_inline.row(buttons)
@@ -658,18 +668,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
             markup_reply.add("Отменить")
             await callback_query.message.answer(cfg.create_account_post_1, reply_markup=markup_reply)
             await Add_post.add_post_1.set()
-        data = await state.get_data()
-        number_group_parser = data.get('number_group_parser')
-        channels_parser = db.select_channels_with_number(number_group_parser)
-        check_tarife_parser = db.check_date_tarife_for_number(number_group_parser)
-        group_name_parser = db.select_group_name_for_number_group(user_id, number_group_parser)
-        channels_count_all_parser = len(channels_parser)
-        channels_count_parser = data.get("channels_count_parser")
-        channels_page_parser = data.get("channels_page_parser")
-        page_here_parser = data.get("page_here_parser")
-        from_page_parser = data.get("from_page_parser")
-        before_page_parser = data.get("before_page_parser")
-        if callback_query.data in channels_parser:
+        elif callback_query.data in channels_parser:
             if check_tarife_parser is None:
                 await callback_query.answer(text=cfg.error_oplata, show_alert=True)
             else:
