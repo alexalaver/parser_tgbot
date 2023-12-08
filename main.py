@@ -507,15 +507,31 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
     if callback_query.message.chat.type == types.ChatType.PRIVATE:
         user_id = callback_query.from_user.id
         if callback_query.data == "menu_after_pay_parser":
+            user_id = callback_query.from_user.id
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
-            btn_inline1 = types.InlineKeyboardButton(cfg.groups_button, callback_data='groups_parser')
+            group_names = db.select_group_name(user_id)
+            max_buttons = 5
+            for i in range(min(max_buttons, len(group_names))):
+                button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
+                markup_inline.add(button)
+            btn_inline1 = types.InlineKeyboardButton(cfg.groups_add_button, callback_data='groups_add_button_parser')
             markup_inline.add(btn_inline1)
-            await callback_query.message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.parser_groups_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+            await callback_query.message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.parser_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
         elif callback_query.data == "menu_after_pay_autoposting":
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
-            btn_inline1 = types.InlineKeyboardButton(cfg.account_button, callback_data='accounts_button')
-            markup_inline.add(btn_inline1)
-            await callback_query.message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.autoposting_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+            user_id = callback_query.from_user.id
+            group_names = db.select_autoposting_group_name(user_id)
+            max_buttons = 5
+            for i in range(min(max_buttons, len(group_names))):
+                button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
+                markup_inline.add(button)
+            btn1_inline = types.InlineKeyboardButton(cfg.add_account_button, callback_data="add_account_autoposting")
+            markup_inline.add(btn1_inline)
+            if group_names is None:
+                text = cfg.accounts_left_text
+            else:
+                text = cfg.accounts_right_text
+            await callback_query.message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
         elif callback_query.data == "groups_add_button_parser":
             number_group_parser = db.check_number_group(user_id)
             if int(number_group_parser) < 5:
