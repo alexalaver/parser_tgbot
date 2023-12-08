@@ -763,12 +763,10 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
             await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline,
                                                       parse_mode=types.ParseMode.MARKDOWN)
         elif callback_query.data == "change_keyword_parser":
-            markup_inline = types.InlineKeyboardMarkup(row_width=1)
-            markup_inline.add(
-                types.InlineKeyboardButton(cfg.back_button, callback_data='back_keyword_parser')
-            )
+            markup_reply= types.ReplyKeyboardMarkup(row_width=1)
+            markup_reply.add(cfg.cancel_button)
             await state.update_data(number_group=number_group_parser)
-            await callback_query.message.edit_caption(cfg.change_keyword_text, reply_markup=markup_inline)
+            await callback_query.message.answer(cfg.change_keyword_text, reply_markup=markup_reply)
             await Change_keyword.change_keyword_1.set()
 
 @dp.callback_query_handler(state=Accounts_button.select_accounts_button)
@@ -1280,44 +1278,62 @@ async def change_keyword_1_func(message: types.Message, state: FSMContext):
         if message.text == "/cancel":
             await message.answer(cfg.cancel_sostoyanie, parse_mode=types.ParseMode.MARKDOWN)
             await state.reset_state()
+        elif message.text == cfg.cancel_button:
+            user_id = message.from_user.id
+            first_name = message.from_user.first_name
+            username = message.from_user.username
+            if (not db.check_user(user_id)):
+                db.add_user(user_id, first_name, username)
+            markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+            markup_reply.add(cfg.autoposting)
+            markup_reply.add(cfg.parser)
+            markup_reply.row(cfg.my_profile, cfg.support)
+            if db.select_admin(user_id) > 0:
+                markup_reply.add(cfg.admin_panel_button)
+
+            await message.answer(cfg.cancel_sostoyanie, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
+            await state.reset_state()
         else:
             if 2 <= len(message.text) <= 500:
                 if 1 <= len(text_lines) <= 20:
                     try:
+                        user_id = message.from_user.id
+                        first_name = message.from_user.first_name
+                        username = message.from_user.username
+                        if (not db.check_user(user_id)):
+                            db.add_user(user_id, first_name, username)
+                        markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+                        markup_reply.add(cfg.autoposting)
+                        markup_reply.add(cfg.parser)
+                        markup_reply.row(cfg.my_profile, cfg.support)
+                        if db.select_admin(user_id) > 0:
+                            markup_reply.add(cfg.admin_panel_button)
                         data = await state.get_data()
                         number_group = data.get("number_group")
                         db.update_keywords(text_lines, number_group)
                         group_name = db.get_group_name_number(number_group)
-                        await message.answer(cfg.correct_keyword_change(group_name), parse_mode=types.ParseMode.MARKDOWN)
+                        await message.answer(cfg.correct_keyword_change(group_name), parse_mode=types.ParseMode.MARKDOWN, reply_markup=markup_reply)
                         await state.finish()
                     except Exception as es:
                         await state.reset_state()
-                        await message.answer(cfg.error_change_keyword_1, parse_mode=types.ParseMode.MARKDOWN)
+                        user_id = message.from_user.id
+                        first_name = message.from_user.first_name
+                        username = message.from_user.username
+                        if (not db.check_user(user_id)):
+                            db.add_user(user_id, first_name, username)
+                        markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True,
+                                                                 one_time_keyboard=False)
+                        markup_reply.add(cfg.autoposting)
+                        markup_reply.add(cfg.parser)
+                        markup_reply.row(cfg.my_profile, cfg.support)
+                        if db.select_admin(user_id) > 0:
+                            markup_reply.add(cfg.admin_panel_button)
+                        await message.answer(cfg.error_change_keyword_1, parse_mode=types.ParseMode.MARKDOWN, reply_markup=markup_reply)
                         print(f"[ERROR] {es}")
                 else:
                     await message.answer(cfg.error_len_keyword_create, parse_mode=types.ParseMode.MARKDOWN)
             else:
                 await message.answer(cfg.error_len_keyword, parse_mode=types.ParseMode.MARKDOWN)
-
-@dp.callback_query_handler(state=Change_keyword.change_keyword_1)
-async def change_keyword_1_buttons(callback_query: types.CallbackQuery):
-    if callback_query.message.chat.type == types.ChatType.PRIVATE:
-        if callback_query.data == "back_keyword":
-            user_id = callback_query.from_user.id
-            markup_inline = types.InlineKeyboardMarkup(row_width=1)
-            group_names = db.select_group_name(user_id)
-            max_buttons = 5
-            for i in range(min(max_buttons, len(group_names))):
-                button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
-                markup_inline.add(button)
-
-            btn_inline1 = types.InlineKeyboardButton(cfg.groups_add_button, callback_data='groups_add_button')
-            btn_inline2 = types.InlineKeyboardButton(cfg.back_button, callback_data='back_groups_parser')
-            markup_inline.add(btn_inline1, btn_inline2)
-            await Parser_groups_button.select_groups_button.set()
-            await callback_query.message.edit_caption(caption=cfg.parser_text,reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
-        else:
-            await callback_query.answer(cfg.error_button_create_group, show_alert=True)
 
 @dp.message_handler(state=Create_group.create_group_1)
 async def create_group_func_1(message: types.Message, state: FSMContext):

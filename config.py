@@ -26,6 +26,7 @@ support = "Саппорт"
 change_keyword_button = "Изменить ✏"
 admin_panel_button = "Панель администратора"
 add_chat_id_button = "Добавить id чатов"
+cancel_button = "Отменить"
 
 panel_admin_text = "Вы находитесь в панели администратора, выберите нужную вами функцию."
 panel_admin_back_text = "Вы вышли из панели администратора."
