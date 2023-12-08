@@ -595,7 +595,6 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
             btn2_inline = types.InlineKeyboardButton(cfg.back_button, callback_data="back_autoposting_account")
             markup_inline.add(btn1_inline, btn2_inline)
             await callback_query.message.edit_caption(caption=cfg.posts_right_text, reply_markup=markup_inline)
-            await Account_post_button.account_post_button_1.set()
         elif callback_query.data == "back_sostoyanie_autoposting":
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
             user_id = callback_query.from_user.id
