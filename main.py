@@ -358,8 +358,7 @@ async def parsers_send(message):
         markup_inline.add(button)
 
     btn_inline1 = types.InlineKeyboardButton(cfg.groups_add_button, callback_data='groups_add_button')
-    btn_inline2 = types.InlineKeyboardButton(cfg.back_button, callback_data='back_groups_parser')
-    markup_inline.add(btn_inline1, btn_inline2)
+    markup_inline.add(btn_inline1)
     await Parser_groups_button.select_groups_button.set()
     await message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.parser_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
 
@@ -372,8 +371,7 @@ async def autoposting_send(message):
         button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
         markup_inline.add(button)
     btn1_inline = types.InlineKeyboardButton(cfg.add_account_button, callback_data="add_account")
-    btn2_inline = types.InlineKeyboardButton(cfg.back_button, callback_data="back_autoposting_menu")
-    markup_inline.add(btn1_inline, btn2_inline)
+    markup_inline.add(btn1_inline)
     await Accounts_button.select_accounts_button.set()
     if group_names is None:
         text = cfg.accounts_left_text
@@ -525,12 +523,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
 async def parser_group_button(callback_query: types.CallbackQuery, state: FSMContext):
     if callback_query.message.chat.type == types.ChatType.PRIVATE:
         user_id = callback_query.from_user.id
-        if callback_query.data == "back_groups_parser":
-            markup_inline = types.InlineKeyboardMarkup(row_width=1)
-            markup_inline.add(types.InlineKeyboardButton(cfg.groups_button, callback_data='groups_parser'))
-            await callback_query.message.edit_caption(caption=cfg.parser_groups_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
-            await state.finish()
-        elif callback_query.data == "groups_add_button":
+        if callback_query.data == "groups_add_button":
             number_group = db.check_number_group(user_id)
             if int(number_group) < 5:
                 markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
@@ -619,12 +612,7 @@ async def parsers_groups_1_text(message: types.Message, state: FSMContext):
 async def accounts_button_1_button(callback_query: types.CallbackQuery, state: FSMContext):
     if callback_query.message.chat.type == types.ChatType.PRIVATE:
         user_id = callback_query.from_user.id
-        if callback_query.data == "back_autoposting_menu":
-            markup_inline = types.InlineKeyboardMarkup(row_width=1)
-            markup_inline.add(types.InlineKeyboardButton(cfg.account_button, callback_data='accounts_button'))
-            await callback_query.message.edit_caption(caption=cfg.autoposting_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
-            await state.finish()
-        elif callback_query.data == "add_account":
+        if callback_query.data == "add_account":
             number_group = db.check_numbers_autoposting_group(user_id)
             if int(number_group) < 5:
                 markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
