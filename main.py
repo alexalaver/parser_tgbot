@@ -619,8 +619,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
                 markup_inline.add(button)
             btn1_inline = types.InlineKeyboardButton(cfg.add_account_button, callback_data="add_account_autoposting")
-            btn2_inline = types.InlineKeyboardButton(cfg.back_button, callback_data="back_autoposting_menu")
-            markup_inline.add(btn1_inline, btn2_inline)
+            markup_inline.add(btn1_inline)
             await callback_query.message.edit_caption(caption=cfg.account_menu_text, reply_markup=markup_inline)
         elif callback_query.data in db.select_autoposting_post_name(user_id):
             channels = db.select_chats_post(user_id, callback_query.data)
