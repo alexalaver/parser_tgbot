@@ -558,22 +558,22 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
             await state.update_data(number_group=number_group)
             channels = db.select_channels(user_id, callback_query.data)
             markup_inline = types.InlineKeyboardMarkup(row_width=2)
-            channels_count_autoposting = len(channels)
-            channels_page_autoposting = fnc.get_category(channels_count_autoposting)
-            page_here_autoposting = 1
-            from_page_autoposting = 0
-            before_page_autoposting = 10
-            await state.update_data(channels_count_autoposting=channels_count_autoposting)
-            await state.update_data(channels_page_autoposting=channels_page_autoposting)
-            await state.update_data(page_here_autoposting=page_here_autoposting)
-            await state.update_data(from_page_autoposting=from_page_autoposting)
-            await state.update_data(before_page_autoposting=before_page_autoposting)
-            for channel in channels[from_page_autoposting:before_page_autoposting]:
+            channels_count = len(channels)
+            channels_page= fnc.get_category(channels_count)
+            page_here = 1
+            from_page = 0
+            before_page = 10
+            await state.update_data(channels_count=channels_count)
+            await state.update_data(channels_page=channels_page)
+            await state.update_data(page_here=page_here)
+            await state.update_data(from_page_autoposting=from_page)
+            await state.update_data(before_page=before_page)
+            for channel in channels[from_page:before_page]:
                 buttons = types.InlineKeyboardButton(text=channel, callback_data=channel)
                 markup_inline.row(buttons)
-            buttons_count = types.InlineKeyboardButton(text=f"Страница {page_here_autoposting}/{channels_page_autoposting} 📄", callback_data="page")
+            buttons_count = types.InlineKeyboardButton(text=f"Страница {page_here}/{channels_pageg} 📄", callback_data="page")
             markup_inline.add(buttons_count)
-            if channels_count_autoposting > 10:
+            if channels_count > 10:
                 buttons_next = types.InlineKeyboardButton(text=cfg.next_page, callback_data="next_page")
                 buttons_old = types.InlineKeyboardButton(text=cfg.old_page, callback_data="old_page")
                 markup_inline.row(buttons_old, buttons_next)
