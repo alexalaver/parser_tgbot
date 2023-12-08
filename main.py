@@ -539,8 +539,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
                 markup_inline.add(button)
             btn1_inline = types.InlineKeyboardButton(cfg.add_post_button, callback_data="add_post")
-            btn2_inline = types.InlineKeyboardButton(cfg.back_button, callback_data="back_autoposting_account")
-            markup_inline.add(btn1_inline, btn2_inline)
+            markup_inline.add(btn1_inline)
             await callback_query.message.edit_caption(caption=cfg.posts_right_text, reply_markup=markup_inline)
         elif callback_query.data == "groups_add_button":
             number_group = db.check_number_group(user_id)
@@ -594,8 +593,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
                 markup_inline.add(button)
             btn1_inline = types.InlineKeyboardButton(cfg.add_account_button, callback_data="add_account")
-            btn2_inline = types.InlineKeyboardButton(cfg.back_button, callback_data="back_autoposting_menu")
-            markup_inline.add(btn1_inline, btn2_inline)
+            markup_inline.add(btn1_inline)
             await callback_query.message.edit_caption(caption=cfg.account_menu_text, reply_markup=markup_inline)
         elif callback_query.data in db.select_autoposting_post_name(user_id):
             channels_autoposting = db.select_chats_post(user_id, callback_query.data)
@@ -803,8 +801,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 buttons_old = types.InlineKeyboardButton(text=cfg.old_page, callback_data="old_page")
                 markup_inline.row(buttons_old, buttons_next)
             if db.check_date_tarife_account_for_number(number_group_autoposting) is None:
-                pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels,
-                                                               callback_data='pay_money_channels')
+                pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels')
                 markup_inline.add(pay_money_buttons)
             back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels')
             markup_inline.add(back_channels)
@@ -908,8 +905,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 for channel in channels[from_page:before_page]:
                     buttons = types.InlineKeyboardButton(text=channel, callback_data=channel)
                     markup_inline.row(buttons)
-                buttons_count = types.InlineKeyboardButton(text=f"Страница {page_here}/{channels_page} 📄",
-                                                           callback_data="page")
+                buttons_count = types.InlineKeyboardButton(text=f"Страница {page_here}/{channels_page} 📄", callback_data="page")
                 markup_inline.add(buttons_count)
                 if channels_count_all > 10:
                     buttons_next = types.InlineKeyboardButton(text=cfg.next_page, callback_data="next_page")
@@ -932,10 +928,8 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
             for i in range(min(max_buttons, len(group_names))):
                 button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
                 markup_inline.add(button)
-
             btn_inline1 = types.InlineKeyboardButton(cfg.groups_add_button, callback_data='groups_add_button')
-            btn_inline2 = types.InlineKeyboardButton(cfg.back_button, callback_data='back_groups_parser')
-            markup_inline.add(btn_inline1, btn_inline2)
+            markup_inline.add(btn_inline1)
             await callback_query.message.edit_caption(caption=cfg.parser_text, reply_markup=markup_inline,parse_mode=types.ParseMode.MARKDOWN)
         elif callback_query.data == "pay_money_channels":
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
