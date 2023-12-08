@@ -558,7 +558,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
             channels = db.select_channels(user_id, callback_query.data)
             markup_inline = types.InlineKeyboardMarkup(row_width=2)
             channels_count = len(channels)
-            channels_page= fnc.get_category(channels_count)
+            channels_page = fnc.get_category(channels_count)
             page_here = 1
             from_page = 0
             before_page = 10
@@ -570,7 +570,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
             for channel in channels[from_page:before_page]:
                 buttons = types.InlineKeyboardButton(text=channel, callback_data=channel)
                 markup_inline.row(buttons)
-            buttons_count = types.InlineKeyboardButton(text=f"Страница {page_here}/{channels_pageg} 📄", callback_data="page")
+            buttons_count = types.InlineKeyboardButton(text=f"Страница {page_here}/{channels_page} 📄", callback_data="page")
             markup_inline.add(buttons_count)
             if channels_count > 10:
                 buttons_next = types.InlineKeyboardButton(text=cfg.next_page, callback_data="next_page")
@@ -602,7 +602,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
             channels_count_autoposting = len(channels_autoposting)
             channels_page_autoposting = fnc.get_category(channels_count_autoposting)
             number_post = db.select_number_post(user_id, callback_query.data)
-            await state.update_data(number_post=number_post)
+            await state.update_data(number_post_autoposting=number_post)
             page_here_autoposting = 1
             from_page_autoposting = 0
             before_page_autoposting = 10
