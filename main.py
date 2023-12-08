@@ -529,7 +529,6 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
             else:
                 await callback_query.answer(cfg.error_group_5, show_alert=True)
         elif callback_query.data in db.select_group_name(user_id):
-            await Parsers_use.parsers_use_1.set()
             number_group_parser = db.select_number_group(user_id, callback_query.data)
             await state.update_data(number_group_parser=number_group_parser)
             channels_parser = db.select_channels(user_id, callback_query.data)
@@ -619,13 +618,10 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                         buttons_old = types.InlineKeyboardButton(text=cfg.old_page, callback_data="old_page_parser")
                         markup_inline.row(buttons_old, buttons_next)
                     if db.check_date_tarife_for_number(number_group_parser) is None:
-                        pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels,
-                                                                       callback_data='pay_money_channels_parser')
+                        pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels_parser')
                         markup_inline.add(pay_money_buttons)
-                    change_keywords = types.InlineKeyboardButton(text=cfg.change_keyword_button,
-                                                                 callback_data='change_keyword_parser')
-                    back_channels = types.InlineKeyboardButton(text=cfg.back_channels,
-                                                               callback_data='back_channels_parser')
+                    change_keywords = types.InlineKeyboardButton(text=cfg.change_keyword_button, callback_data='change_keyword_parser')
+                    back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels_parser')
                     markup_inline.add(change_keywords)
                     markup_inline.add(back_channels)
                     await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline,
@@ -654,11 +650,9 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     buttons_old = types.InlineKeyboardButton(text=cfg.old_page, callback_data="old_page_parser")
                     markup_inline.row(buttons_old, buttons_next)
                 if db.check_date_tarife_for_number(number_group_parser) is None:
-                    pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels,
-                                                                   callback_data='pay_money_channels_parser')
+                    pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels_parser')
                     markup_inline.add(pay_money_buttons)
-                change_keywords = types.InlineKeyboardButton(text=cfg.change_keyword_button,
-                                                             callback_data='change_keyword_parser')
+                change_keywords = types.InlineKeyboardButton(text=cfg.change_keyword_button, callback_data='change_keyword_parser')
                 back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels_parser')
                 markup_inline.add(change_keywords)
                 markup_inline.add(back_channels)
@@ -696,8 +690,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels_parser')
                 markup_inline.add(change_keywords)
                 markup_inline.add(back_channels)
-                await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline,
-                                                          parse_mode=types.ParseMode.MARKDOWN)
+                await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
         elif callback_query.data == "back_channels_parser":
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
             group_names = db.select_group_name(user_id)
@@ -705,11 +698,9 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
             for i in range(min(max_buttons, len(group_names))):
                 button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
                 markup_inline.add(button)
-
             btn_inline1 = types.InlineKeyboardButton(cfg.groups_add_button, callback_data='groups_add_button_parser')
             markup_inline.add(btn_inline1)
-            await callback_query.message.edit_caption(caption=cfg.parser_text, reply_markup=markup_inline,
-                                                      parse_mode=types.ParseMode.MARKDOWN)
+            await callback_query.message.edit_caption(caption=cfg.parser_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
         elif callback_query.data == "pay_money_channels_parser":
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
             btn_inline1 = types.InlineKeyboardButton(cfg.confirm_oplata, callback_data='confirm_oplata_parser')
