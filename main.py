@@ -655,7 +655,8 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels_autoposting')
                 markup_inline.add(pay_money_buttons)
             back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels_autoposting')
-            markup_inline.add(back_channels)
+            delete_post_button = types.InlineKeyboardButton(text=cfg.delete_post_button, callback_data="delete_post_autoposting")
+            markup_inline.add(back_channels, delete_post_button)
             message_id_bot = db.select_post_name(callback_query.data)
             await bot.forward_message(chat_id=user_id, from_chat_id=user_id, message_id=message_id_bot)
             await callback_query.message.edit_caption(caption=cfg.account_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
@@ -979,7 +980,10 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 btn1_inline = types.InlineKeyboardButton(cfg.add_account_button, callback_data="add_account_autoposting")
                 btn2_inline = types.InlineKeyboardButton(cfg.back_button, callback_data="back_autoposting_menu")
                 markup_inline.add(btn1_inline, btn2_inline)
-                text = cfg.account_menu_text
+                if group_names is None:
+                    text = cfg.accounts_left_text
+                else:
+                    text = cfg.accounts_right_text
                 await callback_query.message.edit_caption(caption=text, reply_markup=markup_inline)
             elif callback_query.data == "pay_money_channels_autoposting":
                 markup_inline = types.InlineKeyboardMarkup(row_width=1)
@@ -1035,7 +1039,8 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels_autoposting')
                     markup_inline.add(pay_money_buttons)
                 back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels_autoposting')
-                markup_inline.add(back_channels)
+                delete_post_button = types.InlineKeyboardButton(text=cfg.delete_post_button, callback_data="delete_post_autoposting")
+                markup_inline.add(back_channels, delete_post_button)
                 await callback_query.message.edit_caption(caption=cfg.account_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
 
 
