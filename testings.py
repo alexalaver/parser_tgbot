@@ -1,5 +1,7 @@
-a = "434134aa"
-if int(a):
-    print('right')
-else:
-    print('no right')
+import re
+
+a = "Здравствуйте, вот допустим ваш 'post 1', что вы хотите сделать"
+
+matches = re.findall(r"'([^']*)'", a)
+
+print(matches[0])

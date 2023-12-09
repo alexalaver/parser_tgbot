@@ -491,5 +491,11 @@ class Data:
     def check_autoposting_group_name(self, id):
         with self.connect:
             self.cursor.execute("SELECT group_name FROM autoposting_groups WHERE id=%s", (id,))
-            a = self.cursor.fetcone()
+            a = self.cursor.fetchone()
             return a
+
+    def select_post_name(self, post):
+        with self.connect:
+            self.cursor.execute("SELECT message_id_bot FROM autoposting_post WHERE post=%s", (post,))
+            a = self.cursor.fetchone()
+            return a[0]

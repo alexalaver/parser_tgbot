@@ -307,12 +307,6 @@ class Create_account_autoposting(StatesGroup):
     create_autoposting_1 = State()
     create_autoposting_2 = State()
 
-class Parsers_use(StatesGroup):
-    parsers_use_1 = State()
-
-class Account_use(StatesGroup):
-    account_use_1 = State()
-
 class Change_keyword(StatesGroup):
     change_keyword_1 = State()
 
@@ -321,14 +315,6 @@ class Add_chat_ids(StatesGroup):
     add_ids_1 = State()
     add_ids_2 = State()
 
-class Accounts_button(StatesGroup):
-    select_accounts_button = State()
-
-class Parser_groups_button(StatesGroup):
-    select_groups_button = State()
-
-class Account_post_button(StatesGroup):
-    account_post_button_1 = State()
 
 class Add_post(StatesGroup):
     add_post_1 = State()
@@ -670,6 +656,8 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 markup_inline.add(pay_money_buttons)
             back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels_autoposting')
             markup_inline.add(back_channels)
+            message_id_bot = db.select_post_name(callback_query.data)
+            await bot.forward_message(chat_id=user_id, from_chat_id=user_id, message_id=message_id_bot)
             await callback_query.message.edit_caption(caption=cfg.account_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
         elif callback_query.data == "add_post_autoposting":
             markup_reply = types.ReplyKeyboardMarkup(resize_keyboard=True)
