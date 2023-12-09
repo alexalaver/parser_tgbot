@@ -953,7 +953,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 db.delete_post(post_name2)
                 await callback_query.message.edit_caption(caption=cfg.delete_post_yes_text(post_name2), reply_markup=None)
             elif callback_query.data == "no_delete_autoposting":
-                post_name1 = str(callback_query.message.text)
+                post_name1 = str(callback_query.message)
                 await bot.send_message(user_id, str(post_name1))
                 post_name2 = re.findall(r"'([^']*)'", post_name1)
                 await bot.send_message(user_id, str(post_name2))
