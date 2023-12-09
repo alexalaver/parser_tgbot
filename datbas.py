@@ -502,5 +502,5 @@ class Data:
 
     def delete_post(self, post):
         with self.connect:
-            self.cursor.execute("DELETE FROM autoposting_post WHERE post=%s", (int(post),))
+            self.cursor.execute("DELETE FROM autoposting_post WHERE post=%s", (post,))
             self.connect.commit()

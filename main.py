@@ -955,12 +955,11 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
             elif callback_query.data == "no_delete_autoposting":
                 post_name1 = str(callback_query.message)
                 post_name2 = re.findall(r"'([^']*)'", post_name1)
-                await bot.send_message(user_id, str(post_name2[0]))
                 channels = db.select_chats_post(user_id, str(post_name2[0]))
                 markup_inline = types.InlineKeyboardMarkup(row_width=1)
                 channels_count_autoposting = len(channels)
                 channels_page_autoposting = fnc.get_category(channels_count_autoposting)
-                number_post_autoposting = db.select_number_post(user_id, callback_query.data)
+                number_post_autoposting = db.select_number_post(user_id, str(post_name2[0]))
                 await state.update_data(number_post_autoposting=number_post_autoposting)
                 page_here_autoposting = 1
                 from_page_autoposting = 0
