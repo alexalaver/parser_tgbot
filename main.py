@@ -635,6 +635,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
             channels_page_autoposting = fnc.get_category(channels_count_autoposting)
             number_post_autoposting = db.select_number_post(user_id, callback_query.data)
             await state.update_data(number_post_autoposting=number_post_autoposting)
+            await state.update_data(post_name_autoposting=callback_query.data)
             page_here_autoposting = 1
             from_page_autoposting = 0
             before_page_autoposting = 10
@@ -937,13 +938,15 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                         markup_inline.add(pay_money_buttons)
                     back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels_autoposting')
                     markup_inline.add(back_channels)
-                    await callback_query.message.edit_caption(caption=cfg.account_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+                    await callback_query.message.edit_caption(caption=cfg.account_text_use(), reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
             elif callback_query.data == "delete_post_autoposting":
+                data = await state.get_data()
+                post_name = data.get("post_name_autoposting")
                 markup_inline = types.InlineKeyboardMarkup(row_width=1)
                 btn_yes = types.InlineKeyboardButton("Да", callback_data='yes_delete_autoposting')
                 btn_no = types.InlineKeyboardButton("Нет", callback_data='no_delete_autoposting')
                 markup_inline.add(btn_yes, btn_no)
-                await callback_query.message.edit_caption(caption=cfg.delete_post_text(callback_query.data), reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+                await callback_query.message.edit_caption(caption=cfg.delete_post_text(post_name), reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
             elif callback_query.data == "yes_delete_autoposting":
                 post_name1 = str(callback_query.message.text)
                 post_name2 = re.findall(r"'([^']*)'", post_name1)
@@ -952,7 +955,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
             elif callback_query.data == "no_delete_autoposting":
                 post_name1 = str(callback_query.message.text)
                 post_name2 = re.findall(r"'([^']*)'", post_name1)
-                channels = db.select_chats_post(user_id, post_name2)
+                channels = db.select_chats_post(user_id, post_name2[0])
                 markup_inline = types.InlineKeyboardMarkup(row_width=1)
                 channels_count_autoposting = len(channels)
                 channels_page_autoposting = fnc.get_category(channels_count_autoposting)
