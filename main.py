@@ -951,7 +951,8 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 post_name1 = str(callback_query.message)
                 post_name2 = re.findall(r"'([^']*)'", post_name1)
                 db.delete_post(post_name2[0])
-                await callback_query.message.edit_caption(caption=cfg.delete_post_yes_text(post_name2), reply_markup=None)
+                await callback_query.message.delete()
+                await callback_query.message.answer(text=cfg.delete_post_yes_text(post_name2[0]))
             elif callback_query.data == "no_delete_autoposting":
                 post_name1 = str(callback_query.message)
                 post_name2 = re.findall(r"'([^']*)'", post_name1)
@@ -986,8 +987,6 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels_autoposting')
                 delete_post_button = types.InlineKeyboardButton(text=cfg.delete_post_button, callback_data="delete_post_autoposting")
                 markup_inline.add(delete_post_button, back_channels)
-                message_id_bot = db.select_post_name(str(post_name2[0]))
-                await bot.forward_message(chat_id=user_id, from_chat_id=user_id, message_id=message_id_bot)
                 await callback_query.message.edit_caption(caption=cfg.account_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
             elif callback_query.data == "old_page_autoposting":
                 print(
