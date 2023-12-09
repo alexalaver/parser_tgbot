@@ -444,9 +444,9 @@ class Data:
             else:
                 return len(b)
 
-    def add_post_account(self, id, post, string_session, chats, time_betw, number_post, number_account, channel_tag):
+    def add_post_account(self, id, post, string_session, chats, time_betw, number_post, number_account, channel_tag, message_id_bot):
         with self.connect:
-            self.cursor.execute("INSERT INTO autoposting_post(id, post, string_session, chats, time_betw, number_post, number_account, channel_tag) VALUES(%s, %s, %s, %s, %s, %s, %s, %s)", (id, post, string_session, chats, time_betw, number_post, number_account, channel_tag,))
+            self.cursor.execute("INSERT INTO autoposting_post(id, post, string_session, chats, time_betw, number_post, number_account, channel_tag, message_id_bot) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)", (id, post, string_session, chats, time_betw, number_post, number_account, channel_tag, message_id_bot,))
             self.connect.commit()
 
     def get_string_session(self, number_account):
