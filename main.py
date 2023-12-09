@@ -13,6 +13,7 @@ import asyncio
 import config as cfg
 import logging
 import datetime
+import re
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -629,7 +630,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
             await callback_query.message.edit_caption(caption=text, reply_markup=markup_inline)
         elif callback_query.data in db.select_autoposting_post_name(user_id):
             channels = db.select_chats_post(user_id, callback_query.data)
-            markup_inline = types.InlineKeyboardMarkup(row_width=2)
+            markup_inline = types.InlineKeyboardMarkup(row_width=1)
             channels_count_autoposting = len(channels)
             channels_page_autoposting = fnc.get_category(channels_count_autoposting)
             number_post_autoposting = db.select_number_post(user_id, callback_query.data)
@@ -656,7 +657,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 markup_inline.add(pay_money_buttons)
             back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels_autoposting')
             delete_post_button = types.InlineKeyboardButton(text=cfg.delete_post_button, callback_data="delete_post_autoposting")
-            markup_inline.add(back_channels, delete_post_button)
+            markup_inline.add(delete_post_button, back_channels)
             message_id_bot = db.select_post_name(callback_query.data)
             await bot.forward_message(chat_id=user_id, from_chat_id=user_id, message_id=message_id_bot)
             await callback_query.message.edit_caption(caption=cfg.account_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
@@ -937,6 +938,52 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels_autoposting')
                     markup_inline.add(back_channels)
                     await callback_query.message.edit_caption(caption=cfg.account_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+            elif callback_query.data == "delete_post_autoposting":
+                markup_inline = types.InlineKeyboardMarkup(row_width=1)
+                btn_yes = types.InlineKeyboardButton("Да", callback_data='yes_delete_autoposting')
+                btn_no = types.InlineKeyboardButton("Нет", callback_data='no_delete_autoposting')
+                markup_inline.add(btn_yes, btn_no)
+                await callback_query.message.edit_caption(caption=cfg.delete_post_text(callback_query.data), reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+            elif callback_query.data == "yes_delete_autoposting":
+                post_name1 = str(callback_query.message)
+                post_name2 = re.findall(r"'([^']*)'", post_name1)
+                db.delete_post(post_name2)
+                await callback_query.message.edit_caption(caption=cfg.delete_post_yes_text(post_name2), reply_markup=None)
+            elif callback_query.data == "no_delete_autoposting":
+                channels = db.select_chats_post(user_id, callback_query.data)
+                markup_inline = types.InlineKeyboardMarkup(row_width=1)
+                channels_count_autoposting = len(channels)
+                channels_page_autoposting = fnc.get_category(channels_count_autoposting)
+                number_post_autoposting = db.select_number_post(user_id, callback_query.data)
+                await state.update_data(number_post_autoposting=number_post_autoposting)
+                page_here_autoposting = 1
+                from_page_autoposting = 0
+                before_page_autoposting = 10
+                await state.update_data(channels_count_autoposting=channels_count_autoposting)
+                await state.update_data(channels_page_autoposting=channels_page_autoposting)
+                await state.update_data(page_here_autoposting=page_here_autoposting)
+                await state.update_data(from_page_autoposting=from_page_autoposting)
+                await state.update_data(before_page_autoposting=before_page_autoposting)
+                for channel in channels[from_page_autoposting:before_page_autoposting]:
+                    buttons = types.InlineKeyboardButton(text=channel, callback_data=channel)
+                    markup_inline.row(buttons)
+                buttons_count = types.InlineKeyboardButton(
+                    text=f"Страница {page_here_autoposting}/{channels_page_autoposting} 📄",
+                    callback_data="page_autoposting")
+                markup_inline.add(buttons_count)
+                if channels_count_autoposting > 10:
+                    buttons_next = types.InlineKeyboardButton(text=cfg.next_page, callback_data="next_page_autoposting")
+                    buttons_old = types.InlineKeyboardButton(text=cfg.old_page, callback_data="old_page_autoposting")
+                    markup_inline.row(buttons_old, buttons_next)
+                if db.check_date_tarife_account(user_id, callback_query.data) is None:
+                    pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels_autoposting')
+                    markup_inline.add(pay_money_buttons)
+                back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels_autoposting')
+                delete_post_button = types.InlineKeyboardButton(text=cfg.delete_post_button, callback_data="delete_post_autoposting")
+                markup_inline.add(delete_post_button, back_channels)
+                message_id_bot = db.select_post_name(callback_query.data)
+                await bot.forward_message(chat_id=user_id, from_chat_id=user_id, message_id=message_id_bot)
+                await callback_query.message.edit_caption(caption=cfg.account_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
             elif callback_query.data == "old_page_autoposting":
                 print(
                     f"{channels_count_autoposting}\n{page_here_autoposting}\n{from_page_autoposting}\n{before_page_autoposting}")

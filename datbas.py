@@ -499,3 +499,8 @@ class Data:
             self.cursor.execute("SELECT message_id_bot FROM autoposting_post WHERE post=%s", (post,))
             a = self.cursor.fetchone()
             return a[0]
+
+    def delete_post(self, post):
+        with self.connect:
+            self.cursor.execute("DELETE FROM autoposting_post WHERE post=%s", (int(post),))
+            self.connect.commit()
