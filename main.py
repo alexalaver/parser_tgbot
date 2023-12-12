@@ -1469,7 +1469,6 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                                 if title_div:
                                     group_name = title_div.get_text(strip=True)
                                     channels_name_1.append(group_name)
-                                    print(channels_name_1)
                                 else:
                                     await message.answer(cfg.error_channel_name_add)
                                     break
@@ -1496,6 +1495,7 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                                     await message.answer(cfg.error_channel_name_add)
                                     break
                         if len(channels_name_1) == len(text_line):
+                            print(channels_name_1)
                             channels_name_2 = list(dict.fromkeys([element + ' ⚠' for element in channels_name_1]))
                             check_number_group = db.check_numbers_group()
                             new_number_group = check_number_group + 1
