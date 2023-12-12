@@ -112,9 +112,9 @@ class Data:
             else:
                 return a[0]
 
-    def add_channels(self, id, number_group, keyword, channels, group_name):
+    def add_channels(self, id, number_group, keyword, channels, group_name, channels_title):
         with self.connect:
-            self.cursor.execute("INSERT INTO groups (id, number_group, keyword, channels, group_name) VALUES (%s, %s, %s, %s, %s)", (id, number_group, keyword, channels, group_name,))
+            self.cursor.execute("INSERT INTO groups (id, number_group, keyword, channels, group_name, channels_title) VALUES (%s, %s, %s, %s, %s, %s)", (id, number_group, keyword, channels, group_name, channels_title, ))
             self.connect.commit()
 
     def add_cashe_group_name_parsing(self, id, group_name):
@@ -152,6 +152,12 @@ class Data:
             a = self.cursor.fetchone()[0]
             return a
 
+    def select_channels_name(self, id, group_name):
+        with self.connect:
+            self.cursor.execute("SELECT channels_title FROM groups WHERE id=%s AND group_name=%s", (id, group_name,))
+            a = self.cursor.fetchone()[0]
+            return a
+
     def select_all_off_channels(self, id, group_name):
         with self.connect:
             self.cursor.execute("SELECT off_channels FROM groups WHERE id=%s AND group_name=%s", (id, group_name,))
@@ -171,6 +177,12 @@ class Data:
     def select_channels_with_number(self, number_group):
         with self.connect:
             self.cursor.execute("SELECT channels FROM groups WHERE number_group=%s", (number_group,))
+            a = self.cursor.fetchone()[0]
+            return a
+
+    def select_channels_name_with_number(self, number_group):
+        with self.connect:
+            self.cursor.execute("SELECT channels_title FROM groups WHERE number_group=%s", (number_group,))
             a = self.cursor.fetchone()[0]
             return a
 
@@ -232,6 +244,11 @@ class Data:
     def update_all_channels(self, number_group, channels):
         with self.connect:
             self.cursor.execute("UPDATE groups SET channels=%s WHERE number_group=%s", (channels, number_group,))
+            self.connect.commit()
+
+    def update_all_channels_name(self, number_group, channels_name):
+        with self.connect:
+            self.cursor.execute("UPDATE groups SET channels_title=%s WHERE number_group=%s", (channels_name, number_group,))
             self.connect.commit()
 
     def update_off_channels(self, number_group, channels):

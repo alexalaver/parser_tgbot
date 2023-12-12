@@ -8,6 +8,8 @@ from datetime import timedelta
 from telethon import TelegramClient
 from telethon.sessions import StringSession
 from telethon.errors import FloodWaitError, ChannelPrivateError, ChatForbiddenError, UserPrivacyRestrictedError, PeerIdInvalidError, SessionPasswordNeededError, PhoneCodeExpiredError, PhoneNumberUnoccupiedError, RPCError
+from bs4 import BeautifulSoup
+import requests
 import functions as fnc
 import asyncio
 import config as cfg
@@ -73,7 +75,7 @@ async def search_and_forward():
                 continue
 
             group = groups[num]
-            user_id, chat_idn, keywords, data_end, group_name = group[0], group[2], group[5], group[3], group[4]
+            user_id, chat_idn, keywords, data_end, group_name, chat_name = group[0], group[2], group[5], group[3], group[4], group[8]
             chat_ids = [item for item in chat_idn if item.endswith('✅')]
             chat_ids = [item for item in chat_ids if len(item) < 13 or item[13] != '+']
 
@@ -82,55 +84,60 @@ async def search_and_forward():
             current_date = datetime.datetime.now()
             formated_base = datetime.datetime.strptime(data_end, "%Y-%m-%d %H:%M:%S")
             if formated_base > current_date:
-                for chat_id in chat_ids:
-                    trimmed_chat_id = chat_id[:-2]
-                    exception_occurred = False
-                    messages_sent = db.select_message_id(number_group)
-                    try:
-                        chat_select_id = await telethon_client.get_entity(trimmed_chat_id)
-                        chat_check_id = chat_select_id.id
-                        last_id = last_message_ids.get(trimmed_chat_id, 0)
-                        messages_to_check = 30
-                        forced_check = num == 0 and last_id == 0
-                        async for message in telethon_client.iter_messages(chat_check_id, offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
-                            if message.text:
-                                for keyword in keywords:
-                                    if keyword.lower() in message.text.lower():
-                                        message_key = [chat_check_id, message.id]
-                                        if message_key not in messages_sent:
-                                            sender = await message.get_sender()
-                                            if "http" in trimmed_chat_id:
-                                                link_message = f"{trimmed_chat_id}/{str(message.id)}"
-                                            else:
-                                                link_message = f"t.me/{trimmed_chat_id[1:]}/{str(message.id)}"
-                                            sender_identifier = f"@{sender.username}" if sender else "Анонимный пользователь"
-                                            message_text = f"Обнаружено ключевое слово\n\nЧат: {trimmed_chat_id}\n\nПользователь: {sender_identifier}\n\nЗапрос: {keyword}\n\nСсылка на сообщение: {link_message}\n\nТекст:\n{message.text}"
-                                            await bot.send_message(user_id, message_text)
-                                            # print(f"Message sent to user {user_id}: {message.text}")
-                                            db.update_all_message_ids(number_group, message_key)
-                                            await asyncio.sleep(2)
-                                        break
+                for chat_id_name in chat_name:
+                    for chat_id in chat_ids:
+                        trimmed_chat_id = chat_id[:-2]
+                        exception_occurred = False
+                        messages_sent = db.select_message_id(number_group)
+                        try:
+                            chat_select_id = await telethon_client.get_entity(trimmed_chat_id)
+                            chat_check_id = chat_select_id.id
+                            last_id = last_message_ids.get(trimmed_chat_id, 0)
+                            messages_to_check = 30
+                            forced_check = num == 0 and last_id == 0
+                            async for message in telethon_client.iter_messages(chat_check_id, offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
+                                if message.text:
+                                    for keyword in keywords:
+                                        if keyword.lower() in message.text.lower():
+                                            message_key = [chat_check_id, message.id]
+                                            if message_key not in messages_sent:
+                                                sender = await message.get_sender()
+                                                if "http" in trimmed_chat_id:
+                                                    link_message = f"{trimmed_chat_id}/{str(message.id)}"
+                                                else:
+                                                    link_message = f"t.me/{trimmed_chat_id[1:]}/{str(message.id)}"
+                                                sender_identifier = f"@{sender.username}" if sender else "Анонимный пользователь"
+                                                message_text = f"Обнаружено ключевое слово\n\nЧат: {trimmed_chat_id}\n\nПользователь: {sender_identifier}\n\nЗапрос: {keyword}\n\nСсылка на сообщение: {link_message}\n\nТекст:\n{message.text}"
+                                                await bot.send_message(user_id, message_text)
+                                                # print(f"Message sent to user {user_id}: {message.text}")
+                                                db.update_all_message_ids(number_group, message_key)
+                                                await asyncio.sleep(2)
+                                            break
 
-                    except FloodWaitError as e:
-                        wait_time = e.seconds
-                        print(f"Flood wait error on chat {trimmed_chat_id}. Sleeping for {wait_time} seconds.")
-                        await asyncio.sleep(3)
-                        exception_occurred = True
-                    except Exception as erri:
-                        print(f"[ERROR EXCEPTION] {erri}")
-                        all_channels = db.select_channels_with_number(number_group)
-                        new_callback = chat_id[:-1] + '⏳'
-                        new_channels = [new_callback if item == chat_id else item for item in all_channels]
-                        db.update_all_channels(number_group, new_channels)
-                        await asyncio.sleep(2)
-                        exception_occurred = True
-                    finally:
-                        if exception_occurred is False:
-                            messages = await telethon_client.get_messages(trimmed_chat_id, limit=1)
-                            if messages:
-                                last_message_ids[trimmed_chat_id] = messages[0].id
-                            else:
-                                pass
+                        except FloodWaitError as e:
+                            wait_time = e.seconds
+                            print(f"Flood wait error on chat {trimmed_chat_id}. Sleeping for {wait_time} seconds.")
+                            await asyncio.sleep(3)
+                            exception_occurred = True
+                        except Exception as erri:
+                            print(f"[ERROR EXCEPTION] {erri}")
+                            all_channels = db.select_channels_with_number(number_group)
+                            new_callback = chat_id[:-1] + '⏳'
+                            new_channels = [new_callback if item == chat_id else item for item in all_channels]
+                            db.update_all_channels(number_group, new_channels)
+                            all_channels_name = db.select_channels_name_with_number(number_group)
+                            new_callback_name = chat_id_name[:-1] + '⏳'
+                            new_channels_name = [new_callback_name if item == chat_id_name else item for item in all_channels_name]
+                            db.update_all_channels_name(number_group, new_channels_name)
+                            await asyncio.sleep(2)
+                            exception_occurred = True
+                        finally:
+                            if exception_occurred is False:
+                                messages = await telethon_client.get_messages(trimmed_chat_id, limit=1)
+                                if messages:
+                                    last_message_ids[trimmed_chat_id] = messages[0].id
+                                else:
+                                    pass
             else:
                 db.delete_data_end_group(number_group)
                 formated_chat_idn = [s.replace('✅', '⚠') for s in chat_idn]
@@ -162,81 +169,84 @@ async def search_and_forward_close_group():
                 continue
 
             group = groups[num]
-            user_id, chat_ids, keywords, channelss_link, data_end, group_name = group[0], group[7], group[5], group[2], group[3], group[4]
+            user_id, chat_ids, keywords, channelss_link, data_end, group_name, channels_name = group[0], group[7], group[5], group[2], group[3], group[4], group[8]
             channels_link = [item for item in channelss_link if len(item) >= 13 and item[13] == '+']
             number_group = group[1]
             current_date = datetime.datetime.now()
             formated_base = datetime.datetime.strptime(data_end, "%Y-%m-%d %H:%M:%S")
             if formated_base > current_date:
                 if chat_ids is not None:
-                    for chat_id in chat_ids:
-                        index_chat_id = int(chat_id[0])
-                        links_1 = channels_link[index_chat_id - 1]
-                        links_2 = links_1[-1]
-                        if links_2 == "✅":
-                            trimmed_chat_ids = int(chat_id[3:])
-                            exception_occurred = False
-                            messages_sent = db.select_message_id(number_group)
-                            try:
-                                last_id = last_message_ids.get(trimmed_chat_ids, 0)
-                                messages_to_check = 30
-                                forced_check = num == 0 and last_id == 0
-                                async for message in telethon_client.iter_messages(trimmed_chat_ids, offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
-                                    if message.text:
-                                        for keyword in keywords:
-                                            if keyword.lower() in message.text.lower():
-                                                message_key = [trimmed_chat_ids, message.id]
-                                                if message_key not in messages_sent:
-                                                    sender = await message.get_sender()
-                                                    sender_identifier = f"@{sender.username}" if sender else "Анонимный пользователь"
-                                                    message_text = f"Обнаружено ключевое слово\n\nЧат: {links_1[:-2]}\n\nПользователь: {sender_identifier}\n\nЗапрос: {keyword}\n\nСсылка на сообщение: Чат закрыт.\n\nТекст:\n{message.text}"
-                                                    await bot.send_message(user_id, message_text)
-                                                    # print(f"Message sent to user {user_id}: {message.text}")
-                                                    db.update_all_message_ids(number_group, message_key)
-                                                    await asyncio.sleep(2)
-                                                break
+                    for chat_id_name in channels_name:
+                        for chat_id in chat_ids:
+                            index_chat_id = int(chat_id[0])
+                            links_1 = channels_link[index_chat_id - 1]
+                            links_2 = links_1[-1]
+                            if links_2 == "✅":
+                                trimmed_chat_ids = int(chat_id[3:])
+                                exception_occurred = False
+                                messages_sent = db.select_message_id(number_group)
+                                try:
+                                    last_id = last_message_ids.get(trimmed_chat_ids, 0)
+                                    messages_to_check = 30
+                                    forced_check = num == 0 and last_id == 0
+                                    async for message in telethon_client.iter_messages(trimmed_chat_ids, offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
+                                        if message.text:
+                                            for keyword in keywords:
+                                                if keyword.lower() in message.text.lower():
+                                                    message_key = [trimmed_chat_ids, message.id]
+                                                    if message_key not in messages_sent:
+                                                        sender = await message.get_sender()
+                                                        sender_identifier = f"@{sender.username}" if sender else "Анонимный пользователь"
+                                                        message_text = f"Обнаружено ключевое слово\n\nЧат: {links_1[:-2]}\n\nПользователь: {sender_identifier}\n\nЗапрос: {keyword}\n\nСсылка на сообщение: Чат закрыт.\n\nТекст:\n{message.text}"
+                                                        await bot.send_message(user_id, message_text)
+                                                        # print(f"Message sent to user {user_id}: {message.text}")
+                                                        db.update_all_message_ids(number_group, message_key)
+                                                        await asyncio.sleep(2)
+                                                    break
 
-                            except FloodWaitError as e:
-                                print(f"Flood wait error on chat. Sleeping for seconds. {e}")
-                                await asyncio.sleep(2)
-                                exception_occurred = True
-                            except ChannelPrivateError:
-                                print("Ошибка доступа: канал закрыт и у меня нет к нему доступа.")
-                                await asyncio.sleep(2)
-                                exception_occurred = True
-                            except ChatForbiddenError:
-                                print("Ошибка доступа: я исключён из чата или покинул его.")
-                                await asyncio.sleep(2)
-                                exception_occurred = True
-                            except UserPrivacyRestrictedError:
-                                print("Ошибка доступа: ограничения конфиденциальности пользователя.")
-                                await asyncio.sleep(2)
-                                exception_occurred = True
-                            except PeerIdInvalidError:
-                                print("Ошибка ID: не найден ID")
-                                await asyncio.sleep(2)
-                                exception_occurred = True
-                            except ValueError:
-                                print("Ошибка ID: не найден ID")
-                                await asyncio.sleep(2)
-                                exception_occurred = True
-                            except Exception as e:
-                                print(f"Произошла непредвиденная ошибка: {type(e).__name__}, {e}")
-                                await asyncio.sleep(2)
-                                exception_occurred = True
-                            finally:
-                                if exception_occurred is False:
-                                    messages = await telethon_client.get_messages(trimmed_chat_ids, limit=1)
-                                    if messages:
-                                        last_message_ids[trimmed_chat_ids] = messages[0].id
-                                        await asyncio.sleep(2)
-                                    else:
-                                        pass
-                            await asyncio.sleep(1)
+                                except FloodWaitError as e:
+                                    print(f"Flood wait error on chat. Sleeping for seconds. {e}")
+                                    await asyncio.sleep(2)
+                                    exception_occurred = True
+                                except ChannelPrivateError:
+                                    print("Ошибка доступа: канал закрыт и у меня нет к нему доступа.")
+                                    await asyncio.sleep(2)
+                                    exception_occurred = True
+                                except ChatForbiddenError:
+                                    print("Ошибка доступа: я исключён из чата или покинул его.")
+                                    await asyncio.sleep(2)
+                                    exception_occurred = True
+                                except UserPrivacyRestrictedError:
+                                    print("Ошибка доступа: ограничения конфиденциальности пользователя.")
+                                    await asyncio.sleep(2)
+                                    exception_occurred = True
+                                except PeerIdInvalidError:
+                                    print("Ошибка ID: не найден ID")
+                                    await asyncio.sleep(2)
+                                    exception_occurred = True
+                                except ValueError:
+                                    print("Ошибка ID: не найден ID")
+                                    await asyncio.sleep(2)
+                                    exception_occurred = True
+                                except Exception as e:
+                                    print(f"Произошла непредвиденная ошибка: {type(e).__name__}, {e}")
+                                    await asyncio.sleep(2)
+                                    exception_occurred = True
+                                finally:
+                                    if exception_occurred is False:
+                                        messages = await telethon_client.get_messages(trimmed_chat_ids, limit=1)
+                                        if messages:
+                                            last_message_ids[trimmed_chat_ids] = messages[0].id
+                                            await asyncio.sleep(2)
+                                        else:
+                                            pass
+                                await asyncio.sleep(1)
             else:
                 db.delete_data_end_group(number_group)
                 formated_chat_idn = [s.replace('✅', '⚠') for s in channelss_link]
+                formated_chat_id_name = [s.replace('✅', '⚠') for s in channels_name]
                 db.update_all_channels(number_group, formated_chat_idn)
+                db.update_all_channels_name(number_group, formated_chat_id_name)
                 await bot.send_message(user_id, cfg.end_data_group_text(group_name))
             num += 1
             if num >= len(groups):
@@ -533,6 +543,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
             number_group_parser = db.select_number_group(user_id, callback_query.data)
             await state.update_data(number_group_parser=number_group_parser)
             channels_parser = db.select_channels(user_id, callback_query.data)
+            channels_name_parser = db.select_channels_name(user_id, callback_query.data)
             markup_inline = types.InlineKeyboardMarkup(row_width=2)
             channels_count_parser= len(channels_parser)
             channels_page_parser = fnc.get_category(channels_count_parser)
@@ -544,9 +555,10 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
             await state.update_data(page_here_parser=page_here_parser)
             await state.update_data(from_page_parser=from_page_parser)
             await state.update_data(before_page_parser=before_page_parser)
-            for channel in channels_parser[from_page_parser:before_page_parser]:
-                buttons = types.InlineKeyboardButton(text=channel, callback_data=channel)
-                markup_inline.row(buttons)
+            for channel_name in channels_name_parser[from_page_parser:before_page_parser]:
+                for channel in channels_parser[from_page_parser:before_page_parser]:
+                    buttons = types.InlineKeyboardButton(text=channel_name, callback_data=channel)
+                    markup_inline.row(buttons)
             buttons_count = types.InlineKeyboardButton(text=f"Страница {page_here_parser}/{channels_page_parser} 📄", callback_data="page_parser")
             markup_inline.add(buttons_count)
             if channels_count_parser > 10:
@@ -691,22 +703,106 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     else:
                         channel_name = callback_query.data
                         if channel_name[-1] == "✅":
-                            all_channels = db.select_channels_with_number(number_group_parser)
-                            new_callback = channel_name[:-1] + '❌'
-                            new_channels = [new_callback if item == channel_name else item for item in all_channels]
-                            db.update_all_channels(number_group_parser, new_channels)
+                            if channel_name[13] == "+":
+                                response = requests.get(channel_name)
+                                html_content = response.text
+                                soup = BeautifulSoup(html_content, 'html.parser')
+                                title_div = soup.find('div', {'class': 'tgme_page_title'})
+                                if title_div:
+                                    all_channels = db.select_channels_with_number(number_group_parser)
+                                    new_callback = channel_name[:-1] + '❌'
+                                    new_channels = [new_callback if item == channel_name else item for item in all_channels]
+                                    db.update_all_channels(number_group_parser, new_channels)
+                                    group_name = title_div.get_text(strip=True)
+                                    all_channels_name_parser = db.select_channels_name_with_number(number_group_parser)
+                                    new_callback_name = group_name + '❌'
+                                    new_channels_name = [new_callback_name if item == group_name else item for item in all_channels_name_parser]
+                                    db.update_all_channels_name(number_group_parser, new_channels_name)
+                            elif channel_name[0] == "@":
+                                response = requests.get(f"https://t.me/{channel_name[1:]}")
+                                html_content = response.text
+                                soup = BeautifulSoup(html_content, 'html.parser')
+                                title_div = soup.find('div', {'class': 'tgme_page_title'})
+                                if title_div:
+                                    all_channels = db.select_channels_with_number(number_group_parser)
+                                    new_callback = channel_name[:-1] + '❌'
+                                    new_channels = [new_callback if item == channel_name else item for item in all_channels]
+                                    db.update_all_channels(number_group_parser, new_channels)
+                                    group_name = title_div.get_text(strip=True)
+                                    all_channels_name_parser = db.select_channels_name_with_number(number_group_parser)
+                                    new_callback_name = group_name + '❌'
+                                    new_channels_name = [new_callback_name if item == group_name else item for item in all_channels_name_parser]
+                                    db.update_all_channels_name(number_group_parser, new_channels_name)
+                            else:
+                                response = requests.get(f"https://t.me/{channel_name}")
+                                html_content = response.text
+                                soup = BeautifulSoup(html_content, 'html.parser')
+                                title_div = soup.find('div', {'class': 'tgme_page_title'})
+                                if title_div:
+                                    all_channels = db.select_channels_with_number(number_group_parser)
+                                    new_callback = channel_name[:-1] + '❌'
+                                    new_channels = [new_callback if item == channel_name else item for item in all_channels]
+                                    db.update_all_channels(number_group_parser, new_channels)
+                                    group_name = title_div.get_text(strip=True)
+                                    all_channels_name_parser = db.select_channels_name_with_number(number_group_parser)
+                                    new_callback_name = group_name + '❌'
+                                    new_channels_name = [new_callback_name if item == group_name else item for item in all_channels_name_parser]
+                                    db.update_all_channels_name(number_group_parser, new_channels_name)
                         elif channel_name[-1] == "❌":
-                            all_channels = db.select_channels_with_number(number_group_parser)
-                            new_callback = channel_name[:-1] + '✅'
-                            new_channels = [new_callback if item == channel_name else item for item in all_channels]
-                            db.update_all_channels(number_group_parser, new_channels)
+                            if channel_name[13] == "+":
+                                response = requests.get(channel_name)
+                                html_content = response.text
+                                soup = BeautifulSoup(html_content, 'html.parser')
+                                title_div = soup.find('div', {'class': 'tgme_page_title'})
+                                if title_div:
+                                    all_channels = db.select_channels_with_number(number_group_parser)
+                                    new_callback = channel_name[:-1] + '✅'
+                                    new_channels = [new_callback if item == channel_name else item for item in all_channels]
+                                    db.update_all_channels(number_group_parser, new_channels)
+                                    group_name = title_div.get_text(strip=True)
+                                    all_channels_name_parser = db.select_channels_name_with_number(number_group_parser)
+                                    new_callback_name = group_name + '✅'
+                                    new_channels_name = [new_callback_name if item == group_name else item for item in all_channels_name_parser]
+                                    db.update_all_channels_name(number_group_parser, new_channels_name)
+                            elif channel_name[0] == "@":
+                                response = requests.get(f"https://t.me/{channel_name[1:]}")
+                                html_content = response.text
+                                soup = BeautifulSoup(html_content, 'html.parser')
+                                title_div = soup.find('div', {'class': 'tgme_page_title'})
+                                if title_div:
+                                    all_channels = db.select_channels_with_number(number_group_parser)
+                                    new_callback = channel_name[:-1] + '✅'
+                                    new_channels = [new_callback if item == channel_name else item for item in all_channels]
+                                    db.update_all_channels(number_group_parser, new_channels)
+                                    group_name = title_div.get_text(strip=True)
+                                    all_channels_name_parser = db.select_channels_name_with_number(number_group_parser)
+                                    new_callback_name = group_name + '✅'
+                                    new_channels_name = [new_callback_name if item == group_name else item for item in all_channels_name_parser]
+                                    db.update_all_channels_name(number_group_parser, new_channels_name)
+                            else:
+                                response = requests.get(f"https://t.me/{channel_name}")
+                                html_content = response.text
+                                soup = BeautifulSoup(html_content, 'html.parser')
+                                title_div = soup.find('div', {'class': 'tgme_page_title'})
+                                if title_div:
+                                    all_channels = db.select_channels_with_number(number_group_parser)
+                                    new_callback = channel_name[:-1] + '✅'
+                                    new_channels = [new_callback if item == channel_name else item for item in all_channels]
+                                    db.update_all_channels(number_group_parser, new_channels)
+                                    group_name = title_div.get_text(strip=True)
+                                    all_channels_name_parser = db.select_channels_name_with_number(number_group_parser)
+                                    new_callback_name = group_name + '✅'
+                                    new_channels_name = [new_callback_name if item == group_name else item for item in all_channels_name_parser]
+                                    db.update_all_channels_name(number_group_parser, new_channels_name)
                         elif channel_name[-1] == "⏳":
                             await callback_query.answer(cfg.error_dostup_chat, show_alert=True)
                         channels = db.select_channels_with_number(number_group_parser)
+                        channels_name_parser = db.select_channels_name_with_number(number_group_parser)
                         markup_inline = types.InlineKeyboardMarkup(row_width=2)
-                        for channel in channels[from_page_parser:before_page_parser]:
-                            buttons = types.InlineKeyboardButton(text=channel, callback_data=channel)
-                            markup_inline.row(buttons)
+                        for channel_name in channels_name_parser[from_page_parser:before_page_parser]:
+                            for channel in channels[from_page_parser:before_page_parser]:
+                                buttons = types.InlineKeyboardButton(text=channel_name, callback_data=channel)
+                                markup_inline.row(buttons)
                         buttons_count = types.InlineKeyboardButton(
                             text=f"Страница {page_here_parser}/{channels_page_parser} 📄", callback_data="page_parser")
                         markup_inline.add(buttons_count)
@@ -727,6 +823,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     await callback_query.answer(cfg.error_page_next, show_alert=True)
                 else:
                     channels = db.select_channels_with_number(number_group_parser)
+                    channels_name_parser = db.select_channels_name_with_number(number_group_parser)
                     markup_inline = types.InlineKeyboardMarkup(row_width=2)
                     page_here_parser = page_here_parser + 1
                     await state.update_data(page_here_parser=page_here_parser)
@@ -735,9 +832,10 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     before_page_parser = before_page_parser + 10
                     await state.update_data(from_page_parser=from_page_parser)
                     await state.update_data(before_page_parser=before_page_parser)
-                    for channel in channels[from_page_parser:before_page_parser]:
-                        buttons = types.InlineKeyboardButton(text=channel, callback_data=channel)
-                        markup_inline.row(buttons)
+                    for channel_name in channels_name_parser[from_page_parser:before_page_parser]:
+                        for channel in channels[from_page_parser:before_page_parser]:
+                            buttons = types.InlineKeyboardButton(text=channel_name, callback_data=channel)
+                            markup_inline.row(buttons)
                     buttons_count = types.InlineKeyboardButton(text=f"Страница {page_here_parser}/{channels_page_parser} 📄", callback_data="page_parser")
                     markup_inline.add(buttons_count)
                     if channels_count_all_parser > 10:
@@ -758,6 +856,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     await callback_query.answer(cfg.error_page_old, show_alert=True)
                 else:
                     channels = db.select_channels_with_number(number_group_parser)
+                    channels_name_parser = db.select_channels_name_with_number(number_group_parser)
                     markup_inline = types.InlineKeyboardMarkup(row_width=2)
                     page_here_parser = page_here_parser - 1
                     before_page_parser = before_page_parser - 10
@@ -766,9 +865,10 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     await state.update_data(before_page_parser=before_page_parser)
                     await state.update_data(page_here_parser=page_here_parser)
                     await state.update_data(channels_count_parser=channels_count_parser)
-                    for channel in channels[from_page_parser:before_page_parser]:
-                        buttons = types.InlineKeyboardButton(text=channel, callback_data=channel)
-                        markup_inline.row(buttons)
+                    for channel_name in channels_name_parser[from_page_parser:before_page_parser]:
+                        for channel in channels[from_page_parser:before_page_parser]:
+                            buttons = types.InlineKeyboardButton(text=channel_name, callback_data=channel)
+                            markup_inline.row(buttons)
                     buttons_count = types.InlineKeyboardButton(text=f"Страница {page_here_parser}/{channels_page_parser} 📄", callback_data="page_parser")
                     markup_inline.add(buttons_count)
                     if channels_count_all_parser > 10:
@@ -831,10 +931,12 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     await callback_query.answer(text=cfg.tariffe_error, show_alert=True)
             elif callback_query.data == "back_oplata_parser":
                 channels = db.select_channels_with_number(number_group_parser)
+                channels_name_parser = db.select_channels_name_with_number(number_group_parser)
                 markup_inline = types.InlineKeyboardMarkup(row_width=2)
-                for channel in channels[from_page_parser:before_page_parser]:
-                    buttons = types.InlineKeyboardButton(text=channel, callback_data=channel)
-                    markup_inline.row(buttons)
+                for channel_name in channels_name_parser[from_page_parser:before_page_parser]:
+                    for channel in channels[from_page_parser:before_page_parser]:
+                        buttons = types.InlineKeyboardButton(text=channel_name, callback_data=channel)
+                        markup_inline.row(buttons)
                 buttons_count = types.InlineKeyboardButton(text=f"Страница {page_here_parser}/{channels_page_parser} 📄", callback_data="page_parser")
                 markup_inline.add(buttons_count)
                 if channels_count_all_parser > 10:
@@ -1072,7 +1174,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                         reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
                 else:
                     await callback_query.answer(text=cfg.tariffe_error, show_alert=True)
-            elif callback_query.data == "back_oplata":
+            elif callback_query.data == "back_oplata_autoposting":
                 channels = db.select_chats_account_with_number(number_group_autoposting)
                 markup_inline = types.InlineKeyboardMarkup(row_width=2)
                 for channel in channels[from_page_autoposting:before_page_autoposting]:
@@ -1356,20 +1458,57 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
             if 2 <= len(message.text) <= 1000:
                 if 5 <= len(text_lines) <= 50:
                     try:
-                        check_number_group = db.check_numbers_group()
-                        new_number_group = check_number_group + 1
-                        data = await state.get_data()
-                        cashe_group_name = data.get('group_name')
-                        cashe_keyword = data.get('text_lines')
-                        db.add_channels(user_id, new_number_group, cashe_keyword, text_lines, cashe_group_name)
-                        markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
-                        markup_reply.add(cfg.autoposting)
-                        markup_reply.add(cfg.parser)
-                        markup_reply.row(cfg.my_profile, cfg.support)
-                        if db.select_admin(user_id) > 0:
-                            markup_reply.add(cfg.admin_panel_button)
-                        await message.answer(cfg.right_create_group, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
-                        await state.finish()
+                        channels_name_1 = []
+                        for channel_name in text_line:
+                            if channel_name[13] == "+":
+                                response = requests.get(channel_name)
+                                html_content = response.text
+                                soup = BeautifulSoup(html_content, 'html.parser')
+                                title_div = soup.find('div', {'class': 'tgme_page_title'})
+                                if title_div:
+                                    group_name = title_div.get_text(strip=True)
+                                    channels_name_1.append(group_name)
+                                else:
+                                    await message.answer(cfg.error_channel_name_add)
+                                    break
+                            elif channel_name[0] == "@":
+                                response = requests.get(f"https://t.me/{channel_name[1:]}")
+                                html_content = response.text
+                                soup = BeautifulSoup(html_content, 'html.parser')
+                                title_div = soup.find('div', {'class': 'tgme_page_title'})
+                                if title_div:
+                                    group_name = title_div.get_text(strip=True)
+                                    channels_name_1.append(group_name)
+                                else:
+                                    await message.answer(cfg.error_channel_name_add)
+                                    break
+                            else:
+                                response = requests.get(f"https://t.me/{channel_name}")
+                                html_content = response.text
+                                soup = BeautifulSoup(html_content, 'html.parser')
+                                title_div = soup.find('div', {'class': 'tgme_page_title'})
+                                if title_div:
+                                    group_name = title_div.get_text(strip=True)
+                                    channels_name_1.append(group_name)
+                                else:
+                                    await message.answer(cfg.error_channel_name_add)
+                                    break
+                        if len(channels_name_1) == len(text_line):
+                            channels_name_2 = list(dict.fromkeys([element + ' ⚠' for element in channels_name_1]))
+                            check_number_group = db.check_numbers_group()
+                            new_number_group = check_number_group + 1
+                            data = await state.get_data()
+                            cashe_group_name = data.get('group_name')
+                            cashe_keyword = data.get('text_lines')
+                            db.add_channels(user_id, new_number_group, cashe_keyword, text_lines, cashe_group_name, channels_name_2)
+                            markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+                            markup_reply.add(cfg.autoposting)
+                            markup_reply.add(cfg.parser)
+                            markup_reply.row(cfg.my_profile, cfg.support)
+                            if db.select_admin(user_id) > 0:
+                                markup_reply.add(cfg.admin_panel_button)
+                            await message.answer(cfg.right_create_group, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
+                            await state.finish()
                     except Exception as es:
                         await state.reset_state()
                         markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
@@ -1445,11 +1584,15 @@ async def add_chat_ids_num_2(message: types.Message, state: FSMContext):
                 int(lines[3:])
                 new_lst.append(lines)
                 all_channels = db.select_channels_with_number(number_group)
+                all_channels_name = db.select_channels_name_with_number(number_group)
                 channels_link = [item for item in all_channels if len(item) >= 13 and item[13] == '+']
                 index = int(lines.split(')')[0]) - 1
                 channels_link[index] = channels_link[index].replace("⏳", "✅")
+                all_channels_name[index] = all_channels_name[index].replace("⏳", "✅")
                 owner_lst = [next((full_word for full_word in channels_link if full_word[:-2] == word[:-2]), word) for word in all_channels]
+                owner_lst_name = [next((full_word for full_word in all_channels_name if full_word[:-2] == word[:-2]), word) for word in all_channels_name]
                 db.update_all_channels(number_group, owner_lst)
+                db.update_all_channels_name(number_group, owner_lst_name)
             except Exception:
                 await message.answer(cfg.error_add_ids, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
                 await Add_chat_ids.panel_adm.set()
@@ -1581,10 +1724,10 @@ async def other(message: types.Message):
             await message.answer(cfg.unknown_command_text)
 
 
-async def on_startup(_):
-    asyncio.create_task(search_and_forward())
-    asyncio.create_task(search_and_forward_close_group())
-    asyncio.create_task(autoposting_forward())
+async def on_startup():
+    await asyncio.create_task(search_and_forward())
+    await asyncio.create_task(search_and_forward_close_group())
+    await asyncio.create_task(autoposting_forward())
 
 if __name__ == "__main__":
     executor.start_polling(dp, skip_updates=True, on_startup=on_startup)

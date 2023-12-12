@@ -223,3 +223,5 @@ def delete_post_text(post):
 
 def delete_post_yes_text(post):
     return f"Вы успешно удалили пост '{post}'"
+
+error_channel_name_add = "В списке чатов, есть несуществующий чат, пожалуйста повторите попытку:"

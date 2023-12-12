@@ -1,7 +1,19 @@
-import re
+import requests
+from bs4 import BeautifulSoup
 
-a = "Здравствуйте, вот допустим ваш '5', что вы хотите сделать"
+url = 'https://t.me/@asdasdas'
 
-matches = re.findall(r"'([^']*)'", a)
+response = requests.get(url)
+html_content = response.text
 
-print(matches[0])
+soup = BeautifulSoup(html_content, 'html.parser')
+
+title_div = soup.find('div', {'class': 'tgme_page_title'})
+if title_div:
+    group_name = title_div.get_text(strip=True)
+    print("Название группы:", group_name)
+else:
+    print("Название группы не найдено.")
+
+a = "Hello"
+print(a[1:])
