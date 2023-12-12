@@ -1724,7 +1724,7 @@ async def other(message: types.Message):
             await message.answer(cfg.unknown_command_text)
 
 
-async def on_startup():
+async def on_startup(_):
     await asyncio.create_task(search_and_forward())
     await asyncio.create_task(search_and_forward_close_group())
     await asyncio.create_task(autoposting_forward())
