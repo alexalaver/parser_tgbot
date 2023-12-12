@@ -923,9 +923,23 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     markup_inline = types.InlineKeyboardMarkup(row_width=1)
                     btn_inline1 = types.InlineKeyboardButton(cfg.menu_button, callback_data='menu_after_pay_parser')
                     markup_inline.add(btn_inline1)
-                    all_channels = db.select_channels_with_number(number_group_parser)
+                    all_channels = db.select_channels_name_with_number(number_group_parser)
+                    all_channels_name = db.select_channels_with_number(number_group_parser)
                     updated_a = [x[:-1] + '⏳' if len(x) >= 13 and x[13] == '+' else x for x in all_channels]
                     db.update_all_channels(number_group_parser, updated_a)
+                    paired_channels = zip(updated_a, all_channels_name)
+                    for channel_name_updated, channel_name_id in paired_channels:
+                        if channel_name_updated[13] == "+":
+                            response = requests.get(channel_name_updated[:-2])
+                            html_content = response.text
+                            soup = BeautifulSoup(html_content, 'html.parser')
+                            title_div = soup.find('div', {'class': 'tgme_page_title'})
+                            if title_div:
+                                group_name = title_div.get_text(strip=True)
+                                all_channels_name_parser = db.select_channels_name_with_number(number_group_parser)
+                                new_callback_name = group_name + '⏳'
+                                new_channels_name = [new_callback_name if item == group_name else item for item in all_channels_name_parser]
+                                db.update_all_channels_name(number_group_parser, new_channels_name)
                     await check_private_channel(new_chan, user_id, number_group_parser)
                     await state.finish()
                     await callback_query.message.delete()
