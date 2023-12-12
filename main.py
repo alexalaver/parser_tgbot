@@ -911,6 +911,9 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     new_channels = [newer[:-2] + " ✅" for newer in channels]
                     new_chan = [newer[:-2] for newer in channels]
                     db.update_all_channels(number_group_parser, new_channels)
+                    channels_name_parser = db.select_channels_name_with_number(number_group_parser)
+                    new_channels_name = [newer[:-2] + " ✅" for newer in channels_name_parser]
+                    db.update_all_channels_name(number_group_parser, new_channels_name)
                     db.update_balance(user_id, money_oplata)
                     channels_len = len(channels)
                     current_data = datetime.datetime.now()
