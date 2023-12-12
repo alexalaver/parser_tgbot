@@ -1491,6 +1491,7 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                                 if title_div:
                                     group_name = title_div.get_text(strip=True)
                                     channels_name_1.append(group_name)
+                                    print(channels_name_1)
                                 else:
                                     await message.answer(cfg.error_channel_name_add)
                                     break
