@@ -799,10 +799,10 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                         channels = db.select_channels_with_number(number_group_parser)
                         channels_name_parser = db.select_channels_name_with_number(number_group_parser)
                         markup_inline = types.InlineKeyboardMarkup(row_width=2)
-                        for channel_name in channels_name_parser[from_page_parser:before_page_parser]:
-                            for channel in channels[from_page_parser:before_page_parser]:
-                                buttons = types.InlineKeyboardButton(text=channel_name, callback_data=channel)
-                                markup_inline.row(buttons)
+                        paired_channels = zip(channels_name_parser[from_page_parser:before_page_parser], channels[from_page_parser:before_page_parser])
+                        for channel_name, channel in paired_channels:
+                            button = types.InlineKeyboardButton(text=channel_name, callback_data=channel)
+                            markup_inline.row(button)
                         buttons_count = types.InlineKeyboardButton(
                             text=f"Страница {page_here_parser}/{channels_page_parser} 📄", callback_data="page_parser")
                         markup_inline.add(buttons_count)
@@ -832,10 +832,10 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     before_page_parser = before_page_parser + 10
                     await state.update_data(from_page_parser=from_page_parser)
                     await state.update_data(before_page_parser=before_page_parser)
-                    for channel_name in channels_name_parser[from_page_parser:before_page_parser]:
-                        for channel in channels[from_page_parser:before_page_parser]:
-                            buttons = types.InlineKeyboardButton(text=channel_name, callback_data=channel)
-                            markup_inline.row(buttons)
+                    paired_channels = zip(channels_name_parser[from_page_parser:before_page_parser], channels[from_page_parser:before_page_parser])
+                    for channel_name, channel in paired_channels:
+                        button = types.InlineKeyboardButton(text=channel_name, callback_data=channel)
+                        markup_inline.row(button)
                     buttons_count = types.InlineKeyboardButton(text=f"Страница {page_here_parser}/{channels_page_parser} 📄", callback_data="page_parser")
                     markup_inline.add(buttons_count)
                     if channels_count_all_parser > 10:
@@ -865,10 +865,10 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     await state.update_data(before_page_parser=before_page_parser)
                     await state.update_data(page_here_parser=page_here_parser)
                     await state.update_data(channels_count_parser=channels_count_parser)
-                    for channel_name in channels_name_parser[from_page_parser:before_page_parser]:
-                        for channel in channels[from_page_parser:before_page_parser]:
-                            buttons = types.InlineKeyboardButton(text=channel_name, callback_data=channel)
-                            markup_inline.row(buttons)
+                    paired_channels = zip(channels_name_parser[from_page_parser:before_page_parser], channels[from_page_parser:before_page_parser])
+                    for channel_name, channel in paired_channels:
+                        button = types.InlineKeyboardButton(text=channel_name, callback_data=channel)
+                        markup_inline.row(button)
                     buttons_count = types.InlineKeyboardButton(text=f"Страница {page_here_parser}/{channels_page_parser} 📄", callback_data="page_parser")
                     markup_inline.add(buttons_count)
                     if channels_count_all_parser > 10:
@@ -933,10 +933,10 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 channels = db.select_channels_with_number(number_group_parser)
                 channels_name_parser = db.select_channels_name_with_number(number_group_parser)
                 markup_inline = types.InlineKeyboardMarkup(row_width=2)
-                for channel_name in channels_name_parser[from_page_parser:before_page_parser]:
-                    for channel in channels[from_page_parser:before_page_parser]:
-                        buttons = types.InlineKeyboardButton(text=channel_name, callback_data=channel)
-                        markup_inline.row(buttons)
+                paired_channels = zip(channels_name_parser[from_page_parser:before_page_parser], channels[from_page_parser:before_page_parser])
+                for channel_name, channel in paired_channels:
+                    button = types.InlineKeyboardButton(text=channel_name, callback_data=channel)
+                    markup_inline.row(button)
                 buttons_count = types.InlineKeyboardButton(text=f"Страница {page_here_parser}/{channels_page_parser} 📄", callback_data="page_parser")
                 markup_inline.add(buttons_count)
                 if channels_count_all_parser > 10:
