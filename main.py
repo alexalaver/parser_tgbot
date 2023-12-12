@@ -1459,6 +1459,7 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                 if 5 <= len(text_lines) <= 50:
                     try:
                         channels_name_1 = []
+                        await message.answer(cfg.please_wait_add_channels_name)
                         for channel_name in text_line:
                             if channel_name[13] == "+":
                                 response = requests.get(channel_name)
@@ -1468,6 +1469,7 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                                 if title_div:
                                     group_name = title_div.get_text(strip=True)
                                     channels_name_1.append(group_name)
+                                    print(channels_name_1)
                                 else:
                                     await message.answer(cfg.error_channel_name_add)
                                     break

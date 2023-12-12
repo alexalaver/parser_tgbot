@@ -225,3 +225,5 @@ def delete_post_yes_text(post):
     return f"Вы успешно удалили пост '{post}'"
 
 error_channel_name_add = "В списке чатов, есть несуществующий чат, пожалуйста повторите попытку:"
+
+please_wait_add_channels_name = "Пожалуйста ожидайте добавления чатов, это займёт пару секунд..."
