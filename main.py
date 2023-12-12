@@ -938,7 +938,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                                 group_name = title_div.get_text(strip=True)
                                 all_channels_name_parser = db.select_channels_name_with_number(number_group_parser)
                                 new_callback_name = group_name + '⏳'
-                                new_channels_name = [new_callback_name if item == group_name else item for item in all_channels_name_parser]
+                                new_channels_name = [new_callback_name if item[:-2] == group_name else item for item in all_channels_name_parser]
                                 db.update_all_channels_name(number_group_parser, new_channels_name)
                     await check_private_channel(new_chan, user_id, number_group_parser)
                     await state.finish()
