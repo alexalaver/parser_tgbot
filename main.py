@@ -1724,10 +1724,10 @@ async def other(message: types.Message):
             await message.answer(cfg.unknown_command_text)
 
 
-def on_startup():
-    asyncio.create_task(search_and_forward())
-    asyncio.create_task(search_and_forward_close_group())
-    asyncio.create_task(autoposting_forward())
+async def on_startup():
+    await asyncio.create_task(search_and_forward())
+    await asyncio.create_task(search_and_forward_close_group())
+    await asyncio.create_task(autoposting_forward())
 
 if __name__ == "__main__":
     executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
