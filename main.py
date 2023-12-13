@@ -1617,7 +1617,7 @@ async def add_chat_ids_num_2(message: types.Message, state: FSMContext):
                 group_name = all_channels_name[index_channel]
                 new_callback_name = group_name[:-1] + "✅"
                 new_channels_name = [new_callback_name if item == group_name else item for item in all_channels_name]
-                db.update_all_channels(number_group, new_channels_name)
+                db.update_all_channels_name(number_group, new_channels_name)
         old_chat_list = db.select_chat_ids(number_group) or []
         new_lst = old_chat_list + new_lst
         db.add_chat_ids(int(number_group), new_lst)
