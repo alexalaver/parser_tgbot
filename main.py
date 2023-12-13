@@ -1269,7 +1269,10 @@ async def add_post_func_text_3(message: types.Message, state: FSMContext):
                                     await message.answer(cfg.error_channel_name_add)
                                     break
                             else:
-                                response = requests.get(f"https://t.me/{channel_name}")
+                                if channel_name[:8] == "https://":
+                                    response = requests.get(channel_name)
+                                else:
+                                    response = requests.get(f"https://t.me/{channel_name}")
                                 html_content = response.text
                                 soup = BeautifulSoup(html_content, 'html.parser')
                                 title_div = soup.find('div', {'class': 'tgme_page_title'})

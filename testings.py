@@ -19,6 +19,5 @@ a = "Hello"
 print(a[-1])
 
 
-a_text = ["Symon", "Dindo", "Lolo"]
-b_text = "Lolo"
-print(a_text.index(b_text))
+a_d = "Textsingtest"
+print(a_d[:8])
