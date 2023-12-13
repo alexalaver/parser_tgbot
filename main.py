@@ -1102,8 +1102,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
                     markup_inline.add(button)
                 btn1_inline = types.InlineKeyboardButton(cfg.add_account_button, callback_data="add_account_autoposting")
-                btn2_inline = types.InlineKeyboardButton(cfg.back_button, callback_data="back_autoposting_menu")
-                markup_inline.add(btn1_inline, btn2_inline)
+                markup_inline.add(btn1_inline)
                 if group_names is None:
                     text = cfg.accounts_left_text
                 else:
