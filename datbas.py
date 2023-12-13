@@ -388,6 +388,12 @@ class Data:
             a = self.cursor.fetchone()[0]
             return a
 
+    def select_chats_name_post(self, id, post_id):
+        with self.connect:
+            self.cursor.execute("SELECT channels_title FROM autoposting_post WHERE id=%s AND post=%s", (id, post_id,))
+            a = self.cursor.fetchone()[0]
+            return a
+
     def check_date_tarife_account(self, id, post_id):
         with self.connect:
             self.cursor.execute("SELECT data_end FROM autoposting_post WHERE id=%s AND post=%s", (id, post_id,))
@@ -399,6 +405,13 @@ class Data:
             self.cursor.execute("SELECT chats FROM autoposting_post WHERE number_post=%s", (number_post,))
             a = self.cursor.fetchone()
             return a[0]
+
+    def select_chats_name_account_with_number(self, number_post):
+        with self.connect:
+            self.cursor.execute("SELECT channels_title FROM autoposting_post WHERE number_post=%s", (number_post,))
+            a = self.cursor.fetchone()
+            return a[0]
+
 
     def check_date_tarife_account_for_number(self, number_post):
         with self.connect:
@@ -419,6 +432,12 @@ class Data:
         with self.connect:
             self.cursor.execute("UPDATE autoposting_post SET chats=%s WHERE number_post=%s", (channels, number_post,))
             self.connect.commit()
+
+    def update_all_chats_name_account(self, number_post, channels):
+        with self.connect:
+            self.cursor.execute("UPDATE autoposting_post SET channels_title=%s WHERE number_post=%s", (channels, number_post,))
+            self.connect.commit()
+
 
     def add_date_tariffe_autoposting(self, id, data, number_group):
         with self.connect:
@@ -461,9 +480,9 @@ class Data:
             else:
                 return len(b)
 
-    def add_post_account(self, id, post, string_session, chats, time_betw, number_post, number_account, channel_tag, message_id_bot):
+    def add_post_account(self, id, post, string_session, chats, time_betw, number_post, number_account, channel_tag, message_id_bot, channels_title):
         with self.connect:
-            self.cursor.execute("INSERT INTO autoposting_post(id, post, string_session, chats, time_betw, number_post, number_account, channel_tag, message_id_bot) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)", (id, post, string_session, chats, time_betw, number_post, number_account, channel_tag, message_id_bot,))
+            self.cursor.execute("INSERT INTO autoposting_post(id, post, string_session, chats, time_betw, number_post, number_account, channel_tag, message_id_bot, channels_title) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (id, post, string_session, chats, time_betw, number_post, number_account, channel_tag, message_id_bot, channels_title,))
             self.connect.commit()
 
     def get_string_session(self, number_account):

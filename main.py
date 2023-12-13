@@ -642,6 +642,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
             await callback_query.message.edit_caption(caption=text, reply_markup=markup_inline)
         elif callback_query.data in db.select_autoposting_post_name(user_id):
             channels = db.select_chats_post(user_id, callback_query.data)
+            channels_name = db.select_chats_name_post(user_id, callback_query.data)
             markup_inline = types.InlineKeyboardMarkup(row_width=1)
             channels_count_autoposting = len(channels)
             channels_page_autoposting = fnc.get_category(channels_count_autoposting)
@@ -656,8 +657,9 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
             await state.update_data(page_here_autoposting=page_here_autoposting)
             await state.update_data(from_page_autoposting=from_page_autoposting)
             await state.update_data(before_page_autoposting=before_page_autoposting)
-            for channel in channels[from_page_autoposting:before_page_autoposting]:
-                buttons = types.InlineKeyboardButton(text=channel, callback_data=channel)
+            paired_channels = zip(channels_name[from_page_autoposting:before_page_autoposting], channels[from_page_autoposting:before_page_autoposting])
+            for channel_name, channel in paired_channels:
+                buttons = types.InlineKeyboardButton(text=channel_name, callback_data=channel)
                 markup_inline.row(buttons)
             buttons_count = types.InlineKeyboardButton(text=f"Страница {page_here_autoposting}/{channels_page_autoposting} 📄", callback_data="page_autoposting")
             markup_inline.add(buttons_count)
@@ -928,21 +930,35 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     else:
                         channel_name = callback_query.data
                         if channel_name[-1] == "✅":
+                            group_index = channels_autoposting.index(channel_name)
                             all_channels = db.select_chats_account_with_number(number_group_autoposting)
+                            all_channels_name = db.select_chats_name_account_with_number(number_group_autoposting)
+                            group_name = all_channels_name[group_index]
                             new_callback = channel_name[:-1] + '❌'
                             new_channels = [new_callback if item == channel_name else item for item in all_channels]
                             db.update_all_chats_account(number_group_autoposting, new_channels)
+                            new_callback_name = group_name[:-1] + '❌'
+                            new_channels_name = [new_callback_name if item == channel_name else item for item in all_channels_name]
+                            db.update_all_chats_name_account(number_group_autoposting, new_channels_name)
                         elif channel_name[-1] == "❌":
+                            group_index = channels_autoposting.index(channel_name)
                             all_channels = db.select_chats_account_with_number(number_group_autoposting)
-                            new_callback = channel_name[:-1] + '✅'
+                            all_channels_name = db.select_chats_name_account_with_number(number_group_autoposting)
+                            group_name = all_channels_name[group_index]
+                            new_callback = channel_name[:-1] + "✅"
                             new_channels = [new_callback if item == channel_name else item for item in all_channels]
                             db.update_all_chats_account(number_group_autoposting, new_channels)
+                            new_callback_name = group_name[:-1] + "✅"
+                            new_channels_name = [new_callback_name if item == channel_name else item for item in all_channels_name]
+                            db.update_all_chats_name_account(number_group_autoposting, new_channels_name)
                         elif channel_name[-1] == "⏳":
                             await callback_query.answer(cfg.error_dostup_chat, show_alert=True)
                         channels = db.select_chats_account_with_number(number_group_autoposting)
+                        channels_name = db.select_chats_name_account_with_number(number_group_autoposting)
                         markup_inline = types.InlineKeyboardMarkup(row_width=2)
-                        for channel in channels[from_page_autoposting:before_page_autoposting]:
-                            buttons = types.InlineKeyboardButton(text=channel, callback_data=channel)
+                        paired_channels = zip(channels_name[from_page_autoposting:before_page_autoposting], channels[from_page_autoposting:before_page_autoposting])
+                        for channel_name, channel in paired_channels:
+                            buttons = types.InlineKeyboardButton(text=channel_name, callback_data=channel)
                             markup_inline.row(buttons)
                         buttons_count = types.InlineKeyboardButton(
                             text=f"Страница {page_here_autoposting}/{channels_page_autoposting} 📄",
@@ -963,6 +979,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     await callback_query.answer(cfg.error_page_next, show_alert=True)
                 else:
                     channels = db.select_chats_account_with_number(number_group_autoposting)
+                    channels_name = db.select_chats_name_account_with_number(number_group_autoposting)
                     markup_inline = types.InlineKeyboardMarkup(row_width=2)
                     page_here_autoposting = page_here_autoposting + 1
                     await state.update_data(page_here_autoposting=page_here_autoposting)
@@ -971,8 +988,9 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     before_page_autoposting = before_page_autoposting + 10
                     await state.update_data(from_page_autoposting=from_page_autoposting)
                     await state.update_data(before_page_autoposting=before_page_autoposting)
-                    for channel in channels[from_page_autoposting:before_page_autoposting]:
-                        buttons = types.InlineKeyboardButton(text=channel, callback_data=channel)
+                    paired_channels = zip(channels_name[from_page_autoposting:before_page_autoposting], channels[from_page_autoposting:before_page_autoposting])
+                    for channel_name, channel in paired_channels:
+                        buttons = types.InlineKeyboardButton(text=channel_name, callback_data=channel)
                         markup_inline.row(buttons)
                     buttons_count = types.InlineKeyboardButton(
                         text=f"Страница {page_here_autoposting}/{channels_page_autoposting} 📄",
@@ -1006,6 +1024,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 post_name1 = str(callback_query.message)
                 post_name2 = re.findall(r"'([^']*)'", post_name1)
                 channels = db.select_chats_post(user_id, str(post_name2[0]))
+                channels_name = db.select_chats_name_post(user_id, str(post_name2[0]))
                 markup_inline = types.InlineKeyboardMarkup(row_width=1)
                 channels_count_autoposting = len(channels)
                 channels_page_autoposting = fnc.get_category(channels_count_autoposting)
@@ -1019,8 +1038,9 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 await state.update_data(page_here_autoposting=page_here_autoposting)
                 await state.update_data(from_page_autoposting=from_page_autoposting)
                 await state.update_data(before_page_autoposting=before_page_autoposting)
-                for channel in channels[from_page_autoposting:before_page_autoposting]:
-                    buttons = types.InlineKeyboardButton(text=channel, callback_data=channel)
+                paired_channels = zip(channels_name[from_page_autoposting:before_page_autoposting], channels[from_page_autoposting:before_page_autoposting])
+                for channel_name, channel in paired_channels:
+                    buttons = types.InlineKeyboardButton(text=channel_name, callback_data=channel)
                     markup_inline.row(buttons)
                 buttons_count = types.InlineKeyboardButton(
                     text=f"Страница {page_here_autoposting}/{channels_page_autoposting} 📄",
@@ -1044,6 +1064,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     await callback_query.answer(cfg.error_page_old, show_alert=True)
                 else:
                     channels = db.select_chats_account_with_number(number_group_autoposting)
+                    channels_name = db.select_chats_name_account_with_number(number_group_autoposting)
                     markup_inline = types.InlineKeyboardMarkup(row_width=2)
                     page_here_autoposting = page_here_autoposting - 1
                     before_page_autoposting = before_page_autoposting - 10
@@ -1052,8 +1073,9 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     await state.update_data(before_page_autoposting=before_page_autoposting)
                     await state.update_data(page_here_autoposting=page_here_autoposting)
                     await state.update_data(channels_count_autoposting=channels_count_autoposting)
-                    for channel in channels[from_page_autoposting:before_page_autoposting]:
-                        buttons = types.InlineKeyboardButton(text=channel, callback_data=channel)
+                    paired_channels = zip(channels_name[from_page_autoposting:before_page_autoposting], channels[from_page_autoposting:before_page_autoposting])
+                    for channel_name, channel in paired_channels:
+                        buttons = types.InlineKeyboardButton(text=channel_name, callback_data=channel)
                         markup_inline.row(buttons)
                     buttons_count = types.InlineKeyboardButton(
                         text=f"Страница {page_here_autoposting}/{channels_page_autoposting} 📄",
@@ -1099,8 +1121,11 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 money_oplata = 5 * int(channels_len)
                 if balance >= money_oplata:
                     channels = db.select_chats_account_with_number(number_group_autoposting)
+                    channels_name = db.select_chats_name_account_with_number(number_group_autoposting)
                     new_channels = [newer[:-2] + " ✅" for newer in channels]
+                    new_chats_name = [newer[:-2] + " ✅" for newer in channels_name]
                     db.update_all_chats_account(number_group_autoposting, new_channels)
+                    db.update_all_chats_name_account(number_group_autoposting, new_chats_name)
                     db.update_balance(user_id, money_oplata)
                     channels_len = len(channels)
                     current_data = datetime.datetime.now()
@@ -1123,9 +1148,11 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     await callback_query.answer(text=cfg.tariffe_error, show_alert=True)
             elif callback_query.data == "back_oplata_autoposting":
                 channels = db.select_chats_account_with_number(number_group_autoposting)
+                channels_name = db.select_chats_name_account_with_number(number_group_autoposting)
                 markup_inline = types.InlineKeyboardMarkup(row_width=2)
-                for channel in channels[from_page_autoposting:before_page_autoposting]:
-                    buttons = types.InlineKeyboardButton(text=channel, callback_data=channel)
+                paired_channels = zip(channels_name[from_page_autoposting:before_page_autoposting], channels[from_page_autoposting:before_page_autoposting])
+                for channel_name, channel in paired_channels:
+                    buttons = types.InlineKeyboardButton(text=channel_name, callback_data=channel)
                     markup_inline.row(buttons)
                 buttons_count = types.InlineKeyboardButton(
                     text=f"Страница {page_here_autoposting}/{channels_page_autoposting} 📄",
@@ -1216,24 +1243,62 @@ async def add_post_func_text_3(message: types.Message, state: FSMContext):
             if 2 <= len(message.text) <= 1000:
                 if 1 <= len(text_lines) <= 10:
                     try:
-                        check_number_post = db.check_numbers_account_post()
-                        new_number_post = check_number_post + 1
-                        data = await state.get_data()
-                        number_account = data.get("number_account")
-                        string_session = db.get_string_session(number_account)
-                        time_betw = data.get("time_betw")
-                        forwarded_message_id = data.get("forwarded_message_id")
-                        channel_tag = data.get("channel_tag")
-                        message_id_bot = data.get("message_id_bot")
-                        db.add_post_account(user_id, forwarded_message_id, string_session, text_lines, time_betw, new_number_post, number_account, channel_tag, message_id_bot)
-                        markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
-                        markup_reply.add(cfg.autoposting)
-                        markup_reply.add(cfg.parser)
-                        markup_reply.row(cfg.my_profile, cfg.support)
-                        if db.select_admin(user_id) > 0:
-                            markup_reply.add(cfg.admin_panel_button)
-                        await message.answer(cfg.right_create_post, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
-                        await state.finish()
+                        channels_name_1 = []
+                        await message.answer(cfg.please_wait_add_channels_name)
+                        for channel_name in text_line:
+                            if channel_name[13] == "+":
+                                response = requests.get(channel_name)
+                                html_content = response.text
+                                soup = BeautifulSoup(html_content, 'html.parser')
+                                title_div = soup.find('div', {'class': 'tgme_page_title'})
+                                if title_div:
+                                    group_name = title_div.get_text(strip=True)
+                                    channels_name_1.append(group_name)
+                                else:
+                                    await message.answer(cfg.error_channel_name_add)
+                                    break
+                            elif channel_name[0] == "@":
+                                response = requests.get(f"https://t.me/{channel_name[1:]}")
+                                html_content = response.text
+                                soup = BeautifulSoup(html_content, 'html.parser')
+                                title_div = soup.find('div', {'class': 'tgme_page_title'})
+                                if title_div:
+                                    group_name = title_div.get_text(strip=True)
+                                    channels_name_1.append(group_name)
+                                else:
+                                    await message.answer(cfg.error_channel_name_add)
+                                    break
+                            else:
+                                response = requests.get(f"https://t.me/{channel_name}")
+                                html_content = response.text
+                                soup = BeautifulSoup(html_content, 'html.parser')
+                                title_div = soup.find('div', {'class': 'tgme_page_title'})
+                                if title_div:
+                                    group_name = title_div.get_text(strip=True)
+                                    channels_name_1.append(group_name)
+                                else:
+                                    await message.answer(cfg.error_channel_name_add)
+                                    break
+                        if len(channels_name_1) == len(text_line):
+                            channels_name_2 = list(dict.fromkeys([element + ' ⚠' for element in channels_name_1]))
+                            check_number_post = db.check_numbers_account_post()
+                            new_number_post = check_number_post + 1
+                            data = await state.get_data()
+                            number_account = data.get("number_account")
+                            string_session = db.get_string_session(number_account)
+                            time_betw = data.get("time_betw")
+                            forwarded_message_id = data.get("forwarded_message_id")
+                            channel_tag = data.get("channel_tag")
+                            message_id_bot = data.get("message_id_bot")
+                            db.add_post_account(user_id, forwarded_message_id, string_session, text_lines, time_betw, new_number_post, number_account, channel_tag, message_id_bot, channels_name_2)
+                            markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+                            markup_reply.add(cfg.autoposting)
+                            markup_reply.add(cfg.parser)
+                            markup_reply.row(cfg.my_profile, cfg.support)
+                            if db.select_admin(user_id) > 0:
+                                markup_reply.add(cfg.admin_panel_button)
+                            await message.answer(cfg.right_create_post, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
+                            await state.finish()
                     except Exception as es:
                         await state.reset_state()
                         markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
