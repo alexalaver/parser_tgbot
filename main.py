@@ -839,6 +839,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 channels_len = len(channels_parser)
                 money_oplata = 5 * int(channels_len)
                 if balance >= money_oplata:
+                    await callback_query.message.answer(cfg.confirm_oplata_text)
                     channels = db.select_channels_with_number(number_group_parser)
                     new_channels = [newer[:-2] + " ✅" for newer in channels]
                     new_chan = [newer[:-2] for newer in channels]
@@ -1621,7 +1622,15 @@ async def add_chat_ids_num_2(message: types.Message, state: FSMContext):
             except Exception:
                 await message.answer(cfg.error_add_ids, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
                 await Add_chat_ids.panel_adm.set()
-
+        all_channels = db.select_channels_with_number(number_group)
+        for channel_name in all_channels:
+            if channel_name[-1] == "✅":
+                index_channel = all_channels.index(channel_name)
+                all_channels_name = db.select_channels_name_with_number(number_group)
+                group_name = all_channels_name[index_channel]
+                new_callback_name = group_name[:-1] + "✅"
+                new_channels_name = [new_callback_name if item == group_name else item for item in all_channels_name]
+                db.update_all_channels(number_group, new_channels_name)
         old_chat_list = db.select_chat_ids(number_group) or []
         new_lst = old_chat_list + new_lst
         db.add_chat_ids(int(number_group), new_lst)
