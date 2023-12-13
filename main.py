@@ -171,6 +171,7 @@ async def search_and_forward_close_group():
             group = groups[num]
             user_id, chat_ids, keywords, channelss_link, data_end, group_name, channels_name = group[0], group[7], group[5], group[2], group[3], group[4], group[8]
             channels_link = [item for item in channelss_link if len(item) >= 13 and item[13] == '+']
+            channels_link = [item for item in channels_link if item.endswith('✅')]
             number_group = group[1]
             current_date = datetime.datetime.now()
             formated_base = datetime.datetime.strptime(data_end, "%Y-%m-%d %H:%M:%S")
