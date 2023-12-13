@@ -955,7 +955,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                             await callback_query.answer(cfg.error_dostup_chat, show_alert=True)
                         channels = db.select_chats_account_with_number(number_group_autoposting)
                         channels_name = db.select_chats_name_account_with_number(number_group_autoposting)
-                        markup_inline = types.InlineKeyboardMarkup(row_width=2)
+                        markup_inline = types.InlineKeyboardMarkup(row_width=1)
                         paired_channels = zip(channels_name[from_page_autoposting:before_page_autoposting], channels[from_page_autoposting:before_page_autoposting])
                         for channel_name, channel in paired_channels:
                             buttons = types.InlineKeyboardButton(text=channel_name, callback_data=channel)
