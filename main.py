@@ -703,97 +703,27 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     else:
                         channel_name = callback_query.data
                         if channel_name[-1] == "✅":
-                            if channel_name[13] == "+":
-                                response = requests.get(channel_name)
-                                html_content = response.text
-                                soup = BeautifulSoup(html_content, 'html.parser')
-                                title_div = soup.find('div', {'class': 'tgme_page_title'})
-                                if title_div:
-                                    all_channels = db.select_channels_with_number(number_group_parser)
-                                    new_callback = channel_name[:-1] + '❌'
-                                    new_channels = [new_callback if item == channel_name else item for item in all_channels]
-                                    db.update_all_channels(number_group_parser, new_channels)
-                                    group_name = title_div.get_text(strip=True)
-                                    all_channels_name_parser = db.select_channels_name_with_number(number_group_parser)
-                                    new_callback_name = group_name + '❌'
-                                    new_channels_name = [new_callback_name if item == group_name else item for item in all_channels_name_parser]
-                                    db.update_all_channels_name(number_group_parser, new_channels_name)
-                            elif channel_name[0] == "@":
-                                response = requests.get(f"https://t.me/{channel_name[1:]}")
-                                html_content = response.text
-                                soup = BeautifulSoup(html_content, 'html.parser')
-                                title_div = soup.find('div', {'class': 'tgme_page_title'})
-                                if title_div:
-                                    all_channels = db.select_channels_with_number(number_group_parser)
-                                    new_callback = channel_name[:-1] + '❌'
-                                    new_channels = [new_callback if item == channel_name else item for item in all_channels]
-                                    db.update_all_channels(number_group_parser, new_channels)
-                                    group_name = title_div.get_text(strip=True)
-                                    all_channels_name_parser = db.select_channels_name_with_number(number_group_parser)
-                                    new_callback_name = group_name + '❌'
-                                    new_channels_name = [new_callback_name if item == group_name else item for item in all_channels_name_parser]
-                                    db.update_all_channels_name(number_group_parser, new_channels_name)
-                            else:
-                                response = requests.get(f"https://t.me/{channel_name}")
-                                html_content = response.text
-                                soup = BeautifulSoup(html_content, 'html.parser')
-                                title_div = soup.find('div', {'class': 'tgme_page_title'})
-                                if title_div:
-                                    all_channels = db.select_channels_with_number(number_group_parser)
-                                    new_callback = channel_name[:-1] + '❌'
-                                    new_channels = [new_callback if item == channel_name else item for item in all_channels]
-                                    db.update_all_channels(number_group_parser, new_channels)
-                                    group_name = title_div.get_text(strip=True)
-                                    all_channels_name_parser = db.select_channels_name_with_number(number_group_parser)
-                                    new_callback_name = group_name + '❌'
-                                    new_channels_name = [new_callback_name if item == group_name else item for item in all_channels_name_parser]
-                                    db.update_all_channels_name(number_group_parser, new_channels_name)
+                            group_index = channels_parser.index(channel_name)
+                            all_channels_name_parser = db.select_channels_name_with_number(number_group_parser)
+                            group_name = all_channels_name_parser[group_index]
+                            all_channels = db.select_channels_with_number(number_group_parser)
+                            new_callback = channel_name[:-1] + '❌'
+                            new_channels = [new_callback if item == channel_name else item for item in all_channels]
+                            db.update_all_channels(number_group_parser, new_channels)
+                            new_callback_name = group_name[:-1] + '❌'
+                            new_channels_name = [new_callback_name if item == group_name else item for item in all_channels_name_parser]
+                            db.update_all_channels_name(number_group_parser, new_channels_name)
                         elif channel_name[-1] == "❌":
-                            if channel_name[13] == "+":
-                                response = requests.get(channel_name)
-                                html_content = response.text
-                                soup = BeautifulSoup(html_content, 'html.parser')
-                                title_div = soup.find('div', {'class': 'tgme_page_title'})
-                                if title_div:
-                                    all_channels = db.select_channels_with_number(number_group_parser)
-                                    new_callback = channel_name[:-1] + '✅'
-                                    new_channels = [new_callback if item == channel_name else item for item in all_channels]
-                                    db.update_all_channels(number_group_parser, new_channels)
-                                    group_name = title_div.get_text(strip=True)
-                                    all_channels_name_parser = db.select_channels_name_with_number(number_group_parser)
-                                    new_callback_name = group_name + '✅'
-                                    new_channels_name = [new_callback_name if item == group_name else item for item in all_channels_name_parser]
-                                    db.update_all_channels_name(number_group_parser, new_channels_name)
-                            elif channel_name[0] == "@":
-                                response = requests.get(f"https://t.me/{channel_name[1:]}")
-                                html_content = response.text
-                                soup = BeautifulSoup(html_content, 'html.parser')
-                                title_div = soup.find('div', {'class': 'tgme_page_title'})
-                                if title_div:
-                                    all_channels = db.select_channels_with_number(number_group_parser)
-                                    new_callback = channel_name[:-1] + '✅'
-                                    new_channels = [new_callback if item == channel_name else item for item in all_channels]
-                                    db.update_all_channels(number_group_parser, new_channels)
-                                    group_name = title_div.get_text(strip=True)
-                                    all_channels_name_parser = db.select_channels_name_with_number(number_group_parser)
-                                    new_callback_name = group_name + '✅'
-                                    new_channels_name = [new_callback_name if item == group_name else item for item in all_channels_name_parser]
-                                    db.update_all_channels_name(number_group_parser, new_channels_name)
-                            else:
-                                response = requests.get(f"https://t.me/{channel_name}")
-                                html_content = response.text
-                                soup = BeautifulSoup(html_content, 'html.parser')
-                                title_div = soup.find('div', {'class': 'tgme_page_title'})
-                                if title_div:
-                                    all_channels = db.select_channels_with_number(number_group_parser)
-                                    new_callback = channel_name[:-1] + '✅'
-                                    new_channels = [new_callback if item == channel_name else item for item in all_channels]
-                                    db.update_all_channels(number_group_parser, new_channels)
-                                    group_name = title_div.get_text(strip=True)
-                                    all_channels_name_parser = db.select_channels_name_with_number(number_group_parser)
-                                    new_callback_name = group_name + '✅'
-                                    new_channels_name = [new_callback_name if item == group_name else item for item in all_channels_name_parser]
-                                    db.update_all_channels_name(number_group_parser, new_channels_name)
+                            group_index = channels_parser.index(channel_name)
+                            all_channels_name_parser = db.select_channels_name_with_number(number_group_parser)
+                            group_name = all_channels_name_parser[group_index]
+                            all_channels = db.select_channels_with_number(number_group_parser)
+                            new_callback = channel_name[:-1] + "✅"
+                            new_channels = [new_callback if item == channel_name else item for item in all_channels]
+                            db.update_all_channels(number_group_parser, new_channels)
+                            new_callback_name = group_name[:-1] + "✅"
+                            new_channels_name = [new_callback_name if item == group_name else item for item in all_channels_name_parser]
+                            db.update_all_channels_name(number_group_parser, new_channels_name)
                         elif channel_name[-1] == "⏳":
                             await callback_query.answer(cfg.error_dostup_chat, show_alert=True)
                         channels = db.select_channels_with_number(number_group_parser)
@@ -1602,15 +1532,23 @@ async def add_chat_ids_num_2(message: types.Message, state: FSMContext):
                 int(lines[3:])
                 new_lst.append(lines)
                 all_channels = db.select_channels_with_number(number_group)
-                all_channels_name = db.select_channels_name_with_number(number_group)
                 channels_link = [item for item in all_channels if len(item) >= 13 and item[13] == '+']
                 index = int(lines.split(')')[0]) - 1
                 channels_link[index] = channels_link[index].replace("⏳", "✅")
-                all_channels_name[index] = all_channels_name[index].replace("⏳", "✅")
                 owner_lst = [next((full_word for full_word in channels_link if full_word[:-2] == word[:-2]), word) for word in all_channels]
-                owner_lst_name = [next((full_word for full_word in all_channels_name if full_word[:-2] == word[:-2]), word) for word in all_channels_name]
                 db.update_all_channels(number_group, owner_lst)
-                db.update_all_channels_name(number_group, owner_lst_name)
+                # int(lines[3:])
+                # new_lst.append(lines)
+                # all_channels = db.select_channels_with_number(number_group)
+                # all_channels_name = db.select_channels_name_with_number(number_group)
+                # channels_link = [item for item in all_channels if len(item) >= 13 and item[13] == '+']
+                # index = int(lines.split(')')[0]) - 1
+                # channels_link[index] = channels_link[index].replace("⏳", "✅")
+                # all_channels_name[index] = all_channels_name[index].replace("⏳", "✅")
+                # owner_lst = [next((full_word for full_word in channels_link if full_word[:-2] == word[:-2]), word) for word in all_channels]
+                # owner_lst_name = [next((full_word for full_word in all_channels_name if full_word[:-2] == word[:-2]), word) for word in all_channels_name]
+                # db.update_all_channels(number_group, owner_lst)
+                # db.update_all_channels_name(number_group, owner_lst_name)
             except Exception:
                 await message.answer(cfg.error_add_ids, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
                 await Add_chat_ids.panel_adm.set()

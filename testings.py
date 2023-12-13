@@ -17,3 +17,8 @@ else:
 
 a = "Hello"
 print(a[-1])
+
+
+a_text = ["Symon", "Dindo", "Lolo"]
+b_text = "Lolo"
+print(a_text.index(b_text))
