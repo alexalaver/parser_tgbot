@@ -1607,18 +1607,6 @@ async def add_chat_ids_num_2(message: types.Message, state: FSMContext):
                 channels_link[index] = channels_link[index].replace("⏳", "✅")
                 owner_lst = [next((full_word for full_word in channels_link if full_word[:-2] == word[:-2]), word) for word in all_channels]
                 db.update_all_channels(number_group, owner_lst)
-                # int(lines[3:])
-                # new_lst.append(lines)
-                # all_channels = db.select_channels_with_number(number_group)
-                # all_channels_name = db.select_channels_name_with_number(number_group)
-                # channels_link = [item for item in all_channels if len(item) >= 13 and item[13] == '+']
-                # index = int(lines.split(')')[0]) - 1
-                # channels_link[index] = channels_link[index].replace("⏳", "✅")
-                # all_channels_name[index] = all_channels_name[index].replace("⏳", "✅")
-                # owner_lst = [next((full_word for full_word in channels_link if full_word[:-2] == word[:-2]), word) for word in all_channels]
-                # owner_lst_name = [next((full_word for full_word in all_channels_name if full_word[:-2] == word[:-2]), word) for word in all_channels_name]
-                # db.update_all_channels(number_group, owner_lst)
-                # db.update_all_channels_name(number_group, owner_lst_name)
             except Exception:
                 await message.answer(cfg.error_add_ids, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
                 await Add_chat_ids.panel_adm.set()
