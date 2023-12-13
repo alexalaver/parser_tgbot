@@ -949,7 +949,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                             new_channels = [new_callback if item == group_name else item for item in all_channels]
                             db.update_all_chats_account(number_group_autoposting, new_channels)
                             new_callback_name = group_name[:-1] + "✅"
-                            new_channels_name = [new_callback_name if item == channel_name else item for item in all_channels_name]
+                            new_channels_name = [new_callback_name if item == group_name else item for item in all_channels_name]
                             db.update_all_chats_name_account(number_group_autoposting, new_channels_name)
                         elif channel_name[-1] == "⏳":
                             await callback_query.answer(cfg.error_dostup_chat, show_alert=True)
