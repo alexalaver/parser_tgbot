@@ -419,6 +419,16 @@ async def start(message: types.Message):
         await message.answer(cfg.start_text(first_name), reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
         await profile(message)
 
+@dp.message_handler(commands=['send_message'])
+async def send_message(message: types.Message):
+    parts = message.text.split(maxsplit=2)
+    if len(parts) == 3:
+        command, user_id, message = parts
+    else:
+        command = user_id = message = None
+    await bot.send_message(user_id, message)
+    print("успешно отправлено")
+
 @dp.message_handler(commands=['addadmin'])
 async def add_admin_user(message: types.Message):
     if message.chat.type == types.ChatType.PRIVATE:
@@ -1828,14 +1838,6 @@ async def other(message: types.Message):
             await autoposting_send(message)
         elif message.text == cfg.admin_panel_button:
             await panel_administration(message)
-        elif message.text == "/send_message":
-            parts = message.text.split(maxsplit=2)
-            if len(parts) == 3:
-                command, user_id, message = parts
-            else:
-                command = user_id = message = None
-            await bot.send_message(user_id, message)
-            print("успешно отправлено")
         else:
             await message.answer(cfg.unknown_command_text)
 
