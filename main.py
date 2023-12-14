@@ -1144,7 +1144,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     channels_len = len(channels)
                     current_data = datetime.datetime.now()
                     time_betw = db.select_time_betw(number_group_autoposting)
-                    hours, minutes = map(int, time_betw.split(':'))
+                    hours, minutes = map(int, time_betw[0].split(':'))
                     current_date = datetime.datetime.now()
                     combined_datetime = current_date.replace(hour=hours, minute=minutes, second=0, microsecond=0)
                     date_betw = combined_datetime.strftime("%Y-%m-%d %H:%M:%S")
