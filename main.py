@@ -345,6 +345,9 @@ class Add_post(StatesGroup):
     add_post_2 = State()
     add_post_3 = State()
 
+class Change_time_betw(StatesGroup):
+    change_time_betw_1 = State()
+
 async def profile(message):
     user_id = message.from_user.id
     markup_inline = types.InlineKeyboardMarkup(row_width=1, )
@@ -685,7 +688,8 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 markup_inline.add(pay_money_buttons)
             back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels_autoposting')
             delete_post_button = types.InlineKeyboardButton(text=cfg.delete_post_button, callback_data="delete_post_autoposting")
-            markup_inline.add(delete_post_button, back_channels)
+            change_time_betw_button = types.InlineKeyboardButton(text=cfg.change_time_betw_button, callback_data="change_time_betw_autoposting")
+            markup_inline.add(change_time_betw_button, delete_post_button, back_channels)
             message_id_bot = db.select_post_name(callback_query.data)
             await bot.forward_message(chat_id=user_id, from_chat_id=user_id, message_id=message_id_bot)
             await callback_query.message.edit_caption(caption=cfg.account_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
@@ -987,7 +991,8 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                             markup_inline.add(pay_money_buttons)
                         delete_post_button = types.InlineKeyboardButton(text=cfg.delete_post_button, callback_data="delete_post_autoposting")
                         back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels_autoposting')
-                        markup_inline.add(delete_post_button, back_channels)
+                        change_time_betw_button = types.InlineKeyboardButton(text=cfg.change_time_betw_button, callback_data="change_time_betw_autoposting")
+                        markup_inline.add(change_time_betw_button, delete_post_button, back_channels)
                         await callback_query.message.edit_caption(caption=cfg.account_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
             elif callback_query.data == "next_page_autoposting":
                 if channels_page_autoposting == page_here_autoposting:
@@ -1018,8 +1023,10 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     if db.check_date_tarife_account_for_number(number_group_autoposting) is None:
                         pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels_autoposting')
                         markup_inline.add(pay_money_buttons)
+                    delete_post_button = types.InlineKeyboardButton(text=cfg.delete_post_button, callback_data="delete_post_autoposting")
                     back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels_autoposting')
-                    markup_inline.add(back_channels)
+                    change_time_betw_button = types.InlineKeyboardButton(text=cfg.change_time_betw_button, callback_data="change_time_betw_autoposting")
+                    markup_inline.add(change_time_betw_button, delete_post_button, back_channels)
                     await callback_query.message.edit_caption(caption=cfg.account_text_use(), reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
             elif callback_query.data == "delete_post_autoposting":
                 data = await state.get_data()
@@ -1070,7 +1077,8 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     markup_inline.add(pay_money_buttons)
                 back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels_autoposting')
                 delete_post_button = types.InlineKeyboardButton(text=cfg.delete_post_button, callback_data="delete_post_autoposting")
-                markup_inline.add(delete_post_button, back_channels)
+                change_time_betw_button = types.InlineKeyboardButton(text=cfg.change_time_betw_button, callback_data="change_time_betw_autoposting")
+                markup_inline.add(change_time_betw_button, delete_post_button, back_channels)
                 await callback_query.message.edit_caption(caption=cfg.account_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
             elif callback_query.data == "old_page_autoposting":
                 print(
@@ -1103,8 +1111,10 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     if db.check_date_tarife_account_for_number(number_group_autoposting) is None:
                         pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels_autoposting')
                         markup_inline.add(pay_money_buttons)
+                    delete_post_button = types.InlineKeyboardButton(text=cfg.delete_post_button, callback_data="delete_post_autoposting")
                     back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels_autoposting')
-                    markup_inline.add(back_channels)
+                    change_time_betw_button = types.InlineKeyboardButton(text=cfg.change_time_betw_button, callback_data="change_time_betw_autoposting")
+                    markup_inline.add(change_time_betw_button, delete_post_button, back_channels)
                     await callback_query.message.edit_caption(caption=cfg.account_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
             elif callback_query.data == "back_channels_autoposting":
                 markup_inline = types.InlineKeyboardMarkup(row_width=1)
@@ -1184,8 +1194,60 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     markup_inline.add(pay_money_buttons)
                 back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels_autoposting')
                 delete_post_button = types.InlineKeyboardButton(text=cfg.delete_post_button, callback_data="delete_post_autoposting")
-                markup_inline.add(back_channels, delete_post_button)
+                change_time_betw_button = types.InlineKeyboardButton(text=cfg.change_time_betw_button, callback_data="change_time_betw_autoposting")
+                markup_inline.add(change_time_betw_button, delete_post_button, back_channels)
                 await callback_query.message.edit_caption(caption=cfg.account_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+            elif callback_query.data == "change_time_betw_autoposting":
+                markup_reply_time = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
+                markup_reply_time.add(cfg.cancel_button)
+                await callback_query.message.answer(cfg.change_time_betw_text, reply_markup=markup_reply_time)
+                await Change_time_betw.change_time_betw_1.set()
+
+@dp.message_handler(state=Change_time_betw.change_time_betw_1)
+async def change_time_betw_1_func(message: types.Message, state: FSMContext):
+    if message.chat.type == types.ChatType.PRIVATE:
+        textsing = message.text
+        text_lines = textsing.strip().split('\n')
+        if message.text == "/cancel":
+            await message.answer(cfg.cancel_sostoyanie, parse_mode=types.ParseMode.MARKDOWN)
+            await state.reset_state()
+        else:
+            if 1 <= len(text_lines) <= 5:
+                try:
+                    bluable = False
+                    for text_lin in text_lines:
+                        hours, minutes = text_lin.split(":")
+                        hours = int(hours)
+                        minutes = int(minutes)
+                        if 0 <= hours < 24:
+                            if 0 <= minutes < 61:
+                                if validate_time_format(text_lin):
+                                    await Add_post.add_post_3.set()
+                                    await message.answer(cfg.create_account_post_3)
+                                    bluable = True
+                                    current_date = datetime.datetime.now()
+                                    combined_datetime = current_date.replace(hour=hours, minute=minutes, second=0, microsecond=0)
+                                    formatted_datetime = combined_datetime.strftime("%Y-%m-%d %H:%M:%S")
+                                    new_lst = []
+                                    new_lst.append(formatted_datetime)
+                                else:
+                                    await message.answer("Формат времени не верный, отправьте время в следющем формате:\n\nПример:\n10:30\n14:30")
+                                    bluable = False
+                                    break
+                            else:
+                                await message.answer("Вы можете поставить минуты не больше 60 и не меньше 0, попробуйте ещё раз:")
+                                bluable = False
+                                break
+                        else:
+                            await message.answer("Вы можете поставить часы не больше 23 и не меньше 0, попробуйте ещё раз:")
+                            bluable = False
+                            break
+                    if bluable is True:
+                        pass
+                except Exception:
+                    pass
+            else:
+                await message.answer(cfg.error_len_keyword_create, parse_mode=types.ParseMode.MARKDOWN)
 
 
 @dp.message_handler(state=Add_post.add_post_1)
@@ -1766,6 +1828,13 @@ async def other(message: types.Message):
             await autoposting_send(message)
         elif message.text == cfg.admin_panel_button:
             await panel_administration(message)
+        elif message.text == "/send_message":
+            parts = message.text.split(maxsplit=2)
+            if len(parts) == 3:
+                command, user_id, message = parts
+            else:
+                command = user_id = message = None
+            await bot.send_message(user_id, message)
         else:
             await message.answer(cfg.unknown_command_text)
 
