@@ -366,7 +366,7 @@ class Data:
 
     def select_date_betw(self, number_group):
         with self.connect:
-            self.cursor.execute("SELECT date_betw FROM autoposting_post WHERE number_post=%s,", (number_group,))
+            self.cursor.execute("SELECT date_betw FROM autoposting_post WHERE number_post=%s", (number_group,))
             a = self.cursor.fetchone()[0]
             return a
 
