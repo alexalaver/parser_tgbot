@@ -364,6 +364,12 @@ class Data:
             a = self.cursor.fetchall()
             return a
 
+    def select_date_betw(self, number_group):
+        with self.connect:
+            self.cursor.execute("SELECT date_betw FROM autoposting_post WHERE number_post=%s,", (number_group,))
+            a = self.cursor.fetchone()[0]
+            return a
+
     def update_date_betw(self, data, number_group):
         with self.connect:
             self.cursor.execute("UPDATE autoposting_post SET date_betw=%s WHERE number_post=%s", (data, number_group,))

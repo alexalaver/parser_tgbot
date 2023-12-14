@@ -31,6 +31,16 @@ db = Data("192.168.1.37", "5432", "pars_db", "pars_user", "pars_pwd")
 client = TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH)
 telethon_client = TelegramClient(StringSession(cfg.STRING_SESSION), cfg.API_ID, cfg.API_HASH)
 
+def validate_time_format(time_str):
+    # Регулярное выражение для проверки формата времени
+    pattern = r'^\d{2}:\d{2}$'
+
+    # Проверка соответствия строки шаблону
+    if re.match(pattern, time_str):
+        return True
+    else:
+        return False
+
 async def check_for_new_groups(current_count):
     new_count = len(db.select_all_channels_group())
     return new_count != current_count
@@ -270,30 +280,33 @@ async def autoposting_forward():
                 continue
 
             group = groups[num]
-            user_id, chat_idn, string_session, message_id, time_betw, date_betw, number_group, data_end, channel_tag = group[0], group[3], group[2], group[1], group[5], group[6], group[7], group[4], group[9]
+            user_id, chat_idn, string_session, message_id, date_betw, number_group, data_end, channel_tag = group[0], group[3], group[2], group[1], group[10], group[7], group[4], group[9]
             chat_ids = [item for item in chat_idn if item.endswith('✅')]
             current_date = datetime.datetime.now()
             formated_base = datetime.datetime.strptime(data_end, "%Y-%m-%d %H:%M:%S")
             if formated_base > current_date:
                 if chat_ids != []:
                     current_date = datetime.datetime.now()
-                    formated_base = datetime.datetime.strptime(date_betw, "%Y-%m-%d %H:%M:%S")
-                    if current_date > formated_base:
-                        async with TelegramClient(StringSession(string_session), cfg.API_ID, cfg.API_HASH) as telethon_client_autoposting:
-                            for chat_id in chat_ids:
-                                formated_chat_id = chat_id[:-2]
-                                try:
-                                    await telethon_client_autoposting.forward_messages(entity=formated_chat_id, messages=int(message_id), from_peer=channel_tag)
-                                    await bot.send_message(user_id, f"Рекламный пост, успешно отправлен в чат {formated_chat_id}")
-                                    await asyncio.sleep(5)
-                                except RPCError as err:
-                                    print(f"[ERROR RPCError] {err}")
-                                except Exception as erri:
-                                    print(f"[ERROR EXCEPTION] {erri}")
-                            current_data = datetime.datetime.now()
-                            time_in_60_minutes = current_data + datetime.timedelta(minutes=time_betw)
-                            formatted_date_new = time_in_60_minutes.strftime("%Y-%m-%d %H:%M:%S")
-                            db.update_date_betw(formatted_date_new, number_group)
+                    for date_bet in date_betw:
+                        formated_base = datetime.datetime.strptime(date_bet, "%Y-%m-%d %H:%M:%S")
+                        if current_date > formated_base:
+                            async with TelegramClient(StringSession(string_session), cfg.API_ID, cfg.API_HASH) as telethon_client_autoposting:
+                                for chat_id in chat_ids:
+                                    formated_chat_id = chat_id[:-2]
+                                    try:
+                                        await telethon_client_autoposting.forward_messages(entity=formated_chat_id, messages=int(message_id), from_peer=channel_tag)
+                                        await bot.send_message(user_id, f"Рекламный пост, успешно отправлен в чат {formated_chat_id}")
+                                        await asyncio.sleep(5)
+                                    except RPCError as err:
+                                        print(f"[ERROR RPCError] {err}")
+                                    except Exception as erri:
+                                        print(f"[ERROR EXCEPTION] {erri}")
+                                all_date_betw = db.select_date_betw(number_group)
+                                current_data = datetime.datetime.now()
+                                time_in_60_minutes = current_data + datetime.timedelta(minutes=1440)
+                                formatted_date_new = time_in_60_minutes.strftime("%Y-%m-%d %H:%M:%S")
+                                new_channels = [formatted_date_new if item == date_bet else item for item in all_date_betw]
+                                db.update_date_betw(new_channels, number_group)
             else:
                 db.delete_data_end_post(number_group)
                 formated_chat_idn = [s.replace('✅', '⚠') for s in chat_idn]
@@ -1131,10 +1144,11 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     channels_len = len(channels)
                     current_data = datetime.datetime.now()
                     time_betw = db.select_time_betw(number_group_autoposting)
+                    hours, minutes = map(int, time_betw.split(':'))
+                    current_date = datetime.datetime.now()
+                    combined_datetime = current_date.replace(hour=hours, minute=minutes, second=0, microsecond=0)
+                    date_betw = combined_datetime.strftime("%Y-%m-%d %H:%M:%S")
                     new_date = current_data + datetime.timedelta(days=30)
-                    current_time = datetime.datetime.now()
-                    formatted_date_betw = current_time + timedelta(minutes=time_betw)
-                    date_betw = formatted_date_betw.strftime("%Y-%m-%d %H:%M:%S")
                     formatted_date_new = new_date.strftime("%Y-%m-%d %H:%M:%S")
                     db.update_date_betw(date_betw, number_group_autoposting)
                     db.add_date_tariffe_autoposting(user_id, formatted_date_new, number_group_autoposting)
@@ -1210,18 +1224,26 @@ async def add_post_func_text_2(message: types.Message, state: FSMContext):
             await message.answer(cfg.back_text, reply_markup=markup_reply)
             await state.reset_state()
         else:
-            if int(message.text):
-                if int(message.text) >= 60:
-                    current_time = datetime.datetime.now()
-                    time_in_60_minutes = current_time + timedelta(minutes=60)
-                    await state.update_data(time_betw=int(message.text))
-                    await state.update_data(date_betw=time_in_60_minutes)
-                    await message.answer(cfg.create_account_post_3)
-                    await Add_post.add_post_3.set()
+            hours, minutes = message.text.split(":")
+            hours = int(hours)
+            minutes = int(minutes)
+            if 0 <= hours < 24:
+                if 0 <= minutes < 61:
+                    if validate_time_format(message.text):
+                        await Add_post.add_post_3.set()
+                        await message.answer(cfg.create_account_post_3)
+                        # current_date = datetime.datetime.now()
+                        # combined_datetime = current_date.replace(hour=hours, minute=minutes, second=0, microsecond=0)
+                        # formatted_datetime = combined_datetime.strftime("%Y-%m-%d %H:%M:%S")
+                        new_lst = []
+                        new_lst.append(message.text)
+                        await state.update_data(time_betw=new_lst)
+                    else:
+                        await message.answer("Формат времени не верный, отправьте время в следющем формате")
                 else:
-                    await message.answer(cfg.minimum_time_error)
+                    await message.answer("Вы можете поставить минуты не больше 60 и не меньше 0, попробуйте ещё раз:")
             else:
-                await message.answer("Ошибка! Промежуток времени должен быть цифрой, повторите ещё раз:")
+                await message.answer("Вы можете поставить часы не больше 23 и не меньше 0, попробуйте ещё раз:")
 
 @dp.message_handler(state=Add_post.add_post_3)
 async def add_post_func_text_3(message: types.Message, state: FSMContext):

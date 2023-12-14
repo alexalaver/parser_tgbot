@@ -1,23 +1,33 @@
-import requests
-from bs4 import BeautifulSoup
+# import requests
+# from bs4 import BeautifulSoup
+#
+# url = 'https://t.me/@asdasdas'
+#
+# response = requests.get(url)
+# html_content = response.text
+#
+# soup = BeautifulSoup(html_content, 'html.parser')
+#
+# title_div = soup.find('div', {'class': 'tgme_page_title'})
+# if title_div:
+#     group_name = title_div.get_text(strip=True)
+#     print("Название группы:", group_name)
+# else:
+#     print("Название группы не найдено.")
 
-url = 'https://t.me/@asdasdas'
+from datetime import datetime
+import pytz
 
-response = requests.get(url)
-html_content = response.text
+a = "10:30"
+hours, minutes = map(int, a.split(':'))
 
-soup = BeautifulSoup(html_content, 'html.parser')
+# Получаем текущую дату
+current_date = datetime.now()
 
-title_div = soup.find('div', {'class': 'tgme_page_title'})
-if title_div:
-    group_name = title_div.get_text(strip=True)
-    print("Название группы:", group_name)
-else:
-    print("Название группы не найдено.")
+# Объединяем текущую дату с временем из `a`
+combined_datetime = current_date.replace(hour=hours, minute=minutes, second=0, microsecond=0)
 
-a = "Hello"
-print(a[-1])
+# Форматируем результат в строку
+formatted_datetime = combined_datetime.strftime("%Y-%m-%d %H:%M:%S")
 
-
-a_d = "Textsingtest"
-print(a_d[:8])
+print(formatted_datetime)
