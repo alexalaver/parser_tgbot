@@ -288,7 +288,7 @@ async def autoposting_forward():
             if formated_base > current_date:
                 await bot.send_message(user_id, 'right 1')
                 if chat_ids != []:
-                    current_date = datetime.datetime.now(moscow_tz)
+                    current_date = datetime.datetime.now()
                     await bot.send_message(user_id, 'right 2')
                     for date_bet in date_betw:
                         await bot.send_message(user_id, 'right 3')
