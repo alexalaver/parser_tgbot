@@ -288,7 +288,7 @@ async def autoposting_forward():
             if formated_base > current_date:
                 await bot.send_message(user_id, 'right 1')
                 if chat_ids != []:
-                    current_date = datetime.datetime.now()
+                    current_date = datetime.datetime.now(moscow_tz)
                     await bot.send_message(user_id, 'right 2')
                     for date_bet in date_betw:
                         await bot.send_message(user_id, 'right 3')
@@ -307,8 +307,7 @@ async def autoposting_forward():
                                     except Exception as erri:
                                         print(f"[ERROR EXCEPTION] {erri}")
                                 all_date_betw = db.select_date_betw(number_group)
-                                current_data = datetime.datetime.now(moscow_tz)
-                                time_in_60_minutes = current_data + datetime.timedelta(minutes=1440)
+                                time_in_60_minutes = formated_base + datetime.timedelta(minutes=1440)
                                 formatted_date_new = time_in_60_minutes.strftime("%Y-%m-%d %H:%M:%S")
                                 new_channels = [formatted_date_new if item == date_bet else item for item in all_date_betw]
                                 db.update_date_betw(new_channels, number_group)
