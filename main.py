@@ -1148,9 +1148,11 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     current_date = datetime.datetime.now()
                     combined_datetime = current_date.replace(hour=hours, minute=minutes, second=0, microsecond=0)
                     date_betw = combined_datetime.strftime("%Y-%m-%d %H:%M:%S")
+                    new_lst = []
                     new_date = current_data + datetime.timedelta(days=30)
                     formatted_date_new = new_date.strftime("%Y-%m-%d %H:%M:%S")
-                    db.update_date_betw(date_betw, number_group_autoposting)
+                    new_lst.append(date_betw)
+                    db.update_date_betw(new_lst, number_group_autoposting)
                     db.add_date_tariffe_autoposting(user_id, formatted_date_new, number_group_autoposting)
                     markup_inline = types.InlineKeyboardMarkup(row_width=1)
                     btn_inline1 = types.InlineKeyboardButton(cfg.menu_button, callback_data='menu_after_pay_autoposting')
