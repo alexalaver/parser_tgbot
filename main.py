@@ -1835,6 +1835,7 @@ async def other(message: types.Message):
             else:
                 command = user_id = message = None
             await bot.send_message(user_id, message)
+            print("успешно отправлено")
         else:
             await message.answer(cfg.unknown_command_text)
 
