@@ -16,6 +16,7 @@ import config as cfg
 import logging
 import datetime
 import re
+import pytz
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -278,7 +279,7 @@ async def autoposting_forward():
             if not groups:
                 await asyncio.sleep(10)
                 continue
-
+            moscow_tz = pytz.timezone('Europe/Moscow')
             group = groups[num]
             user_id, chat_idn, string_session, message_id, date_betw, number_group, data_end, channel_tag = group[0], group[3], group[2], group[1], group[10], group[5], group[4], group[9]
             chat_ids = [item for item in chat_idn if item.endswith('✅')]
@@ -306,7 +307,7 @@ async def autoposting_forward():
                                     except Exception as erri:
                                         print(f"[ERROR EXCEPTION] {erri}")
                                 all_date_betw = db.select_date_betw(number_group)
-                                current_data = datetime.datetime.now()
+                                current_data = datetime.datetime.now(moscow_tz)
                                 time_in_60_minutes = current_data + datetime.timedelta(minutes=1440)
                                 formatted_date_new = time_in_60_minutes.strftime("%Y-%m-%d %H:%M:%S")
                                 new_channels = [formatted_date_new if item == date_bet else item for item in all_date_betw]
