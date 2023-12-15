@@ -546,3 +546,8 @@ class Data:
         with self.connect:
             self.cursor.execute("DELETE FROM autoposting_post WHERE post=%s", (post,))
             self.connect.commit()
+
+    def update_chat_idn_autoposting(self, chats, number_post):
+        with self.connect:
+            self.cursor.execute("UPDATE autoposting_post SET chats=%s WHERE number_post=%s", (chats, number_post,))
+            self.connect.commit()

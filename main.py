@@ -281,32 +281,33 @@ async def autoposting_forward():
                 continue
             moscow_tz = pytz.timezone('Europe/Moscow')
             group = groups[num]
-            user_id, chat_idn, string_session, message_id, date_betw, number_group, data_end, channel_tag = group[0], group[3], group[2], group[1], group[10], group[5], group[4], group[7]
+            user_id, chat_idn, string_session, message_id, number_group, data_end, channel_tag = group[0], group[11], group[2], group[1], group[4], group[3], group[6]
             chat_ids = [item for item in chat_idn if item.endswith('✅')]
             current_date = datetime.datetime.now()
             formated_base = datetime.datetime.strptime(data_end, "%Y-%m-%d %H:%M:%S")
             if formated_base > current_date:
                 if chat_ids != []:
                     current_date = datetime.datetime.now()
-                    for date_bet in date_betw:
-                        formated_base = datetime.datetime.strptime(date_bet, "%Y-%m-%d %H:%M:%S")
-                        if current_date > formated_base:
-                            async with TelegramClient(StringSession(string_session), cfg.API_ID, cfg.API_HASH) as telethon_client_autoposting:
-                                for chat_id in chat_ids:
-                                    formated_chat_id = chat_id[:-2]
-                                    try:
-                                        await telethon_client_autoposting.forward_messages(entity=formated_chat_id, messages=int(message_id), from_peer=channel_tag)
-                                        await bot.send_message(user_id, f"Рекламный пост, успешно отправлен в чат {formated_chat_id}")
-                                        await asyncio.sleep(5)
-                                    except RPCError as err:
-                                        print(f"[ERROR RPCError] {err}")
-                                    except Exception as erri:
-                                        print(f"[ERROR EXCEPTION] {erri}")
-                                all_date_betw = db.select_date_betw(number_group)
-                                time_in_60_minutes = formated_base + datetime.timedelta(minutes=1440)
-                                formatted_date_new = time_in_60_minutes.strftime("%Y-%m-%d %H:%M:%S")
-                                new_channels = [formatted_date_new if item == date_bet else item for item in all_date_betw]
-                                db.update_date_betw(new_channels, number_group)
+                    for chat_id in chat_ids:
+                        formated_chat_id = chat_id[0][:-2]
+                        date_betw = chat_id[1:]
+                        for date_bet in date_betw:
+                            formated_base = datetime.datetime.strptime(date_bet, "%Y-%m-%d %H:%M:%S")
+                            if current_date > formated_base:
+                                async with TelegramClient(StringSession(string_session), cfg.API_ID, cfg.API_HASH) as telethon_client_autoposting:
+                                        try:
+                                            await telethon_client_autoposting.forward_messages(entity=formated_chat_id, messages=int(message_id), from_peer=channel_tag)
+                                            await bot.send_message(user_id, f"Рекламный пост, успешно отправлен в чат {formated_chat_id}")
+                                            await asyncio.sleep(5)
+                                        except RPCError as err:
+                                            print(f"[ERROR RPCError] {err}")
+                                        except Exception as erri:
+                                            print(f"[ERROR EXCEPTION] {erri}")
+                                        time_in_60_minutes = formated_base + datetime.timedelta(minutes=1440)
+                                        formatted_date_new = time_in_60_minutes.strftime("%Y-%m-%d %H:%M:%S")
+                                        new_channels = [formatted_date_new if item == date_bet else item for item in chat_id]
+                                        new_updates = [new_channels if item == chat_id else item for item in chat_idn]
+                                        db.update_chat_idn_autoposting(new_updates, number_group)
             else:
                 db.delete_data_end_post(number_group)
                 formated_chat_idn = [s.replace('✅', '⚠') for s in chat_idn]
@@ -1156,9 +1157,8 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 if balance >= money_oplata:
                     channels = db.select_chats_account_with_number(number_group_autoposting)
                     channels_name = db.select_chats_name_account_with_number(number_group_autoposting)
-                    new_channels = [newer[:-2] + " ✅" for newer in channels]
+                    new_channels = [[channel[0][:-2] + " ✅"] for channel in channels]
                     new_chats_name = [newer[:-2] + " ✅" for newer in channels_name]
-                    db.update_all_chats_account(number_group_autoposting, new_channels)
                     db.update_all_chats_name_account(number_group_autoposting, new_chats_name)
                     db.update_balance(user_id, money_oplata)
                     channels_len = len(channels)
@@ -1172,15 +1172,15 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     new_date = current_data + datetime.timedelta(days=30)
                     formatted_date_new = new_date.strftime("%Y-%m-%d %H:%M:%S")
                     new_lst.append(date_betw)
-                    db.update_date_betw(new_lst, number_group_autoposting)
+                    for channel in channels:
+                        channel.append(date_betw)
+                    db.update_all_chats_account(number_group_autoposting, new_channels)
                     db.add_date_tariffe_autoposting(user_id, formatted_date_new, number_group_autoposting)
                     markup_inline = types.InlineKeyboardMarkup(row_width=1)
                     btn_inline1 = types.InlineKeyboardButton(cfg.menu_button, callback_data='menu_after_pay_autoposting')
                     markup_inline.add(btn_inline1)
                     await callback_query.message.delete()
-                    await callback_query.message.answer(
-                        text=cfg.tariffe_correct_autoposting(group_name_autoposting, channels_len, formatted_date_new),
-                        reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+                    await callback_query.message.answer(text=cfg.tariffe_correct_autoposting(group_name_autoposting, channels_len, formatted_date_new), reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
                 else:
                     await callback_query.answer(text=cfg.tariffe_error, show_alert=True)
             elif callback_query.data == "back_oplata_autoposting":
@@ -1325,7 +1325,7 @@ async def add_post_func_text_3(message: types.Message, state: FSMContext):
         user_id = message.from_user.id
         textsing = message.text
         text_line = textsing.strip().split('\n')
-        text_lines = list(dict.fromkeys([element + ' ⚠' for element in text_line]))
+        text_lines = [[element + ' ⚠'] for element in text_line]
         if message.text == cfg.cancel_creategroup:
             user_id = message.from_user.id
             markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
