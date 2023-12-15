@@ -292,6 +292,7 @@ async def autoposting_forward():
                         date_betw = chat_id[1:]
                         for date_bet in date_betw:
                             formated_base = datetime.datetime.strptime(date_bet, "%Y-%m-%d %H:%M:%S")
+                            formated_base = moscow_tz.localize(formated_base)
                             if current_date > formated_base:
                                 async with TelegramClient(StringSession(string_session), cfg.API_ID, cfg.API_HASH) as telethon_client_autoposting:
                                         try:
