@@ -4,7 +4,6 @@ from aiogram.dispatcher.storage import FSMContext
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from datbas import Data
-from datetime import timedelta
 from telethon import TelegramClient
 from telethon.sessions import StringSession
 from telethon.errors import FloodWaitError, ChannelPrivateError, ChatForbiddenError, UserPrivacyRestrictedError, PeerIdInvalidError, SessionPasswordNeededError, PhoneCodeExpiredError, PhoneNumberUnoccupiedError, RPCError
