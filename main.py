@@ -306,7 +306,8 @@ async def autoposting_forward():
                                 time_in_60_minutes = formated_base + datetime.timedelta(minutes=1440)
                                 formatted_date_new = time_in_60_minutes.strftime("%Y-%m-%d %H:%M:%S")
                                 new_channels = [formatted_date_new if item == date_bet else item for item in chat_id]
-                                new_updates = [new_channels if item == chat_id else item for item in chat_idn]
+                                chat_idln = db.select_chats_account_with_number_autoposting(number_group)
+                                new_updates = [new_channels if item == chat_id else item for item in chat_idln]
                                 db.update_chat_idn_autoposting(new_updates, number_group)
             else:
                 db.delete_data_end_post(number_group)
