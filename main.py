@@ -281,7 +281,7 @@ async def autoposting_forward():
                 continue
             moscow_tz = pytz.timezone('Europe/Moscow')
             group = groups[num]
-            user_id, chat_idn, string_session, message_id, number_group, data_end, channel_tag = group[0], group[11], group[2], group[1], group[4], group[3], group[6]
+            user_id, chat_idn, string_session, message_id, number_group, data_end, channel_tag = group[0], group[10], group[2], group[1], group[4], group[3], group[6]
             chat_ids = [item for item in chat_idn if item.endswith('✅')]
             current_date = datetime.datetime.now()
             formated_base = datetime.datetime.strptime(data_end, "%Y-%m-%d %H:%M:%S")
