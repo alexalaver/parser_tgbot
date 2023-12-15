@@ -392,7 +392,8 @@ class Data:
         with self.connect:
             self.cursor.execute("SELECT chats FROM autoposting_post WHERE id=%s AND post=%s", (id, post_id,))
             a = self.cursor.fetchone()[0]
-            return a
+            first_elements = [sublist[0] for sublist in a]
+            return first_elements
 
     def select_chats_name_post(self, id, post_id):
         with self.connect:
@@ -409,8 +410,9 @@ class Data:
     def select_chats_account_with_number(self, number_post):
         with self.connect:
             self.cursor.execute("SELECT chats FROM autoposting_post WHERE number_post=%s", (number_post,))
-            a = self.cursor.fetchone()
-            return a[0]
+            a = self.cursor.fetchone()[0]
+            first_elements = [sublist[0] for sublist in a]
+            return first_elements
 
     def select_chats_name_account_with_number(self, number_post):
         with self.connect:
