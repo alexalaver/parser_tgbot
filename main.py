@@ -292,7 +292,9 @@ async def autoposting_forward():
                         date_betw = chat_id[1:]
                         for date_bet in date_betw:
                             formated_base = datetime.datetime.strptime(date_bet, "%Y-%m-%d %H:%M:%S")
+                            print("right 1")
                             if current_date > formated_base:
+                                print("right 2")
                                 async with TelegramClient(StringSession(string_session), cfg.API_ID, cfg.API_HASH) as telethon_client_autoposting:
                                         try:
                                             await telethon_client_autoposting.forward_messages(entity=formated_chat_id, messages=int(message_id), from_peer=channel_tag)
