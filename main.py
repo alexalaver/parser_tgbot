@@ -1171,8 +1171,8 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     new_date = current_data + datetime.timedelta(days=30)
                     formatted_date_new = new_date.strftime("%Y-%m-%d %H:%M:%S")
                     new_lst.append(date_betw)
-                    for channel in channels:
-                        channel.append(str(date_betw))
+                    for new_channel in new_channels:
+                        new_channel.append(str(date_betw))
                     db.update_all_chats_account(number_group_autoposting, new_channels)
                     db.add_date_tariffe_autoposting(user_id, formatted_date_new, number_group_autoposting)
                     markup_inline = types.InlineKeyboardMarkup(row_width=1)
