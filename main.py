@@ -302,11 +302,12 @@ async def autoposting_forward():
                                             print(f"[ERROR RPCError] {err}")
                                         except Exception as erri:
                                             print(f"[ERROR EXCEPTION] {erri}")
-                                        time_in_60_minutes = formated_base + datetime.timedelta(minutes=1440)
-                                        formatted_date_new = time_in_60_minutes.strftime("%Y-%m-%d %H:%M:%S")
-                                        new_channels = [formatted_date_new if item == date_bet else item for item in chat_id]
-                                        new_updates = [new_channels if item == chat_id else item for item in chat_idn]
-                                        db.update_chat_idn_autoposting(new_updates, number_group)
+                                time_in_60_minutes = formated_base + datetime.timedelta(minutes=1440)
+                                formatted_date_new = time_in_60_minutes.strftime("%Y-%m-%d %H:%M:%S")
+                                new_channels = [formatted_date_new if item == date_bet else item for item in chat_id]
+                                print(new_channels)
+                                new_updates = [new_channels if item == chat_id else item for item in chat_idn]
+                                db.update_chat_idn_autoposting(new_updates, number_group)
             else:
                 db.delete_data_end_post(number_group)
                 formated_chat_idn = [s.replace('✅', '⚠') for s in chat_idn]
