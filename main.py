@@ -1154,7 +1154,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 channels_len = len(channels_autoposting)
                 money_oplata = 5 * int(channels_len)
                 if balance >= money_oplata:
-                    channels = db.select_chats_account_with_number(number_group_autoposting)
+                    channels = db.select_chats_account_with_number_confirm_oplata(number_group_autoposting)
                     channels_name = db.select_chats_name_account_with_number(number_group_autoposting)
                     new_channels = [[channel[0][:-2] + " ✅"] for channel in channels]
                     new_chats_name = [newer[:-2] + " ✅" for newer in channels_name]

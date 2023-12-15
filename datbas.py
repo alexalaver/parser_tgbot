@@ -414,6 +414,12 @@ class Data:
             first_elements = [sublist[0] for sublist in a]
             return first_elements
 
+    def select_chats_account_with_number_confirm_oplata(self, number_post):
+        with self.connect:
+            self.cursor.execute("SELECT chats FROM autoposting_post WHERE number_post=%s", (number_post,))
+            a = self.cursor.fetchone()[0]
+            return a
+
     def select_chats_name_account_with_number(self, number_post):
         with self.connect:
             self.cursor.execute("SELECT channels_title FROM autoposting_post WHERE number_post=%s", (number_post,))
