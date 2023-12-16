@@ -1135,6 +1135,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 chat_idln = db.select_chats_account_with_number_autoposting(number_group_autoposting)
                 b_replaced = settings_callback_data.replace("❌", "✅")
                 a_updated = [[b_replaced if item == settings_callback_data else item for item in sublist] for sublist in chat_idln]
+                print(a_updated)
                 json_data = json.dumps(a_updated)
                 db.update_chat_idn_autoposting(json_data, number_group_autoposting)
                 markup_inline = types.InlineKeyboardMarkup(row_width=1)
