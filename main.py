@@ -1060,7 +1060,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 result = selected_sublist[0] if selected_sublist else []
                 times = [datetime_str.split()[1][:5] for datetime_str in result[1:]]
                 if len(times) >= 3:
-                    await callback_query.answer(cfg.add_time_text_limit)
+                    await callback_query.answer(cfg.add_time_text_limit, show_alert=True)
                 else:
                     await Add_time_autoposting_chat.add_time_autoposting_1.set()
                     markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
