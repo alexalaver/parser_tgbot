@@ -1300,7 +1300,9 @@ async def add_time_autoposting_chat_text(message: types.Message, state: FSMConte
                         formatted_datetime = combined_datetime.strftime("%Y-%m-%d %H:%M:%S")
                         data = await state.get_data()
                         number_group_autoposting = data.get("number_group_autoposting")
+                        await message.answer(f"number {number_group_autoposting}")
                         settings_callback_data = data.get("settings_callback_data")
+                        await message.answer(f"settings_callback_data {settings_callback_data}")
                         post_names = db.select_chats_account_with_number_autoposting(number_group_autoposting)
                         selected_sublist = [sublist for sublist in post_names if sublist[0] == settings_callback_data]
                         result = selected_sublist[0] if selected_sublist else []
