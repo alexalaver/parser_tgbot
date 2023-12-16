@@ -999,9 +999,9 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                                 button = types.InlineKeyboardButton(text=time, callback_data=time)
                                 markup_inline.add(button)
                             if channel_name[-1] == "✅":
-                                markup_inline.add(types.InlineKeyboardButton(text=cfg.on_chat_button, callback_data="on_chat_autoposting"))
-                            elif channel_name[-1] == "❌":
                                 markup_inline.add(types.InlineKeyboardButton(text=cfg.off_chat_button, callback_data="off_chat_autoposting"))
+                            elif channel_name[-1] == "❌":
+                                markup_inline.add(types.InlineKeyboardButton(text=cfg.on_chat_button, callback_data="on_chat_autoposting"))
                             markup_inline.add(
                                 types.InlineKeyboardButton(text=cfg.add_time_button, callback_data="add_time_autoposting_chat"),
                                 types.InlineKeyboardButton(text=cfg.back_button, callback_data="back_settings_chat_time_autoposting")
@@ -1091,14 +1091,70 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     button = types.InlineKeyboardButton(text=time, callback_data=time)
                     markup_inline.add(button)
                 if channel_name[-1] == "✅":
-                    markup_inline.add(types.InlineKeyboardButton(text=cfg.on_chat_button, callback_data="on_chat_autoposting"))
-                elif channel_name[-1] == "❌":
                     markup_inline.add(types.InlineKeyboardButton(text=cfg.off_chat_button, callback_data="off_chat_autoposting"))
+                elif channel_name[-1] == "❌":
+                    markup_inline.add(types.InlineKeyboardButton(text=cfg.on_chat_button, callback_data="on_chat_autoposting"))
                 markup_inline.add(
                     types.InlineKeyboardButton(text=cfg.add_time_button, callback_data="add_time_autoposting_chat"),
                     types.InlineKeyboardButton(text=cfg.back_button, callback_data="back_settings_chat_time_autoposting")
                 )
                 await callback_query.message.edit_caption(caption=cfg.time_chats_autoposting_text, reply_markup=markup_inline)
+            elif callback_query.data == "on_chat_autoposting":
+                data = await state.get_data()
+                settings_callback_data = data.get("settings_callback_data")
+                chat_idln = db.select_chats_account_with_number_autoposting(number_group_autoposting)
+                selected_sublist = [sublist for sublist in chat_idln if sublist[0] == settings_callback_data]
+                if len(selected_sublist) > 1:
+                    b_replaced = settings_callback_data.replace("✅", "❌")
+                    a_updated = [[b_replaced if item == settings_callback_data else item for item in sublist] for sublist in chat_idln]
+                    json_data = json.dumps(a_updated)
+                    db.update_chat_idn_autoposting(json_data, number_group_autoposting)
+                    markup_inline = types.InlineKeyboardMarkup(row_width=1)
+                    post_names = db.select_chats_account_with_number_autoposting(number_group_autoposting)
+                    selected_sublist = [sublist for sublist in post_names if sublist[0] == b_replaced]
+                    result = selected_sublist[0] if selected_sublist else []
+                    times = [datetime_str.split()[1][:5] for datetime_str in result[1:]]
+                    for time in times:
+                        button = types.InlineKeyboardButton(text=time, callback_data=time)
+                        markup_inline.add(button)
+                    if b_replaced[-1] == "✅":
+                        markup_inline.add(types.InlineKeyboardButton(text=cfg.off_chat_button, callback_data="off_chat_autoposting"))
+                    elif b_replaced[-1] == "❌":
+                        markup_inline.add(types.InlineKeyboardButton(text=cfg.on_chat_button, callback_data="on_chat_autoposting"))
+                    markup_inline.add(
+                        types.InlineKeyboardButton(text=cfg.add_time_button, callback_data="add_time_autoposting_chat"),
+                        types.InlineKeyboardButton(text=cfg.back_button,callback_data="back_settings_chat_time_autoposting")
+                    )
+                    await state.update_data(settings_callback_data=b_replaced)
+                    await callback_query.message.edit_reply_markup(reply_markup=markup_inline)
+                else:
+                    await callback_query.answer(cfg.without_time_in_chat_text, show_alert=True)
+            elif callback_query.data == "off_chat_autoposting":
+                data = await state.get_data()
+                settings_callback_data = data.get("settings_callback_data")
+                chat_idln = db.select_chats_account_with_number_autoposting(number_group_autoposting)
+                b_replaced = settings_callback_data.replace("❌", "✅")
+                a_updated = [[b_replaced if item == settings_callback_data else item for item in sublist] for sublist in chat_idln]
+                json_data = json.dumps(a_updated)
+                db.update_chat_idn_autoposting(json_data, number_group_autoposting)
+                markup_inline = types.InlineKeyboardMarkup(row_width=1)
+                post_names = db.select_chats_account_with_number_autoposting(number_group_autoposting)
+                selected_sublist = [sublist for sublist in post_names if sublist[0] == b_replaced]
+                result = selected_sublist[0] if selected_sublist else []
+                times = [datetime_str.split()[1][:5] for datetime_str in result[1:]]
+                for time in times:
+                    button = types.InlineKeyboardButton(text=time, callback_data=time)
+                    markup_inline.add(button)
+                if b_replaced[-1] == "✅":
+                    markup_inline.add(types.InlineKeyboardButton(text=cfg.off_chat_button, callback_data="off_chat_autoposting"))
+                elif b_replaced[-1] == "❌":
+                    markup_inline.add(types.InlineKeyboardButton(text=cfg.on_chat_button, callback_data="on_chat_autoposting"))
+                markup_inline.add(
+                    types.InlineKeyboardButton(text=cfg.add_time_button, callback_data="add_time_autoposting_chat"),
+                    types.InlineKeyboardButton(text=cfg.back_button, callback_data="back_settings_chat_time_autoposting")
+                )
+                await state.update_data(settings_callback_data=b_replaced)
+                await callback_query.message.edit_reply_markup(reply_markup=markup_inline)
             elif callback_query.data == "next_page_autoposting":
                 if channels_page_autoposting == page_here_autoposting:
                     await callback_query.answer(cfg.error_page_next, show_alert=True)
