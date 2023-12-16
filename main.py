@@ -1105,7 +1105,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 chat_idln = db.select_chats_account_with_number_autoposting(number_group_autoposting)
                 selected_sublist = [sublist for sublist in chat_idln if sublist[0] == settings_callback_data]
                 if len(selected_sublist) > 1:
-                    b_replaced = settings_callback_data.replace("✅", "❌")
+                    b_replaced = settings_callback_data[:-1] + "✅"
                     group_index = channels_autoposting.index(settings_callback_data)
                     all_channels_name = db.select_chats_name_account_with_number(number_group_autoposting)
                     group_name = all_channels_name[group_index]
@@ -1140,14 +1140,14 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 settings_callback_data = data.get("settings_callback_data")
                 print(settings_callback_data)
                 chat_idln = db.select_chats_account_with_number_autoposting(number_group_autoposting)
-                b_replaced = settings_callback_data.replace("❌", "✅")
+                b_replaced = settings_callback_data[:-1] + "❌"
                 print(b_replaced)
-                # group_index = channels_autoposting.index(settings_callback_data)
-                # all_channels_name = db.select_chats_name_account_with_number(number_group_autoposting)
-                # group_name = all_channels_name[group_index]
-                # new_callback_name = group_name[:-1] + "❌"
-                # new_channels_name = [new_callback_name if item == group_name else item for item in all_channels_name]
-                # db.update_all_chats_name_account(number_group_autoposting, new_channels_name)
+                group_index = channels_autoposting.index(settings_callback_data)
+                all_channels_name = db.select_chats_name_account_with_number(number_group_autoposting)
+                group_name = all_channels_name[group_index]
+                new_callback_name = group_name[:-1] + "❌"
+                new_channels_name = [new_callback_name if item == group_name else item for item in all_channels_name]
+                db.update_all_chats_name_account(number_group_autoposting, new_channels_name)
                 a_updated = [[b_replaced if item == settings_callback_data else item for item in sublist] for sublist in chat_idln]
                 print(a_updated)
                 json_data = json.dumps(a_updated)
