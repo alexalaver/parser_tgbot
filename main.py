@@ -1199,13 +1199,19 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     time_for_chat = data.get("time_for_chat")
                     sublist = next((sub for sub in post_names if sub[0] == settings_callback_data), None)
                     a = None
-                    if len(sublist) == 1:
+                    if len(sublist) == 2:
                         sublist[0] = sublist[0].rstrip(' ✅') + ' ❌'
                     if sublist:
                         updated_sublist = [sublist[0]] + [time for time in sublist[1:] if time.split()[1][:5] != time_for_chat]
                         a = [updated_sublist if sub[0] == settings_callback_data else sub for sub in post_names]
                     json_data = json.dumps(a)
                     db.update_chat_idn_autoposting(json_data, number_group_autoposting)
+                    group_index = channels_autoposting.index(settings_callback_data)
+                    all_channels_name = db.select_chats_name_account_with_number(number_group_autoposting)
+                    group_name = all_channels_name[group_index]
+                    new_callback_name = group_name[:-1] + "❌"
+                    new_channels_name = [new_callback_name if item == group_name else item for item in all_channels_name]
+                    db.update_all_chats_name_account(number_group_autoposting, new_channels_name)
                     await callback_query.message.answer(cfg.delete_time_autoposting_yes_text)
                 elif callback_query.data == "next_page_autoposting":
                     if channels_page_autoposting == page_here_autoposting:
