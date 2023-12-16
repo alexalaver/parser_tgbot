@@ -1104,6 +1104,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 settings_callback_data = data.get("settings_callback_data")
                 chat_idln = db.select_chats_account_with_number_autoposting(number_group_autoposting)
                 selected_sublist = [sublist for sublist in chat_idln if sublist[0] == settings_callback_data]
+                print(selected_sublist)
                 if len(selected_sublist) > 1:
                     b_replaced = settings_callback_data[:-1] + "✅"
                     group_index = channels_autoposting.index(settings_callback_data)
