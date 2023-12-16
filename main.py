@@ -959,53 +959,69 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                         await callback_query.answer(text=cfg.error_oplata, show_alert=True)
                     else:
                         channel_name = callback_query.data
-                        if channel_name[-1] == "✅":
-                            group_index = channels_autoposting.index(channel_name)
-                            all_channels = db.select_chats_account_with_number(number_group_autoposting)
-                            all_channels_name = db.select_chats_name_account_with_number(number_group_autoposting)
-                            group_name = all_channels_name[group_index]
-                            new_callback = channel_name[:-1] + '❌'
-                            new_channels = [new_callback if item == channel_name else item for item in all_channels]
-                            db.update_all_chats_account(number_group_autoposting, new_channels)
-                            new_callback_name = group_name[:-1] + '❌'
-                            new_channels_name = [new_callback_name if item == group_name else item for item in all_channels_name]
-                            db.update_all_chats_name_account(number_group_autoposting, new_channels_name)
-                        elif channel_name[-1] == "❌":
-                            group_index = channels_autoposting.index(channel_name)
-                            all_channels = db.select_chats_account_with_number(number_group_autoposting)
-                            all_channels_name = db.select_chats_name_account_with_number(number_group_autoposting)
-                            group_name = all_channels_name[group_index]
-                            new_callback = channel_name[:-1] + "✅"
-                            new_channels = [new_callback if item == channel_name else item for item in all_channels]
-                            db.update_all_chats_account(number_group_autoposting, new_channels)
-                            new_callback_name = group_name[:-1] + "✅"
-                            new_channels_name = [new_callback_name if item == group_name else item for item in all_channels_name]
-                            db.update_all_chats_name_account(number_group_autoposting, new_channels_name)
-                        elif channel_name[-1] == "⏳":
+                        # if channel_name[-1] == "✅":
+                        #     group_index = channels_autoposting.index(channel_name)
+                        #     all_channels = db.select_chats_account_with_number(number_group_autoposting)
+                        #     all_channels_name = db.select_chats_name_account_with_number(number_group_autoposting)
+                        #     group_name = all_channels_name[group_index]
+                        #     new_callback = channel_name[:-1] + '❌'
+                        #     new_channels = [new_callback if item == channel_name else item for item in all_channels]
+                        #     db.update_all_chats_account(number_group_autoposting, new_channels)
+                        #     new_callback_name = group_name[:-1] + '❌'
+                        #     new_channels_name = [new_callback_name if item == group_name else item for item in all_channels_name]
+                        #     db.update_all_chats_name_account(number_group_autoposting, new_channels_name)
+                        # elif channel_name[-1] == "❌":
+                        #     group_index = channels_autoposting.index(channel_name)
+                        #     all_channels = db.select_chats_account_with_number(number_group_autoposting)
+                        #     all_channels_name = db.select_chats_name_account_with_number(number_group_autoposting)
+                        #     group_name = all_channels_name[group_index]
+                        #     new_callback = channel_name[:-1] + "✅"
+                        #     new_channels = [new_callback if item == channel_name else item for item in all_channels]
+                        #     db.update_all_chats_account(number_group_autoposting, new_channels)
+                        #     new_callback_name = group_name[:-1] + "✅"
+                        #     new_channels_name = [new_callback_name if item == group_name else item for item in all_channels_name]
+                        #     db.update_all_chats_name_account(number_group_autoposting, new_channels_name)
+                        if channel_name[-1] == "⏳":
                             await callback_query.answer(cfg.error_dostup_chat, show_alert=True)
-                        channels = db.select_chats_account_with_number(number_group_autoposting)
-                        channels_name = db.select_chats_name_account_with_number(number_group_autoposting)
-                        markup_inline = types.InlineKeyboardMarkup(row_width=1)
-                        paired_channels = zip(channels_name[from_page_autoposting:before_page_autoposting], channels[from_page_autoposting:before_page_autoposting])
-                        for channel_name, channel in paired_channels:
-                            buttons = types.InlineKeyboardButton(text=channel_name, callback_data=channel)
-                            markup_inline.row(buttons)
-                        buttons_count = types.InlineKeyboardButton(
-                            text=f"Страница {page_here_autoposting}/{channels_page_autoposting} 📄",
-                            callback_data="page_autoposting")
-                        markup_inline.add(buttons_count)
-                        if channels_count_all_autoposting > 10:
-                            buttons_next = types.InlineKeyboardButton(text=cfg.next_page, callback_data="next_page_autoposting")
-                            buttons_old = types.InlineKeyboardButton(text=cfg.old_page, callback_data="old_page_autoposting")
-                            markup_inline.row(buttons_old, buttons_next)
-                        if db.check_date_tarife_for_number(number_group_autoposting) is None:
-                            pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels_autoposting')
-                            markup_inline.add(pay_money_buttons)
-                        delete_post_button = types.InlineKeyboardButton(text=cfg.delete_post_button, callback_data="delete_post_autoposting")
-                        back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels_autoposting')
-                        change_time_betw_button = types.InlineKeyboardButton(text=cfg.change_time_betw_button, callback_data="change_time_betw_autoposting")
-                        markup_inline.add(change_time_betw_button, delete_post_button, back_channels)
-                        await callback_query.message.edit_caption(caption=cfg.account_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+                        else:
+                            markup_inline = types.InlineKeyboardMarkup(row_width=1)
+                            post_names = db.select_chats_account_with_number_autoposting(number_group_autoposting)
+                            selected_sublist = [sublist for sublist in post_names if sublist[0] == channel_name]
+                            result = selected_sublist[0] if selected_sublist else []
+                            times = [datetime_str.split()[1][:5] for datetime_str in result[1:]]
+                            max_buttons = 3
+                            for i in range(min(max_buttons, len(times))):
+                                button = types.InlineKeyboardButton(text=times[i], callback_data=times[i])
+                                markup_inline.add(button)
+                            markup_inline.add(
+                                types.InlineKeyboardButton(text=cfg.add_time_button, callback_data="add_time_autoposting_chat"),
+                                types.InlineKeyboardButton(text=cfg.back_button, callback_data="back_settings_chat_time_autoposting")
+                            )
+                            await state.update_data(settings_callback_data=channel_name)
+                            await callback_query.message.edit_caption(caption=cfg.time_chats_autoposting_text, reply_markup=markup_inline)
+                        # channels = db.select_chats_account_with_number(number_group_autoposting)
+                        # channels_name = db.select_chats_name_account_with_number(number_group_autoposting)
+                        # markup_inline = types.InlineKeyboardMarkup(row_width=1)
+                        # paired_channels = zip(channels_name[from_page_autoposting:before_page_autoposting], channels[from_page_autoposting:before_page_autoposting])
+                        # for channel_name, channel in paired_channels:
+                        #     buttons = types.InlineKeyboardButton(text=channel_name, callback_data=channel)
+                        #     markup_inline.row(buttons)
+                        # buttons_count = types.InlineKeyboardButton(
+                        #     text=f"Страница {page_here_autoposting}/{channels_page_autoposting} 📄",
+                        #     callback_data="page_autoposting")
+                        # markup_inline.add(buttons_count)
+                        # if channels_count_all_autoposting > 10:
+                        #     buttons_next = types.InlineKeyboardButton(text=cfg.next_page, callback_data="next_page_autoposting")
+                        #     buttons_old = types.InlineKeyboardButton(text=cfg.old_page, callback_data="old_page_autoposting")
+                        #     markup_inline.row(buttons_old, buttons_next)
+                        # if db.check_date_tarife_for_number(number_group_autoposting) is None:
+                        #     pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels_autoposting')
+                        #     markup_inline.add(pay_money_buttons)
+                        # delete_post_button = types.InlineKeyboardButton(text=cfg.delete_post_button, callback_data="delete_post_autoposting")
+                        # back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels_autoposting')
+                        # change_time_betw_button = types.InlineKeyboardButton(text=cfg.change_time_betw_button, callback_data="change_time_betw_autoposting")
+                        # markup_inline.add(change_time_betw_button, delete_post_button, back_channels)
+                        # await callback_query.message.edit_caption(caption=cfg.account_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
             elif callback_query.data == "next_page_autoposting":
                 if channels_page_autoposting == page_here_autoposting:
                     await callback_query.answer(cfg.error_page_next, show_alert=True)
