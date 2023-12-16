@@ -563,5 +563,5 @@ class Data:
 
     def update_chat_idn_autoposting(self, chats, number_post):
         with self.connect:
-            self.cursor.execute("UPDATE autoposting_post SET chats=%s WHERE number_post=%s", (chats, number_post,))
+            self.cursor.execute("UPDATE autoposting_post SET chats=%s::jsonb WHERE number_post=%s", (chats, number_post,))
             self.connect.commit()
