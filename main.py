@@ -1316,8 +1316,9 @@ async def add_time_autoposting_chat_text(message: types.Message, state: FSMConte
                         await message.answer("Вы можете поставить минуты не больше 60 и не меньше 0, попробуйте ещё раз:")
                 else:
                     await message.answer("Вы можете поставить часы не больше 23 и не меньше 0, попробуйте ещё раз:")
-            except Exception:
+            except Exception as err:
                 await message.answer("Что-то пошло не так, возможно вы ввели время в неправильном формате, отправьте время в следуюзем формате\n[час:минута] (Пример: 12:30)")
+                await message.answer(f"{err}")
 
 
 @dp.message_handler(state=Change_time_betw.change_time_betw_1)
