@@ -1022,6 +1022,30 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                         # change_time_betw_button = types.InlineKeyboardButton(text=cfg.change_time_betw_button, callback_data="change_time_betw_autoposting")
                         # markup_inline.add(change_time_betw_button, delete_post_button, back_channels)
                         # await callback_query.message.edit_caption(caption=cfg.account_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+            elif callback_query.data == "back_settings_chat_time_autoposting":
+                channels = db.select_chats_account_with_number(number_group_autoposting)
+                channels_name = db.select_chats_name_account_with_number(number_group_autoposting)
+                markup_inline = types.InlineKeyboardMarkup(row_width=2)
+                paired_channels = zip(channels_name[from_page_autoposting:before_page_autoposting], channels[from_page_autoposting:before_page_autoposting])
+                for channel_name, channel in paired_channels:
+                    buttons = types.InlineKeyboardButton(text=channel_name, callback_data=channel)
+                    markup_inline.row(buttons)
+                buttons_count = types.InlineKeyboardButton(
+                    text=f"Страница {page_here_autoposting}/{channels_page_autoposting} 📄",
+                    callback_data="page_autoposting")
+                markup_inline.add(buttons_count)
+                if channels_count_all_autoposting > 10:
+                    buttons_next = types.InlineKeyboardButton(text=cfg.next_page, callback_data="next_page_autoposting")
+                    buttons_old = types.InlineKeyboardButton(text=cfg.old_page, callback_data="old_page_autoposting")
+                    markup_inline.row(buttons_old, buttons_next)
+                if db.check_date_tarife_account_for_number(number_group_autoposting) is None:
+                    pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels_autoposting')
+                    markup_inline.add(pay_money_buttons)
+                back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels_autoposting')
+                delete_post_button = types.InlineKeyboardButton(text=cfg.delete_post_button, callback_data="delete_post_autoposting")
+                change_time_betw_button = types.InlineKeyboardButton(text=cfg.change_time_betw_button, callback_data="change_time_betw_autoposting")
+                markup_inline.add(change_time_betw_button, delete_post_button, back_channels)
+                await callback_query.message.edit_caption(caption=cfg.account_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
             elif callback_query.data == "next_page_autoposting":
                 if channels_page_autoposting == page_here_autoposting:
                     await callback_query.answer(cfg.error_page_next, show_alert=True)
