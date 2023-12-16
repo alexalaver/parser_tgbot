@@ -1278,47 +1278,43 @@ async def add_time_autoposting_chat_text(message: types.Message, state: FSMConte
             await message.answer(cfg.cancel_sostoyanie, parse_mode=types.ParseMode.MARKDOWN)
             await state.reset_state()
         else:
-            try:
-                hours, minutes = message.text.split(":")
-                hours = int(hours)
-                minutes = int(minutes)
-                if 0 <= hours < 24:
-                    if 0 <= minutes < 61:
-                        if validate_time_format(message.text):
-                            user_id = message.from_user.id
-                            first_name = message.from_user.first_name
-                            username = message.from_user.username
-                            if (not db.check_user(user_id)):
-                                db.add_user(user_id, first_name, username)
-                            markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
-                            markup_reply.add(cfg.autoposting)
-                            markup_reply.add(cfg.parser)
-                            markup_reply.row(cfg.my_profile, cfg.support)
-                            if db.select_admin(user_id) > 0:
-                                markup_reply.add(cfg.admin_panel_button)
-                            current_date = datetime.datetime.now()
-                            combined_datetime = current_date.replace(hour=hours, minute=minutes, second=0, microsecond=0)
-                            formatted_datetime = combined_datetime.strftime("%Y-%m-%d %H:%M:%S")
-                            data = await state.get_data()
-                            number_group_autoposting = data.get("number_group_autoposting")
-                            settings_callback_data = data.get("settings_callback_data")
-                            post_names = db.select_chats_account_with_number_autoposting(number_group_autoposting)
-                            selected_sublist = [sublist for sublist in post_names if sublist[0] == settings_callback_data]
-                            result = selected_sublist[0] if selected_sublist else []
-                            result.append(formatted_datetime)
-                            new_updates = [result if item[0] == settings_callback_data else item for item in post_names]
-                            db.update_chat_idn_autoposting(new_updates, number_group_autoposting)
-                            await message.answer(cfg.add_time_text_finish, reply_markup=markup_reply)
-                            await state.finish()
-                        else:
-                            await message.answer("Формат времени не верный, отправьте время в следющем формате\b[час:минута] (Пример: 12:30)")
+            hours, minutes = message.text.split(":")
+            hours = int(hours)
+            minutes = int(minutes)
+            if 0 <= hours < 24:
+                if 0 <= minutes < 61:
+                    if validate_time_format(message.text):
+                        user_id = message.from_user.id
+                        first_name = message.from_user.first_name
+                        username = message.from_user.username
+                        if (not db.check_user(user_id)):
+                            db.add_user(user_id, first_name, username)
+                        markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+                        markup_reply.add(cfg.autoposting)
+                        markup_reply.add(cfg.parser)
+                        markup_reply.row(cfg.my_profile, cfg.support)
+                        if db.select_admin(user_id) > 0:
+                            markup_reply.add(cfg.admin_panel_button)
+                        current_date = datetime.datetime.now()
+                        combined_datetime = current_date.replace(hour=hours, minute=minutes, second=0, microsecond=0)
+                        formatted_datetime = combined_datetime.strftime("%Y-%m-%d %H:%M:%S")
+                        data = await state.get_data()
+                        number_group_autoposting = data.get("number_group_autoposting")
+                        settings_callback_data = data.get("settings_callback_data")
+                        post_names = db.select_chats_account_with_number_autoposting(number_group_autoposting)
+                        selected_sublist = [sublist for sublist in post_names if sublist[0] == settings_callback_data]
+                        result = selected_sublist[0] if selected_sublist else []
+                        result.append(formatted_datetime)
+                        new_updates = [result if item[0] == settings_callback_data else item for item in post_names]
+                        db.update_chat_idn_autoposting(new_updates, number_group_autoposting)
+                        await message.answer(cfg.add_time_text_finish, reply_markup=markup_reply)
+                        await state.finish()
                     else:
-                        await message.answer("Вы можете поставить минуты не больше 60 и не меньше 0, попробуйте ещё раз:")
+                        await message.answer("Формат времени не верный, отправьте время в следющем формате\b[час:минута] (Пример: 12:30)")
                 else:
-                    await message.answer("Вы можете поставить часы не больше 23 и не меньше 0, попробуйте ещё раз:")
-            except Exception as err:
-                await message.answer("Что-то пошло не так, возможно вы ввели время в неправильном формате, отправьте время в следуюзем формате\n[час:минута] (Пример: 12:30)")
-                await message.answer(f"{err}")
+                    await message.answer("Вы можете поставить минуты не больше 60 и не меньше 0, попробуйте ещё раз:")
+            else:
+                await message.answer("Вы можете поставить часы не больше 23 и не меньше 0, попробуйте ещё раз:")
 
 
 @dp.message_handler(state=Change_time_betw.change_time_betw_1)
