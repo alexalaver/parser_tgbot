@@ -1216,11 +1216,9 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 money_oplata = 5 * int(channels_len)
                 if balance >= money_oplata:
                     channels = db.select_chats_account_with_number_confirm_oplata(number_group_autoposting)
-                    print(channels)
                     channels_name = db.select_chats_name_account_with_number(number_group_autoposting)
                     new_channels = [[channel[0][:-2] + " ✅"] for channel in channels]
                     new_chats_name = [newer[:-2] + " ✅" for newer in channels_name]
-                    print(new_channels)
                     db.update_all_chats_name_account(number_group_autoposting, new_chats_name)
                     db.update_balance(user_id, money_oplata)
                     channels_len = len(channels)
@@ -1236,7 +1234,8 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     new_lst.append(date_betw)
                     for new_channel in new_channels:
                         new_channel.append(str(date_betw))
-                    db.update_all_chats_account(number_group_autoposting, new_channels)
+                    json_data = json.dumps(new_channels)
+                    db.update_all_chats_account(number_group_autoposting, json_data)
                     db.add_date_tariffe_autoposting(user_id, formatted_date_new, number_group_autoposting)
                     markup_inline = types.InlineKeyboardMarkup(row_width=1)
                     btn_inline1 = types.InlineKeyboardButton(cfg.menu_button, callback_data='menu_after_pay_autoposting')
