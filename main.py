@@ -1283,7 +1283,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 channels_len = len(channels_autoposting)
                 days = db.select_days_autoposting_post(number_group_autoposting)
                 money_oplata = str(days * 0.15 * int(channels_len))
-                await callback_query.message.edit_caption(caption=cfg.oplata_chatov_autoposting(channels_len, money_oplata, days), reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+                await callback_query.message.edit_caption(caption=cfg.oplata_chatov_autoposting(channels_len, money_oplata, days), reply_markup=markup_inline)
             elif callback_query.data == "confirm_oplata_autoposting":
                 balance = db.check_balance(user_id)
                 channels_len = len(channels_autoposting)
