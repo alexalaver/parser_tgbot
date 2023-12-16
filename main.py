@@ -14,6 +14,7 @@ import asyncio
 import config as cfg
 import logging
 import datetime
+import json
 import re
 import pytz
 
@@ -1520,7 +1521,8 @@ async def add_post_func_text_3(message: types.Message, state: FSMContext):
                             forwarded_message_id = data.get("forwarded_message_id")
                             channel_tag = data.get("channel_tag")
                             message_id_bot = data.get("message_id_bot")
-                            db.add_post_account(user_id, forwarded_message_id, string_session, text_lines, time_betw, new_number_post, number_account, channel_tag, message_id_bot, channels_name_2)
+                            json_data = json.dumps(text_lines)
+                            db.add_post_account(user_id, forwarded_message_id, string_session, json_data, time_betw, new_number_post, number_account, channel_tag, message_id_bot, channels_name_2)
                             markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
                             markup_reply.add(cfg.autoposting)
                             markup_reply.add(cfg.parser)

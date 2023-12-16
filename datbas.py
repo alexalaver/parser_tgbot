@@ -502,7 +502,7 @@ class Data:
 
     def add_post_account(self, id, post, string_session, chats, time_betw, number_post, number_account, channel_tag, message_id_bot, channels_title):
         with self.connect:
-            self.cursor.execute("INSERT INTO autoposting_post(id, post, string_session, chats, time_betw, number_post, number_account, channel_tag, message_id_bot, channels_title) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (id, post, string_session, chats, time_betw, number_post, number_account, channel_tag, message_id_bot, channels_title,))
+            self.cursor.execute("INSERT INTO autoposting_post(id, post, string_session, chats, time_betw, number_post, number_account, channel_tag, message_id_bot, channels_title) VALUES(%s, %s, %s, %s::jsonb, %s, %s, %s, %s, %s, %s)", (id, post, string_session, chats, time_betw, number_post, number_account, channel_tag, message_id_bot, channels_title,))
             self.connect.commit()
 
     def get_string_session(self, number_account):
