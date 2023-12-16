@@ -1465,7 +1465,8 @@ async def change_time_autoposting_1_text(message: types.Message, state: FSMConte
                             result = selected_sublist[0] if selected_sublist else []
                             a_updated = None
                             for reslt in result[1:]:
-                                b_time = datetime.datetime.strptime(reslt, '%H:%M').time()
+                                dt = datetime.datetime.strptime(reslt, '%Y-%m-%d %H:%M:%S')
+                                b_time = datetime.datetime.strptime(dt, '%H:%M').time()
                                 a_updated = [formatted_datetime if time_for_chat == b_time else item for item in result]
                             new_updates = [a_updated if item[0] == settings_callback_data else item for item in post_names]
                             json_data = json.dumps(new_updates)
