@@ -1052,6 +1052,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
             elif callback_query.data == "add_time_autoposting_chat":
                 data = await state.get_data()
                 settings_callback_data = data.get("settings_callback_data")
+                await state.update_data(number_group_autoposting=number_group_autoposting)
                 post_names = db.select_chats_account_with_number_autoposting(number_group_autoposting)
                 selected_sublist = [sublist for sublist in post_names if sublist[0] == settings_callback_data]
                 result = selected_sublist[0] if selected_sublist else []
