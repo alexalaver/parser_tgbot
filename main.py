@@ -1276,7 +1276,32 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
 async def add_time_autoposting_chat_text(message: types.Message, state: FSMContext):
     if message.chat.type == types.ChatType.PRIVATE:
         if message.text == "/cancel":
-            await message.answer(cfg.cancel_sostoyanie, parse_mode=types.ParseMode.MARKDOWN)
+            user_id = message.from_user.id
+            first_name = message.from_user.first_name
+            username = message.from_user.username
+            if (not db.check_user(user_id)):
+                db.add_user(user_id, first_name, username)
+            markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+            markup_reply.add(cfg.autoposting)
+            markup_reply.add(cfg.parser)
+            markup_reply.row(cfg.my_profile, cfg.support)
+            if db.select_admin(user_id) > 0:
+                markup_reply.add(cfg.admin_panel_button)
+            await message.answer(cfg.cancel_sostoyanie, parse_mode=types.ParseMode.MARKDOWN, reply_markup=markup_reply)
+            await state.reset_state()
+        elif message.text == cfg.cancel_button:
+            user_id = message.from_user.id
+            first_name = message.from_user.first_name
+            username = message.from_user.username
+            if (not db.check_user(user_id)):
+                db.add_user(user_id, first_name, username)
+            markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+            markup_reply.add(cfg.autoposting)
+            markup_reply.add(cfg.parser)
+            markup_reply.row(cfg.my_profile, cfg.support)
+            if db.select_admin(user_id) > 0:
+                markup_reply.add(cfg.admin_panel_button)
+            await message.answer(cfg.cancel_sostoyanie, parse_mode=types.ParseMode.MARKDOWN, reply_markup=markup_reply)
             await state.reset_state()
         else:
             hours, minutes = message.text.split(":")
