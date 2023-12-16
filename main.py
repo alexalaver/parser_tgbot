@@ -1199,9 +1199,11 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     time_for_chat = data.get("time_for_chat")
                     sublist = next((sub for sub in post_names if sub[0] == settings_callback_data), None)
                     a = None
-                    if len(sublist) == 2:
-                        sublist[0] = sublist[0].rstrip(' ✅') + ' ❌'
-                        if sublist:
+                    if sublist:
+                        if len(sublist) == 2:
+                            updated_sublist = [sublist[0][:-1] + '❌'] + [time for time in sublist[1:] if time.split()[1][:5] != time_for_chat]
+                            a = [updated_sublist if sub[0] == settings_callback_data else sub for sub in post_names]
+                        else:
                             updated_sublist = [sublist[0]] + [time for time in sublist[1:] if time.split()[1][:5] != time_for_chat]
                             a = [updated_sublist if sub[0] == settings_callback_data else sub for sub in post_names]
                     json_data = json.dumps(a)
