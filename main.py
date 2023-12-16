@@ -283,8 +283,9 @@ async def autoposting_forward():
             group = groups[num]
             user_id, chat_ids, string_session, message_id, number_group, data_end, channel_tag = group[0], group[10], group[2], group[1], group[4], group[3], group[6]
             # chat_ids = [sublist for sublist in chat_idn if '✅' in sublist[0]]
-            current_date = datetime.datetime.now()
+            current_date = datetime.datetime.now(moscow_tz)
             formated_base = datetime.datetime.strptime(data_end, "%Y-%m-%d %H:%M:%S")
+            formated_base = moscow_tz.localize(formated_base)
             if formated_base > current_date:
                 if chat_ids != []:
                     current_date = datetime.datetime.now(moscow_tz)
@@ -1455,9 +1456,6 @@ async def change_time_autoposting_1_text(message: types.Message, state: FSMConte
                             markup_reply.row(cfg.my_profile, cfg.support)
                             if db.select_admin(user_id) > 0:
                                 markup_reply.add(cfg.admin_panel_button)
-                            current_date = datetime.datetime.now()
-                            combined_datetime = current_date.replace(hour=hours, minute=minutes, second=0, microsecond=0)
-                            formatted_datetime = combined_datetime.strftime("%Y-%m-%d %H:%M:%S")
                             updated_a = [
                                 [sublist[0]] + [
                                     datetime_str.replace(time_for_chat, message.text) if datetime.datetime.strptime(datetime_str,"%Y-%m-%d %H:%M:%S").strftime("%H:%M") == time_for_chat else datetime_str
@@ -1467,7 +1465,7 @@ async def change_time_autoposting_1_text(message: types.Message, state: FSMConte
                             ]
                             json_data = json.dumps(updated_a)
                             db.update_chat_idn_autoposting(json_data, number_group_autoposting)
-                            await message.answer(cfg.add_time_text_finish, reply_markup=markup_reply)
+                            await message.answer(cfg.edit_time_text_finish, reply_markup=markup_reply)
                             await state.finish()
                     else:
                         await message.answer("Формат времени не верный, отправьте время в следющем формате\b[час:минута] (Пример: 12:30)")
