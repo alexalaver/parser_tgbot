@@ -1141,6 +1141,20 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
                 markup_reply.add(cfg.cancel_button)
                 await callback_query.message.answer(cfg.add_time_text, reply_markup=markup_reply)
+            elif callback_query.data == "delete_time_chat_button_autoposting":
+                markup_inline = types.InlineKeyboardMarkup(row_width=1)
+                btn_yes = types.InlineKeyboardButton("Да", callback_data='yes_delete_time_autoposting')
+                btn_no = types.InlineKeyboardButton("Нет", callback_data='no_delete_time_autoposting')
+                markup_inline.add(btn_yes, btn_no)
+                await callback_query.message.edit_caption(caption=cfg.delete_time_autoposting_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+            elif callback_query.data == "no_delete_time_autoposting":
+                markup_inline = types.InlineKeyboardMarkup(row_width=1)
+                markup_inline.add(
+                    types.InlineKeyboardButton(cfg.change_time_chat_button, callback_data="change_time_chat_button_autoposting"),
+                    types.InlineKeyboardButton(cfg.back_button, callback_data="back_change_time_chat_button_autoposting"),
+                    types.InlineKeyboardButton(cfg.delete_time_chat_button, callback_data="delete_time_chat_button_autoposting")
+                )
+                await callback_query.message.edit_caption(cfg.time_functions_chats_text, reply_markup=markup_inline)
             elif callback_query.data == "next_page_autoposting":
                 if channels_page_autoposting == page_here_autoposting:
                     await callback_query.answer(cfg.error_page_next, show_alert=True)
