@@ -1220,7 +1220,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     channels_name = db.select_chats_name_account_with_number(number_group_autoposting)
                     new_channels = [[channel[0][:-2] + " ✅"] for channel in channels]
                     new_chats_name = [newer[:-2] + " ✅" for newer in channels_name]
-                    print(new_chats_name)
+                    print(new_channels)
                     db.update_all_chats_name_account(number_group_autoposting, new_chats_name)
                     db.update_balance(user_id, money_oplata)
                     channels_len = len(channels)
