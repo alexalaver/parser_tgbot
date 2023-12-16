@@ -998,6 +998,10 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                             for time in times:
                                 button = types.InlineKeyboardButton(text=time, callback_data=time)
                                 markup_inline.add(button)
+                            if channel_name[-1] == "✅":
+                                markup_inline.add(types.InlineKeyboardButton(text=cfg.on_chat_button, callback_data="on_chat_autoposting"))
+                            elif channel_name[-1] == "❌":
+                                markup_inline.add(types.InlineKeyboardButton(text=cfg.off_chat_button, callback_data="off_chat_autoposting"))
                             markup_inline.add(
                                 types.InlineKeyboardButton(text=cfg.add_time_button, callback_data="add_time_autoposting_chat"),
                                 types.InlineKeyboardButton(text=cfg.back_button, callback_data="back_settings_chat_time_autoposting")
@@ -1086,6 +1090,10 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 for time in times:
                     button = types.InlineKeyboardButton(text=time, callback_data=time)
                     markup_inline.add(button)
+                if channel_name[-1] == "✅":
+                    markup_inline.add(types.InlineKeyboardButton(text=cfg.on_chat_button, callback_data="on_chat_autoposting"))
+                elif channel_name[-1] == "❌":
+                    markup_inline.add(types.InlineKeyboardButton(text=cfg.off_chat_button, callback_data="off_chat_autoposting"))
                 markup_inline.add(
                     types.InlineKeyboardButton(text=cfg.add_time_button, callback_data="add_time_autoposting_chat"),
                     types.InlineKeyboardButton(text=cfg.back_button, callback_data="back_settings_chat_time_autoposting")

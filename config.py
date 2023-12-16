@@ -245,3 +245,5 @@ time_again_no_text = "Данное время уже есть в чате, по�
 time_functions_chats_text = "Ниже предоставлен, настройки для выбранного вами времени в чате."
 change_time_chat_button = "Изменить время"
 delete_time_chat_button = "Удалить время"
+on_chat_button = "Включить чат"
+off_chat_button = "Выключить чат"
