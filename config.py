@@ -253,3 +253,4 @@ without_time_in_chat_text = "Вы не можете включить автоп�
 edit_time_text_finish = "Вы успешно изменили время для чата!"
 
 delete_time_autoposting_text = "Вы уверены что хотите удалить данное время в чате?"
+delete_time_autoposting_yes_text = "Вы успешно удалили время для данного чата!"
