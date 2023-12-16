@@ -1332,6 +1332,7 @@ async def add_time_autoposting_chat_text(message: types.Message, state: FSMConte
                         result = selected_sublist[0] if selected_sublist else []
                         result.append(formatted_datetime)
                         new_updates = [result if item[0] == settings_callback_data else item for item in post_names]
+                        print("Updating chats with:", new_updates)
                         db.update_chat_idn_autoposting(new_updates, number_group_autoposting)
                         await message.answer(cfg.add_time_text_finish, reply_markup=markup_reply)
                         await state.finish()
