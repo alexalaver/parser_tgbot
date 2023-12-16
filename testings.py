@@ -47,4 +47,4 @@ selected_sublist = [sublist for sublist in a if sublist[0] == b]
 result = selected_sublist[0] if selected_sublist else []
 times = [datetime_str.split()[1][:5] for datetime_str in result[1:]]
 
-print(times)
+print(result)

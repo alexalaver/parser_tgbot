@@ -350,6 +350,9 @@ class Add_post(StatesGroup):
 class Change_time_betw(StatesGroup):
     change_time_betw_1 = State()
 
+class Add_time_autoposting_chat(StatesGroup):
+    add_time_autoposting_1 = State()
+
 async def profile(message):
     user_id = message.from_user.id
     markup_inline = types.InlineKeyboardMarkup(row_width=1, )
@@ -1046,6 +1049,20 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 change_time_betw_button = types.InlineKeyboardButton(text=cfg.change_time_betw_button, callback_data="change_time_betw_autoposting")
                 markup_inline.add(change_time_betw_button, delete_post_button, back_channels)
                 await callback_query.message.edit_caption(caption=cfg.account_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+            elif callback_query.data == "add_time_autoposting_chat":
+                data = await state.get_data()
+                settings_callback_data = data.get("settings_callback_data")
+                post_names = db.select_chats_account_with_number_autoposting(number_group_autoposting)
+                selected_sublist = [sublist for sublist in post_names if sublist[0] == settings_callback_data]
+                result = selected_sublist[0] if selected_sublist else []
+                times = [datetime_str.split()[1][:5] for datetime_str in result[1:]]
+                if len(times) > 3:
+                    await callback_query.answer(cfg.add_time_text_limit)
+                else:
+                    await Add_time_autoposting_chat.add_time_autoposting_1.set()
+                    markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
+                    markup_reply.add(cfg.cancel_button)
+                    await callback_query.message.answer(cfg.add_time_text, reply_markup=markup_reply)
             elif callback_query.data == "next_page_autoposting":
                 if channels_page_autoposting == page_here_autoposting:
                     await callback_query.answer(cfg.error_page_next, show_alert=True)
@@ -1253,6 +1270,55 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 markup_reply_time.add(cfg.cancel_button)
                 await callback_query.message.answer(cfg.change_time_betw_text, reply_markup=markup_reply_time)
                 await Change_time_betw.change_time_betw_1.set()
+
+@dp.message_handler(state=Add_time_autoposting_chat.add_time_autoposting_1)
+async def add_time_autoposting_chat_text(message: types.Message, state: FSMContext):
+    if message.chat.type == types.ChatType.PRIVATE:
+        if message.text == "/cancel":
+            await message.answer(cfg.cancel_sostoyanie, parse_mode=types.ParseMode.MARKDOWN)
+            await state.reset_state()
+        else:
+            try:
+                hours, minutes = message.text.split(":")
+                hours = int(hours)
+                minutes = int(minutes)
+                if 0 <= hours < 24:
+                    if 0 <= minutes < 61:
+                        if validate_time_format(message.text):
+                            user_id = message.from_user.id
+                            first_name = message.from_user.first_name
+                            username = message.from_user.username
+                            if (not db.check_user(user_id)):
+                                db.add_user(user_id, first_name, username)
+                            markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+                            markup_reply.add(cfg.autoposting)
+                            markup_reply.add(cfg.parser)
+                            markup_reply.row(cfg.my_profile, cfg.support)
+                            if db.select_admin(user_id) > 0:
+                                markup_reply.add(cfg.admin_panel_button)
+                            current_date = datetime.datetime.now()
+                            combined_datetime = current_date.replace(hour=hours, minute=minutes, second=0, microsecond=0)
+                            formatted_datetime = combined_datetime.strftime("%Y-%m-%d %H:%M:%S")
+                            data = await state.get_data()
+                            number_group_autoposting = data.get("number_group_autoposting")
+                            settings_callback_data = data.get("settings_callback_data")
+                            post_names = db.select_chats_account_with_number_autoposting(number_group_autoposting)
+                            selected_sublist = [sublist for sublist in post_names if sublist[0] == settings_callback_data]
+                            result = selected_sublist[0] if selected_sublist else []
+                            result.append(formatted_datetime)
+                            new_updates = [result if item[0] == settings_callback_data else item for item in post_names]
+                            db.update_chat_idn_autoposting(new_updates, number_group_autoposting)
+                            await message.answer(cfg.add_time_text_finish, reply_markup=markup_reply)
+                            await state.finish()
+                        else:
+                            await message.answer("Формат времени не верный, отправьте время в следющем формате\b[час:минута] (Пример: 12:30)")
+                    else:
+                        await message.answer("Вы можете поставить минуты не больше 60 и не меньше 0, попробуйте ещё раз:")
+                else:
+                    await message.answer("Вы можете поставить часы не больше 23 и не меньше 0, попробуйте ещё раз:")
+            except Exception:
+                await message.answer("Что-то пошло не так, возможно вы ввели время в неправильном формате, отправьте время в следуюзем формате\n[час:минута] (Пример: 12:30)")
+
 
 @dp.message_handler(state=Change_time_betw.change_time_betw_1)
 async def change_time_betw_1_func(message: types.Message, state: FSMContext):
