@@ -1071,7 +1071,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 markup_inline = types.InlineKeyboardMarkup(row_width=1)
                 markup_inline.add(
                     types.InlineKeyboardButton(cfg.change_time_chat_button, callback_data="change_time_chat_button_autoposting"),
-                    types.InlineKeyboardButton(cfg.back_button, callback_query="back_change_time_chat_button_autoposting"),
+                    types.InlineKeyboardButton(cfg.back_button, callback_data="back_change_time_chat_button_autoposting"),
                     types.InlineKeyboardButton(cfg.delete_time_chat_button, callback_data="delete_time_chat_button_autoposting")
                 )
                 await callback_query.message.edit_caption(cfg.time_functions_chats_text, reply_markup=markup_inline)
