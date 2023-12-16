@@ -1010,6 +1010,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                                 types.InlineKeyboardButton(text=cfg.back_button, callback_data="back_settings_chat_time_autoposting")
                             )
                             await state.update_data(settings_callback_data=channel_name)
+                            await state.update_data(number_group_autoposting=number_group_autoposting)
                             await callback_query.message.edit_caption(caption=cfg.time_chats_autoposting_text, reply_markup=markup_inline)
                         # channels = db.select_chats_account_with_number(number_group_autoposting)
                         # channels_name = db.select_chats_name_account_with_number(number_group_autoposting)
@@ -1075,6 +1076,9 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     await callback_query.message.answer(cfg.add_time_text, reply_markup=markup_reply)
             elif callback_query.data in all_times:
                 await state.update_data(time_for_chat=callback_query.data)
+                data = await state.get_data()
+                number_group_autoposting = data.get("number_group_autoposting")
+                await state.update_data(number_group_autoposting=number_group_autoposting)
                 markup_inline = types.InlineKeyboardMarkup(row_width=1)
                 markup_inline.add(
                     types.InlineKeyboardButton(cfg.change_time_chat_button, callback_data="change_time_chat_button_autoposting"),
@@ -1174,6 +1178,9 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 await state.update_data(settings_callback_data=b_replaced)
                 await callback_query.message.edit_reply_markup(reply_markup=markup_inline)
             elif callback_query.data == "change_time_chat_button_autoposting":
+                data = await state.get_data()
+                number_group_autoposting = data.get("number_group_autoposting")
+                await state.update_data(number_group_autoposting=number_group_autoposting)
                 await Change_time_autoposting_chat.change_time_autoposting_1.set()
                 markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
                 markup_reply.add(cfg.cancel_button)
