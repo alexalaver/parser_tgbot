@@ -1207,7 +1207,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                             all_channels_name = db.select_chats_name_account_with_number(number_group_autoposting)
                             group_name = all_channels_name[group_index]
                             new_callback_name = group_name[:-1] + "❌"
-                            new_channels_name = [new_callback_name if item == group_name else item for item inall_channels_name]
+                            new_channels_name = [new_callback_name if item == group_name else item for item in all_channels_name]
                             db.update_all_chats_name_account(number_group_autoposting, new_channels_name)
                         else:
                             updated_sublist = [sublist[0]] + [time for time in sublist[1:] if time.split()[1][:5] != time_for_chat]
