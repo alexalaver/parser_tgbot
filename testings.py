@@ -32,19 +32,23 @@
 #
 # print(formatted_datetime)
 
-a = [
-    ["https://t.me/testonepublic ✅", "2023-12-16 12:30:00"],
-    ["https://t.me/testtwopublic ✅", "2023-12-16 12:30:00"],
-    ["https://t.me/testthreepublic ✅", "2023-12-16 12:30:00"],
-    ["https://t.me/+kaLhqGj2EHg3NjFi ✅", "2023-12-16 12:30:00", "2023-12-16 14:30:00"]
-]
-b = "https://t.me/+kaLhqGj2EHg3NjFi ✅"
+# a = [
+#     ["https://t.me/testonepublic ✅", "2023-12-16 12:30:00"],
+#     ["https://t.me/testtwopublic ✅", "2023-12-16 12:30:00"],
+#     ["https://t.me/testthreepublic ✅", "2023-12-16 12:30:00"],
+#     ["https://t.me/+kaLhqGj2EHg3NjFi ✅", "2023-12-16 12:30:00", "2023-12-16 14:30:00"]
+# ]
+# b = "https://t.me/+kaLhqGj2EHg3NjFi ✅"
+#
+# # Выбор подсписка, где первый элемент равен 'b'
+# selected_sublist = [sublist for sublist in a if sublist[0] == b]
+#
+# # Поскольку нужен только один элемент, мы берем первый подходящий подсписок
+# result = selected_sublist[0] if selected_sublist else []
+# times = [datetime_str.split()[1][:5] for datetime_str in result[1:]]
+#
+# print(result)
 
-# Выбор подсписка, где первый элемент равен 'b'
-selected_sublist = [sublist for sublist in a if sublist[0] == b]
+all_times = [f'{hour:02d}:{minute:02d}' for hour in range(24) for minute in range(60)]
 
-# Поскольку нужен только один элемент, мы берем первый подходящий подсписок
-result = selected_sublist[0] if selected_sublist else []
-times = [datetime_str.split()[1][:5] for datetime_str in result[1:]]
-
-print(result)
+print(all_times)

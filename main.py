@@ -953,6 +953,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
             page_here_autoposting = data.get("page_here_autoposting")
             from_page_autoposting = data.get("from_page_autoposting")
             before_page_autoposting = data.get("before_page_autoposting")
+            all_times = [f'{hour:02d}:{minute:02d}' for hour in range(24) for minute in range(60)]
             if callback_query.data in channels_autoposting:
                 if check_tarife_autoposting is None:
                     await callback_query.answer(text=cfg.error_oplata, show_alert=True)
@@ -1065,6 +1066,31 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
                     markup_reply.add(cfg.cancel_button)
                     await callback_query.message.answer(cfg.add_time_text, reply_markup=markup_reply)
+            elif callback_query.data in all_times:
+                await state.update_data(time_for_chat=callback_query.data)
+                markup_inline = types.InlineKeyboardMarkup(row_width=1)
+                markup_inline.add(
+                    types.InlineKeyboardButton(cfg.change_time_chat_button, callback_data="change_time_chat_button_autoposting"),
+                    types.InlineKeyboardButton(cfg.back_button, callback_query="back_change_time_chat_button_autoposting"),
+                    types.InlineKeyboardButton(cfg.delete_time_chat_button, callback_data="delete_time_chat_button_autoposting")
+                )
+                await callback_query.message.edit_caption(cfg.time_functions_chats_text, reply_markup=markup_inline)
+            elif callback_query.data == "back_change_time_chat_button_autoposting":
+                markup_inline = types.InlineKeyboardMarkup(row_width=1)
+                post_names = db.select_chats_account_with_number_autoposting(number_group_autoposting)
+                data = await state.get_data()
+                channel_name = data.get("settings_callback_data")
+                selected_sublist = [sublist for sublist in post_names if sublist[0] == channel_name]
+                result = selected_sublist[0] if selected_sublist else []
+                times = [datetime_str.split()[1][:5] for datetime_str in result[1:]]
+                for time in times:
+                    button = types.InlineKeyboardButton(text=time, callback_data=time)
+                    markup_inline.add(button)
+                markup_inline.add(
+                    types.InlineKeyboardButton(text=cfg.add_time_button, callback_data="add_time_autoposting_chat"),
+                    types.InlineKeyboardButton(text=cfg.back_button, callback_data="back_settings_chat_time_autoposting")
+                )
+                await callback_query.message.edit_caption(caption=cfg.time_chats_autoposting_text, reply_markup=markup_inline)
             elif callback_query.data == "next_page_autoposting":
                 if channels_page_autoposting == page_here_autoposting:
                     await callback_query.answer(cfg.error_page_next, show_alert=True)
