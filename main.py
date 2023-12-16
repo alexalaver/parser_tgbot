@@ -1201,9 +1201,9 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     a = None
                     if len(sublist) == 2:
                         sublist[0] = sublist[0].rstrip(' ✅') + ' ❌'
-                    if sublist:
-                        updated_sublist = [sublist[0]] + [time for time in sublist[1:] if time.split()[1][:5] != time_for_chat]
-                        a = [updated_sublist if sub[0] == settings_callback_data else sub for sub in post_names]
+                        if sublist:
+                            updated_sublist = [sublist[0]] + [time for time in sublist[1:] if time.split()[1][:5] != time_for_chat]
+                            a = [updated_sublist if sub[0] == settings_callback_data else sub for sub in post_names]
                     json_data = json.dumps(a)
                     db.update_chat_idn_autoposting(json_data, number_group_autoposting)
                     group_index = channels_autoposting.index(settings_callback_data)
