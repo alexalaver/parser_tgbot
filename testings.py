@@ -48,7 +48,18 @@
 # times = [datetime_str.split()[1][:5] for datetime_str in result[1:]]
 #
 # print(result)
+from datetime import datetime
 
-all_times = [f'{hour:02d}:{minute:02d}' for hour in range(24) for minute in range(60)]
 
-print(all_times)
+a = ["https://t.me/+kaLhqGj2EHg3NjFi ✅", "2023-12-17 12:30:00", "2023-12-17 23:30:00"]
+b = "12:30"
+c = "18:30"
+
+# Преобразование времени из b и c в формат datetime для сравнения
+b_time = datetime.strptime(b, '%H:%M').time()
+c_time = datetime.strptime(c, '%H:%M').time()
+
+# Использование list comprehension для поиска и замены времени
+a_updated = [a[0]] + [datetime.strftime(datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S').replace(hour=c_time.hour, minute=c_time.minute), '%Y-%m-%d %H:%M:%S') if datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S').time() == b_time else date_str for date_str in a[1:]]
+
+print(a_updated)
