@@ -281,8 +281,8 @@ async def autoposting_forward():
                 continue
             moscow_tz = pytz.timezone('Europe/Moscow')
             group = groups[num]
-            user_id, chat_idn, string_session, message_id, number_group, data_end, channel_tag = group[0], group[10], group[2], group[1], group[4], group[3], group[6]
-            chat_ids = [sublist for sublist in chat_idn if '✅' in sublist[0]]
+            user_id, chat_ids, string_session, message_id, number_group, data_end, channel_tag = group[0], group[10], group[2], group[1], group[4], group[3], group[6]
+            # chat_ids = [sublist for sublist in chat_idn if '✅' in sublist[0]]
             current_date = datetime.datetime.now()
             formated_base = datetime.datetime.strptime(data_end, "%Y-%m-%d %H:%M:%S")
             if formated_base > current_date:
@@ -292,18 +292,27 @@ async def autoposting_forward():
                         formated_chat_id = chat_id[0][:-2]
                         date_betw = chat_id[1:]
                         for date_bet in date_betw:
-                            formated_base = datetime.datetime.strptime(date_bet, "%Y-%m-%d %H:%M:%S")
-                            formated_base = moscow_tz.localize(formated_base)
-                            if current_date > formated_base:
-                                async with TelegramClient(StringSession(string_session), cfg.API_ID, cfg.API_HASH) as telethon_client_autoposting:
-                                        try:
-                                            await telethon_client_autoposting.forward_messages(entity=formated_chat_id, messages=int(message_id), from_peer=channel_tag)
-                                            await bot.send_message(user_id, f"Рекламный пост, успешно отправлен в чат {formated_chat_id}")
-                                            await asyncio.sleep(5)
-                                        except RPCError as err:
-                                            print(f"[ERROR RPCError] {err}")
-                                        except Exception as erri:
-                                            print(f"[ERROR EXCEPTION] {erri}")
+                            if chat_id[0][-1] == "✅":
+                                formated_base = datetime.datetime.strptime(date_bet, "%Y-%m-%d %H:%M:%S")
+                                formated_base = moscow_tz.localize(formated_base)
+                                if current_date > formated_base:
+                                    async with TelegramClient(StringSession(string_session), cfg.API_ID, cfg.API_HASH) as telethon_client_autoposting:
+                                            try:
+                                                await telethon_client_autoposting.forward_messages(entity=formated_chat_id, messages=int(message_id), from_peer=channel_tag)
+                                                await bot.send_message(user_id, f"Рекламный пост, успешно отправлен в чат {formated_chat_id}")
+                                                await asyncio.sleep(5)
+                                            except RPCError as err:
+                                                print(f"[ERROR RPCError] {err}")
+                                            except Exception as erri:
+                                                print(f"[ERROR EXCEPTION] {erri}")
+                                    time_in_60_minutes = formated_base + datetime.timedelta(minutes=1440)
+                                    formatted_date_new = time_in_60_minutes.strftime("%Y-%m-%d %H:%M:%S")
+                                    new_channels = [formatted_date_new if item == date_bet else item for item in chat_id]
+                                    chat_idln = db.select_chats_account_with_number_autoposting(number_group)
+                                    new_updates = [new_channels if item == chat_id else item for item in chat_idln]
+                                    json_data = json.dumps(new_updates)
+                                    db.update_chat_idn_autoposting(json_data, number_group)
+                            else:
                                 time_in_60_minutes = formated_base + datetime.timedelta(minutes=1440)
                                 formatted_date_new = time_in_60_minutes.strftime("%Y-%m-%d %H:%M:%S")
                                 new_channels = [formatted_date_new if item == date_bet else item for item in chat_id]
@@ -313,7 +322,7 @@ async def autoposting_forward():
                                 db.update_chat_idn_autoposting(json_data, number_group)
             else:
                 db.delete_data_end_post(number_group)
-                formated_chat_idn = [s.replace('✅', '⚠') for s in chat_idn]
+                formated_chat_idn = [s.replace('✅', '⚠') for s in chat_ids]
                 db.update_chats_post(formated_chat_idn, number_group)
                 await bot.send_message(user_id, cfg.end_data_post_text(message_id))
 
@@ -1438,8 +1447,8 @@ async def change_time_autoposting_1_text(message: types.Message, state: FSMConte
                         time_for_chat = data.get("time_for_chat")
                         post_names = db.select_chats_account_with_number_autoposting(number_group_autoposting)
                         selected_sublist_time = [sublist for sublist in post_names if sublist[0] == settings_callback_data]
-                        result = selected_sublist_time[0] if selected_sublist_time else []
-                        times = [datetime_str.split()[1][:5] for datetime_str in result[1:]]
+                        result_ = selected_sublist_time[0] if selected_sublist_time else []
+                        times = [datetime_str.split()[1][:5] for datetime_str in result_[1:]]
                         if message.text in times:
                             await message.answer(cfg.time_again_no_text)
                         else:
@@ -1457,19 +1466,14 @@ async def change_time_autoposting_1_text(message: types.Message, state: FSMConte
                             current_date = datetime.datetime.now()
                             combined_datetime = current_date.replace(hour=hours, minute=minutes, second=0, microsecond=0)
                             formatted_datetime = combined_datetime.strftime("%Y-%m-%d %H:%M:%S")
-                            # selected_sublist = [sublist for sublist in post_names if sublist[0] == settings_callback_data]
-                            # result = selected_sublist[0] if selected_sublist else []
-                            # result.append(formatted_datetime)
-                            # new_updates = [result if item[0] == settings_callback_data else item for item in post_names]
-                            selected_sublist = [sublist for sublist in post_names if sublist[0] == settings_callback_data]
-                            result = selected_sublist[0] if selected_sublist else []
-                            a_updated = None
-                            for reslt in result[1:]:
-                                dt = datetime.datetime.strptime(reslt, '%Y-%m-%d %H:%M:%S')
-                                b_time = datetime.datetime.strptime(dt, '%H:%M').time()
-                                a_updated = [formatted_datetime if time_for_chat == b_time else item for item in result]
-                            new_updates = [a_updated if item[0] == settings_callback_data else item for item in post_names]
-                            json_data = json.dumps(new_updates)
+                            updated_a = [
+                                [sublist[0]] + [
+                                    datetime_str.replace(time_for_chat, message.text) if datetime.datetime.strptime(datetime_str,"%Y-%m-%d %H:%M:%S").strftime("%H:%M") == time_for_chat else datetime_str
+                                    for datetime_str in sublist[1:]
+                                ] if sublist[0] == settings_callback_data else sublist
+                                for sublist in post_names
+                            ]
+                            json_data = json.dumps(updated_a)
                             db.update_chat_idn_autoposting(json_data, number_group_autoposting)
                             await message.answer(cfg.add_time_text_finish, reply_markup=markup_reply)
                             await state.finish()

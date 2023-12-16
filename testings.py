@@ -50,16 +50,33 @@
 # print(result)
 from datetime import datetime
 
+# Given data
+a = [
+    ["https://t.me/testonepublic ✅", "2023-12-17 12:30:00"],
+    ["https://t.me/testtwopublic ❌", "2023-12-17 12:30:00", "2023-12-16 22:35:00"],
+    ["https://t.me/testthreepublic ❌", "2023-12-17 12:30:00", "2023-12-17 17:25:00", "2023-12-17 21:30:00"],
+    ["https://t.me/+kaLhqGj2EHg3NjFi ❌", "2023-12-17 12:30:00"]
+]
 
-a = ["https://t.me/+kaLhqGj2EHg3NjFi ✅", "2023-12-17 12:30:00", "2023-12-17 23:30:00"]
 b = "12:30"
-c = "18:30"
+c = "14:40"
 
-# Преобразование времени из b и c в формат datetime для сравнения
-b_time = datetime.strptime(b, '%H:%M').time()
-c_time = datetime.strptime(c, '%H:%M').time()
+# Function to check and replace the time
+def check_and_replace_times(data, time_to_check, replacement_time):
+    # Format for time comparison
+    time_format = "%H:%M"
 
-# Использование list comprehension для поиска и замены времени
-a_updated = [a[0]] + [datetime.strftime(datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S').replace(hour=c_time.hour, minute=c_time.minute), '%Y-%m-%d %H:%M:%S') if datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S').time() == b_time else date_str for date_str in a[1:]]
+    # Iterate through each sublist in the data
+    for sublist in data:
+        # Iterate through each item in the sublist starting from the first time element
+        for i in range(1, len(sublist)):
+            # Compare time part only
+            if datetime.strptime(sublist[i], "%Y-%m-%d %H:%M:%S").strftime(time_format) == time_to_check:
+                # Replace date keeping the same date but changing the time
+                sublist[i] = sublist[i].replace(time_to_check, replacement_time)
 
-print(a_updated)
+    return data
+
+# Apply the function to the data
+updated_a = check_and_replace_times(a, b, c)
+print(updated_a)
