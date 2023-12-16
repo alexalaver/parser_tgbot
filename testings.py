@@ -48,35 +48,10 @@
 # times = [datetime_str.split()[1][:5] for datetime_str in result[1:]]
 #
 # print(result)
-from datetime import datetime
 
-# Given data
-a = [
-    ["https://t.me/testonepublic ✅", "2023-12-17 12:30:00"],
-    ["https://t.me/testtwopublic ❌", "2023-12-17 12:30:00", "2023-12-16 22:35:00"],
-    ["https://t.me/testthreepublic ❌", "2023-12-17 12:30:00", "2023-12-17 17:25:00", "2023-12-17 21:30:00"],
-    ["https://t.me/+kaLhqGj2EHg3NjFi ❌", "2023-12-17 12:30:00"]
-]
 
-b = "12:30"
-c = "14:40"
+a = 15
+b = 28
+c = 0.13 * 15 * 28
 
-# Function to check and replace the time
-def check_and_replace_times(data, time_to_check, replacement_time):
-    # Format for time comparison
-    time_format = "%H:%M"
-
-    # Iterate through each sublist in the data
-    for sublist in data:
-        # Iterate through each item in the sublist starting from the first time element
-        for i in range(1, len(sublist)):
-            # Compare time part only
-            if datetime.strptime(sublist[i], "%Y-%m-%d %H:%M:%S").strftime(time_format) == time_to_check:
-                # Replace date keeping the same date but changing the time
-                sublist[i] = sublist[i].replace(time_to_check, replacement_time)
-
-    return data
-
-# Apply the function to the data
-updated_a = check_and_replace_times(a, b, c)
-print(updated_a)
+print(c)

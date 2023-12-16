@@ -1286,7 +1286,8 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
             elif callback_query.data == "confirm_oplata_autoposting":
                 balance = db.check_balance(user_id)
                 channels_len = len(channels_autoposting)
-                money_oplata = 5 * int(channels_len)
+                days = db.select_days_autoposting_post(number_group_autoposting)
+                money_oplata = days * 0.15 * int(channels_len)
                 if balance >= money_oplata:
                     channels = db.select_chats_account_with_number_confirm_oplata(number_group_autoposting)
                     channels_name = db.select_chats_name_account_with_number(number_group_autoposting)
@@ -1303,7 +1304,6 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     combined_datetime = current_date.replace(hour=hours, minute=minutes, second=0, microsecond=0)
                     date_betw = combined_datetime.strftime("%Y-%m-%d %H:%M:%S")
                     new_lst = []
-                    days = db.select_days_autoposting_post(number_group_autoposting)
                     new_date = current_data + datetime.timedelta(days=days)
                     formatted_date_new = new_date.strftime("%Y-%m-%d %H:%M:%S")
                     new_lst.append(date_betw)
