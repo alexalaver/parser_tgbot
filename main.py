@@ -711,8 +711,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 markup_inline.add(pay_money_buttons)
             back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels_autoposting')
             delete_post_button = types.InlineKeyboardButton(text=cfg.delete_post_button, callback_data="delete_post_autoposting")
-            change_time_betw_button = types.InlineKeyboardButton(text=cfg.change_time_betw_button, callback_data="change_time_betw_autoposting")
-            markup_inline.add(change_time_betw_button, delete_post_button, back_channels)
+            markup_inline.add(delete_post_button, back_channels)
             message_id_bot = db.select_post_name(callback_query.data)
             await bot.forward_message(chat_id=user_id, from_chat_id=user_id, message_id=message_id_bot)
             await callback_query.message.edit_caption(caption=cfg.account_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
@@ -971,28 +970,6 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                         await callback_query.answer(text=cfg.error_oplata, show_alert=True)
                     else:
                         channel_name = callback_query.data
-                        # if channel_name[-1] == "✅":
-                        #     group_index = channels_autoposting.index(channel_name)
-                        #     all_channels = db.select_chats_account_with_number(number_group_autoposting)
-                        #     all_channels_name = db.select_chats_name_account_with_number(number_group_autoposting)
-                        #     group_name = all_channels_name[group_index]
-                        #     new_callback = channel_name[:-1] + '❌'
-                        #     new_channels = [new_callback if item == channel_name else item for item in all_channels]
-                        #     db.update_all_chats_account(number_group_autoposting, new_channels)
-                        #     new_callback_name = group_name[:-1] + '❌'
-                        #     new_channels_name = [new_callback_name if item == group_name else item for item in all_channels_name]
-                        #     db.update_all_chats_name_account(number_group_autoposting, new_channels_name)
-                        # elif channel_name[-1] == "❌":
-                        #     group_index = channels_autoposting.index(channel_name)
-                        #     all_channels = db.select_chats_account_with_number(number_group_autoposting)
-                        #     all_channels_name = db.select_chats_name_account_with_number(number_group_autoposting)
-                        #     group_name = all_channels_name[group_index]
-                        #     new_callback = channel_name[:-1] + "✅"
-                        #     new_channels = [new_callback if item == channel_name else item for item in all_channels]
-                        #     db.update_all_chats_account(number_group_autoposting, new_channels)
-                        #     new_callback_name = group_name[:-1] + "✅"
-                        #     new_channels_name = [new_callback_name if item == group_name else item for item in all_channels_name]
-                        #     db.update_all_chats_name_account(number_group_autoposting, new_channels_name)
                         if channel_name[-1] == "⏳":
                             await callback_query.answer(cfg.error_dostup_chat, show_alert=True)
                         else:
@@ -1015,29 +992,6 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                             await state.update_data(settings_callback_data=channel_name)
                             await state.update_data(number_group_autoposting=number_group_autoposting)
                             await callback_query.message.edit_caption(caption=cfg.time_chats_autoposting_text, reply_markup=markup_inline)
-                        # channels = db.select_chats_account_with_number(number_group_autoposting)
-                        # channels_name = db.select_chats_name_account_with_number(number_group_autoposting)
-                        # markup_inline = types.InlineKeyboardMarkup(row_width=1)
-                        # paired_channels = zip(channels_name[from_page_autoposting:before_page_autoposting], channels[from_page_autoposting:before_page_autoposting])
-                        # for channel_name, channel in paired_channels:
-                        #     buttons = types.InlineKeyboardButton(text=channel_name, callback_data=channel)
-                        #     markup_inline.row(buttons)
-                        # buttons_count = types.InlineKeyboardButton(
-                        #     text=f"Страница {page_here_autoposting}/{channels_page_autoposting} 📄",
-                        #     callback_data="page_autoposting")
-                        # markup_inline.add(buttons_count)
-                        # if channels_count_all_autoposting > 10:
-                        #     buttons_next = types.InlineKeyboardButton(text=cfg.next_page, callback_data="next_page_autoposting")
-                        #     buttons_old = types.InlineKeyboardButton(text=cfg.old_page, callback_data="old_page_autoposting")
-                        #     markup_inline.row(buttons_old, buttons_next)
-                        # if db.check_date_tarife_for_number(number_group_autoposting) is None:
-                        #     pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels_autoposting')
-                        #     markup_inline.add(pay_money_buttons)
-                        # delete_post_button = types.InlineKeyboardButton(text=cfg.delete_post_button, callback_data="delete_post_autoposting")
-                        # back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels_autoposting')
-                        # change_time_betw_button = types.InlineKeyboardButton(text=cfg.change_time_betw_button, callback_data="change_time_betw_autoposting")
-                        # markup_inline.add(change_time_betw_button, delete_post_button, back_channels)
-                        # await callback_query.message.edit_caption(caption=cfg.account_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
             elif callback_query.data == "back_settings_chat_time_autoposting":
                 channels = db.select_chats_account_with_number(number_group_autoposting)
                 channels_name = db.select_chats_name_account_with_number(number_group_autoposting)
@@ -1059,8 +1013,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     markup_inline.add(pay_money_buttons)
                 back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels_autoposting')
                 delete_post_button = types.InlineKeyboardButton(text=cfg.delete_post_button, callback_data="delete_post_autoposting")
-                change_time_betw_button = types.InlineKeyboardButton(text=cfg.change_time_betw_button, callback_data="change_time_betw_autoposting")
-                markup_inline.add(change_time_betw_button, delete_post_button, back_channels)
+                markup_inline.add(delete_post_button, back_channels)
                 await callback_query.message.edit_caption(caption=cfg.account_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
             elif callback_query.data == "add_time_autoposting_chat":
                 data = await state.get_data()
@@ -1219,8 +1172,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                         markup_inline.add(pay_money_buttons)
                     delete_post_button = types.InlineKeyboardButton(text=cfg.delete_post_button, callback_data="delete_post_autoposting")
                     back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels_autoposting')
-                    change_time_betw_button = types.InlineKeyboardButton(text=cfg.change_time_betw_button, callback_data="change_time_betw_autoposting")
-                    markup_inline.add(change_time_betw_button, delete_post_button, back_channels)
+                    markup_inline.add(delete_post_button, back_channels)
                     await callback_query.message.edit_caption(caption=cfg.account_text_use(), reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
             elif callback_query.data == "delete_post_autoposting":
                 data = await state.get_data()
@@ -1271,8 +1223,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     markup_inline.add(pay_money_buttons)
                 back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels_autoposting')
                 delete_post_button = types.InlineKeyboardButton(text=cfg.delete_post_button, callback_data="delete_post_autoposting")
-                change_time_betw_button = types.InlineKeyboardButton(text=cfg.change_time_betw_button, callback_data="change_time_betw_autoposting")
-                markup_inline.add(change_time_betw_button, delete_post_button, back_channels)
+                markup_inline.add(delete_post_button, back_channels)
                 await callback_query.message.edit_caption(caption=cfg.account_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
             elif callback_query.data == "old_page_autoposting":
                 print(
@@ -1307,8 +1258,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                         markup_inline.add(pay_money_buttons)
                     delete_post_button = types.InlineKeyboardButton(text=cfg.delete_post_button, callback_data="delete_post_autoposting")
                     back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels_autoposting')
-                    change_time_betw_button = types.InlineKeyboardButton(text=cfg.change_time_betw_button, callback_data="change_time_betw_autoposting")
-                    markup_inline.add(change_time_betw_button, delete_post_button, back_channels)
+                    markup_inline.add(delete_post_button, back_channels)
                     await callback_query.message.edit_caption(caption=cfg.account_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
             elif callback_query.data == "back_channels_autoposting":
                 markup_inline = types.InlineKeyboardMarkup(row_width=1)
@@ -1390,8 +1340,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     markup_inline.add(pay_money_buttons)
                 back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels_autoposting')
                 delete_post_button = types.InlineKeyboardButton(text=cfg.delete_post_button, callback_data="delete_post_autoposting")
-                change_time_betw_button = types.InlineKeyboardButton(text=cfg.change_time_betw_button, callback_data="change_time_betw_autoposting")
-                markup_inline.add(change_time_betw_button, delete_post_button, back_channels)
+                markup_inline.add(delete_post_button, back_channels)
                 await callback_query.message.edit_caption(caption=cfg.account_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
             elif callback_query.data == "change_time_betw_autoposting":
                 markup_reply_time = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
