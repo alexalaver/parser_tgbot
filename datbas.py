@@ -500,9 +500,9 @@ class Data:
             else:
                 return len(b)
 
-    def add_post_account(self, id, post, string_session, chats, time_betw, number_post, number_account, channel_tag, message_id_bot, channels_title):
+    def add_post_account(self, id, post, string_session, chats, time_betw, number_post, number_account, channel_tag, message_id_bot, channels_title, days):
         with self.connect:
-            self.cursor.execute("INSERT INTO autoposting_post(id, post, string_session, chats, time_betw, number_post, number_account, channel_tag, message_id_bot, channels_title) VALUES(%s, %s, %s, %s::jsonb, %s, %s, %s, %s, %s, %s)", (id, post, string_session, chats, time_betw, number_post, number_account, channel_tag, message_id_bot, channels_title,))
+            self.cursor.execute("INSERT INTO autoposting_post(id, post, string_session, chats, time_betw, number_post, number_account, channel_tag, message_id_bot, channels_title, days) VALUES(%s, %s, %s, %s::jsonb, %s, %s, %s, %s, %s, %s, %s)", (id, post, string_session, chats, time_betw, number_post, number_account, channel_tag, message_id_bot, channels_title, days,))
             self.connect.commit()
 
     def get_string_session(self, number_account):
@@ -565,3 +565,9 @@ class Data:
         with self.connect:
             self.cursor.execute("UPDATE autoposting_post SET chats=%s::jsonb WHERE number_post=%s", (chats, number_post,))
             self.connect.commit()
+
+    def select_days_autoposting_post(self, number_post):
+        with self.connect:
+            self.cursor.execute("SELECT days FROM autoposting_post WHERE number_post=%s", (number_post,))
+            a = self.cursor.fetchone()[0]
+            return a

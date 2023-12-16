@@ -350,6 +350,7 @@ class Add_post(StatesGroup):
     add_post_1 = State()
     add_post_2 = State()
     add_post_3 = State()
+    add_post_4 = State()
 
 class Change_time_betw(StatesGroup):
     change_time_betw_1 = State()
@@ -1343,15 +1344,17 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     new_chats_name = [newer[:-2] + " ✅" for newer in channels_name]
                     db.update_all_chats_name_account(number_group_autoposting, new_chats_name)
                     db.update_balance(user_id, money_oplata)
+                    moscow_tz = pytz.timezone('Europe/Moscow')
                     channels_len = len(channels)
-                    current_data = datetime.datetime.now()
+                    current_data = datetime.datetime.now(moscow_tz)
                     time_betw = db.select_time_betw(number_group_autoposting)
                     hours, minutes = map(int, time_betw[0].split(':'))
-                    current_date = datetime.datetime.now()
+                    current_date = datetime.datetime.now(moscow_tz)
                     combined_datetime = current_date.replace(hour=hours, minute=minutes, second=0, microsecond=0)
                     date_betw = combined_datetime.strftime("%Y-%m-%d %H:%M:%S")
                     new_lst = []
-                    new_date = current_data + datetime.timedelta(days=30)
+                    days = db.select_days_autoposting_post(number_group_autoposting)
+                    new_date = current_data + datetime.timedelta(days=days)
                     formatted_date_new = new_date.strftime("%Y-%m-%d %H:%M:%S")
                     new_lst.append(date_betw)
                     for new_channel in new_channels:
@@ -1399,750 +1402,8 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
 @dp.message_handler(state=Change_time_autoposting_chat.change_time_autoposting_1)
 async def change_time_autoposting_1_text(message: types.Message, state: FSMContext):
     if message.chat.type == types.ChatType.PRIVATE:
-        if message.text == "/cancel":
-            user_id = message.from_user.id
-            first_name = message.from_user.first_name
-            username = message.from_user.username
-            if (not db.check_user(user_id)):
-                db.add_user(user_id, first_name, username)
-            markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
-            markup_reply.add(cfg.autoposting)
-            markup_reply.add(cfg.parser)
-            markup_reply.row(cfg.my_profile, cfg.support)
-            if db.select_admin(user_id) > 0:
-                markup_reply.add(cfg.admin_panel_button)
-            await message.answer(cfg.cancel_sostoyanie, parse_mode=types.ParseMode.MARKDOWN, reply_markup=markup_reply)
-            await state.reset_state()
-        elif message.text == cfg.cancel_button:
-            user_id = message.from_user.id
-            first_name = message.from_user.first_name
-            username = message.from_user.username
-            if (not db.check_user(user_id)):
-                db.add_user(user_id, first_name, username)
-            markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
-            markup_reply.add(cfg.autoposting)
-            markup_reply.add(cfg.parser)
-            markup_reply.row(cfg.my_profile, cfg.support)
-            if db.select_admin(user_id) > 0:
-                markup_reply.add(cfg.admin_panel_button)
-            await message.answer(cfg.cancel_sostoyanie, parse_mode=types.ParseMode.MARKDOWN, reply_markup=markup_reply)
-            await state.reset_state()
-        else:
-            hours, minutes = message.text.split(":")
-            hours = int(hours)
-            minutes = int(minutes)
-            if 0 <= hours < 24:
-                if 0 <= minutes < 60:
-                    if validate_time_format(message.text):
-                        data = await state.get_data()
-                        number_group_autoposting = data.get("number_group_autoposting")
-                        settings_callback_data = data.get("settings_callback_data")
-                        time_for_chat = data.get("time_for_chat")
-                        post_names = db.select_chats_account_with_number_autoposting(number_group_autoposting)
-                        selected_sublist_time = [sublist for sublist in post_names if sublist[0] == settings_callback_data]
-                        result_ = selected_sublist_time[0] if selected_sublist_time else []
-                        times = [datetime_str.split()[1][:5] for datetime_str in result_[1:]]
-                        if message.text in times:
-                            await message.answer(cfg.time_again_no_text)
-                        else:
-                            user_id = message.from_user.id
-                            first_name = message.from_user.first_name
-                            username = message.from_user.username
-                            if (not db.check_user(user_id)):
-                                db.add_user(user_id, first_name, username)
-                            markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
-                            markup_reply.add(cfg.autoposting)
-                            markup_reply.add(cfg.parser)
-                            markup_reply.row(cfg.my_profile, cfg.support)
-                            if db.select_admin(user_id) > 0:
-                                markup_reply.add(cfg.admin_panel_button)
-                            updated_a = [
-                                [sublist[0]] + [
-                                    datetime_str.replace(time_for_chat, message.text) if datetime.datetime.strptime(datetime_str,"%Y-%m-%d %H:%M:%S").strftime("%H:%M") == time_for_chat else datetime_str
-                                    for datetime_str in sublist[1:]
-                                ] if sublist[0] == settings_callback_data else sublist
-                                for sublist in post_names
-                            ]
-                            json_data = json.dumps(updated_a)
-                            db.update_chat_idn_autoposting(json_data, number_group_autoposting)
-                            await message.answer(cfg.edit_time_text_finish, reply_markup=markup_reply)
-                            await state.finish()
-                    else:
-                        await message.answer("Формат времени не верный, отправьте время в следющем формате\b[час:минута] (Пример: 12:30)")
-                else:
-                    await message.answer("Вы можете поставить минуты не больше 60 и не меньше 0, попробуйте ещё раз:")
-            else:
-                await message.answer("Вы можете поставить часы не больше 23 и не меньше 0, попробуйте ещё раз:")
-
-@dp.message_handler(state=Add_time_autoposting_chat.add_time_autoposting_1)
-async def add_time_autoposting_chat_text(message: types.Message, state: FSMContext):
-    if message.chat.type == types.ChatType.PRIVATE:
-        if message.text == "/cancel":
-            user_id = message.from_user.id
-            first_name = message.from_user.first_name
-            username = message.from_user.username
-            if (not db.check_user(user_id)):
-                db.add_user(user_id, first_name, username)
-            markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
-            markup_reply.add(cfg.autoposting)
-            markup_reply.add(cfg.parser)
-            markup_reply.row(cfg.my_profile, cfg.support)
-            if db.select_admin(user_id) > 0:
-                markup_reply.add(cfg.admin_panel_button)
-            await message.answer(cfg.cancel_sostoyanie, parse_mode=types.ParseMode.MARKDOWN, reply_markup=markup_reply)
-            await state.reset_state()
-        elif message.text == cfg.cancel_button:
-            user_id = message.from_user.id
-            first_name = message.from_user.first_name
-            username = message.from_user.username
-            if (not db.check_user(user_id)):
-                db.add_user(user_id, first_name, username)
-            markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
-            markup_reply.add(cfg.autoposting)
-            markup_reply.add(cfg.parser)
-            markup_reply.row(cfg.my_profile, cfg.support)
-            if db.select_admin(user_id) > 0:
-                markup_reply.add(cfg.admin_panel_button)
-            await message.answer(cfg.cancel_sostoyanie, parse_mode=types.ParseMode.MARKDOWN, reply_markup=markup_reply)
-            await state.reset_state()
-        else:
-            hours, minutes = message.text.split(":")
-            hours = int(hours)
-            minutes = int(minutes)
-            if 0 <= hours < 24:
-                if 0 <= minutes < 60:
-                    if validate_time_format(message.text):
-                        data = await state.get_data()
-                        number_group_autoposting = data.get("number_group_autoposting")
-                        settings_callback_data = data.get("settings_callback_data")
-                        post_names = db.select_chats_account_with_number_autoposting(number_group_autoposting)
-                        selected_sublist_time = [sublist for sublist in post_names if sublist[0] == settings_callback_data]
-                        result = selected_sublist_time[0] if selected_sublist_time else []
-                        times = [datetime_str.split()[1][:5] for datetime_str in result[1:]]
-                        if message.text in times:
-                            await message.answer(cfg.time_again_no_text)
-                        else:
-                            user_id = message.from_user.id
-                            first_name = message.from_user.first_name
-                            username = message.from_user.username
-                            if (not db.check_user(user_id)):
-                                db.add_user(user_id, first_name, username)
-                            markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
-                            markup_reply.add(cfg.autoposting)
-                            markup_reply.add(cfg.parser)
-                            markup_reply.row(cfg.my_profile, cfg.support)
-                            if db.select_admin(user_id) > 0:
-                                markup_reply.add(cfg.admin_panel_button)
-                            current_date = datetime.datetime.now()
-                            combined_datetime = current_date.replace(hour=hours, minute=minutes, second=0, microsecond=0)
-                            formatted_datetime = combined_datetime.strftime("%Y-%m-%d %H:%M:%S")
-                            selected_sublist = [sublist for sublist in post_names if sublist[0] == settings_callback_data]
-                            result = selected_sublist[0] if selected_sublist else []
-                            result.append(formatted_datetime)
-                            new_updates = [result if item[0] == settings_callback_data else item for item in post_names]
-                            json_data = json.dumps(new_updates)
-                            db.update_chat_idn_autoposting(json_data, number_group_autoposting)
-                            await message.answer(cfg.add_time_text_finish, reply_markup=markup_reply)
-                            await state.finish()
-                    else:
-                        await message.answer("Формат времени не верный, отправьте время в следющем формате\b[час:минута] (Пример: 12:30)")
-                else:
-                    await message.answer("Вы можете поставить минуты не больше 60 и не меньше 0, попробуйте ещё раз:")
-            else:
-                await message.answer("Вы можете поставить часы не больше 23 и не меньше 0, попробуйте ещё раз:")
-
-
-@dp.message_handler(state=Change_time_betw.change_time_betw_1)
-async def change_time_betw_1_func(message: types.Message, state: FSMContext):
-    if message.chat.type == types.ChatType.PRIVATE:
-        textsing = message.text
-        text_lines = textsing.strip().split('\n')
-        if message.text == "/cancel":
-            await message.answer(cfg.cancel_sostoyanie, parse_mode=types.ParseMode.MARKDOWN)
-            await state.reset_state()
-        else:
-            if 1 <= len(text_lines) <= 5:
-                try:
-                    bluable = False
-                    for text_lin in text_lines:
-                        hours, minutes = text_lin.split(":")
-                        hours = int(hours)
-                        minutes = int(minutes)
-                        if 0 <= hours < 24:
-                            if 0 <= minutes < 61:
-                                if validate_time_format(text_lin):
-                                    await Add_post.add_post_3.set()
-                                    await message.answer(cfg.create_account_post_3)
-                                    bluable = True
-                                    current_date = datetime.datetime.now()
-                                    combined_datetime = current_date.replace(hour=hours, minute=minutes, second=0, microsecond=0)
-                                    formatted_datetime = combined_datetime.strftime("%Y-%m-%d %H:%M:%S")
-                                    new_lst = []
-                                    new_lst.append(formatted_datetime)
-                                else:
-                                    await message.answer("Формат времени не верный, отправьте время в следющем формате:\n\nПример:\n10:30\n14:30")
-                                    bluable = False
-                                    break
-                            else:
-                                await message.answer("Вы можете поставить минуты не больше 60 и не меньше 0, попробуйте ещё раз:")
-                                bluable = False
-                                break
-                        else:
-                            await message.answer("Вы можете поставить часы не больше 23 и не меньше 0, попробуйте ещё раз:")
-                            bluable = False
-                            break
-                    if bluable is True:
-                        pass
-                except Exception:
-                    pass
-            else:
-                await message.answer(cfg.error_len_keyword_create, parse_mode=types.ParseMode.MARKDOWN)
-
-
-@dp.message_handler(state=Add_post.add_post_1)
-async def add_post_func_text_1(message: types.Message, state: FSMContext):
-    if message.chat.type == types.ChatType.PRIVATE:
-        if message.text == cfg.cancel_creategroup:
-            user_id = message.from_user.id
-            markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
-            markup_reply.add(cfg.autoposting)
-            markup_reply.add(cfg.parser)
-            markup_reply.row(cfg.my_profile, cfg.support)
-            if db.select_admin(user_id) > 0:
-                markup_reply.add(cfg.admin_panel_button)
-            await message.answer(cfg.back_text, reply_markup=markup_reply)
-            await state.reset_state()
-        else:
-            if message.forward_from or message.forward_from_chat:
-                channel_message_id = message.forward_from_message_id if message.forward_from_message_id else None
-                channel_tag = message.forward_from_chat.username if message.forward_from_chat else None
-                message_id_bot = message.message_id
-                await state.update_data(forwarded_message_id=channel_message_id, channel_tag=channel_tag, message_id_bot=message_id_bot)
-                await message.answer(cfg.create_account_post_2)
-                await Add_post.add_post_2.set()
-            else:
-                await message.answer("Вы должны переслать сообщение из канала, попробуйте ещё раз:")
-
-@dp.message_handler(state=Add_post.add_post_2)
-async def add_post_func_text_2(message: types.Message, state: FSMContext):
-    if message.chat.type == types.ChatType.PRIVATE:
-        if message.text == cfg.cancel_creategroup:
-            user_id = message.from_user.id
-            markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
-            markup_reply.add(cfg.autoposting)
-            markup_reply.add(cfg.parser)
-            markup_reply.row(cfg.my_profile, cfg.support)
-            if db.select_admin(user_id) > 0:
-                markup_reply.add(cfg.admin_panel_button)
-            await message.answer(cfg.back_text, reply_markup=markup_reply)
-            await state.reset_state()
-        else:
-            hours, minutes = message.text.split(":")
-            hours = int(hours)
-            minutes = int(minutes)
-            if 0 <= hours < 24:
-                if 0 <= minutes < 61:
-                    if validate_time_format(message.text):
-                        await Add_post.add_post_3.set()
-                        await message.answer(cfg.create_account_post_3)
-                        # current_date = datetime.datetime.now()
-                        # combined_datetime = current_date.replace(hour=hours, minute=minutes, second=0, microsecond=0)
-                        # formatted_datetime = combined_datetime.strftime("%Y-%m-%d %H:%M:%S")
-                        new_lst = []
-                        new_lst.append(message.text)
-                        await state.update_data(time_betw=new_lst)
-                    else:
-                        await message.answer("Формат времени не верный, отправьте время в следющем формате")
-                else:
-                    await message.answer("Вы можете поставить минуты не больше 60 и не меньше 0, попробуйте ещё раз:")
-            else:
-                await message.answer("Вы можете поставить часы не больше 23 и не меньше 0, попробуйте ещё раз:")
-
-@dp.message_handler(state=Add_post.add_post_3)
-async def add_post_func_text_3(message: types.Message, state: FSMContext):
-    if message.chat.type == types.ChatType.PRIVATE:
-        user_id = message.from_user.id
-        textsing = message.text
-        text_line = textsing.strip().split('\n')
-        text_lines = [[element + ' ⚠'] for element in text_line]
-        if message.text == cfg.cancel_creategroup:
-            user_id = message.from_user.id
-            markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
-            markup_reply.add(cfg.autoposting)
-            markup_reply.add(cfg.parser)
-            markup_reply.row(cfg.my_profile, cfg.support)
-            if db.select_admin(user_id) > 0:
-                markup_reply.add(cfg.admin_panel_button)
-            await message.answer(cfg.back_text, reply_markup=markup_reply)
-            await state.reset_state()
-        else:
-            if 2 <= len(message.text) <= 1000:
-                if 1 <= len(text_lines) <= 10:
-                    try:
-                        channels_name_1 = []
-                        await message.answer(cfg.please_wait_add_channels_name)
-                        for channel_name in text_line:
-                            if channel_name[13] == "+":
-                                response = requests.get(channel_name)
-                                html_content = response.text
-                                soup = BeautifulSoup(html_content, 'html.parser')
-                                title_div = soup.find('div', {'class': 'tgme_page_title'})
-                                if title_div:
-                                    group_name = title_div.get_text(strip=True)
-                                    channels_name_1.append(group_name)
-                                else:
-                                    await message.answer(cfg.error_channel_name_add)
-                                    break
-                            elif channel_name[0] == "@":
-                                response = requests.get(f"https://t.me/{channel_name[1:]}")
-                                html_content = response.text
-                                soup = BeautifulSoup(html_content, 'html.parser')
-                                title_div = soup.find('div', {'class': 'tgme_page_title'})
-                                if title_div:
-                                    group_name = title_div.get_text(strip=True)
-                                    channels_name_1.append(group_name)
-                                else:
-                                    await message.answer(cfg.error_channel_name_add)
-                                    break
-                            else:
-                                if channel_name[:8] == "https://":
-                                    response = requests.get(channel_name)
-                                else:
-                                    response = requests.get(f"https://t.me/{channel_name}")
-                                html_content = response.text
-                                soup = BeautifulSoup(html_content, 'html.parser')
-                                title_div = soup.find('div', {'class': 'tgme_page_title'})
-                                if title_div:
-                                    group_name = title_div.get_text(strip=True)
-                                    channels_name_1.append(group_name)
-                                else:
-                                    await message.answer(cfg.error_channel_name_add)
-                                    break
-                        if len(channels_name_1) == len(text_line):
-                            channels_name_2 = list(dict.fromkeys([element + ' ⚠' for element in channels_name_1]))
-                            check_number_post = db.check_numbers_account_post()
-                            new_number_post = check_number_post + 1
-                            data = await state.get_data()
-                            number_account = data.get("number_account")
-                            string_session = db.get_string_session(number_account)
-                            time_betw = data.get("time_betw")
-                            forwarded_message_id = data.get("forwarded_message_id")
-                            channel_tag = data.get("channel_tag")
-                            message_id_bot = data.get("message_id_bot")
-                            json_data = json.dumps(text_lines)
-                            db.add_post_account(user_id, forwarded_message_id, string_session, json_data, time_betw, new_number_post, number_account, channel_tag, message_id_bot, channels_name_2)
-                            markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
-                            markup_reply.add(cfg.autoposting)
-                            markup_reply.add(cfg.parser)
-                            markup_reply.row(cfg.my_profile, cfg.support)
-                            if db.select_admin(user_id) > 0:
-                                markup_reply.add(cfg.admin_panel_button)
-                            await message.answer(cfg.right_create_post, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
-                            await state.finish()
-                    except Exception as es:
-                        await state.reset_state()
-                        markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
-                        markup_reply.add(cfg.autoposting)
-                        markup_reply.add(cfg.parser)
-                        markup_reply.row(cfg.my_profile, cfg.support)
-                        if db.select_admin(user_id) > 0:
-                            markup_reply.add(cfg.admin_panel_button)
-                        await message.answer(cfg.error_create_post, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
-                        print(f"[ERROR] {es}")
-                else:
-                    await message.answer(cfg.error_len_chat_post_create, parse_mode=types.ParseMode.MARKDOWN)
-            else:
-                await message.answer(cfg.error_len_channels, parse_mode=types.ParseMode.MARKDOWN)
-
-@dp.message_handler(state=Change_keyword.change_keyword_1)
-async def change_keyword_1_func(message: types.Message, state: FSMContext):
-    if message.chat.type == types.ChatType.PRIVATE:
-        textsing = message.text
-        text_lines = textsing.strip().split('\n')
-        if message.text == "/cancel":
-            await message.answer(cfg.cancel_sostoyanie, parse_mode=types.ParseMode.MARKDOWN)
-            await state.reset_state()
-        elif message.text == cfg.cancel_button:
-            user_id = message.from_user.id
-            first_name = message.from_user.first_name
-            username = message.from_user.username
-            if (not db.check_user(user_id)):
-                db.add_user(user_id, first_name, username)
-            markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
-            markup_reply.add(cfg.autoposting)
-            markup_reply.add(cfg.parser)
-            markup_reply.row(cfg.my_profile, cfg.support)
-            if db.select_admin(user_id) > 0:
-                markup_reply.add(cfg.admin_panel_button)
-
-            await message.answer(cfg.cancel_sostoyanie, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
-            await state.reset_state()
-        else:
-            if 2 <= len(message.text) <= 500:
-                if 1 <= len(text_lines) <= 20:
-                    try:
-                        user_id = message.from_user.id
-                        first_name = message.from_user.first_name
-                        username = message.from_user.username
-                        if (not db.check_user(user_id)):
-                            db.add_user(user_id, first_name, username)
-                        markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
-                        markup_reply.add(cfg.autoposting)
-                        markup_reply.add(cfg.parser)
-                        markup_reply.row(cfg.my_profile, cfg.support)
-                        if db.select_admin(user_id) > 0:
-                            markup_reply.add(cfg.admin_panel_button)
-                        data = await state.get_data()
-                        number_group = data.get("number_group")
-                        db.update_keywords(text_lines, number_group)
-                        group_name = db.get_group_name_number(number_group)
-                        await message.answer(cfg.correct_keyword_change(group_name), parse_mode=types.ParseMode.MARKDOWN, reply_markup=markup_reply)
-                        await state.finish()
-                    except Exception as es:
-                        await state.reset_state()
-                        user_id = message.from_user.id
-                        first_name = message.from_user.first_name
-                        username = message.from_user.username
-                        if (not db.check_user(user_id)):
-                            db.add_user(user_id, first_name, username)
-                        markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True,
-                                                                 one_time_keyboard=False)
-                        markup_reply.add(cfg.autoposting)
-                        markup_reply.add(cfg.parser)
-                        markup_reply.row(cfg.my_profile, cfg.support)
-                        if db.select_admin(user_id) > 0:
-                            markup_reply.add(cfg.admin_panel_button)
-                        await message.answer(cfg.error_change_keyword_1, parse_mode=types.ParseMode.MARKDOWN, reply_markup=markup_reply)
-                        print(f"[ERROR] {es}")
-                else:
-                    await message.answer(cfg.error_len_keyword_create, parse_mode=types.ParseMode.MARKDOWN)
-            else:
-                await message.answer(cfg.error_len_keyword, parse_mode=types.ParseMode.MARKDOWN)
-
-@dp.message_handler(state=Create_group.create_group_1)
-async def create_group_func_1(message: types.Message, state: FSMContext):
-    if message.chat.type == types.ChatType.PRIVATE:
-        user_id = message.from_user.id
-        if message.text == cfg.cancel_creategroup:
-            markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
-            markup_reply.add(cfg.autoposting)
-            markup_reply.add(cfg.parser)
-            markup_reply.row(cfg.my_profile, cfg.support)
-            if db.select_admin(user_id) > 0:
-                markup_reply.add(cfg.admin_panel_button)
-            await state.reset_state()
-            await message.answer(cfg.cancel_creategroup_text, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
-        elif message.text:
-            if 3 <= len(message.text) <= 15:
-                if message.text in db.select_all_group_name():
-                    await message.answer(cfg.error_name_again, parse_mode=types.ParseMode.MARKDOWN)
-                else:
-                    await state.update_data(group_name=message.text)
-                    await message.answer(cfg.create_group_text_3, parse_mode=types.ParseMode.MARKDOWN)
-                    await Create_group.create_group_2.set()
-            else:
-                await message.answer(cfg.error_len_name_group, parse_mode=types.ParseMode.MARKDOWN)
-
-@dp.callback_query_handler(state=Create_group.create_group_1)
-async def button_group_1(callback_query: types.CallbackQuery):
-    if callback_query.data is not None:
-        await callback_query.answer(cfg.error_button_create_group, show_alert=True)
-
-@dp.message_handler(state=Create_group.create_group_2)
-async def create_group_func_2(message: types.Message, state: FSMContext):
-    if message.chat.type == types.ChatType.PRIVATE:
-        user_id = message.from_user.id
-        textsing = message.text
-        text_lines = textsing.strip().split('\n')
-        if message.text == cfg.cancel_creategroup:
-            markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
-            markup_reply.add(cfg.autoposting)
-            markup_reply.add(cfg.parser)
-            markup_reply.row(cfg.my_profile, cfg.support)
-            if db.select_admin(user_id) > 0:
-                markup_reply.add(cfg.admin_panel_button)
-            await state.reset_state()
-            await message.answer(cfg.cancel_creategroup_text, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
-        elif message.text:
-            if 2 <= len(message.text) <= 500:
-                if 1 <= len(text_lines) <= 20:
-                    try:
-                        await state.update_data(text_lines=text_lines)
-                        await message.answer(cfg.create_group_text_4, parse_mode=types.ParseMode.MARKDOWN)
-                        await Create_group.create_group_3.set()
-                    except Exception as es:
-                        await state.reset_state()
-                        markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
-                        markup_reply.add(cfg.autoposting)
-                        markup_reply.add(cfg.parser)
-                        markup_reply.row(cfg.my_profile, cfg.support)
-                        if db.select_admin(user_id) > 0:
-                            markup_reply.add(cfg.admin_panel_button)
-                        await message.answer(cfg.error_create_group, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
-                        print(f"[ERROR] {es}")
-                else:
-                    await message.answer(cfg.error_len_keyword_create, parse_mode=types.ParseMode.MARKDOWN)
-            else:
-                await message.answer(cfg.error_len_keyword, parse_mode=types.ParseMode.MARKDOWN)
-
-@dp.callback_query_handler(state=Create_group.create_group_2)
-async def button_group_2(callback_query: types.CallbackQuery):
-    if callback_query.data is not None:
-        await callback_query.answer(cfg.error_button_create_group, show_alert=True)
-
-@dp.message_handler(state=Create_group.create_group_3)
-async def create_group_func_3(message: types.Message, state: FSMContext):
-    if message.chat.type == types.ChatType.PRIVATE:
-        user_id = message.from_user.id
-        textsing = message.text
-        text_line = textsing.strip().split('\n')
-        text_lines = list(dict.fromkeys([element + ' ⚠' for element in text_line]))
-        if message.text == cfg.cancel_creategroup:
-            markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
-            markup_reply.add(cfg.autoposting)
-            markup_reply.add(cfg.parser)
-            markup_reply.row(cfg.my_profile, cfg.support)
-            if db.select_admin(user_id) > 0:
-                markup_reply.add(cfg.admin_panel_button)
-            await state.reset_state()
-            await message.answer(cfg.cancel_creategroup_text, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
-        elif message.text:
-            if 2 <= len(message.text) <= 1000:
-                if 5 <= len(text_lines) <= 50:
-                    try:
-                        channels_name_1 = []
-                        await message.answer(cfg.please_wait_add_channels_name)
-                        for channel_name in text_line:
-                            if channel_name[13] == "+":
-                                response = requests.get(channel_name)
-                                html_content = response.text
-                                soup = BeautifulSoup(html_content, 'html.parser')
-                                title_div = soup.find('div', {'class': 'tgme_page_title'})
-                                if title_div:
-                                    group_name = title_div.get_text(strip=True)
-                                    channels_name_1.append(group_name)
-                                else:
-                                    await message.answer(cfg.error_channel_name_add)
-                                    break
-                            elif channel_name[0] == "@":
-                                response = requests.get(f"https://t.me/{channel_name[1:]}")
-                                html_content = response.text
-                                soup = BeautifulSoup(html_content, 'html.parser')
-                                title_div = soup.find('div', {'class': 'tgme_page_title'})
-                                if title_div:
-                                    group_name = title_div.get_text(strip=True)
-                                    channels_name_1.append(group_name)
-                                else:
-                                    await message.answer(cfg.error_channel_name_add)
-                                    break
-                            else:
-                                response = requests.get(f"https://t.me/{channel_name}")
-                                html_content = response.text
-                                soup = BeautifulSoup(html_content, 'html.parser')
-                                title_div = soup.find('div', {'class': 'tgme_page_title'})
-                                if title_div:
-                                    group_name = title_div.get_text(strip=True)
-                                    channels_name_1.append(group_name)
-                                else:
-                                    await message.answer(cfg.error_channel_name_add)
-                                    break
-                        if len(channels_name_1) == len(text_line):
-                            channels_name_2 = list(dict.fromkeys([element + ' ⚠' for element in channels_name_1]))
-                            check_number_group = db.check_numbers_group()
-                            new_number_group = check_number_group + 1
-                            data = await state.get_data()
-                            cashe_group_name = data.get('group_name')
-                            cashe_keyword = data.get('text_lines')
-                            db.add_channels(user_id, new_number_group, cashe_keyword, text_lines, cashe_group_name, channels_name_2)
-                            markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
-                            markup_reply.add(cfg.autoposting)
-                            markup_reply.add(cfg.parser)
-                            markup_reply.row(cfg.my_profile, cfg.support)
-                            if db.select_admin(user_id) > 0:
-                                markup_reply.add(cfg.admin_panel_button)
-                            await message.answer(cfg.right_create_group, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
-                            await state.finish()
-                    except Exception as es:
-                        await state.reset_state()
-                        markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
-                        markup_reply.add(cfg.autoposting)
-                        markup_reply.add(cfg.parser)
-                        markup_reply.row(cfg.my_profile, cfg.support)
-                        if db.select_admin(user_id) > 0:
-                            markup_reply.add(cfg.admin_panel_button)
-                        await message.answer(cfg.error_create_group, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
-                        print(f"[ERROR] {es}")
-                else:
-                    await message.answer(cfg.error_len_channels_create, parse_mode=types.ParseMode.MARKDOWN)
-            else:
-                await message.answer(cfg.error_len_channels, parse_mode=types.ParseMode.MARKDOWN)
-
-@dp.callback_query_handler(state=Create_group.create_group_3)
-async def button_group_2(callback_query: types.CallbackQuery):
-    if callback_query.data is not None:
-        await callback_query.answer(cfg.error_button_create_group, show_alert=True)
-
-@dp.message_handler(state=Add_chat_ids.panel_adm)
-async def panel_adm(message: types.Message, state: FSMContext):
-    if message.text == cfg.back_button:
-        markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
-        markup_reply.add(cfg.autoposting)
-        markup_reply.add(cfg.parser)
-        markup_reply.row(cfg.my_profile, cfg.support)
-        markup_reply.add(cfg.admin_panel_button)
-        await message.answer(cfg.panel_admin_back_text, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
-        await state.reset_state()
-    elif message.text == cfg.add_chat_id_button:
-        markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
-        markup_reply.add(cfg.back_button)
-        await message.answer(cfg.write_number_group_text, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
-        await Add_chat_ids.add_ids_1.set()
-    else:
-        await message.answer(cfg.error_text_in_state_panel, parse_mode=types.ParseMode.MARKDOWN)
-
-@dp.message_handler(state=Add_chat_ids.add_ids_1)
-async def add_chat_ids_num_1(message: types.Message, state: FSMContext):
-    if message.text == cfg.back_button:
-        markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
-        markup_reply.add(cfg.add_chat_id_button, cfg.back_button)
-        await message.answer(cfg.cancel_add_ids, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
-        await Add_chat_ids.panel_adm.set()
-    else:
         try:
-            message_text = int(message.text)
-            await state.update_data(number_group=message_text)
-            await message.answer(cfg.write_chat_ids_text, parse_mode=types.ParseMode.MARKDOWN)
-            await Add_chat_ids.add_ids_2.set()
-        except Exception as err:
-            await message.answer(cfg.error_write_number_group_text, parse_mode=types.ParseMode.MARKDOWN)
-            await Add_chat_ids.add_ids_1.set()
-
-@dp.message_handler(state=Add_chat_ids.add_ids_2)
-async def add_chat_ids_num_2(message: types.Message, state: FSMContext):
-    if message.text == cfg.back_button:
-        markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
-        markup_reply.add(cfg.add_chat_id_button, cfg.back_button)
-        await message.answer(cfg.cancel_add_ids, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
-        await Add_chat_ids.panel_adm.set()
-    else:
-        markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
-        markup_reply.add(cfg.add_chat_id_button, cfg.back_button)
-        textsing = message.text
-        text_lines = textsing.strip().split('\n')
-        new_lst = []
-        data = await state.get_data()
-        number_group = data.get("number_group")
-        for lines in text_lines:
-            try:
-                int(lines[3:])
-                new_lst.append(lines)
-                all_channels = db.select_channels_with_number(number_group)
-                channels_link = [item for item in all_channels if len(item) >= 13 and item[13] == '+']
-                index = int(lines.split(')')[0]) - 1
-                channels_link[index] = channels_link[index].replace("⏳", "✅")
-                owner_lst = [next((full_word for full_word in channels_link if full_word[:-2] == word[:-2]), word) for word in all_channels]
-                db.update_all_channels(number_group, owner_lst)
-            except Exception:
-                await message.answer(cfg.error_add_ids, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
-                await Add_chat_ids.panel_adm.set()
-        all_channels = db.select_channels_with_number(number_group)
-        for channel_name in all_channels:
-            if channel_name[-1] == "✅":
-                index_channel = all_channels.index(channel_name)
-                all_channels_name = db.select_channels_name_with_number(number_group)
-                group_name = all_channels_name[index_channel]
-                new_callback_name = group_name[:-1] + "✅"
-                new_channels_name = [new_callback_name if item == group_name else item for item in all_channels_name]
-                db.update_all_channels_name(number_group, new_channels_name)
-        old_chat_list = db.select_chat_ids(number_group) or []
-        new_lst = old_chat_list + new_lst
-        db.add_chat_ids(int(number_group), new_lst)
-        await message.answer(cfg.correct_add_chat_ids, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
-        await Add_chat_ids.panel_adm.set()
-
-@dp.message_handler(state=Create_account_autoposting.create_autoposting_1)
-async def process_phone(message: types.Message, state: FSMContext):
-    user_id = message.from_user.id
-    markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
-    markup_reply.add(cfg.autoposting)
-    markup_reply.add(cfg.parser)
-    markup_reply.row(cfg.my_profile, cfg.support)
-    await client.connect()
-    if db.select_admin(user_id) > 0:
-        markup_reply.add(cfg.admin_panel_button)
-    if message.text == cfg.cancel_creategroup:
-        await message.answer(cfg.back_text, reply_markup=markup_reply)
-        await state.reset_state()
-    else:
-        if db.get_states_sms(user_id) == 1:
-            phone = message.text
-            if not client.is_connected():
-                await client.connect()
-
-            try:
-                result = await client.send_code_request(phone)
-                phone_code_hash = result.phone_code_hash
-                await state.update_data(phone=phone)
-                await state.update_data(phone_code_hash=phone_code_hash)
-                db.update_states_sms(user_id, 2)
-                await message.reply("Теперь отправьте код, который вы получили от Telegram.\n\nВажно! Пожалуйста, НЕ присылай мне код как есть (иначе он сразу перестанет действовать). Пришли мне его, разделив цифры пробелами. Например, 123 45 или 1 2345, где 12345 - это сам код, который ты получил от Телеграма.")
-            except Exception as e:
-                logging.error(f"Ошибка при отправке кода: {e}")
-                await message.reply("Произошла ошибка при отправке кода, пожалуйста, попробуйте еще раз ввести номер телефона:")
-        elif db.get_states_sms(user_id) == 2:
-            code_spaces = message.text
-            code = code_spaces.replace(" ", "")
-            data = await state.get_data()
-            phone = data.get("phone")
-            phone_code_hash = data.get("phone_code_hash")
-            try:
-                int(code)
-                await client.sign_in(phone, int(code), phone_code_hash=phone_code_hash)
-                string_session = client.session.save()
-                await state.update_data(string_session=string_session)
-                await Create_account_autoposting.create_autoposting_2.set()
-                await message.reply(cfg.create_account_autoposting_3)
-            except SessionPasswordNeededError:
-                db.update_states_sms(user_id, 3)
-                await message.reply("Требуется пароль для двухфакторной аутентификации. Введите его здесь:")
-            except PhoneCodeExpiredError:
-                await message.reply("Код подтверждения истек. Попробуйте начать заново.", reply_markup=markup_reply)
-                await state.finish()
-            except PhoneNumberUnoccupiedError:
-                await message.reply("Этот номер телефона не зарегистрирован в Telegram.", reply_markup=markup_reply)
-                await state.finish()
-            except ValueError:
-                await message.answer("Произошла ошибка! Код должен состоять исключительно из цифр, пожалуйста повторите попытку:")
-            except Exception as e:
-                await message.reply(f"Произошла ошибка: {str(e)}", reply_markup=markup_reply)
-                await state.finish()
-        elif db.get_states_sms(user_id) == 3:
-            password = message.text
-            try:
-                await client.sign_in(password=password)
-                string_session = client.session.save()
-                await Create_account_autoposting.create_autoposting_2.set()
-                await state.update_data(string_session=string_session)
-                await message.answer(cfg.create_account_autoposting_3)
-            except Exception as e:
-                await message.reply(str(e), reply_markup=markup_reply)
-                await state.finish()
-
-@dp.message_handler(state=Create_account_autoposting.create_autoposting_2)
-async def group_name_autoposting(message: types.Message, state: FSMContext):
-    if message.chat.type == types.ChatType.PRIVATE:
-        user_id = message.from_user.id
-        if message.text == cfg.cancel_creategroup:
-            markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
-            markup_reply.add(cfg.autoposting)
-            markup_reply.add(cfg.parser)
-            markup_reply.row(cfg.my_profile, cfg.support)
-            if db.select_admin(user_id) > 0:
-                markup_reply.add(cfg.admin_panel_button)
-            await message.answer(cfg.back_text, reply_markup=markup_reply)
-            await state.reset_state()
-        else:
-            if 3 <= len(message.text) <= 15:
+            if message.text == "/cancel":
                 user_id = message.from_user.id
                 first_name = message.from_user.first_name
                 username = message.from_user.username
@@ -2152,34 +1413,851 @@ async def group_name_autoposting(message: types.Message, state: FSMContext):
                 markup_reply.add(cfg.autoposting)
                 markup_reply.add(cfg.parser)
                 markup_reply.row(cfg.my_profile, cfg.support)
-                data = await state.get_data()
-                phone = data.get('phone')
-                string_session = data.get('string_session')
-                group_name = message.text
-                check_number_group = db.check_numbers_account_autoposting()
-                new_number_group = check_number_group + 1
-                db.add_autoposting_account(user_id, new_number_group, phone, string_session, group_name)
-                await message.answer(cfg.create_account_right, reply_markup=markup_reply)
-                await state.finish()
+                if db.select_admin(user_id) > 0:
+                    markup_reply.add(cfg.admin_panel_button)
+                await message.answer(cfg.cancel_sostoyanie, parse_mode=types.ParseMode.MARKDOWN, reply_markup=markup_reply)
+                await state.reset_state()
+            elif message.text == cfg.cancel_button:
+                user_id = message.from_user.id
+                first_name = message.from_user.first_name
+                username = message.from_user.username
+                if (not db.check_user(user_id)):
+                    db.add_user(user_id, first_name, username)
+                markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+                markup_reply.add(cfg.autoposting)
+                markup_reply.add(cfg.parser)
+                markup_reply.row(cfg.my_profile, cfg.support)
+                if db.select_admin(user_id) > 0:
+                    markup_reply.add(cfg.admin_panel_button)
+                await message.answer(cfg.cancel_sostoyanie, parse_mode=types.ParseMode.MARKDOWN, reply_markup=markup_reply)
+                await state.reset_state()
             else:
-                await message.answer("Минимальная длина названия аккаунта, должна быть 3, максимальная 15, попробуйте ещё раз:")
+                hours, minutes = message.text.split(":")
+                hours = int(hours)
+                minutes = int(minutes)
+                if 0 <= hours < 24:
+                    if 0 <= minutes < 60:
+                        if validate_time_format(message.text):
+                            data = await state.get_data()
+                            number_group_autoposting = data.get("number_group_autoposting")
+                            settings_callback_data = data.get("settings_callback_data")
+                            time_for_chat = data.get("time_for_chat")
+                            post_names = db.select_chats_account_with_number_autoposting(number_group_autoposting)
+                            selected_sublist_time = [sublist for sublist in post_names if sublist[0] == settings_callback_data]
+                            result_ = selected_sublist_time[0] if selected_sublist_time else []
+                            times = [datetime_str.split()[1][:5] for datetime_str in result_[1:]]
+                            if message.text in times:
+                                await message.answer(cfg.time_again_no_text)
+                            else:
+                                user_id = message.from_user.id
+                                first_name = message.from_user.first_name
+                                username = message.from_user.username
+                                if (not db.check_user(user_id)):
+                                    db.add_user(user_id, first_name, username)
+                                markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+                                markup_reply.add(cfg.autoposting)
+                                markup_reply.add(cfg.parser)
+                                markup_reply.row(cfg.my_profile, cfg.support)
+                                if db.select_admin(user_id) > 0:
+                                    markup_reply.add(cfg.admin_panel_button)
+                                updated_a = [
+                                    [sublist[0]] + [
+                                        datetime_str.replace(time_for_chat, message.text) if datetime.datetime.strptime(datetime_str,"%Y-%m-%d %H:%M:%S").strftime("%H:%M") == time_for_chat else datetime_str
+                                        for datetime_str in sublist[1:]
+                                    ] if sublist[0] == settings_callback_data else sublist
+                                    for sublist in post_names
+                                ]
+                                json_data = json.dumps(updated_a)
+                                db.update_chat_idn_autoposting(json_data, number_group_autoposting)
+                                await message.answer(cfg.edit_time_text_finish, reply_markup=markup_reply)
+                                await state.finish()
+                        else:
+                            await message.answer("Формат времени не верный, отправьте время в следющем формате\b[час:минута] (Пример: 12:30)")
+                    else:
+                        await message.answer("Вы можете поставить минуты не больше 60 и не меньше 0, попробуйте ещё раз:")
+                else:
+                    await message.answer("Вы можете поставить часы не больше 23 и не меньше 0, попробуйте ещё раз:")
+        except Exception:
+            await message.answer("Произошла ошибка, пожалуйста повторите ещё раз:")
+
+@dp.message_handler(state=Add_time_autoposting_chat.add_time_autoposting_1)
+async def add_time_autoposting_chat_text(message: types.Message, state: FSMContext):
+    if message.chat.type == types.ChatType.PRIVATE:
+        try:
+            if message.text == "/cancel":
+                user_id = message.from_user.id
+                first_name = message.from_user.first_name
+                username = message.from_user.username
+                if (not db.check_user(user_id)):
+                    db.add_user(user_id, first_name, username)
+                markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+                markup_reply.add(cfg.autoposting)
+                markup_reply.add(cfg.parser)
+                markup_reply.row(cfg.my_profile, cfg.support)
+                if db.select_admin(user_id) > 0:
+                    markup_reply.add(cfg.admin_panel_button)
+                await message.answer(cfg.cancel_sostoyanie, parse_mode=types.ParseMode.MARKDOWN, reply_markup=markup_reply)
+                await state.reset_state()
+            elif message.text == cfg.cancel_button:
+                user_id = message.from_user.id
+                first_name = message.from_user.first_name
+                username = message.from_user.username
+                if (not db.check_user(user_id)):
+                    db.add_user(user_id, first_name, username)
+                markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+                markup_reply.add(cfg.autoposting)
+                markup_reply.add(cfg.parser)
+                markup_reply.row(cfg.my_profile, cfg.support)
+                if db.select_admin(user_id) > 0:
+                    markup_reply.add(cfg.admin_panel_button)
+                await message.answer(cfg.cancel_sostoyanie, parse_mode=types.ParseMode.MARKDOWN, reply_markup=markup_reply)
+                await state.reset_state()
+            else:
+                hours, minutes = message.text.split(":")
+                hours = int(hours)
+                minutes = int(minutes)
+                if 0 <= hours < 24:
+                    if 0 <= minutes < 60:
+                        if validate_time_format(message.text):
+                            data = await state.get_data()
+                            number_group_autoposting = data.get("number_group_autoposting")
+                            settings_callback_data = data.get("settings_callback_data")
+                            post_names = db.select_chats_account_with_number_autoposting(number_group_autoposting)
+                            selected_sublist_time = [sublist for sublist in post_names if sublist[0] == settings_callback_data]
+                            result = selected_sublist_time[0] if selected_sublist_time else []
+                            times = [datetime_str.split()[1][:5] for datetime_str in result[1:]]
+                            if message.text in times:
+                                await message.answer(cfg.time_again_no_text)
+                            else:
+                                user_id = message.from_user.id
+                                first_name = message.from_user.first_name
+                                username = message.from_user.username
+                                if (not db.check_user(user_id)):
+                                    db.add_user(user_id, first_name, username)
+                                markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+                                markup_reply.add(cfg.autoposting)
+                                markup_reply.add(cfg.parser)
+                                markup_reply.row(cfg.my_profile, cfg.support)
+                                if db.select_admin(user_id) > 0:
+                                    markup_reply.add(cfg.admin_panel_button)
+                                moscow_tz = pytz.timezone('Europe/Moscow')
+                                current_date = datetime.datetime.now(moscow_tz)
+                                combined_datetime = current_date.replace(hour=hours, minute=minutes, second=0, microsecond=0)
+                                formatted_datetime = combined_datetime.strftime("%Y-%m-%d %H:%M:%S")
+                                selected_sublist = [sublist for sublist in post_names if sublist[0] == settings_callback_data]
+                                result = selected_sublist[0] if selected_sublist else []
+                                result.append(formatted_datetime)
+                                new_updates = [result if item[0] == settings_callback_data else item for item in post_names]
+                                json_data = json.dumps(new_updates)
+                                db.update_chat_idn_autoposting(json_data, number_group_autoposting)
+                                await message.answer(cfg.add_time_text_finish, reply_markup=markup_reply)
+                                await state.finish()
+                        else:
+                            await message.answer("Формат времени не верный, отправьте время в следющем формате\b[час:минута] (Пример: 12:30)")
+                    else:
+                        await message.answer("Вы можете поставить минуты не больше 60 и не меньше 0, попробуйте ещё раз:")
+                else:
+                    await message.answer("Вы можете поставить часы не больше 23 и не меньше 0, попробуйте ещё раз:")
+        except Exception:
+            await message.answer("Произошла ошибка, возможно вы не правильно ввели, повторите ещё раз:")
+
+
+@dp.message_handler(state=Change_time_betw.change_time_betw_1)
+async def change_time_betw_1_func(message: types.Message, state: FSMContext):
+    if message.chat.type == types.ChatType.PRIVATE:
+        try:
+            textsing = message.text
+            text_lines = textsing.strip().split('\n')
+            if message.text == "/cancel":
+                await message.answer(cfg.cancel_sostoyanie, parse_mode=types.ParseMode.MARKDOWN)
+                await state.reset_state()
+            else:
+                if 1 <= len(text_lines) <= 5:
+                    try:
+                        bluable = False
+                        for text_lin in text_lines:
+                            hours, minutes = text_lin.split(":")
+                            hours = int(hours)
+                            minutes = int(minutes)
+                            if 0 <= hours < 24:
+                                if 0 <= minutes < 61:
+                                    if validate_time_format(text_lin):
+                                        await Add_post.add_post_3.set()
+                                        await message.answer(cfg.create_account_post_3)
+                                        bluable = True
+                                        current_date = datetime.datetime.now()
+                                        combined_datetime = current_date.replace(hour=hours, minute=minutes, second=0, microsecond=0)
+                                        formatted_datetime = combined_datetime.strftime("%Y-%m-%d %H:%M:%S")
+                                        new_lst = []
+                                        new_lst.append(formatted_datetime)
+                                    else:
+                                        await message.answer("Формат времени не верный, отправьте время в следющем формате:\n\nПример:\n10:30\n14:30")
+                                        bluable = False
+                                        break
+                                else:
+                                    await message.answer("Вы можете поставить минуты не больше 60 и не меньше 0, попробуйте ещё раз:")
+                                    bluable = False
+                                    break
+                            else:
+                                await message.answer("Вы можете поставить часы не больше 23 и не меньше 0, попробуйте ещё раз:")
+                                bluable = False
+                                break
+                        if bluable is True:
+                            pass
+                    except Exception:
+                        pass
+                else:
+                    await message.answer(cfg.error_len_keyword_create, parse_mode=types.ParseMode.MARKDOWN)
+        except Exception:
+            await message.answer("Произошла ошибка, пожалуйста повторите ещё раз:")
+
+
+@dp.message_handler(state=Add_post.add_post_1)
+async def add_post_func_text_1(message: types.Message, state: FSMContext):
+    if message.chat.type == types.ChatType.PRIVATE:
+        try:
+            if message.text == cfg.cancel_creategroup:
+                user_id = message.from_user.id
+                markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+                markup_reply.add(cfg.autoposting)
+                markup_reply.add(cfg.parser)
+                markup_reply.row(cfg.my_profile, cfg.support)
+                if db.select_admin(user_id) > 0:
+                    markup_reply.add(cfg.admin_panel_button)
+                await message.answer(cfg.back_text, reply_markup=markup_reply)
+                await state.reset_state()
+            else:
+                if message.forward_from or message.forward_from_chat:
+                    channel_message_id = message.forward_from_message_id if message.forward_from_message_id else None
+                    channel_tag = message.forward_from_chat.username if message.forward_from_chat else None
+                    message_id_bot = message.message_id
+                    await state.update_data(forwarded_message_id=channel_message_id, channel_tag=channel_tag, message_id_bot=message_id_bot)
+                    await message.answer(cfg.create_account_post_2)
+                    await Add_post.add_post_2.set()
+                else:
+                    await message.answer("Вы должны переслать сообщение из канала, попробуйте ещё раз:")
+        except Exception:
+            await message.answer("Произошла ошибка, пожалуйста повторите ещё раз:")
+
+
+@dp.message_handler(state=Add_post.add_post_2)
+async def add_post_func_text_2(message: types.Message, state: FSMContext):
+    if message.chat.type == types.ChatType.PRIVATE:
+        try:
+            if message.text == cfg.cancel_creategroup:
+                user_id = message.from_user.id
+                markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+                markup_reply.add(cfg.autoposting)
+                markup_reply.add(cfg.parser)
+                markup_reply.row(cfg.my_profile, cfg.support)
+                if db.select_admin(user_id) > 0:
+                    markup_reply.add(cfg.admin_panel_button)
+                await message.answer(cfg.back_text, reply_markup=markup_reply)
+                await state.reset_state()
+            else:
+                hours, minutes = message.text.split(":")
+                hours = int(hours)
+                minutes = int(minutes)
+                if 0 <= hours < 24:
+                    if 0 <= minutes < 61:
+                        if validate_time_format(message.text):
+                            await Add_post.add_post_3.set()
+                            await message.answer(cfg.create_account_post_3)
+                            # current_date = datetime.datetime.now()
+                            # combined_datetime = current_date.replace(hour=hours, minute=minutes, second=0, microsecond=0)
+                            # formatted_datetime = combined_datetime.strftime("%Y-%m-%d %H:%M:%S")
+                            new_lst = []
+                            new_lst.append(message.text)
+                            await state.update_data(time_betw=new_lst)
+                        else:
+                            await message.answer("Формат времени не верный, отправьте время в следющем формате")
+                    else:
+                        await message.answer("Вы можете поставить минуты не больше 60 и не меньше 0, попробуйте ещё раз:")
+                else:
+                    await message.answer("Вы можете поставить часы не больше 23 и не меньше 0, попробуйте ещё раз:")
+        except Exception:
+            await message.answer("Произошла ошибка, пожалуйста повторите ещё раз:")
+
+@dp.message_handler(state=Add_post.add_post_3)
+async def add_post_func_text_3(message: types.Message, state: FSMContext):
+    if message.chat.type == types.ChatType.PRIVATE:
+        if message.text == cfg.cancel_creategroup:
+            user_id = message.from_user.id
+            markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+            markup_reply.add(cfg.autoposting)
+            markup_reply.add(cfg.parser)
+            markup_reply.row(cfg.my_profile, cfg.support)
+            if db.select_admin(user_id) > 0:
+                markup_reply.add(cfg.admin_panel_button)
+            await message.answer(cfg.back_text, reply_markup=markup_reply)
+            await state.reset_state()
+        else:
+            try:
+                days = int(message.text)
+                if 1 <= days <= 30:
+                    await state.update_data(days=days)
+                    await message.answer(cfg.create_account_post_4)
+                    await Add_post.add_post_4.set()
+                else:
+                    await message.answer("Вы можете написать не меньше 1 дня и не больше 30 дней, пожалуйста повторите ещё раз:")
+            except Exception:
+                await message.answer("Произошла ошибка, введите дни:")
+
+@dp.message_handler(state=Add_post.add_post_4)
+async def add_post_func_text_4(message: types.Message, state: FSMContext):
+    if message.chat.type == types.ChatType.PRIVATE:
+        try:
+            user_id = message.from_user.id
+            textsing = message.text
+            text_line = textsing.strip().split('\n')
+            text_lines = [[element + ' ⚠'] for element in text_line]
+            if message.text == cfg.cancel_creategroup:
+                user_id = message.from_user.id
+                markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+                markup_reply.add(cfg.autoposting)
+                markup_reply.add(cfg.parser)
+                markup_reply.row(cfg.my_profile, cfg.support)
+                if db.select_admin(user_id) > 0:
+                    markup_reply.add(cfg.admin_panel_button)
+                await message.answer(cfg.back_text, reply_markup=markup_reply)
+                await state.reset_state()
+            else:
+                if 2 <= len(message.text) <= 1000:
+                    if 1 <= len(text_lines) <= 10:
+                        try:
+                            channels_name_1 = []
+                            await message.answer(cfg.please_wait_add_channels_name)
+                            for channel_name in text_line:
+                                if channel_name[13] == "+":
+                                    response = requests.get(channel_name)
+                                    html_content = response.text
+                                    soup = BeautifulSoup(html_content, 'html.parser')
+                                    title_div = soup.find('div', {'class': 'tgme_page_title'})
+                                    if title_div:
+                                        group_name = title_div.get_text(strip=True)
+                                        channels_name_1.append(group_name)
+                                    else:
+                                        await message.answer(cfg.error_channel_name_add)
+                                        break
+                                elif channel_name[0] == "@":
+                                    response = requests.get(f"https://t.me/{channel_name[1:]}")
+                                    html_content = response.text
+                                    soup = BeautifulSoup(html_content, 'html.parser')
+                                    title_div = soup.find('div', {'class': 'tgme_page_title'})
+                                    if title_div:
+                                        group_name = title_div.get_text(strip=True)
+                                        channels_name_1.append(group_name)
+                                    else:
+                                        await message.answer(cfg.error_channel_name_add)
+                                        break
+                                else:
+                                    if channel_name[:8] == "https://":
+                                        response = requests.get(channel_name)
+                                    else:
+                                        response = requests.get(f"https://t.me/{channel_name}")
+                                    html_content = response.text
+                                    soup = BeautifulSoup(html_content, 'html.parser')
+                                    title_div = soup.find('div', {'class': 'tgme_page_title'})
+                                    if title_div:
+                                        group_name = title_div.get_text(strip=True)
+                                        channels_name_1.append(group_name)
+                                    else:
+                                        await message.answer(cfg.error_channel_name_add)
+                                        break
+                            if len(channels_name_1) == len(text_line):
+                                channels_name_2 = list(dict.fromkeys([element + ' ⚠' for element in channels_name_1]))
+                                check_number_post = db.check_numbers_account_post()
+                                new_number_post = check_number_post + 1
+                                data = await state.get_data()
+                                number_account = data.get("number_account")
+                                string_session = db.get_string_session(number_account)
+                                time_betw = data.get("time_betw")
+                                forwarded_message_id = data.get("forwarded_message_id")
+                                channel_tag = data.get("channel_tag")
+                                message_id_bot = data.get("message_id_bot")
+                                days = data.get("days")
+                                json_data = json.dumps(text_lines)
+                                db.add_post_account(user_id, forwarded_message_id, string_session, json_data, time_betw, new_number_post, number_account, channel_tag, message_id_bot, channels_name_2, days)
+                                markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+                                markup_reply.add(cfg.autoposting)
+                                markup_reply.add(cfg.parser)
+                                markup_reply.row(cfg.my_profile, cfg.support)
+                                if db.select_admin(user_id) > 0:
+                                    markup_reply.add(cfg.admin_panel_button)
+                                await message.answer(cfg.right_create_post, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
+                                await state.finish()
+                        except Exception as es:
+                            await state.reset_state()
+                            markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+                            markup_reply.add(cfg.autoposting)
+                            markup_reply.add(cfg.parser)
+                            markup_reply.row(cfg.my_profile, cfg.support)
+                            if db.select_admin(user_id) > 0:
+                                markup_reply.add(cfg.admin_panel_button)
+                            await message.answer(cfg.error_create_post, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
+                            print(f"[ERROR] {es}")
+                    else:
+                        await message.answer(cfg.error_len_chat_post_create, parse_mode=types.ParseMode.MARKDOWN)
+                else:
+                    await message.answer(cfg.error_len_channels, parse_mode=types.ParseMode.MARKDOWN)
+        except Exception:
+            await message.answer("Произошла ошибка, пожалуйста повторите ещё раз:")
+
+@dp.message_handler(state=Change_keyword.change_keyword_1)
+async def change_keyword_1_func(message: types.Message, state: FSMContext):
+    if message.chat.type == types.ChatType.PRIVATE:
+        try:
+            textsing = message.text
+            text_lines = textsing.strip().split('\n')
+            if message.text == "/cancel":
+                await message.answer(cfg.cancel_sostoyanie, parse_mode=types.ParseMode.MARKDOWN)
+                await state.reset_state()
+            elif message.text == cfg.cancel_button:
+                user_id = message.from_user.id
+                first_name = message.from_user.first_name
+                username = message.from_user.username
+                if (not db.check_user(user_id)):
+                    db.add_user(user_id, first_name, username)
+                markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+                markup_reply.add(cfg.autoposting)
+                markup_reply.add(cfg.parser)
+                markup_reply.row(cfg.my_profile, cfg.support)
+                if db.select_admin(user_id) > 0:
+                    markup_reply.add(cfg.admin_panel_button)
+
+                await message.answer(cfg.cancel_sostoyanie, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
+                await state.reset_state()
+            else:
+                if 2 <= len(message.text) <= 500:
+                    if 1 <= len(text_lines) <= 20:
+                        try:
+                            user_id = message.from_user.id
+                            first_name = message.from_user.first_name
+                            username = message.from_user.username
+                            if (not db.check_user(user_id)):
+                                db.add_user(user_id, first_name, username)
+                            markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+                            markup_reply.add(cfg.autoposting)
+                            markup_reply.add(cfg.parser)
+                            markup_reply.row(cfg.my_profile, cfg.support)
+                            if db.select_admin(user_id) > 0:
+                                markup_reply.add(cfg.admin_panel_button)
+                            data = await state.get_data()
+                            number_group = data.get("number_group")
+                            db.update_keywords(text_lines, number_group)
+                            group_name = db.get_group_name_number(number_group)
+                            await message.answer(cfg.correct_keyword_change(group_name), parse_mode=types.ParseMode.MARKDOWN, reply_markup=markup_reply)
+                            await state.finish()
+                        except Exception as es:
+                            await state.reset_state()
+                            user_id = message.from_user.id
+                            first_name = message.from_user.first_name
+                            username = message.from_user.username
+                            if (not db.check_user(user_id)):
+                                db.add_user(user_id, first_name, username)
+                            markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True,
+                                                                     one_time_keyboard=False)
+                            markup_reply.add(cfg.autoposting)
+                            markup_reply.add(cfg.parser)
+                            markup_reply.row(cfg.my_profile, cfg.support)
+                            if db.select_admin(user_id) > 0:
+                                markup_reply.add(cfg.admin_panel_button)
+                            await message.answer(cfg.error_change_keyword_1, parse_mode=types.ParseMode.MARKDOWN, reply_markup=markup_reply)
+                            print(f"[ERROR] {es}")
+                    else:
+                        await message.answer(cfg.error_len_keyword_create, parse_mode=types.ParseMode.MARKDOWN)
+                else:
+                    await message.answer(cfg.error_len_keyword, parse_mode=types.ParseMode.MARKDOWN)
+        except Exception:
+            await message.answer("Произошла ошибка, пожалуйста повторите ещё раз:")
+
+@dp.message_handler(state=Create_group.create_group_1)
+async def create_group_func_1(message: types.Message, state: FSMContext):
+    if message.chat.type == types.ChatType.PRIVATE:
+        try:
+            user_id = message.from_user.id
+            if message.text == cfg.cancel_creategroup:
+                markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+                markup_reply.add(cfg.autoposting)
+                markup_reply.add(cfg.parser)
+                markup_reply.row(cfg.my_profile, cfg.support)
+                if db.select_admin(user_id) > 0:
+                    markup_reply.add(cfg.admin_panel_button)
+                await state.reset_state()
+                await message.answer(cfg.cancel_creategroup_text, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
+            elif message.text:
+                if 3 <= len(message.text) <= 15:
+                    if message.text in db.select_all_group_name():
+                        await message.answer(cfg.error_name_again, parse_mode=types.ParseMode.MARKDOWN)
+                    else:
+                        await state.update_data(group_name=message.text)
+                        await message.answer(cfg.create_group_text_3, parse_mode=types.ParseMode.MARKDOWN)
+                        await Create_group.create_group_2.set()
+                else:
+                    await message.answer(cfg.error_len_name_group, parse_mode=types.ParseMode.MARKDOWN)
+        except Exception:
+            await message.answer("Произошла ошибка, пожалуйста повторите ещё раз:")
+
+@dp.callback_query_handler(state=Create_group.create_group_1)
+async def button_group_1(callback_query: types.CallbackQuery):
+    if callback_query.data is not None:
+        await callback_query.answer(cfg.error_button_create_group, show_alert=True)
+
+@dp.message_handler(state=Create_group.create_group_2)
+async def create_group_func_2(message: types.Message, state: FSMContext):
+    if message.chat.type == types.ChatType.PRIVATE:
+        try:
+            user_id = message.from_user.id
+            textsing = message.text
+            text_lines = textsing.strip().split('\n')
+            if message.text == cfg.cancel_creategroup:
+                markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+                markup_reply.add(cfg.autoposting)
+                markup_reply.add(cfg.parser)
+                markup_reply.row(cfg.my_profile, cfg.support)
+                if db.select_admin(user_id) > 0:
+                    markup_reply.add(cfg.admin_panel_button)
+                await state.reset_state()
+                await message.answer(cfg.cancel_creategroup_text, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
+            elif message.text:
+                if 2 <= len(message.text) <= 500:
+                    if 1 <= len(text_lines) <= 20:
+                        try:
+                            await state.update_data(text_lines=text_lines)
+                            await message.answer(cfg.create_group_text_4, parse_mode=types.ParseMode.MARKDOWN)
+                            await Create_group.create_group_3.set()
+                        except Exception as es:
+                            await state.reset_state()
+                            markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+                            markup_reply.add(cfg.autoposting)
+                            markup_reply.add(cfg.parser)
+                            markup_reply.row(cfg.my_profile, cfg.support)
+                            if db.select_admin(user_id) > 0:
+                                markup_reply.add(cfg.admin_panel_button)
+                            await message.answer(cfg.error_create_group, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
+                            print(f"[ERROR] {es}")
+                    else:
+                        await message.answer(cfg.error_len_keyword_create, parse_mode=types.ParseMode.MARKDOWN)
+                else:
+                    await message.answer(cfg.error_len_keyword, parse_mode=types.ParseMode.MARKDOWN)
+        except Exception:
+            await message.answer("Произошла ошибка, пожалуйста повторите ещё раз:")
+
+@dp.callback_query_handler(state=Create_group.create_group_2)
+async def button_group_2(callback_query: types.CallbackQuery):
+    if callback_query.data is not None:
+        await callback_query.answer(cfg.error_button_create_group, show_alert=True)
+
+@dp.message_handler(state=Create_group.create_group_3)
+async def create_group_func_3(message: types.Message, state: FSMContext):
+    if message.chat.type == types.ChatType.PRIVATE:
+        try:
+            user_id = message.from_user.id
+            textsing = message.text
+            text_line = textsing.strip().split('\n')
+            text_lines = list(dict.fromkeys([element + ' ⚠' for element in text_line]))
+            if message.text == cfg.cancel_creategroup:
+                markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+                markup_reply.add(cfg.autoposting)
+                markup_reply.add(cfg.parser)
+                markup_reply.row(cfg.my_profile, cfg.support)
+                if db.select_admin(user_id) > 0:
+                    markup_reply.add(cfg.admin_panel_button)
+                await state.reset_state()
+                await message.answer(cfg.cancel_creategroup_text, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
+            elif message.text:
+                if 2 <= len(message.text) <= 1000:
+                    if 5 <= len(text_lines) <= 50:
+                        try:
+                            channels_name_1 = []
+                            await message.answer(cfg.please_wait_add_channels_name)
+                            for channel_name in text_line:
+                                if channel_name[13] == "+":
+                                    response = requests.get(channel_name)
+                                    html_content = response.text
+                                    soup = BeautifulSoup(html_content, 'html.parser')
+                                    title_div = soup.find('div', {'class': 'tgme_page_title'})
+                                    if title_div:
+                                        group_name = title_div.get_text(strip=True)
+                                        channels_name_1.append(group_name)
+                                    else:
+                                        await message.answer(cfg.error_channel_name_add)
+                                        break
+                                elif channel_name[0] == "@":
+                                    response = requests.get(f"https://t.me/{channel_name[1:]}")
+                                    html_content = response.text
+                                    soup = BeautifulSoup(html_content, 'html.parser')
+                                    title_div = soup.find('div', {'class': 'tgme_page_title'})
+                                    if title_div:
+                                        group_name = title_div.get_text(strip=True)
+                                        channels_name_1.append(group_name)
+                                    else:
+                                        await message.answer(cfg.error_channel_name_add)
+                                        break
+                                else:
+                                    response = requests.get(f"https://t.me/{channel_name}")
+                                    html_content = response.text
+                                    soup = BeautifulSoup(html_content, 'html.parser')
+                                    title_div = soup.find('div', {'class': 'tgme_page_title'})
+                                    if title_div:
+                                        group_name = title_div.get_text(strip=True)
+                                        channels_name_1.append(group_name)
+                                    else:
+                                        await message.answer(cfg.error_channel_name_add)
+                                        break
+                            if len(channels_name_1) == len(text_line):
+                                channels_name_2 = list(dict.fromkeys([element + ' ⚠' for element in channels_name_1]))
+                                check_number_group = db.check_numbers_group()
+                                new_number_group = check_number_group + 1
+                                data = await state.get_data()
+                                cashe_group_name = data.get('group_name')
+                                cashe_keyword = data.get('text_lines')
+                                db.add_channels(user_id, new_number_group, cashe_keyword, text_lines, cashe_group_name, channels_name_2)
+                                markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+                                markup_reply.add(cfg.autoposting)
+                                markup_reply.add(cfg.parser)
+                                markup_reply.row(cfg.my_profile, cfg.support)
+                                if db.select_admin(user_id) > 0:
+                                    markup_reply.add(cfg.admin_panel_button)
+                                await message.answer(cfg.right_create_group, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
+                                await state.finish()
+                        except Exception as es:
+                            await state.reset_state()
+                            markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+                            markup_reply.add(cfg.autoposting)
+                            markup_reply.add(cfg.parser)
+                            markup_reply.row(cfg.my_profile, cfg.support)
+                            if db.select_admin(user_id) > 0:
+                                markup_reply.add(cfg.admin_panel_button)
+                            await message.answer(cfg.error_create_group, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
+                            print(f"[ERROR] {es}")
+                    else:
+                        await message.answer(cfg.error_len_channels_create, parse_mode=types.ParseMode.MARKDOWN)
+                else:
+                    await message.answer(cfg.error_len_channels, parse_mode=types.ParseMode.MARKDOWN)
+        except Exception:
+            await message.answer("Произошла ошибка, пожалуйста повторите ещё раз:")
+
+@dp.callback_query_handler(state=Create_group.create_group_3)
+async def button_group_2(callback_query: types.CallbackQuery):
+    if callback_query.data is not None:
+        await callback_query.answer(cfg.error_button_create_group, show_alert=True)
+
+@dp.message_handler(state=Add_chat_ids.panel_adm)
+async def panel_adm(message: types.Message, state: FSMContext):
+    try:
+        if message.text == cfg.back_button:
+            markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+            markup_reply.add(cfg.autoposting)
+            markup_reply.add(cfg.parser)
+            markup_reply.row(cfg.my_profile, cfg.support)
+            markup_reply.add(cfg.admin_panel_button)
+            await message.answer(cfg.panel_admin_back_text, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
+            await state.reset_state()
+        elif message.text == cfg.add_chat_id_button:
+            markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
+            markup_reply.add(cfg.back_button)
+            await message.answer(cfg.write_number_group_text, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
+            await Add_chat_ids.add_ids_1.set()
+        else:
+            await message.answer(cfg.error_text_in_state_panel, parse_mode=types.ParseMode.MARKDOWN)
+    except Exception:
+        await message.answer("Произошла ошибка, пожалуйста повторите ещё раз:")
+
+@dp.message_handler(state=Add_chat_ids.add_ids_1)
+async def add_chat_ids_num_1(message: types.Message, state: FSMContext):
+    try:
+        if message.text == cfg.back_button:
+            markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
+            markup_reply.add(cfg.add_chat_id_button, cfg.back_button)
+            await message.answer(cfg.cancel_add_ids, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
+            await Add_chat_ids.panel_adm.set()
+        else:
+            try:
+                message_text = int(message.text)
+                await state.update_data(number_group=message_text)
+                await message.answer(cfg.write_chat_ids_text, parse_mode=types.ParseMode.MARKDOWN)
+                await Add_chat_ids.add_ids_2.set()
+            except Exception as err:
+                await message.answer(cfg.error_write_number_group_text, parse_mode=types.ParseMode.MARKDOWN)
+                await Add_chat_ids.add_ids_1.set()
+    except Exception:
+        await message.answer("Произошла ошибка, пожалуйста повторите ещё раз:")
+
+@dp.message_handler(state=Add_chat_ids.add_ids_2)
+async def add_chat_ids_num_2(message: types.Message, state: FSMContext):
+    try:
+        if message.text == cfg.back_button:
+            markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
+            markup_reply.add(cfg.add_chat_id_button, cfg.back_button)
+            await message.answer(cfg.cancel_add_ids, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
+            await Add_chat_ids.panel_adm.set()
+        else:
+            markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
+            markup_reply.add(cfg.add_chat_id_button, cfg.back_button)
+            textsing = message.text
+            text_lines = textsing.strip().split('\n')
+            new_lst = []
+            data = await state.get_data()
+            number_group = data.get("number_group")
+            for lines in text_lines:
+                try:
+                    int(lines[3:])
+                    new_lst.append(lines)
+                    all_channels = db.select_channels_with_number(number_group)
+                    channels_link = [item for item in all_channels if len(item) >= 13 and item[13] == '+']
+                    index = int(lines.split(')')[0]) - 1
+                    channels_link[index] = channels_link[index].replace("⏳", "✅")
+                    owner_lst = [next((full_word for full_word in channels_link if full_word[:-2] == word[:-2]), word) for word in all_channels]
+                    db.update_all_channels(number_group, owner_lst)
+                except Exception:
+                    await message.answer(cfg.error_add_ids, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
+                    await Add_chat_ids.panel_adm.set()
+            all_channels = db.select_channels_with_number(number_group)
+            for channel_name in all_channels:
+                if channel_name[-1] == "✅":
+                    index_channel = all_channels.index(channel_name)
+                    all_channels_name = db.select_channels_name_with_number(number_group)
+                    group_name = all_channels_name[index_channel]
+                    new_callback_name = group_name[:-1] + "✅"
+                    new_channels_name = [new_callback_name if item == group_name else item for item in all_channels_name]
+                    db.update_all_channels_name(number_group, new_channels_name)
+            old_chat_list = db.select_chat_ids(number_group) or []
+            new_lst = old_chat_list + new_lst
+            db.add_chat_ids(int(number_group), new_lst)
+            await message.answer(cfg.correct_add_chat_ids, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
+            await Add_chat_ids.panel_adm.set()
+    except Exception:
+        await message.answer("Произошла ошибка, пожалуйста повторите ещё раз:")
+@dp.message_handler(state=Create_account_autoposting.create_autoposting_1)
+async def process_phone(message: types.Message, state: FSMContext):
+    try:
+        user_id = message.from_user.id
+        markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+        markup_reply.add(cfg.autoposting)
+        markup_reply.add(cfg.parser)
+        markup_reply.row(cfg.my_profile, cfg.support)
+        await client.connect()
+        if db.select_admin(user_id) > 0:
+            markup_reply.add(cfg.admin_panel_button)
+        if message.text == cfg.cancel_creategroup:
+            await message.answer(cfg.back_text, reply_markup=markup_reply)
+            await state.reset_state()
+        else:
+            if db.get_states_sms(user_id) == 1:
+                phone = message.text
+                if not client.is_connected():
+                    await client.connect()
+
+                try:
+                    result = await client.send_code_request(phone)
+                    phone_code_hash = result.phone_code_hash
+                    await state.update_data(phone=phone)
+                    await state.update_data(phone_code_hash=phone_code_hash)
+                    db.update_states_sms(user_id, 2)
+                    await message.reply("Теперь отправьте код, который вы получили от Telegram.\n\nВажно! Пожалуйста, НЕ присылай мне код как есть (иначе он сразу перестанет действовать). Пришли мне его, разделив цифры пробелами. Например, 123 45 или 1 2345, где 12345 - это сам код, который ты получил от Телеграма.")
+                except Exception as e:
+                    logging.error(f"Ошибка при отправке кода: {e}")
+                    await message.reply("Произошла ошибка при отправке кода, пожалуйста, попробуйте еще раз ввести номер телефона:")
+            elif db.get_states_sms(user_id) == 2:
+                code_spaces = message.text
+                code = code_spaces.replace(" ", "")
+                data = await state.get_data()
+                phone = data.get("phone")
+                phone_code_hash = data.get("phone_code_hash")
+                try:
+                    int(code)
+                    await client.sign_in(phone, int(code), phone_code_hash=phone_code_hash)
+                    string_session = client.session.save()
+                    await state.update_data(string_session=string_session)
+                    await Create_account_autoposting.create_autoposting_2.set()
+                    await message.reply(cfg.create_account_autoposting_3)
+                except SessionPasswordNeededError:
+                    db.update_states_sms(user_id, 3)
+                    await message.reply("Требуется пароль для двухфакторной аутентификации. Введите его здесь:")
+                except PhoneCodeExpiredError:
+                    await message.reply("Код подтверждения истек. Попробуйте начать заново.", reply_markup=markup_reply)
+                    await state.finish()
+                except PhoneNumberUnoccupiedError:
+                    await message.reply("Этот номер телефона не зарегистрирован в Telegram.", reply_markup=markup_reply)
+                    await state.finish()
+                except ValueError:
+                    await message.answer("Произошла ошибка! Код должен состоять исключительно из цифр, пожалуйста повторите попытку:")
+                except Exception as e:
+                    await message.reply(f"Произошла ошибка: {str(e)}", reply_markup=markup_reply)
+                    await state.finish()
+            elif db.get_states_sms(user_id) == 3:
+                password = message.text
+                try:
+                    await client.sign_in(password=password)
+                    string_session = client.session.save()
+                    await Create_account_autoposting.create_autoposting_2.set()
+                    await state.update_data(string_session=string_session)
+                    await message.answer(cfg.create_account_autoposting_3)
+                except Exception as e:
+                    await message.reply(str(e), reply_markup=markup_reply)
+                    await state.finish()
+    except Exception:
+        await message.answer("Произошла ошибка, пожалуйста повторите ещё раз:")
+
+@dp.message_handler(state=Create_account_autoposting.create_autoposting_2)
+async def group_name_autoposting(message: types.Message, state: FSMContext):
+    if message.chat.type == types.ChatType.PRIVATE:
+        try:
+            user_id = message.from_user.id
+            if message.text == cfg.cancel_creategroup:
+                markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+                markup_reply.add(cfg.autoposting)
+                markup_reply.add(cfg.parser)
+                markup_reply.row(cfg.my_profile, cfg.support)
+                if db.select_admin(user_id) > 0:
+                    markup_reply.add(cfg.admin_panel_button)
+                await message.answer(cfg.back_text, reply_markup=markup_reply)
+                await state.reset_state()
+            else:
+                if 3 <= len(message.text) <= 15:
+                    user_id = message.from_user.id
+                    first_name = message.from_user.first_name
+                    username = message.from_user.username
+                    if (not db.check_user(user_id)):
+                        db.add_user(user_id, first_name, username)
+                    markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+                    markup_reply.add(cfg.autoposting)
+                    markup_reply.add(cfg.parser)
+                    markup_reply.row(cfg.my_profile, cfg.support)
+                    data = await state.get_data()
+                    phone = data.get('phone')
+                    string_session = data.get('string_session')
+                    group_name = message.text
+                    check_number_group = db.check_numbers_account_autoposting()
+                    new_number_group = check_number_group + 1
+                    db.add_autoposting_account(user_id, new_number_group, phone, string_session, group_name)
+                    await message.answer(cfg.create_account_right, reply_markup=markup_reply)
+                    await state.finish()
+                else:
+                    await message.answer("Минимальная длина названия аккаунта, должна быть 3, максимальная 15, попробуйте ещё раз:")
+        except Exception:
+            await message.answer("Произошла ошибка, пожалуйста повторите ещё раз:")
 
 
 @dp.message_handler()
 async def other(message: types.Message):
     if message.chat.type == types.ChatType.PRIVATE:
-        if message.text == cfg.my_profile:
-            await profile(message)
-        elif message.text == cfg.support:
-            await supports_send(message)
-        elif message.text == cfg.parser:
-            await parsers_send(message)
-        elif message.text == cfg.autoposting:
-            await autoposting_send(message)
-        elif message.text == cfg.admin_panel_button:
-            await panel_administration(message)
-        else:
-            await message.answer(cfg.unknown_command_text)
+        try:
+            if message.text == cfg.my_profile:
+                await profile(message)
+            elif message.text == cfg.support:
+                await supports_send(message)
+            elif message.text == cfg.parser:
+                await parsers_send(message)
+            elif message.text == cfg.autoposting:
+                await autoposting_send(message)
+            elif message.text == cfg.admin_panel_button:
+                await panel_administration(message)
+            else:
+                await message.answer(cfg.unknown_command_text)
+        except Exception:
+            await message.answer("Произошла ошибка, пожалуйста повторите ещё раз:")
 
 
 async def on_startup(_):
