@@ -309,7 +309,8 @@ async def autoposting_forward():
                                 new_channels = [formatted_date_new if item == date_bet else item for item in chat_id]
                                 chat_idln = db.select_chats_account_with_number_autoposting(number_group)
                                 new_updates = [new_channels if item == chat_id else item for item in chat_idln]
-                                db.update_chat_idn_autoposting(new_updates, number_group)
+                                json_data = json.dumps(new_updates)
+                                db.update_chat_idn_autoposting(json_data, number_group)
             else:
                 db.delete_data_end_post(number_group)
                 formated_chat_idn = [s.replace('✅', '⚠') for s in chat_idn]
