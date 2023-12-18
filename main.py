@@ -181,13 +181,13 @@ async def search_and_forward_close_group():
                 continue
 
             group = groups[num]
-            user_id, chat_ids, keywords, channelss_link, data_end, group_name, channels_name = group[0], group[8], group[5], group[2], group[3], group[4], group[7]
+            user_id, chat_ids, keywords, channelss_link, data_end, group_name, channels_name = group[0], group[8] or [], group[5], group[2], group[3], group[4], group[7]
             channels_link = [item for item in channelss_link if len(item) >= 13 and item[13] == '+']
             number_group = group[1]
             current_date = datetime.datetime.now()
             formated_base = datetime.datetime.strptime(data_end, "%Y-%m-%d %H:%M:%S")
             if formated_base > current_date:
-                if chat_ids is not None:
+                if chat_ids != []:
                     for chat_id_name in channels_name:
                         for chat_id in chat_ids:
                             index_chat_id = int(chat_id[0][0])
@@ -987,7 +987,8 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                                 new_callback_name = group_name[:-1] + "✅"
                                 new_channels_name = [new_callback_name if item == group_name else item for item in all_channels_name]
                                 db.update_all_channels_name(number_group_parser, new_channels_name)
-                    await check_private_channel(new_chan, user_id, number_group_parser)
+                    if c_unmatched != []:
+                        await check_private_channel(c_unmatched, user_id, number_group_parser)
                     await state.finish()
                     await callback_query.message.delete()
                     await callback_query.message.answer(text=cfg.tariffe_correct(group_name_parser, channels_len, formatted_date_new), reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
