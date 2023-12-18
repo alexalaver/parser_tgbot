@@ -952,26 +952,27 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     channels_id = [item for sublist in channels_id if sublist[0] for item in sublist[0]]
                     cleaned_a = [link.split(' ⏳')[0] for link in channels_link]
 
-                    c_corrected = []
+                    c_final = []
                     index = 1
+
                     valuable = False
                     for link in cleaned_a:
                         for item in channels_id:
                             if item[1] == link:
-                                c_corrected.append([f"{index}) {item[0].split(')')[1]}, '{item[1]}'"])
+                                c_final.append([f"{index}) {item[0].split(')')[1]}", item[1]])
                                 index += 1
                                 valuable = True
                                 break
 
                     if valuable is True:
-                        for new_lst_with_ids in c_corrected:
+                        for new_lst_with_ids in c_final:
                             all_channels = db.select_channels_with_number(number_group_parser)
                             channels_link = [item for item in all_channels if len(item) >= 13 and item[13] == '+']
                             index = int(new_lst_with_ids[0][0]) - 1
                             channels_link[index] = channels_link[index].replace("⏳", "✅")
                             owner_lst = [next((full_word for full_word in channels_link if full_word[:-2] == word[:-2]), word) for word in all_channels]
                             db.update_all_channels(number_group_parser, owner_lst)
-                            db.add_chat_ids(int(number_group_parser), c_corrected)
+                            db.add_chat_ids(int(number_group_parser), c_final)
                         all_channels = db.select_channels_with_number(number_group_parser)
                         for channel_name in all_channels:
                             if channel_name[-1] == "✅":
