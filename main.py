@@ -2151,14 +2151,14 @@ async def add_chat_ids_num_2(message: types.Message, state: FSMContext):
         new_list_all = []
         old_chat_list = db.select_chat_ids(number_group) or []
         new_lstss = []
-        new_lstss = old_chat_list + new_lst
         channels_pars = db.select_channels_number_group(number_group)
         channels_link_parser = [item for item in channels_pars if len(item) >= 13 and item[13] == '+']
-        for ownn_lst in new_lstss:
+        for ownn_lst in new_lst:
             index = int(ownn_lst[0])
             link_id_lst = [ownn_lst, channels_link_parser[index]]
             new_list_all.append(link_id_lst)
-        db.add_chat_ids(int(number_group), new_list_all)
+        new_lstss = old_chat_list + new_list_all
+        db.add_chat_ids(int(number_group), new_lstss)
         await message.answer(cfg.correct_add_chat_ids, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
         await Add_chat_ids.panel_adm.set()
 @dp.message_handler(state=Create_account_autoposting.create_autoposting_1)
