@@ -49,16 +49,9 @@
 #
 # print(result)
 
-data = [([['2) -4024273668', 'https://t.me/+kaLhqGj2EHg3NjFi'], ['1) -4066133079', 'https://t.me/+OF5wBCw4OTsxZjMy']],), (None,)]
+data = [([['2) -4024273668', 'https://t.me/+kaLhqGj2EHg3NjFi'], ['1) -4066133079', 'https://t.me/+OF5wBCw4OTsxZjMy']],), ([['3) -4024273668', 'https://t.me/+kaLhqGj2EHg3NjFi'], ['5) -4066133079', 'https://t.me/+OF5wBCw4OTsxZjMy']],),]
 
-# Результирующий список
-result = []
+# Использование спискового включения для создания одного плоского списка
+flat_list = [item for sublist in data for item in sublist[0]]
 
-# Проход по каждому элементу в исходных данных
-for element in data:
-    if element:  # Проверка на None
-        for subelement in element:
-            if subelement:  # Проверка на None в подэлементе
-                result.append(subelement)
-
-print(result)
+print(flat_list)
