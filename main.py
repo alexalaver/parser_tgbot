@@ -953,7 +953,6 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     index = 0
                     lst_with_id = []
                     lst_id = []
-                    print(channels_id)
                     valuable = False
                     print(channels_id)
                     print(channels_link)
@@ -961,15 +960,17 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                         for channel_id in channels_id:
                             for channel_link in channels_link:
                                 if channel_id[1] == channel_link[:-2]:
-                                    channel_id[0] = str(index)
-                                    lst_id.append(channel_id)
-                                    lst_with_id.append(channel_id)
-                                    valuable = True
+                                    parts = channel_id[0].split(') ')
+                                    if len(parts) == 2:
+                                        new_id = f'{index}) {parts[1]}'
+                                        lst_id.append([new_id, channel_id[1]])
+                                        lst_with_id.append([new_id, channel_id[1]])
+                                        valuable = True
                                 index += 1
                     print(lst_id)
                     print(lst_with_id)
                     new_lst = []
-                    if channels_id is True:
+                    if valuable is True:
                         for new_lst_with_ids in lst_with_id:
                             new_lst.append(new_lst_with_ids)
                             all_channels = db.select_channels_with_number(number_group_parser)
