@@ -55,12 +55,8 @@ async def check_for_new_channels(current_count):
     return new_count != current_count
 
 async def check_private_channel(channels, user_id, number_group):
-    channels_link = [item for item in channels if len(item) >= 13 and item[13] == '+']
-    if channels_link is None:
-        pass
-    else:
-        for adm_id in cfg.admin_id:
-            await bot.send_message(adm_id, f"{fnc.nick_with_link('Пользователь', user_id)}, добавил закрытые чаты, вам необходимо подписаться на них.\n\n{channels_link}\n\nНомер группы - {str(number_group)}", parse_mode=types.ParseMode.MARKDOWN)
+    for adm_id in cfg.admin_id:
+        await bot.send_message(adm_id, f"{fnc.nick_with_link('Пользователь', user_id)}, добавил закрытые чаты, вам необходимо подписаться на них.\n\n{channels}\n\nНомер группы - {str(number_group)}", parse_mode=types.ParseMode.MARKDOWN)
 
 async def check_keywords_len(keywords, num):
     groups = db.select_all_channels_group()
@@ -957,7 +953,6 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     c_unmatched = []
                     index = 1
                     valuable = False
-
                     for link in cleaned_a_updated:
                         matched = False
                         for item in channels_id:
