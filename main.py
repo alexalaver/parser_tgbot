@@ -947,6 +947,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                                 new_channels_name = [new_callback_name if item[:-2] == group_name else item for item in all_channels_name_parser]
                                 db.update_all_channels_name(number_group_parser, new_channels_name)
                     channels_id = db.select_channels_id_parser()
+                    print(channels_id)
                     all_channels = db.select_channels_with_number(number_group_parser)
                     channels_link = [item for item in all_channels if len(item) >= 13 and item[13] == '+']
                     new_lst_id = []
