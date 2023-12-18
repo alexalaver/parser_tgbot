@@ -1993,7 +1993,7 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                 await message.answer(cfg.cancel_creategroup_text, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
             elif message.text:
                 if 2 <= len(message.text) <= 1000:
-                    if 5 <= len(text_lines) <= 50:
+                    if 1 <= len(text_lines) <= 50:
                         try:
                             channels_name_1 = []
                             await message.answer(cfg.please_wait_add_channels_name)
