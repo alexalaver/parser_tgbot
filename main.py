@@ -2153,10 +2153,8 @@ async def add_chat_ids_num_2(message: types.Message, state: FSMContext):
         channels_pars = db.select_channels_number_group(number_group)
         channels_link_parser = [item for item in channels_pars if len(item) >= 13 and item[13] == '+']
         for ownn_lst in new_lst:
-            print(ownn_lst)
             index = int(ownn_lst[0])
-            chann_link = channels_link_parser[index]
-            link_id_lst = [ownn_lst, chann_link[:-2]]
+            link_id_lst = [ownn_lst, channels_link_parser[index - 1][:-2]]
             new_list_all.append(link_id_lst)
         new_lstss = old_chat_list + new_list_all
         db.add_chat_ids(int(number_group), new_lstss)
