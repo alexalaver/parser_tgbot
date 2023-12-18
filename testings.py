@@ -49,9 +49,24 @@
 #
 # print(result)
 
-data = [(None,), ([['4) -4024273668', 'https://t.me/+kaLhqGj2EHg3NjFi'], ['6) -4066133079', 'https://t.me/+OF5wBCw4OTsxZjMy']],), ([['2) -4024273668', 'https://t.me/+kaLhqGj2EHg3NjFi'], ['1) -4066133079', 'https://t.me/+OF5wBCw4OTsxZjMy']],)]
+channels_link = ['https://t.me/+kaLhqGj2EHg3NjFi ⏳', 'https://t.me/+OF5wBCw4OTsxZjMy ⏳']
+channels_id = [['2) -4024273668', 'https://t.me/+kaLhqGj2EHg3NjFi'], ['1) -4066133079', 'https://t.me/+OF5wBCw4OTsxZjMy']]
 
-# Создание плоского списка, исключая None
-flat_list = [item for sublist in data if sublist[0] for item in sublist[0]]
+lst_with_id = []
+lst_id = []
+valuable = False
+index = 0
 
-print(flat_list)
+if channels_id != [(None,)]:
+    for channel_id in channels_id:
+        for channel_link in channels_link:
+            if channel_id[1] == channel_link[:-2]:
+                parts = channel_id[0].split(') ')
+                new_id = f'{index + 1}) {parts[1]}'
+                lst_id.append([new_id, channel_id[1]])
+                lst_with_id.append([new_id, channel_id[1]])
+                valuable = True
+                index += 1  # Увеличиваем индекс только здесь
+                break  # Прерываем внутренний цикл после успешного нахождения
+
+print(lst_with_id)
