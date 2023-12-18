@@ -2113,53 +2113,57 @@ async def add_chat_ids_num_1(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=Add_chat_ids.add_ids_2)
 async def add_chat_ids_num_2(message: types.Message, state: FSMContext):
-    if message.text == cfg.back_button:
-        markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
-        markup_reply.add(cfg.add_chat_id_button, cfg.back_button)
-        await message.answer(cfg.cancel_add_ids, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
-        await Add_chat_ids.panel_adm.set()
-    else:
-        markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
-        markup_reply.add(cfg.add_chat_id_button, cfg.back_button)
-        textsing = message.text
-        text_lines = textsing.strip().split('\n')
-        new_lst = []
-        data = await state.get_data()
-        number_group = data.get("number_group")
-        for lines in text_lines:
-            try:
-                int(lines[3:])
-                new_lst.append(lines)
-                all_channels = db.select_channels_with_number(number_group)
-                channels_link = [item for item in all_channels if len(item) >= 13 and item[13] == '+']
-                index = int(lines.split(')')[0]) - 1
-                channels_link[index] = channels_link[index].replace("⏳", "✅")
-                owner_lst = [next((full_word for full_word in channels_link if full_word[:-2] == word[:-2]), word) for word in all_channels]
-                db.update_all_channels(number_group, owner_lst)
-            except Exception:
-                await message.answer(cfg.error_add_ids, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
-                await Add_chat_ids.panel_adm.set()
-        all_channels = db.select_channels_with_number(number_group)
-        for channel_name in all_channels:
-            if channel_name[-1] == "✅":
-                index_channel = all_channels.index(channel_name)
-                all_channels_name = db.select_channels_name_with_number(number_group)
-                group_name = all_channels_name[index_channel]
-                new_callback_name = group_name[:-1] + "✅"
-                new_channels_name = [new_callback_name if item == group_name else item for item in all_channels_name]
-                db.update_all_channels_name(number_group, new_channels_name)
-        new_list_all = []
-        old_chat_list = db.select_chat_ids(number_group) or []
-        channels_pars = db.select_channels_number_group(number_group)
-        channels_link_parser = [item for item in channels_pars if len(item) >= 13 and item[13] == '+']
-        for ownn_lst in new_lst:
-            index = int(ownn_lst[0])
-            link_id_lst = [ownn_lst, channels_link_parser[index - 1][:-2]]
-            new_list_all.append(link_id_lst)
-        new_lstss = old_chat_list + new_list_all
-        db.add_chat_ids(int(number_group), new_lstss)
-        await message.answer(cfg.correct_add_chat_ids, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
-        await Add_chat_ids.panel_adm.set()
+    try:
+        if message.text == cfg.back_button:
+            markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
+            markup_reply.add(cfg.add_chat_id_button, cfg.back_button)
+            await message.answer(cfg.cancel_add_ids, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
+            await Add_chat_ids.panel_adm.set()
+        else:
+            markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
+            markup_reply.add(cfg.add_chat_id_button, cfg.back_button)
+            textsing = message.text
+            text_lines = textsing.strip().split('\n')
+            new_lst = []
+            data = await state.get_data()
+            number_group = data.get("number_group")
+            for lines in text_lines:
+                try:
+                    int(lines[3:])
+                    new_lst.append(lines)
+                    all_channels = db.select_channels_with_number(number_group)
+                    channels_link = [item for item in all_channels if len(item) >= 13 and item[13] == '+']
+                    index = int(lines.split(')')[0]) - 1
+                    channels_link[index] = channels_link[index].replace("⏳", "✅")
+                    owner_lst = [next((full_word for full_word in channels_link if full_word[:-2] == word[:-2]), word) for word in all_channels]
+                    db.update_all_channels(number_group, owner_lst)
+                except Exception:
+                    await message.answer(cfg.error_add_ids, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
+                    await Add_chat_ids.panel_adm.set()
+            all_channels = db.select_channels_with_number(number_group)
+            for channel_name in all_channels:
+                if channel_name[-1] == "✅":
+                    index_channel = all_channels.index(channel_name)
+                    all_channels_name = db.select_channels_name_with_number(number_group)
+                    group_name = all_channels_name[index_channel]
+                    new_callback_name = group_name[:-1] + "✅"
+                    new_channels_name = [new_callback_name if item == group_name else item for item in all_channels_name]
+                    db.update_all_channels_name(number_group, new_channels_name)
+            new_list_all = []
+            old_chat_list = db.select_chat_ids(number_group) or []
+            channels_pars = db.select_channels_number_group(number_group)
+            channels_link_parser = [item for item in channels_pars if len(item) >= 13 and item[13] == '+']
+            for ownn_lst in new_lst:
+                index = int(ownn_lst[0])
+                link_id_lst = [ownn_lst, channels_link_parser[index - 1][:-2]]
+                new_list_all.append(link_id_lst)
+            new_lstss = old_chat_list + new_list_all
+            db.add_chat_ids(int(number_group), new_lstss)
+            await message.answer(cfg.correct_add_chat_ids, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
+            await Add_chat_ids.panel_adm.set()
+    except Exception:
+        await message.answer("Произошла ошибка, попробуйте ещё раз:")
+
 @dp.message_handler(state=Create_account_autoposting.create_autoposting_1)
 async def process_phone(message: types.Message, state: FSMContext):
     try:
