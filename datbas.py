@@ -576,7 +576,4 @@ class Data:
         with self.connect:
             self.cursor.execute("SELECT channels_id FROM groups")
             a = self.cursor.fetchall()
-            if a is None:
-                return []
-            else:
-                return a
+            return a
