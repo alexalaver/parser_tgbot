@@ -957,6 +957,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     c_unmatched = []
                     index = 1
                     valuable = False
+
                     for link in cleaned_a_updated:
                         matched = False
                         for item in channels_id:
