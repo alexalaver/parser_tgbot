@@ -952,13 +952,14 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     new_lst_id = []
                     new_lst_with_id = []
                     channels_id = [item for sublist in channels_id if sublist[0] for item in sublist[0]]
+                    index = 0
                     if channels_id != [(None,)]:
                         for channel_id in channels_id:
                             for channel_link in channels_link:
-                                index = 0
                                 if channel_id[1] == channel_link[:-2]:
-                                    lst_id = [f"{index}) {channel_id}", channel_link[:-2]]
-                                    lst_with_id = [f"{index}) {channel_id}"]
+                                    channel_id[0] = index
+                                    lst_id = [channel_id]
+                                    lst_with_id = [channel_id]
                                     new_lst_with_id.append(lst_with_id)
                                     new_lst_id.append(lst_id)
                                 index += 1
