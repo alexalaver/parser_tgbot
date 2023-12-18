@@ -950,42 +950,29 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     all_channels = db.select_channels_with_number(number_group_parser)
                     channels_link = [item for item in all_channels if len(item) >= 13 and item[13] == '+']
                     channels_id = [item for sublist in channels_id if sublist[0] for item in sublist[0]]
-                    index = 0
-                    lst_with_id = []
-                    lst_id = []
-                    print(channels_link)
-                    print(channels_id)
-                    valuable = False
-                    if channels_id != [(None,)]:
-                        for channel_id in channels_id:
-                            for channel_link in channels_link:
-                                if channel_id[1] != lst_with_id[index][1]:
-                                    if channel_id[1] == channel_link[:-2]:
-                                        parts = channel_id[0].split(') ')
-                                        new_id = f'{index + 1}) {parts[1]}'
-                                        lst_id.append([new_id, channel_id[1]])
-                                        lst_with_id.append([new_id, channel_id[1]])
-                                        valuable = True
-                                        index += 1
-                                        break
-                                    else:
-                                        index = 0
-                                else:
-                                    index = 0
+                    cleaned_a = [link.split(' ⏳')[0] for link in channels_link]
 
-                    print(lst_id)
-                    print(lst_with_id)
-                    new_lst = []
+                    c = []
+                    seen_ids = set()
+
+                    valuable = False
+                    for link in cleaned_a:
+                        for item in channels_id:
+                            if item[1] == link and item[0] not in seen_ids:
+                                c.append(f"{item[0]}, '{item[1]}'")
+                                seen_ids.add(item[0])
+                                valuable = True
+                                break
+
                     if valuable is True:
-                        for new_lst_with_ids in lst_with_id:
-                            new_lst.append(new_lst_with_ids)
+                        for new_lst_with_ids in c:
                             all_channels = db.select_channels_with_number(number_group_parser)
                             channels_link = [item for item in all_channels if len(item) >= 13 and item[13] == '+']
                             index = int(new_lst_with_ids[0][0]) - 1
                             channels_link[index] = channels_link[index].replace("⏳", "✅")
                             owner_lst = [next((full_word for full_word in channels_link if full_word[:-2] == word[:-2]), word) for word in all_channels]
                             db.update_all_channels(number_group_parser, owner_lst)
-                            db.add_chat_ids(int(number_group_parser), lst_with_id)
+                            db.add_chat_ids(int(number_group_parser), c)
                         all_channels = db.select_channels_with_number(number_group_parser)
                         for channel_name in all_channels:
                             if channel_name[-1] == "✅":
