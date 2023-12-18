@@ -49,9 +49,9 @@
 #
 # print(result)
 
-data = [([['2) -4024273668', 'https://t.me/+kaLhqGj2EHg3NjFi'], ['1) -4066133079', 'https://t.me/+OF5wBCw4OTsxZjMy']],), ([['3) -4024273668', 'https://t.me/+kaLhqGj2EHg3NjFi'], ['5) -4066133079', 'https://t.me/+OF5wBCw4OTsxZjMy']],),]
+data = [(None,), ([['4) -4024273668', 'https://t.me/+kaLhqGj2EHg3NjFi'], ['6) -4066133079', 'https://t.me/+OF5wBCw4OTsxZjMy']],), ([['2) -4024273668', 'https://t.me/+kaLhqGj2EHg3NjFi'], ['1) -4066133079', 'https://t.me/+OF5wBCw4OTsxZjMy']],)]
 
-# Использование спискового включения для создания одного плоского списка
-flat_list = [item for sublist in data for item in sublist[0]]
+# Создание плоского списка, исключая None
+flat_list = [item for sublist in data if sublist[0] for item in sublist[0]]
 
 print(flat_list)
