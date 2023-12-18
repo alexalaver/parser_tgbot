@@ -49,22 +49,16 @@
 #
 # print(result)
 
-a = [
-    ["https://t.me/testonepublic ❌", "2023-12-17 15:28:00", "2023-12-17 19:20:00"],
-    ["https://t.me/testtwopublic ✅", "2023-12-17 15:28:00"],
-    ["https://t.me/testthreepublic ✅", "2023-12-17 15:28:00"],
-    ["https://t.me/+kaLhqGj2EHg3NjFi ❌", "2023-12-17 15:28:00", "2023-12-17 19:20:00"]
-]
+data = [([['2) -4024273668', 'https://t.me/+kaLhqGj2EHg3NjFi'], ['1) -4066133079', 'https://t.me/+OF5wBCw4OTsxZjMy']],), (None,)]
 
-b = "15:28"
-c = "https://t.me/+kaLhqGj2EHg3NjFi ❌"
+# Результирующий список
+result = []
 
-# Step 1: Find the sublist where the first element is equal to c
-sublist = next((sub for sub in a if sub[0] == c), None)
+# Проход по каждому элементу в исходных данных
+for element in data:
+    if element:  # Проверка на None
+        for subelement in element:
+            if subelement:  # Проверка на None в подэлементе
+                result.append(subelement)
 
-# Step 2: Remove times from the sublist that match b
-if sublist:
-    updated_sublist = [sublist[0]] + [time for time in sublist[1:] if time.split()[1][:5] != b]
-    a = [updated_sublist if sub[0] == c else sub for sub in a]
-
-print(a)
+print(result)
