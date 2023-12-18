@@ -958,8 +958,8 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                             for channel_link in channels_link:
                                 if channel_id[1] == channel_link[:-2]:
                                     channel_id[0] = index
-                                    lst_id = [channel_id]
-                                    lst_with_id = [channel_id]
+                                    lst_id.append(channel_id)
+                                    lst_with_id.append(channel_id)
                                 index += 1
                     print(lst_with_id)
                     print(lst_id)
