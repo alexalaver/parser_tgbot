@@ -181,7 +181,7 @@ async def search_and_forward_close_group():
                 continue
 
             group = groups[num]
-            user_id, chat_ids, keywords, channelss_link, data_end, group_name, channels_name = group[0], group[7], group[5], group[2], group[3], group[4], group[8]
+            user_id, chat_ids, keywords, channelss_link, data_end, group_name, channels_name = group[0], group[8], group[5], group[2], group[3], group[4], group[7]
             channels_link = [item for item in channelss_link if len(item) >= 13 and item[13] == '+']
             number_group = group[1]
             current_date = datetime.datetime.now()
@@ -190,11 +190,11 @@ async def search_and_forward_close_group():
                 if chat_ids is not None:
                     for chat_id_name in channels_name:
                         for chat_id in chat_ids:
-                            index_chat_id = int(chat_id[0])
+                            index_chat_id = int(chat_id[0][0])
                             links_1 = channels_link[index_chat_id - 1]
                             links_2 = links_1[-1]
                             if links_2 == "✅":
-                                trimmed_chat_ids = int(chat_id[3:])
+                                trimmed_chat_ids = int(chat_id[0][3:])
                                 exception_occurred = False
                                 messages_sent = db.select_message_id(number_group)
                                 try:
@@ -2149,9 +2149,16 @@ async def add_chat_ids_num_2(message: types.Message, state: FSMContext):
                     new_callback_name = group_name[:-1] + "✅"
                     new_channels_name = [new_callback_name if item == group_name else item for item in all_channels_name]
                     db.update_all_channels_name(number_group, new_channels_name)
+            new_list_all = []
             old_chat_list = db.select_chat_ids(number_group) or []
             new_lst = old_chat_list + new_lst
-            db.add_chat_ids(int(number_group), new_lst)
+            channels_pars = db.select_channels_number_group(number_group)
+            channels_link_parser = [item for item in channels_pars if len(item) >= 13 and item[13] == '+']
+            for ownn_lst in new_lst:
+                index = int(ownn_lst[0])
+                link_id_lst = [ownn_lst, channels_link_parser[index]]
+                new_list_all.append(link_id_lst)
+            db.add_chat_ids(int(number_group), new_list_all)
             await message.answer(cfg.correct_add_chat_ids, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
             await Add_chat_ids.panel_adm.set()
     except Exception:
