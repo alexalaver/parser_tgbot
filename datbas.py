@@ -571,3 +571,9 @@ class Data:
             self.cursor.execute("SELECT days FROM autoposting_post WHERE number_post=%s", (number_post,))
             a = self.cursor.fetchone()[0]
             return a
+
+    def select_channels_id_parser(self):
+        with self.connect:
+            self.cursor.execute("SELECT channels_id FROM groups")
+            a = self.cursor.fetchall()
+            return a

@@ -947,6 +947,39 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                                     new_callback_name = group_name + '⏳'
                                     new_channels_name = [new_callback_name if item[:-2] == group_name else item for item in all_channels_name_parser]
                                     db.update_all_channels_name(number_group_parser, new_channels_name)
+                        channels_id = db.select_channels_id_parser()
+                        all_channels = db.select_channels_with_number(number_group_parser)
+                        channels_link = [item for item in all_channels if len(item) >= 13 and item[13] == '+']
+                        new_lst_id = []
+                        new_lst_with_id = []
+                        if channels_id is not None:
+                            for channel_id in channels_id:
+                                for channel_link in channels_link:
+                                    index = 0
+                                    if channel_id[1] == channel_link[:-2]:
+                                        lst_id = [f"{index}) {channel_id}", channel_link[:-2]]
+                                        lst_with_id = [f"{index}) {channel_id}"]
+                                        new_lst_with_id.append(lst_with_id)
+                                        new_lst_id.append(lst_id)
+                                    index += 1
+                        new_lst = []
+                        for new_lst_with_ids in new_lst_with_id:
+                            new_lst.append(new_lst_with_ids)
+                            all_channels = db.select_channels_with_number(number_group_parser)
+                            channels_link = [item for item in all_channels if len(item) >= 13 and item[13] == '+']
+                            index = int(new_lst_with_ids[0]) - 1
+                            channels_link[index] = channels_link[index].replace("⏳", "✅")
+                            owner_lst = [next((full_word for full_word in channels_link if full_word[:-2] == word[:-2]), word) for word in all_channels]
+                            db.update_all_channels(number_group_parser, owner_lst)
+                        all_channels = db.select_channels_with_number(number_group_parser)
+                        for channel_name in all_channels:
+                            if channel_name[-1] == "✅":
+                                index_channel = all_channels.index(channel_name)
+                                all_channels_name = db.select_channels_name_with_number(number_group_parser)
+                                group_name = all_channels_name[index_channel]
+                                new_callback_name = group_name[:-1] + "✅"
+                                new_channels_name = [new_callback_name if item == group_name else item for item in all_channels_name]
+                                db.update_all_channels_name(number_group_parser, new_channels_name)
                         await check_private_channel(new_chan, user_id, number_group_parser)
                         await state.finish()
                         await callback_query.message.delete()
