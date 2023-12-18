@@ -952,7 +952,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     new_lst_id = []
                     new_lst_with_id = []
                     print(channels_id)
-                    if channels_id is not None:
+                    if channels_id != [(None,)]:
                         for channel_id in channels_id:
                             for channel_link in channels_link:
                                 index = 0
