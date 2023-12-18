@@ -754,95 +754,62 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 await Add_post.add_post_1.set()
             except Exception:
                 await callback_query.answer("Произошла ошибка при нажатии на кнопку добавления аккаунта для автопостинга, пожалуйста нажмите на нижнюю кнопку 'Автопостинг' и повторите попытку.", show_alert=True)
-        try:
-            data = await state.get_data()
-            number_group_parser = data.get('number_group_parser')
-            if number_group_parser is not None:
-                channels_parser = db.select_channels_with_number(number_group_parser)
-                check_tarife_parser = db.check_date_tarife_for_number(number_group_parser)
-                group_name_parser = db.select_group_name_for_number_group(user_id, number_group_parser)
-                channels_count_all_parser = len(channels_parser)
-                channels_count_parser = data.get("channels_count_parser")
-                channels_page_parser = data.get("channels_page_parser")
-                page_here_parser = data.get("page_here_parser")
-                from_page_parser = data.get("from_page_parser")
-                before_page_parser = data.get("before_page_parser")
-                if callback_query.data in channels_parser:
-                    if check_tarife_parser is None:
+        data = await state.get_data()
+        number_group_parser = data.get('number_group_parser')
+        if number_group_parser is not None:
+            channels_parser = db.select_channels_with_number(number_group_parser)
+            check_tarife_parser = db.check_date_tarife_for_number(number_group_parser)
+            group_name_parser = db.select_group_name_for_number_group(user_id, number_group_parser)
+            channels_count_all_parser = len(channels_parser)
+            channels_count_parser = data.get("channels_count_parser")
+            channels_page_parser = data.get("channels_page_parser")
+            page_here_parser = data.get("page_here_parser")
+            from_page_parser = data.get("from_page_parser")
+            before_page_parser = data.get("before_page_parser")
+            if callback_query.data in channels_parser:
+                if check_tarife_parser is None:
+                    await callback_query.answer(text=cfg.error_oplata, show_alert=True)
+                else:
+                    current_data = datetime.datetime.now()
+                    formated_check_date_tarife = datetime.datetime.strptime(check_tarife_parser, "%Y-%m-%d %H:%M:%S")
+                    if current_data >= formated_check_date_tarife:
+                        db.delete_old_tariffe(user_id, number_group_parser)
                         await callback_query.answer(text=cfg.error_oplata, show_alert=True)
                     else:
-                        current_data = datetime.datetime.now()
-                        formated_check_date_tarife = datetime.datetime.strptime(check_tarife_parser, "%Y-%m-%d %H:%M:%S")
-                        if current_data >= formated_check_date_tarife:
-                            db.delete_old_tariffe(user_id, number_group_parser)
-                            await callback_query.answer(text=cfg.error_oplata, show_alert=True)
-                        else:
-                            channel_name = callback_query.data
-                            if channel_name[-1] == "✅":
-                                group_index = channels_parser.index(channel_name)
-                                all_channels_name_parser = db.select_channels_name_with_number(number_group_parser)
-                                group_name = all_channels_name_parser[group_index]
-                                all_channels = db.select_channels_with_number(number_group_parser)
-                                new_callback = channel_name[:-1] + '❌'
-                                new_channels = [new_callback if item == channel_name else item for item in all_channels]
-                                db.update_all_channels(number_group_parser, new_channels)
-                                new_callback_name = group_name[:-1] + '❌'
-                                new_channels_name = [new_callback_name if item == group_name else item for item in all_channels_name_parser]
-                                db.update_all_channels_name(number_group_parser, new_channels_name)
-                            elif channel_name[-1] == "❌":
-                                group_index = channels_parser.index(channel_name)
-                                all_channels_name_parser = db.select_channels_name_with_number(number_group_parser)
-                                group_name = all_channels_name_parser[group_index]
-                                all_channels = db.select_channels_with_number(number_group_parser)
-                                new_callback = channel_name[:-1] + "✅"
-                                new_channels = [new_callback if item == channel_name else item for item in all_channels]
-                                db.update_all_channels(number_group_parser, new_channels)
-                                new_callback_name = group_name[:-1] + "✅"
-                                new_channels_name = [new_callback_name if item == group_name else item for item in all_channels_name_parser]
-                                db.update_all_channels_name(number_group_parser, new_channels_name)
-                            elif channel_name[-1] == "⏳":
-                                await callback_query.answer(cfg.error_dostup_chat, show_alert=True)
-                            channels = db.select_channels_with_number(number_group_parser)
-                            channels_name_parser = db.select_channels_name_with_number(number_group_parser)
-                            markup_inline = types.InlineKeyboardMarkup(row_width=2)
-                            paired_channels = zip(channels_name_parser[from_page_parser:before_page_parser], channels[from_page_parser:before_page_parser])
-                            for channel_name, channel in paired_channels:
-                                button = types.InlineKeyboardButton(text=channel_name, callback_data=channel)
-                                markup_inline.row(button)
-                            buttons_count = types.InlineKeyboardButton(
-                                text=f"Страница {page_here_parser}/{channels_page_parser} 📄", callback_data="page_parser")
-                            markup_inline.add(buttons_count)
-                            if channels_count_all_parser > 10:
-                                buttons_next = types.InlineKeyboardButton(text=cfg.next_page, callback_data="next_page_parser")
-                                buttons_old = types.InlineKeyboardButton(text=cfg.old_page, callback_data="old_page_parser")
-                                markup_inline.row(buttons_old, buttons_next)
-                            if db.check_date_tarife_for_number(number_group_parser) is None:
-                                pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels_parser')
-                                markup_inline.add(pay_money_buttons)
-                            change_keywords = types.InlineKeyboardButton(text=cfg.change_keyword_button, callback_data='change_keyword_parser')
-                            back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels_parser')
-                            markup_inline.add(change_keywords)
-                            markup_inline.add(back_channels)
-                            await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
-                elif callback_query.data == "next_page_parser":
-                    if channels_page_parser == page_here_parser:
-                        await callback_query.answer(cfg.error_page_next, show_alert=True)
-                    else:
+                        channel_name = callback_query.data
+                        if channel_name[-1] == "✅":
+                            group_index = channels_parser.index(channel_name)
+                            all_channels_name_parser = db.select_channels_name_with_number(number_group_parser)
+                            group_name = all_channels_name_parser[group_index]
+                            all_channels = db.select_channels_with_number(number_group_parser)
+                            new_callback = channel_name[:-1] + '❌'
+                            new_channels = [new_callback if item == channel_name else item for item in all_channels]
+                            db.update_all_channels(number_group_parser, new_channels)
+                            new_callback_name = group_name[:-1] + '❌'
+                            new_channels_name = [new_callback_name if item == group_name else item for item in all_channels_name_parser]
+                            db.update_all_channels_name(number_group_parser, new_channels_name)
+                        elif channel_name[-1] == "❌":
+                            group_index = channels_parser.index(channel_name)
+                            all_channels_name_parser = db.select_channels_name_with_number(number_group_parser)
+                            group_name = all_channels_name_parser[group_index]
+                            all_channels = db.select_channels_with_number(number_group_parser)
+                            new_callback = channel_name[:-1] + "✅"
+                            new_channels = [new_callback if item == channel_name else item for item in all_channels]
+                            db.update_all_channels(number_group_parser, new_channels)
+                            new_callback_name = group_name[:-1] + "✅"
+                            new_channels_name = [new_callback_name if item == group_name else item for item in all_channels_name_parser]
+                            db.update_all_channels_name(number_group_parser, new_channels_name)
+                        elif channel_name[-1] == "⏳":
+                            await callback_query.answer(cfg.error_dostup_chat, show_alert=True)
                         channels = db.select_channels_with_number(number_group_parser)
                         channels_name_parser = db.select_channels_name_with_number(number_group_parser)
                         markup_inline = types.InlineKeyboardMarkup(row_width=2)
-                        page_here_parser = page_here_parser + 1
-                        await state.update_data(page_here_parser=page_here_parser)
-                        await state.update_data(channels_count_parser=channels_count_parser)
-                        from_page_parser = from_page_parser + 10
-                        before_page_parser = before_page_parser + 10
-                        await state.update_data(from_page_parser=from_page_parser)
-                        await state.update_data(before_page_parser=before_page_parser)
                         paired_channels = zip(channels_name_parser[from_page_parser:before_page_parser], channels[from_page_parser:before_page_parser])
                         for channel_name, channel in paired_channels:
                             button = types.InlineKeyboardButton(text=channel_name, callback_data=channel)
                             markup_inline.row(button)
-                        buttons_count = types.InlineKeyboardButton(text=f"Страница {page_here_parser}/{channels_page_parser} 📄", callback_data="page_parser")
+                        buttons_count = types.InlineKeyboardButton(
+                            text=f"Страница {page_here_parser}/{channels_page_parser} 📄", callback_data="page_parser")
                         markup_inline.add(buttons_count)
                         if channels_count_all_parser > 10:
                             buttons_next = types.InlineKeyboardButton(text=cfg.next_page, callback_data="next_page_parser")
@@ -856,140 +823,20 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                         markup_inline.add(change_keywords)
                         markup_inline.add(back_channels)
                         await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
-                elif callback_query.data == "old_page_parser":
-                    print(f"{channels_count_parser}\n{page_here_parser}\n{from_page_parser}\n{before_page_parser}")
-                    if page_here_parser == 1:
-                        await callback_query.answer(cfg.error_page_old, show_alert=True)
-                    else:
-                        channels = db.select_channels_with_number(number_group_parser)
-                        channels_name_parser = db.select_channels_name_with_number(number_group_parser)
-                        markup_inline = types.InlineKeyboardMarkup(row_width=2)
-                        page_here_parser = page_here_parser - 1
-                        before_page_parser = before_page_parser - 10
-                        from_page_parser = from_page_parser - 10
-                        await state.update_data(from_page_parser=from_page_parser)
-                        await state.update_data(before_page_parser=before_page_parser)
-                        await state.update_data(page_here_parser=page_here_parser)
-                        await state.update_data(channels_count_parser=channels_count_parser)
-                        paired_channels = zip(channels_name_parser[from_page_parser:before_page_parser], channels[from_page_parser:before_page_parser])
-                        for channel_name, channel in paired_channels:
-                            button = types.InlineKeyboardButton(text=channel_name, callback_data=channel)
-                            markup_inline.row(button)
-                        buttons_count = types.InlineKeyboardButton(text=f"Страница {page_here_parser}/{channels_page_parser} 📄", callback_data="page_parser")
-                        markup_inline.add(buttons_count)
-                        if channels_count_all_parser > 10:
-                            buttons_next = types.InlineKeyboardButton(text=cfg.next_page, callback_data="next_page_parser")
-                            buttons_old = types.InlineKeyboardButton(text=cfg.old_page, callback_data="old_page_parser")
-                            markup_inline.row(buttons_old, buttons_next)
-                        if db.check_date_tarife_for_number(number_group_parser) is None:
-                            pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels_parser')
-                            markup_inline.add(pay_money_buttons)
-                        change_keywords = types.InlineKeyboardButton(text=cfg.change_keyword_button,
-                                                                     callback_data='change_keyword_parser')
-                        back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels_parser')
-                        markup_inline.add(change_keywords)
-                        markup_inline.add(back_channels)
-                        await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
-                elif callback_query.data == "back_channels_parser":
-                    markup_inline = types.InlineKeyboardMarkup(row_width=1)
-                    group_names = db.select_group_name(user_id)
-                    max_buttons = 5
-                    for i in range(min(max_buttons, len(group_names))):
-                        button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
-                        markup_inline.add(button)
-                    btn_inline1 = types.InlineKeyboardButton(cfg.groups_add_button, callback_data='groups_add_button_parser')
-                    markup_inline.add(btn_inline1)
-                    await callback_query.message.edit_caption(caption=cfg.parser_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
-                elif callback_query.data == "pay_money_channels_parser":
-                    markup_inline = types.InlineKeyboardMarkup(row_width=1)
-                    btn_inline1 = types.InlineKeyboardButton(cfg.confirm_oplata, callback_data='confirm_oplata_parser')
-                    btn_inline2 = types.InlineKeyboardButton(cfg.back_button, callback_data='back_oplata_parser')
-                    markup_inline.add(btn_inline1, btn_inline2)
-                    channels_len = len(channels_parser)
-                    money_oplata = str(5 * int(channels_len))
-                    await callback_query.message.edit_caption(caption=cfg.oplata_chatov(channels_len, money_oplata), reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
-                elif callback_query.data == "confirm_oplata_parser":
-                    balance = db.check_balance(user_id)
-                    channels_len = len(channels_parser)
-                    money_oplata = 5 * int(channels_len)
-                    if balance >= money_oplata:
-                        await callback_query.message.answer(cfg.confirm_oplata_text)
-                        channels = db.select_channels_with_number(number_group_parser)
-                        new_channels = [newer[:-2] + " ✅" for newer in channels]
-                        new_chan = [newer[:-2] for newer in channels]
-                        db.update_all_channels(number_group_parser, new_channels)
-                        channels_name_parser = db.select_channels_name_with_number(number_group_parser)
-                        new_channels_name = [newer[:-2] + " ✅" for newer in channels_name_parser]
-                        db.update_all_channels_name(number_group_parser, new_channels_name)
-                        db.update_balance(user_id, money_oplata)
-                        channels_len = len(channels)
-                        current_data = datetime.datetime.now()
-                        new_date = current_data + datetime.timedelta(days=30)
-                        formatted_date_new = new_date.strftime("%Y-%m-%d %H:%M:%S")
-                        db.add_date_tariffe(user_id, formatted_date_new, number_group_parser)
-                        markup_inline = types.InlineKeyboardMarkup(row_width=1)
-                        btn_inline1 = types.InlineKeyboardButton(cfg.menu_button, callback_data='menu_after_pay_parser')
-                        markup_inline.add(btn_inline1)
-                        all_channels = db.select_channels_with_number(number_group_parser)
-                        all_channels_name = db.select_channels_name_with_number(number_group_parser)
-                        updated_a = [x[:-1] + '⏳' if len(x) >= 13 and x[13] == '+' else x for x in all_channels]
-                        db.update_all_channels(number_group_parser, updated_a)
-                        paired_channels = zip(updated_a, all_channels_name)
-                        for channel_name_updated, channel_name_id in paired_channels:
-                            if channel_name_updated[13] == "+":
-                                response = requests.get(channel_name_updated[:-2])
-                                html_content = response.text
-                                soup = BeautifulSoup(html_content, 'html.parser')
-                                title_div = soup.find('div', {'class': 'tgme_page_title'})
-                                if title_div:
-                                    group_name = title_div.get_text(strip=True)
-                                    all_channels_name_parser = db.select_channels_name_with_number(number_group_parser)
-                                    new_callback_name = group_name + '⏳'
-                                    new_channels_name = [new_callback_name if item[:-2] == group_name else item for item in all_channels_name_parser]
-                                    db.update_all_channels_name(number_group_parser, new_channels_name)
-                        channels_id = db.select_channels_id_parser() or []
-                        all_channels = db.select_channels_with_number(number_group_parser)
-                        channels_link = [item for item in all_channels if len(item) >= 13 and item[13] == '+']
-                        new_lst_id = []
-                        new_lst_with_id = []
-                        if channels_id != []:
-                            for channel_id in channels_id:
-                                for channel_link in channels_link:
-                                    index = 0
-                                    if channel_id[1] == channel_link[:-2]:
-                                        lst_id = [f"{index}) {channel_id}", channel_link[:-2]]
-                                        lst_with_id = [f"{index}) {channel_id}"]
-                                        new_lst_with_id.append(lst_with_id)
-                                        new_lst_id.append(lst_id)
-                                    index += 1
-                        new_lst = []
-                        for new_lst_with_ids in new_lst_with_id:
-                            new_lst.append(new_lst_with_ids)
-                            all_channels = db.select_channels_with_number(number_group_parser)
-                            channels_link = [item for item in all_channels if len(item) >= 13 and item[13] == '+']
-                            index = int(new_lst_with_ids[0]) - 1
-                            channels_link[index] = channels_link[index].replace("⏳", "✅")
-                            owner_lst = [next((full_word for full_word in channels_link if full_word[:-2] == word[:-2]), word) for word in all_channels]
-                            db.update_all_channels(number_group_parser, owner_lst)
-                        all_channels = db.select_channels_with_number(number_group_parser)
-                        for channel_name in all_channels:
-                            if channel_name[-1] == "✅":
-                                index_channel = all_channels.index(channel_name)
-                                all_channels_name = db.select_channels_name_with_number(number_group_parser)
-                                group_name = all_channels_name[index_channel]
-                                new_callback_name = group_name[:-1] + "✅"
-                                new_channels_name = [new_callback_name if item == group_name else item for item in all_channels_name]
-                                db.update_all_channels_name(number_group_parser, new_channels_name)
-                        await check_private_channel(new_chan, user_id, number_group_parser)
-                        await state.finish()
-                        await callback_query.message.delete()
-                        await callback_query.message.answer(text=cfg.tariffe_correct(group_name_parser, channels_len, formatted_date_new), reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
-                    else:
-                        await callback_query.answer(text=cfg.tariffe_error, show_alert=True)
-                elif callback_query.data == "back_oplata_parser":
+            elif callback_query.data == "next_page_parser":
+                if channels_page_parser == page_here_parser:
+                    await callback_query.answer(cfg.error_page_next, show_alert=True)
+                else:
                     channels = db.select_channels_with_number(number_group_parser)
                     channels_name_parser = db.select_channels_name_with_number(number_group_parser)
                     markup_inline = types.InlineKeyboardMarkup(row_width=2)
+                    page_here_parser = page_here_parser + 1
+                    await state.update_data(page_here_parser=page_here_parser)
+                    await state.update_data(channels_count_parser=channels_count_parser)
+                    from_page_parser = from_page_parser + 10
+                    before_page_parser = before_page_parser + 10
+                    await state.update_data(from_page_parser=from_page_parser)
+                    await state.update_data(before_page_parser=before_page_parser)
                     paired_channels = zip(channels_name_parser[from_page_parser:before_page_parser], channels[from_page_parser:before_page_parser])
                     for channel_name, channel in paired_channels:
                         button = types.InlineKeyboardButton(text=channel_name, callback_data=channel)
@@ -1008,14 +855,164 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     markup_inline.add(change_keywords)
                     markup_inline.add(back_channels)
                     await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
-                elif callback_query.data == "change_keyword_parser":
-                    markup_reply= types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
-                    markup_reply.add(cfg.cancel_button)
-                    await state.update_data(number_group=number_group_parser)
-                    await callback_query.message.answer(cfg.change_keyword_text, reply_markup=markup_reply)
-                    await Change_keyword.change_keyword_1.set()
-        except Exception:
-            await callback_query.answer("Произошла ошибка при использовании парсинга, пожалуйста нажмите на нижнюю кнопку 'Парсинг' и повторите попытку.", show_alert=True)
+            elif callback_query.data == "old_page_parser":
+                print(f"{channels_count_parser}\n{page_here_parser}\n{from_page_parser}\n{before_page_parser}")
+                if page_here_parser == 1:
+                    await callback_query.answer(cfg.error_page_old, show_alert=True)
+                else:
+                    channels = db.select_channels_with_number(number_group_parser)
+                    channels_name_parser = db.select_channels_name_with_number(number_group_parser)
+                    markup_inline = types.InlineKeyboardMarkup(row_width=2)
+                    page_here_parser = page_here_parser - 1
+                    before_page_parser = before_page_parser - 10
+                    from_page_parser = from_page_parser - 10
+                    await state.update_data(from_page_parser=from_page_parser)
+                    await state.update_data(before_page_parser=before_page_parser)
+                    await state.update_data(page_here_parser=page_here_parser)
+                    await state.update_data(channels_count_parser=channels_count_parser)
+                    paired_channels = zip(channels_name_parser[from_page_parser:before_page_parser], channels[from_page_parser:before_page_parser])
+                    for channel_name, channel in paired_channels:
+                        button = types.InlineKeyboardButton(text=channel_name, callback_data=channel)
+                        markup_inline.row(button)
+                    buttons_count = types.InlineKeyboardButton(text=f"Страница {page_here_parser}/{channels_page_parser} 📄", callback_data="page_parser")
+                    markup_inline.add(buttons_count)
+                    if channels_count_all_parser > 10:
+                        buttons_next = types.InlineKeyboardButton(text=cfg.next_page, callback_data="next_page_parser")
+                        buttons_old = types.InlineKeyboardButton(text=cfg.old_page, callback_data="old_page_parser")
+                        markup_inline.row(buttons_old, buttons_next)
+                    if db.check_date_tarife_for_number(number_group_parser) is None:
+                        pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels_parser')
+                        markup_inline.add(pay_money_buttons)
+                    change_keywords = types.InlineKeyboardButton(text=cfg.change_keyword_button,
+                                                                 callback_data='change_keyword_parser')
+                    back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels_parser')
+                    markup_inline.add(change_keywords)
+                    markup_inline.add(back_channels)
+                    await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+            elif callback_query.data == "back_channels_parser":
+                markup_inline = types.InlineKeyboardMarkup(row_width=1)
+                group_names = db.select_group_name(user_id)
+                max_buttons = 5
+                for i in range(min(max_buttons, len(group_names))):
+                    button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
+                    markup_inline.add(button)
+                btn_inline1 = types.InlineKeyboardButton(cfg.groups_add_button, callback_data='groups_add_button_parser')
+                markup_inline.add(btn_inline1)
+                await callback_query.message.edit_caption(caption=cfg.parser_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+            elif callback_query.data == "pay_money_channels_parser":
+                markup_inline = types.InlineKeyboardMarkup(row_width=1)
+                btn_inline1 = types.InlineKeyboardButton(cfg.confirm_oplata, callback_data='confirm_oplata_parser')
+                btn_inline2 = types.InlineKeyboardButton(cfg.back_button, callback_data='back_oplata_parser')
+                markup_inline.add(btn_inline1, btn_inline2)
+                channels_len = len(channels_parser)
+                money_oplata = str(5 * int(channels_len))
+                await callback_query.message.edit_caption(caption=cfg.oplata_chatov(channels_len, money_oplata), reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+            elif callback_query.data == "confirm_oplata_parser":
+                balance = db.check_balance(user_id)
+                channels_len = len(channels_parser)
+                money_oplata = 5 * int(channels_len)
+                if balance >= money_oplata:
+                    await callback_query.message.answer(cfg.confirm_oplata_text)
+                    channels = db.select_channels_with_number(number_group_parser)
+                    new_channels = [newer[:-2] + " ✅" for newer in channels]
+                    new_chan = [newer[:-2] for newer in channels]
+                    db.update_all_channels(number_group_parser, new_channels)
+                    channels_name_parser = db.select_channels_name_with_number(number_group_parser)
+                    new_channels_name = [newer[:-2] + " ✅" for newer in channels_name_parser]
+                    db.update_all_channels_name(number_group_parser, new_channels_name)
+                    db.update_balance(user_id, money_oplata)
+                    channels_len = len(channels)
+                    current_data = datetime.datetime.now()
+                    new_date = current_data + datetime.timedelta(days=30)
+                    formatted_date_new = new_date.strftime("%Y-%m-%d %H:%M:%S")
+                    db.add_date_tariffe(user_id, formatted_date_new, number_group_parser)
+                    markup_inline = types.InlineKeyboardMarkup(row_width=1)
+                    btn_inline1 = types.InlineKeyboardButton(cfg.menu_button, callback_data='menu_after_pay_parser')
+                    markup_inline.add(btn_inline1)
+                    all_channels = db.select_channels_with_number(number_group_parser)
+                    all_channels_name = db.select_channels_name_with_number(number_group_parser)
+                    updated_a = [x[:-1] + '⏳' if len(x) >= 13 and x[13] == '+' else x for x in all_channels]
+                    db.update_all_channels(number_group_parser, updated_a)
+                    paired_channels = zip(updated_a, all_channels_name)
+                    for channel_name_updated, channel_name_id in paired_channels:
+                        if channel_name_updated[13] == "+":
+                            response = requests.get(channel_name_updated[:-2])
+                            html_content = response.text
+                            soup = BeautifulSoup(html_content, 'html.parser')
+                            title_div = soup.find('div', {'class': 'tgme_page_title'})
+                            if title_div:
+                                group_name = title_div.get_text(strip=True)
+                                all_channels_name_parser = db.select_channels_name_with_number(number_group_parser)
+                                new_callback_name = group_name + '⏳'
+                                new_channels_name = [new_callback_name if item[:-2] == group_name else item for item in all_channels_name_parser]
+                                db.update_all_channels_name(number_group_parser, new_channels_name)
+                    channels_id = db.select_channels_id_parser() or []
+                    all_channels = db.select_channels_with_number(number_group_parser)
+                    channels_link = [item for item in all_channels if len(item) >= 13 and item[13] == '+']
+                    new_lst_id = []
+                    new_lst_with_id = []
+                    if channels_id != []:
+                        for channel_id in channels_id:
+                            for channel_link in channels_link:
+                                index = 0
+                                if channel_id[1] == channel_link[:-2]:
+                                    lst_id = [f"{index}) {channel_id}", channel_link[:-2]]
+                                    lst_with_id = [f"{index}) {channel_id}"]
+                                    new_lst_with_id.append(lst_with_id)
+                                    new_lst_id.append(lst_id)
+                                index += 1
+                    new_lst = []
+                    for new_lst_with_ids in new_lst_with_id:
+                        new_lst.append(new_lst_with_ids)
+                        all_channels = db.select_channels_with_number(number_group_parser)
+                        channels_link = [item for item in all_channels if len(item) >= 13 and item[13] == '+']
+                        index = int(new_lst_with_ids[0]) - 1
+                        channels_link[index] = channels_link[index].replace("⏳", "✅")
+                        owner_lst = [next((full_word for full_word in channels_link if full_word[:-2] == word[:-2]), word) for word in all_channels]
+                        db.update_all_channels(number_group_parser, owner_lst)
+                    all_channels = db.select_channels_with_number(number_group_parser)
+                    for channel_name in all_channels:
+                        if channel_name[-1] == "✅":
+                            index_channel = all_channels.index(channel_name)
+                            all_channels_name = db.select_channels_name_with_number(number_group_parser)
+                            group_name = all_channels_name[index_channel]
+                            new_callback_name = group_name[:-1] + "✅"
+                            new_channels_name = [new_callback_name if item == group_name else item for item in all_channels_name]
+                            db.update_all_channels_name(number_group_parser, new_channels_name)
+                    await check_private_channel(new_chan, user_id, number_group_parser)
+                    await state.finish()
+                    await callback_query.message.delete()
+                    await callback_query.message.answer(text=cfg.tariffe_correct(group_name_parser, channels_len, formatted_date_new), reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+                else:
+                    await callback_query.answer(text=cfg.tariffe_error, show_alert=True)
+            elif callback_query.data == "back_oplata_parser":
+                channels = db.select_channels_with_number(number_group_parser)
+                channels_name_parser = db.select_channels_name_with_number(number_group_parser)
+                markup_inline = types.InlineKeyboardMarkup(row_width=2)
+                paired_channels = zip(channels_name_parser[from_page_parser:before_page_parser], channels[from_page_parser:before_page_parser])
+                for channel_name, channel in paired_channels:
+                    button = types.InlineKeyboardButton(text=channel_name, callback_data=channel)
+                    markup_inline.row(button)
+                buttons_count = types.InlineKeyboardButton(text=f"Страница {page_here_parser}/{channels_page_parser} 📄", callback_data="page_parser")
+                markup_inline.add(buttons_count)
+                if channels_count_all_parser > 10:
+                    buttons_next = types.InlineKeyboardButton(text=cfg.next_page, callback_data="next_page_parser")
+                    buttons_old = types.InlineKeyboardButton(text=cfg.old_page, callback_data="old_page_parser")
+                    markup_inline.row(buttons_old, buttons_next)
+                if db.check_date_tarife_for_number(number_group_parser) is None:
+                    pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels_parser')
+                    markup_inline.add(pay_money_buttons)
+                change_keywords = types.InlineKeyboardButton(text=cfg.change_keyword_button, callback_data='change_keyword_parser')
+                back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels_parser')
+                markup_inline.add(change_keywords)
+                markup_inline.add(back_channels)
+                await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+            elif callback_query.data == "change_keyword_parser":
+                markup_reply= types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
+                markup_reply.add(cfg.cancel_button)
+                await state.update_data(number_group=number_group_parser)
+                await callback_query.message.answer(cfg.change_keyword_text, reply_markup=markup_reply)
+                await Change_keyword.change_keyword_1.set()
         try:
             data = await state.get_data()
             number_group_autoposting = data.get('number_post_autoposting')
