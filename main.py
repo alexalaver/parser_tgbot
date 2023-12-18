@@ -947,13 +947,11 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                                 new_channels_name = [new_callback_name if item[:-2] == group_name else item for item in all_channels_name_parser]
                                 db.update_all_channels_name(number_group_parser, new_channels_name)
                     channels_id = db.select_channels_id_parser()
-                    print(channels_id)
                     all_channels = db.select_channels_with_number(number_group_parser)
                     channels_link = [item for item in all_channels if len(item) >= 13 and item[13] == '+']
                     new_lst_id = []
                     new_lst_with_id = []
                     channels_id = [item for sublist in channels_id if sublist[0] for item in sublist[0]]
-                    print(channels_id)
                     if channels_id != [(None,)]:
                         for channel_id in channels_id:
                             for channel_link in channels_link:
@@ -964,6 +962,8 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                                     new_lst_with_id.append(lst_with_id)
                                     new_lst_id.append(lst_id)
                                 index += 1
+                    print(new_lst_with_id)
+                    print(new_lst_id)
                     new_lst = []
                     if channels_id != []:
                         for new_lst_with_ids in new_lst_with_id:
@@ -974,6 +974,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                             channels_link[index] = channels_link[index].replace("⏳", "✅")
                             owner_lst = [next((full_word for full_word in channels_link if full_word[:-2] == word[:-2]), word) for word in all_channels]
                             db.update_all_channels(number_group_parser, owner_lst)
+                            db.add_chat_ids(int(number_group_parser), new_lst_with_id)
                         all_channels = db.select_channels_with_number(number_group_parser)
                         for channel_name in all_channels:
                             if channel_name[-1] == "✅":
