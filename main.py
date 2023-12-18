@@ -953,8 +953,6 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     index = 0
                     lst_with_id = []
                     lst_id = []
-                    print(channels_link)
-                    print(channels_id)
                     if channels_id != [(None,)]:
                         for channel_id in channels_id:
                             for channel_link in channels_link:
@@ -963,8 +961,6 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                                     lst_id.append(channel_id)
                                     lst_with_id.append(channel_id)
                                 index += 1
-                    print(lst_with_id)
-                    print(lst_id)
                     new_lst = []
                     if channels_id != []:
                         for new_lst_with_ids in lst_with_id:
@@ -974,8 +970,6 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                             index = int(new_lst_with_ids[0]) - 1
                             channels_link[index] = channels_link[index].replace("⏳", "✅")
                             owner_lst = [next((full_word for full_word in channels_link if full_word[:-2] == word[:-2]), word) for word in all_channels]
-                            print(owner_lst)
-                            print(lst_with_id)
                             db.update_all_channels(number_group_parser, owner_lst)
                             db.add_chat_ids(int(number_group_parser), lst_with_id)
                         all_channels = db.select_channels_with_number(number_group_parser)
