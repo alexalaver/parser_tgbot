@@ -91,12 +91,8 @@ async def search_and_forward():
             group = groups[num]
             user_id, chat_idn, keywords, data_end, group_name, chat_name = group[0], group[2], group[5], group[3], group[4], group[7]
             chat_ids = [item for item in chat_idn if item.endswith('✅') and not ('https://t.me/+' in item)]
-            print(chat_ids)
             chat_indices = [chat_idn.index(chat) for chat in chat_ids]
-            print(chat_name)
-            print(chat_indices)
             chat_names = [chat_name[index] for index in chat_indices]
-            print(chat_names)
 
             if chat_ids != []:
                 number_group = group[1]
@@ -189,8 +185,8 @@ async def search_and_forward_close_group():
 
             group = groups[num]
             user_id, chat_idn, keywords, channelss_link, data_end, group_name, channels_name = group[0], group[8] or [], group[5], group[2], group[3], group[4], group[7]
-            chat_ids = [item for item in chat_idn if item.endswith('✅') and ('https://t.me/+' in item)]
-            chat_indices = [chat_idn.index(chat) for chat in chat_ids]
+            chat_ids = [item for item in channelss_link if item.endswith('✅') and not ('https://t.me/+' in item)]
+            chat_indices = [channelss_link.index(chat) for chat in chat_ids]
             chat_names = [channels_name[index] for index in chat_indices]
             number_group = group[1]
             current_date = datetime.datetime.now()
