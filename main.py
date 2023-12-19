@@ -91,7 +91,6 @@ async def search_and_forward():
 
             current_date = datetime.datetime.now()
             formated_base = datetime.datetime.strptime(data_end, "%Y-%m-%d %H:%M:%S")
-            print(group)
             if formated_base > current_date:
                 for chat_id_name in chat_name:
                     for chat_id in chat_ids:
@@ -158,7 +157,7 @@ async def search_and_forward():
                 num = 0
 
         except Exception as e:
-            print(f"Произошла ошибка: {e}")
+            print(f"Произошла ошибка: ss{e}")
             await asyncio.sleep(10)
 
         await asyncio.sleep(5)
