@@ -94,6 +94,7 @@ async def search_and_forward():
             print(chat_ids)
             print(chat_idn)
             chat_indices = [chat_idn.index(chat) for chat in chat_ids]
+            print(chat_indices)
             chat_names = [chat_name[i] for i, item in enumerate(chat_idn) if item.endswith('✅') and not ('https://t.me/+' in item)]
 
             if chat_ids != []:
