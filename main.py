@@ -68,11 +68,15 @@ async def check_keywords_len(keywords, num):
     else:
         return False
 
-def escape_markdown(text):
-    escape_chars = ['\\', '`', '*', '_', '{', '}', '[', ']', '(', ')', '#', '+', '-', '.', '!', '|', '~', '<', '>', '=', ';', ':', '"', "'"]
-    for char in escape_chars:
-        text = text.replace(char, '\\' + char)
-    return text
+def escape_html(text):
+    html_escape_table = {
+        "&": "&amp;",
+        '"': "&quot;",
+        "'": "&apos;",
+        ">": "&gt;",
+        "<": "&lt;",
+    }
+    return "".join(html_escape_table.get(c, c) for c in text)
 
 
 async def search_and_forward():
@@ -121,8 +125,8 @@ async def search_and_forward():
                                                 else:
                                                     link_message = f"t.me/{trimmed_chat_id[1:]}/{str(message.id)}"
                                                 sender_identifier = f"@{sender.username}" if sender and sender.username else "Анонимный пользователь"
-                                                escaped_message_text = escape_markdown(message.text)
-                                                message_text = f"Обнаружено ключевое слово\n\nЧат: {trimmed_chat_id}\n\nПользователь: {sender_identifier}\n\nЗапрос: {keyword}\n\n[Ссылка на сообщение]({link_message})\n\nТекст:\n{escaped_message_text}"
+                                                escaped_message_text = escape_html(message.text)
+                                                message_text = f"Обнаружено ключевое слово<br><br>Чат: {trimmed_chat_id}<br><br>Пользователь: {sender_identifier}<br><br>Запрос: {keyword}<br><br><a href='{link_message}'>Ссылка на сообщение</a><br><br>Текст:<br>{escaped_message_text}"
                                                 await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.MARKDOWN)
                                                 db.update_all_message_ids(number_group, message_key)
                                                 await asyncio.sleep(2)
