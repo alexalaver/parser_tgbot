@@ -124,7 +124,7 @@ async def search_and_forward():
                                                 escaped_message_text = escape_markdown(message.text)
                                                 link_markdown = f"[Ссылка на сообщение]({link_message})"
                                                 message_text = f"Обнаружено ключевое слово\n\nЧат: {trimmed_chat_id}\n\nПользователь: {sender_identifier}\n\nЗапрос: {keyword}\n\n{link_markdown}\n\nТекст:\n{escaped_message_text}"
-                                                await bot.send_message(user_id, message_text)
+                                                await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.MARKDOWN)
                                                 db.update_all_message_ids(number_group, message_key)
                                                 await asyncio.sleep(2)
                                             break
