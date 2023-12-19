@@ -69,14 +69,7 @@ async def check_keywords_len(keywords, num):
         return False
 
 def escape_html(text):
-    html_escape_table = {
-        "&": "&amp;",
-        '"': "&quot;",
-        "'": "&apos;",
-        ">": "&gt;",
-        "<": "&lt;",
-    }
-    return "".join(html_escape_table.get(c, c) for c in text)
+    return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;").replace("'", "&apos;")
 
 
 async def search_and_forward():
