@@ -126,7 +126,7 @@ async def search_and_forward():
                                                     link_message = f"t.me/{trimmed_chat_id[1:]}/{str(message.id)}"
                                                 sender_identifier = f"@{sender.username}" if sender and sender.username else "Анонимный пользователь"
                                                 escaped_message_text = escape_html(message.text)
-                                                message_text = f"Обнаружено ключевое слово\n\n<a href='{trimmed_chat_id}'>{chat_id_name[:-2]}</a>\n\nПользователь: {sender_identifier}\n\nЗапрос: {keyword}\n\n<a href='{link_message}'>Ссылка на сообщение</a>\n\n>Текст:\n{escaped_message_text}"
+                                                message_text = f"Обнаружено ключевое слово\n\n<a href='{trimmed_chat_id}'>{chat_id_name[:-2]}</a>\n\nПользователь: {sender_identifier}\n\nЗапрос: {keyword}\n\n<a href='{link_message}'>Ссылка на сообщение</a>\n\nТекст:\n{escaped_message_text}"
                                                 await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
                                                 db.update_all_message_ids(number_group, message_key)
                                                 await asyncio.sleep(2)
@@ -189,12 +189,14 @@ async def search_and_forward_close_group():
             group = groups[num]
             user_id, chat_ids, keywords, channelss_link, data_end, group_name, channels_name = group[0], group[8] or [], group[5], group[2], group[3], group[4], group[7]
             channels_link = [item for item in channelss_link if len(item) >= 13 and item[13] == '+']
+            closed_chat_indices = [i for i, item in enumerate(channels_link) if len(item) >= 13 and item[13] == '+']
+            closed_chat_names = [channels_name[i] for i in closed_chat_indices]
             number_group = group[1]
             current_date = datetime.datetime.now()
             formated_base = datetime.datetime.strptime(data_end, "%Y-%m-%d %H:%M:%S")
             if formated_base > current_date:
                 if chat_ids != []:
-                    for chat_id_name in channels_name:
+                    for chat_id_name in closed_chat_names:
                         for chat_id in chat_ids:
                             index_chat_id = int(chat_id[0][0])
                             links_1 = channels_link[index_chat_id - 1]
@@ -216,7 +218,7 @@ async def search_and_forward_close_group():
                                                         sender = await message.get_sender()
                                                         sender_identifier = f"@{sender.username}" if sender else "Анонимный пользователь"
                                                         escaped_message_text = escape_html(message.text)
-                                                        message_text = f"Обнаружено ключевое слово\n\n<a href='{links_1[:-2]}'>Ссылка на чат</a>\n\nПользователь: {sender_identifier}\n\nЗапрос: {keyword}\n\nСсылка на сообщение: Чат закрыт.\n\nТекст:\n{escaped_message_text}"
+                                                        message_text = f"Обнаружено ключевое слово\n\n<a href='{links_1[:-2]}'>{chat_id_name[:-2]}\n\nПользователь: {sender_identifier}\n\nЗапрос: {keyword}\n\nСсылка на сообщение: Чат закрыт.\n\nТекст:\n{escaped_message_text}"
                                                         await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
                                                         # print(f"Message sent to user {user_id}: {message.text}")
                                                         db.update_all_message_ids(number_group, message_key)
