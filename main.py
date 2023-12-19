@@ -188,9 +188,8 @@ async def search_and_forward_close_group():
 
             group = groups[num]
             user_id, chat_ids, keywords, channelss_link, data_end, group_name, channels_name = group[0], group[8] or [], group[5], group[2], group[3], group[4], group[7]
-            channels_link = [item for item in channelss_link if len(item) >= 13 and item[13] == '+']
-            closed_chat_indices = [i for i, item in enumerate(channels_link) if len(item) >= 13 and item[13] == '+']
-            closed_chat_names = [channels_name[i] for i in closed_chat_indices]
+            channels_link = [i for i, item in enumerate(channelss_link) if len(item) >= 13 and item[13] == '+']
+            closed_chat_names = [channels_name[i] for i in channels_link]
             number_group = group[1]
             current_date = datetime.datetime.now()
             formated_base = datetime.datetime.strptime(data_end, "%Y-%m-%d %H:%M:%S")

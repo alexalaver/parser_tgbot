@@ -52,8 +52,8 @@
 a = ["https://t.me/doubletop_otc ✅", "https://t.me/+kaLhqGj2EHg3NjFi ✅", "@testonepublic ✅", "https://t.me/+kaLasdasd ✅"]
 b = ["2TOP OTC ✅", "TESTPRIVATE5 ✅", "testonepublic ✅", "TESTING ✅"]
 
-# Отфильтровываем индексы закрытых чатов
-closed_chat_indices = [i for i, item in enumerate(a) if len(item) >= 13 and item[13] == '+']
+channels_link = [item for item in a if len(item) >= 13 and item[13] == '+']
+closed_chat_indices = [i for i, item in enumerate(channels_link) if len(item) >= 13 and item[13] == '+']
 
 # Получаем названия для закрытых чатов, используя отфильтрованные индексы
 closed_chat_names = [b[i] for i in closed_chat_indices]
