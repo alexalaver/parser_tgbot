@@ -120,9 +120,8 @@ async def search_and_forward():
                                                     link_message = f"t.me/{trimmed_chat_id[1:]}/{str(message.id)}"
                                                 sender_identifier = f"@{sender.username}" if sender and sender.username else "Анонимный пользователь"
                                                 escaped_message_text = escape_html(message.text)
-                                                message_text = f"Обнаружено ключевое слово\n\nЧат: {trimmed_chat_id}\n\nПользователь: {sender_identifier}\n\nЗапрос: {keyword}\n\n<a href='{link_message}'>Ссылка на сообщение</a>\n\n>Текст:\n{escaped_message_text}"
+                                                message_text = f"Обнаружено ключевое слово\n\n<a href='{trimmed_chat_id}'>Ссылка на чат</a>\n\nПользователь: {sender_identifier}\n\nЗапрос: {keyword}\n\n<a href='{link_message}'>Ссылка на сообщение</a>\n\n>Текст:\n{escaped_message_text}"
                                                 await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
-                                                print(f"Message send {user_id}: {message_text}")
                                                 db.update_all_message_ids(number_group, message_key)
                                                 await asyncio.sleep(2)
                                             break
@@ -210,8 +209,9 @@ async def search_and_forward_close_group():
                                                     if message_key not in messages_sent:
                                                         sender = await message.get_sender()
                                                         sender_identifier = f"@{sender.username}" if sender else "Анонимный пользователь"
-                                                        message_text = f"Обнаружено ключевое слово\n\nЧат: {links_1[:-2]}\n\nПользователь: {sender_identifier}\n\nЗапрос: {keyword}\n\nСсылка на сообщение: Чат закрыт.\n\nТекст:\n{message.text}"
-                                                        await bot.send_message(user_id, message_text)
+                                                        escaped_message_text = escape_html(message.text)
+                                                        message_text = f"Обнаружено ключевое слово\n\n<a href='{links_1[:-2]}'>Ссылка на чат</a>\n\nПользователь: {sender_identifier}\n\nЗапрос: {keyword}\n\nСсылка на сообщение: Чат закрыт.\n\nТекст:\n{escaped_message_text}"
+                                                        await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
                                                         # print(f"Message sent to user {user_id}: {message.text}")
                                                         db.update_all_message_ids(number_group, message_key)
                                                         await asyncio.sleep(2)
