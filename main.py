@@ -96,6 +96,7 @@ async def search_and_forward():
             print(chat_name)
             print(chat_indices)
             chat_names = [chat_name[index] for index in chat_indices]
+            print(chat_names)
 
             if chat_ids != []:
                 number_group = group[1]
