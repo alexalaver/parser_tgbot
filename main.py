@@ -69,6 +69,10 @@ async def check_keywords_len(keywords, num):
         return False
 
 
+def escape_html(text):
+    return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;").replace("'", "&apos;")
+
+
 async def search_and_forward():
     num = 0
     last_message_ids = {}
@@ -115,8 +119,9 @@ async def search_and_forward():
                                                 else:
                                                     link_message = f"t.me/{trimmed_chat_id[1:]}/{str(message.id)}"
                                                 sender_identifier = f"@{sender.username}" if sender and sender.username else "Анонимный пользователь"
-                                                message_text = f"Обнаружено ключевое слово\n\nЧат: {trimmed_chat_id}\n\nПользователь: {sender_identifier}\n\nЗапрос: {keyword}\n\nСсылка на сообщение: {link_message}\n\nТекст:\n{message.text}"
-                                                await bot.send_message(user_id, message_text)
+                                                escaped_message_text = escape_html(message.text)
+                                                message_text = f"Обнаружено ключевое слово\n\nЧат: {trimmed_chat_id}\n\nПользователь: {sender_identifier}\n\nЗапрос: {keyword}\n\n<a href={link_message}>Ссылка на сообщение</a>\n\nТекст:\n{escaped_message_text}"
+                                                await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
                                                 print(f"Message send {user_id}: {message_text}")
                                                 db.update_all_message_ids(number_group, message_key)
                                                 await asyncio.sleep(2)
