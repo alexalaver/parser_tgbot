@@ -49,12 +49,16 @@
 #
 # print(result)
 
-a = ["https://t.me/+kaLhqGj2EHg3NjFi ✅", "https://t.me/+kaLasdasd ✅", "@asdasdasdsad ✅", "@asdsadasdas ✅", "https://t.me/+kaLasdasdASdsd ✅"]
-b = ["2TOP OTC ✅", "TESTPRIVATE5 ✅", "testonepublic ✅", "TESTING ✅", "LYA LYA LYA ✅"]
+chat_idn = ["https://t.me/doubletop_otc ✅", "https://t.me/+kaLhqGj2EHg3NjFi ✅", "@testonepublic ✅", "https://t.me/+kaLasdasd ✅"]
+chat_name = ["2TOP OTC ✅", "TESTPRIVATE5 ✅", "testonepublic ✅", "TESTING ✅"]
 
-chat_ids = [item for item in a if item.endswith('✅') and ('https://t.me/+' in item)]
-chat_indices = [a.index(chat) for chat in chat_ids]
-open_chat_names = [b[i] for i, item in enumerate(a) if item.endswith('✅') and ('https://t.me/+' in item)]
+# Фильтруем открытые чаты, сохраняя их индексы
+chat_ids_with_indices = [(index, item) for index, item in enumerate(chat_idn) if item.endswith('✅') and not ('https://t.me/+' in item)]
 
-print(chat_ids)
-print(open_chat_names)
+# Получаем индексы отфильтрованных открытых чатов
+chat_indices = [index for index, _ in chat_ids_with_indices]
+
+# Используем эти индексы для выбора соответствующих названий из chat_name
+chat_names = [chat_name[index] for index in chat_indices]
+
+print(chat_names)
