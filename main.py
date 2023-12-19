@@ -91,6 +91,7 @@ async def search_and_forward():
 
             current_date = datetime.datetime.now()
             formated_base = datetime.datetime.strptime(data_end, "%Y-%m-%d %H:%M:%S")
+            print(group)
             if formated_base > current_date:
                 for chat_id_name in chat_name:
                     for chat_id in chat_ids:
