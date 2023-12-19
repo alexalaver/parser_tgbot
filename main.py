@@ -106,7 +106,6 @@ async def search_and_forward():
                     for chat_id in chat_ids:
                         trimmed_chat_id = chat_id[:-2]
                         exception_occurred = False
-                        messages_sent = db.select_message_id(number_group)
                         try:
                             chat_select_id = await telethon_client.get_entity(trimmed_chat_id)
                             chat_check_id = chat_select_id.id
@@ -118,6 +117,7 @@ async def search_and_forward():
                                     for keyword in keywords:
                                         if keyword.lower() in message.text.lower():
                                             message_key = [chat_check_id, message.id]
+                                            messages_sent = db.select_message_id(number_group)
                                             if message_key not in messages_sent:
                                                 sender = await message.get_sender()
                                                 if "http" in trimmed_chat_id:
@@ -204,7 +204,6 @@ async def search_and_forward_close_group():
                             if links_2 == "✅":
                                 trimmed_chat_ids = int(chat_id[0][3:])
                                 exception_occurred = False
-                                messages_sent = db.select_message_id(number_group)
                                 try:
                                     last_id = last_message_ids.get(trimmed_chat_ids, 0)
                                     messages_to_check = 30
@@ -214,6 +213,7 @@ async def search_and_forward_close_group():
                                             for keyword in keywords:
                                                 if keyword.lower() in message.text.lower():
                                                     message_key = [trimmed_chat_ids, message.id]
+                                                    messages_sent = db.select_message_id(number_group)
                                                     if message_key not in messages_sent:
                                                         sender = await message.get_sender()
                                                         sender_identifier = f"@{sender.username}" if sender else "Анонимный пользователь"
