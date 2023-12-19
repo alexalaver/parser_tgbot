@@ -2034,7 +2034,7 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                             channels_name_1 = []
                             await message.answer(cfg.please_wait_add_channels_name)
                             for channel_name in text_line:
-                                if channel_name[13] == "+":
+                                if "https" in channel_name:
                                     response = requests.get(channel_name)
                                     html_content = response.text
                                     soup = BeautifulSoup(html_content, 'html.parser')
