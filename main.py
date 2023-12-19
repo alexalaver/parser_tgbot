@@ -120,7 +120,7 @@ async def search_and_forward():
                                                     link_message = f"t.me/{trimmed_chat_id[1:]}/{str(message.id)}"
                                                 sender_identifier = f"@{sender.username}" if sender and sender.username else "Анонимный пользователь"
                                                 escaped_message_text = escape_html(message.text)
-                                                message_text = f"Обнаружено ключевое слово<br><br>Чат: {trimmed_chat_id}<br><br>Пользователь: {sender_identifier}<br><br>Запрос: {keyword}<br><br><a href='{link_message}'>Ссылка на сообщение</a><br><br>Текст:<br>{escaped_message_text}"
+                                                message_text = f"Обнаружено ключевое слово\n\nЧат: {trimmed_chat_id}\n\nПользователь: {sender_identifier}\n\nЗапрос: {keyword}\n\n<a href='{link_message}'>Ссылка на сообщение</a>\n\n>Текст:\n{escaped_message_text}"
                                                 await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
                                                 print(f"Message send {user_id}: {message_text}")
                                                 db.update_all_message_ids(number_group, message_key)
