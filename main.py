@@ -93,7 +93,8 @@ async def search_and_forward():
             chat_ids = [item for item in chat_idn if item.endswith('✅') and not ('https://t.me/+' in item)]
             chat_indices = [chat_idn.index(chat) for chat in chat_ids]
             chat_names = [chat_name[index] for index in chat_indices]
-
+            print(chat_names)
+            print(chat_ids)
             if chat_ids != []:
                 number_group = group[1]
                 current_date = datetime.datetime.now()
@@ -215,7 +216,7 @@ async def search_and_forward_close_group():
                                                         sender = await message.get_sender()
                                                         sender_identifier = f"@{sender.username}" if sender else "Анонимный пользователь"
                                                         escaped_message_text = escape_html(message.text)
-                                                        message_text = f"Обнаружено ключевое слово\n\n<a href='{links_1[:-2]}'>{chat_id_name[:-2]}</a>\n\nПользователь: {sender_identifier}\n\nЗапрос: {keyword}\n\nСсылка на сообщение: Чат закрыт.\n\nТекст:\n{escaped_message_text}"
+                                                        message_text = f"Обнаружено ключевое слово\n\n<a href='{links_1[:-2]}'>{chat_id_name[:-1]}</a>\n\nПользователь: {sender_identifier}\n\nЗапрос: {keyword}\n\nСсылка на сообщение: Чат закрыт.\n\nТекст:\n{escaped_message_text}"
                                                         await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
                                                         # print(f"Message sent to user {user_id}: {message.text}")
                                                         db.update_all_message_ids(number_group, message_key)
