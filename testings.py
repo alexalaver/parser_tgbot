@@ -49,8 +49,21 @@
 #
 # print(result)
 
-a = "https://t.me/zelenka_services"
-if "httpsd" in a:
-    print('yes')
-else:
-    print("No")
+a = ["https://t.me/doubletop_otc ✅","https://t.me/+kaLhqGj2EHg3NjFi ✅","@testonepublic ✅", "https://t.me/+kaBShasVGstf63vSV ✅"]
+b = ["2TOP OTC ✅", "TESTPRIVATE5 ✅", "testonepublic ✅", "TOPING ✅"]
+
+# Отфильтровываем ссылки на открытые чаты
+chat_ids = [item for item in a if len(item) < 13 or item[13] != '+']
+
+# Функция для извлечения ключевого слова из ссылки или имени пользователя
+def extract_key_from_link(link):
+    parts = link.replace("https://t.me/", "").split()
+    return parts[0].replace("@", "")
+
+# Создаем словарь для сопоставления ключевых слов с названиями
+key_to_name = {extract_key_from_link(link): name for link, name in zip(a, b)}
+
+# Получаем названия для отфильтрованных ссылок
+chat_names = [key_to_name[extract_key_from_link(link)] for link in chat_ids if extract_key_from_link(link) in key_to_name]
+
+print(chat_names)

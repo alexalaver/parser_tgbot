@@ -68,10 +68,12 @@ async def check_keywords_len(keywords, num):
     else:
         return False
 
-
 def escape_html(text):
     return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;").replace("'", "&apos;")
 
+def extract_key_from_link(link):
+    parts = link.replace("https://t.me/", "").split()
+    return parts[0].replace("@", "")
 
 async def search_and_forward():
     num = 0
@@ -90,13 +92,17 @@ async def search_and_forward():
             user_id, chat_idn, keywords, data_end, group_name, chat_name = group[0], group[2], group[5], group[3], group[4], group[7]
             chat_ids = [item for item in chat_idn if item.endswith('✅')]
             chat_ids = [item for item in chat_ids if len(item) < 13 or item[13] != '+']
+            chat_names = [item for item in chat_name if item.endswith('✅')]
+            key_to_name = {extract_key_from_link(link): name for link, name in zip(chat_ids, chat_names)}
+
+            chat_names = [key_to_name[extract_key_from_link(link)] for link in chat_ids if extract_key_from_link(link) in key_to_name]
 
             number_group = group[1]
 
             current_date = datetime.datetime.now()
             formated_base = datetime.datetime.strptime(data_end, "%Y-%m-%d %H:%M:%S")
             if formated_base > current_date:
-                for chat_id_name in chat_name:
+                for chat_id_name in chat_names:
                     for chat_id in chat_ids:
                         trimmed_chat_id = chat_id[:-2]
                         exception_occurred = False
@@ -120,7 +126,7 @@ async def search_and_forward():
                                                     link_message = f"t.me/{trimmed_chat_id[1:]}/{str(message.id)}"
                                                 sender_identifier = f"@{sender.username}" if sender and sender.username else "Анонимный пользователь"
                                                 escaped_message_text = escape_html(message.text)
-                                                message_text = f"Обнаружено ключевое слово\n\n<a href='{trimmed_chat_id}'>Ссылка на чат</a>\n\nПользователь: {sender_identifier}\n\nЗапрос: {keyword}\n\n<a href='{link_message}'>Ссылка на сообщение</a>\n\n>Текст:\n{escaped_message_text}"
+                                                message_text = f"Обнаружено ключевое слово\n\n<a href='{trimmed_chat_id}'>{chat_id_name}</a>\n\nПользователь: {sender_identifier}\n\nЗапрос: {keyword}\n\n<a href='{link_message}'>Ссылка на сообщение</a>\n\n>Текст:\n{escaped_message_text}"
                                                 await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
                                                 db.update_all_message_ids(number_group, message_key)
                                                 await asyncio.sleep(2)
