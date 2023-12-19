@@ -100,27 +100,27 @@ async def search_and_forward():
                 current_date = datetime.datetime.now()
                 formated_base = datetime.datetime.strptime(data_end, "%Y-%m-%d %H:%M:%S")
                 if formated_base > current_date:
-                    for chat_id_name in chat_names:
-                        for chat_id in chat_ids:
-                            trimmed_chat_id = chat_id[:-2]
-                            exception_occurred = False
-                            messages_sent = db.select_message_id(number_group)
-                            try:
-                                chat_select_id = await telethon_client.get_entity(trimmed_chat_id)
-                                chat_check_id = chat_select_id.id
-                                last_id = last_message_ids.get(trimmed_chat_id, 0)
-                                messages_to_check = 30
-                                forced_check = num == 0 and last_id == 0
-                                async for message in telethon_client.iter_messages(chat_check_id, offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
-                                    if message.text:
-                                        for keyword in keywords:
-                                            if keyword.lower() in message.text.lower():
-                                                message_key = [chat_check_id, message.id]
-                                                if message_key not in messages_sent:
-                                                    sender = await message.get_sender()
-                                                    if "http" in trimmed_chat_id:
-                                                        link_message = f"{trimmed_chat_id}/{str(message.id)}"
-                                                    else:
+                    for chat_id in chat_ids:
+                        trimmed_chat_id = chat_id[:-2]
+                        exception_occurred = False
+                        messages_sent = db.select_message_id(number_group)
+                        for chat_id_name in chat_names:
+                        try:
+                            chat_select_id = await telethon_client.get_entity(trimmed_chat_id)
+                            chat_check_id = chat_select_id.id
+                            last_id = last_message_ids.get(trimmed_chat_id, 0)
+                            messages_to_check = 30
+                            forced_check = num == 0 and last_id == 0
+                            async for message in telethon_client.iter_messages(chat_check_id, offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
+                                if message.text:
+                                    for keyword in keywords:
+                                        if keyword.lower() in message.text.lower():
+                                            message_key = [chat_check_id, message.id]
+                                            if message_key not in messages_sent:
+                                                sender = await message.get_sender()
+                                                if "http" in trimmed_chat_id:
+                                                    link_message = f"{trimmed_chat_id}/{str(message.id)}"
+                                                else:
                                                         link_message = f"t.me/{trimmed_chat_id[1:]}/{str(message.id)}"
                                                     sender_identifier = f"@{sender.username}" if sender and sender.username else "Анонимный пользователь"
                                                     escaped_message_text = escape_html(message.text)
@@ -194,14 +194,14 @@ async def search_and_forward_close_group():
             formated_base = datetime.datetime.strptime(data_end, "%Y-%m-%d %H:%M:%S")
             if formated_base > current_date:
                 if chat_ids != []:
-                    for chat_id_name in chat_names:
-                        for chat_id in chat_idn:
-                            index_chat_id = int(chat_id[0][0])
-                            links_1 = chat_ids[index_chat_id - 1]
-                            links_2 = links_1[-1]
-                            if links_2 == "✅":
-                                trimmed_chat_ids = int(chat_id[0][3:])
-                                exception_occurred = False
+                    for chat_id in chat_idn:
+                        index_chat_id = int(chat_id[0][0])
+                        links_1 = chat_ids[index_chat_id - 1]
+                        links_2 = links_1[-1]
+                        if links_2 == "✅":
+                            trimmed_chat_ids = int(chat_id[0][3:])
+                            exception_occurred = False
+                            for chat_id_name in chat_names:
                                 try:
                                     last_id = last_message_ids.get(trimmed_chat_ids, 0)
                                     messages_to_check = 30
