@@ -52,14 +52,9 @@
 a = ["https://t.me/+kaLhqGj2EHg3NjFi ✅", "https://t.me/+kaLasdasd ✅", "@asdasdasdsad ✅", "@asdsadasdas ✅", "https://t.me/+kaLasdasdASdsd ✅"]
 b = ["2TOP OTC ✅", "TESTPRIVATE5 ✅", "testonepublic ✅", "TESTING ✅", "LYA LYA LYA ✅"]
 
-# Фильтруем открытые чаты
-chat_ids = [item for item in a if item.endswith('✅') and ('https://t.me/+' in item)]
-
-# Получаем индексы отфильтрованных открытых чатов
+chat_ids = [item for item in a if item.endswith('✅') and not ('https://t.me/+' in item)]
 chat_indices = [a.index(chat) for chat in chat_ids]
-
-# Используем эти индексы для выбора соответствующих названий из b
-chat_names = [b[index] for index in chat_indices]
+open_chat_names = [b[i] for i, item in enumerate(a) if item.endswith('✅') and not ('https://t.me/+' in item)]
 
 print(chat_ids)
-print(chat_names)
+print(open_chat_names)

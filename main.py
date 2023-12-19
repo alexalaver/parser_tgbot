@@ -92,7 +92,7 @@ async def search_and_forward():
             user_id, chat_idn, keywords, data_end, group_name, chat_name = group[0], group[2], group[5], group[3], group[4], group[7]
             chat_ids = [item for item in chat_idn if item.endswith('✅') and not ('https://t.me/+' in item)]
             chat_indices = [chat_idn.index(chat) for chat in chat_ids]
-            chat_names = [chat_name[index] for index in chat_indices]
+            chat_names = [chat_name[i] for i, item in enumerate(chat_idn) if item.endswith('✅') and not ('https://t.me/+' in item)]
 
             if chat_ids != []:
                 number_group = group[1]
