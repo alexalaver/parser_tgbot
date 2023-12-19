@@ -90,77 +90,74 @@ async def search_and_forward():
 
             group = groups[num]
             user_id, chat_idn, keywords, data_end, group_name, chat_name = group[0], group[2], group[5], group[3], group[4], group[7]
-            chat_ids = [item for item in chat_idn if item.endswith('✅')]
-            chat_ids = [item for item in chat_ids if len(item) < 13 or item[13] != '+']
-            chat_names = [item for item in chat_name if item.endswith('✅')]
-            key_to_name = {extract_key_from_link(link): name for link, name in zip(chat_ids, chat_names)}
+            chat_ids = [item for item in chat_idn if item.endswith('✅') and not ('https://t.me/+' in item)]
+            chat_indices = [chat_idn.index(chat) for chat in chat_ids]
+            chat_names = [chat_name[index] for index in chat_indices]
 
-            chat_names = [key_to_name[extract_key_from_link(link)] for link in chat_ids if extract_key_from_link(link) in key_to_name]
+            if chat_ids != []:
+                number_group = group[1]
+                current_date = datetime.datetime.now()
+                formated_base = datetime.datetime.strptime(data_end, "%Y-%m-%d %H:%M:%S")
+                if formated_base > current_date:
+                    for chat_id_name in chat_names:
+                        for chat_id in chat_ids:
+                            trimmed_chat_id = chat_id[:-2]
+                            exception_occurred = False
+                            messages_sent = db.select_message_id(number_group)
+                            try:
+                                chat_select_id = await telethon_client.get_entity(trimmed_chat_id)
+                                chat_check_id = chat_select_id.id
+                                last_id = last_message_ids.get(trimmed_chat_id, 0)
+                                messages_to_check = 30
+                                forced_check = num == 0 and last_id == 0
+                                async for message in telethon_client.iter_messages(chat_check_id, offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
+                                    if message.text:
+                                        for keyword in keywords:
+                                            if keyword.lower() in message.text.lower():
+                                                message_key = [chat_check_id, message.id]
+                                                if message_key not in messages_sent:
+                                                    sender = await message.get_sender()
+                                                    if "http" in trimmed_chat_id:
+                                                        link_message = f"{trimmed_chat_id}/{str(message.id)}"
+                                                    else:
+                                                        link_message = f"t.me/{trimmed_chat_id[1:]}/{str(message.id)}"
+                                                    sender_identifier = f"@{sender.username}" if sender and sender.username else "Анонимный пользователь"
+                                                    escaped_message_text = escape_html(message.text)
+                                                    message_text = f"Обнаружено ключевое слово\n\n<a href='{trimmed_chat_id}'>{chat_id_name[:-2]}</a>\n\nПользователь: {sender_identifier}\n\nЗапрос: {keyword}\n\n<a href='{link_message}'>Ссылка на сообщение</a>\n\nТекст:\n{escaped_message_text}"
+                                                    await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
+                                                    db.update_all_message_ids(number_group, message_key)
+                                                    await asyncio.sleep(2)
+                                                break
 
-            number_group = group[1]
-
-            current_date = datetime.datetime.now()
-            formated_base = datetime.datetime.strptime(data_end, "%Y-%m-%d %H:%M:%S")
-            if formated_base > current_date:
-                for chat_id_name in chat_names:
-                    for chat_id in chat_ids:
-                        trimmed_chat_id = chat_id[:-2]
-                        exception_occurred = False
-                        try:
-                            chat_select_id = await telethon_client.get_entity(trimmed_chat_id)
-                            chat_check_id = chat_select_id.id
-                            last_id = last_message_ids.get(trimmed_chat_id, 0)
-                            messages_to_check = 30
-                            forced_check = num == 0 and last_id == 0
-                            async for message in telethon_client.iter_messages(chat_check_id, offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
-                                if message.text:
-                                    for keyword in keywords:
-                                        if keyword.lower() in message.text.lower():
-                                            message_key = [chat_check_id, message.id]
-                                            messages_sent = db.select_message_id(number_group)
-                                            if message_key not in messages_sent:
-                                                sender = await message.get_sender()
-                                                if "http" in trimmed_chat_id:
-                                                    link_message = f"{trimmed_chat_id}/{str(message.id)}"
-                                                else:
-                                                    link_message = f"t.me/{trimmed_chat_id[1:]}/{str(message.id)}"
-                                                sender_identifier = f"@{sender.username}" if sender and sender.username else "Анонимный пользователь"
-                                                escaped_message_text = escape_html(message.text)
-                                                message_text = f"Обнаружено ключевое слово\n\n<a href='{trimmed_chat_id}'>{chat_id_name[:-2]}</a>\n\nПользователь: {sender_identifier}\n\nЗапрос: {keyword}\n\n<a href='{link_message}'>Ссылка на сообщение</a>\n\nТекст:\n{escaped_message_text}"
-                                                await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
-                                                db.update_all_message_ids(number_group, message_key)
-                                                await asyncio.sleep(2)
-                                            break
-
-                        except FloodWaitError as e:
-                            wait_time = e.seconds
-                            print(f"Flood wait error on chat {trimmed_chat_id}. Sleeping for {wait_time} seconds.")
-                            await asyncio.sleep(3)
-                            exception_occurred = True
-                        except Exception as erri:
-                            print(f"[ERROR EXCEPTION] {erri}")
-                            all_channels = db.select_channels_with_number(number_group)
-                            new_callback = chat_id[:-1] + '⏳'
-                            new_channels = [new_callback if item == chat_id else item for item in all_channels]
-                            db.update_all_channels(number_group, new_channels)
-                            all_channels_name = db.select_channels_name_with_number(number_group)
-                            new_callback_name = chat_id_name[:-1] + '⏳'
-                            new_channels_name = [new_callback_name if item == chat_id_name else item for item in all_channels_name]
-                            db.update_all_channels_name(number_group, new_channels_name)
-                            await asyncio.sleep(2)
-                            exception_occurred = True
-                        finally:
-                            if exception_occurred is False:
-                                messages = await telethon_client.get_messages(trimmed_chat_id, limit=1)
-                                if messages:
-                                    last_message_ids[trimmed_chat_id] = messages[0].id
-                                else:
-                                    pass
-            else:
-                db.delete_data_end_group(number_group)
-                formated_chat_idn = [s.replace('✅', '⚠') for s in chat_idn]
-                db.update_all_channels(number_group, formated_chat_idn)
-                await bot.send_message(user_id, cfg.end_data_group_text(group_name))
+                            except FloodWaitError as e:
+                                wait_time = e.seconds
+                                print(f"Flood wait error on chat {trimmed_chat_id}. Sleeping for {wait_time} seconds.")
+                                await asyncio.sleep(3)
+                                exception_occurred = True
+                            except Exception as erri:
+                                print(f"[ERROR EXCEPTION] {erri}")
+                                all_channels = db.select_channels_with_number(number_group)
+                                new_callback = chat_id[:-1] + '⏳'
+                                new_channels = [new_callback if item == chat_id else item for item in all_channels]
+                                db.update_all_channels(number_group, new_channels)
+                                all_channels_name = db.select_channels_name_with_number(number_group)
+                                new_callback_name = chat_id_name[:-1] + '⏳'
+                                new_channels_name = [new_callback_name if item == chat_id_name else item for item in all_channels_name]
+                                db.update_all_channels_name(number_group, new_channels_name)
+                                await asyncio.sleep(2)
+                                exception_occurred = True
+                            finally:
+                                if exception_occurred is False:
+                                    messages = await telethon_client.get_messages(trimmed_chat_id, limit=1)
+                                    if messages:
+                                        last_message_ids[trimmed_chat_id] = messages[0].id
+                                    else:
+                                        pass
+                else:
+                    db.delete_data_end_group(number_group)
+                    formated_chat_idn = [s.replace('✅', '⚠') for s in chat_idn]
+                    db.update_all_channels(number_group, formated_chat_idn)
+                    await bot.send_message(user_id, cfg.end_data_group_text(group_name))
 
             num += 1
             if num >= len(groups):
@@ -187,18 +184,19 @@ async def search_and_forward_close_group():
                 continue
 
             group = groups[num]
-            user_id, chat_ids, keywords, channelss_link, data_end, group_name, channels_name = group[0], group[8] or [], group[5], group[2], group[3], group[4], group[7]
-            channels_link = [i for i, item in enumerate(channelss_link) if len(item) >= 13 and item[13] == '+']
-            closed_chat_names = [channels_name[i] for i in channels_link]
+            user_id, chat_idn, keywords, channelss_link, data_end, group_name, channels_name = group[0], group[8] or [], group[5], group[2], group[3], group[4], group[7]
+            chat_ids = [item for item in chat_idn if item.endswith('✅') and ('https://t.me/+' in item)]
+            chat_indices = [chat_idn.index(chat) for chat in chat_ids]
+            chat_names = [channels_name[index] for index in chat_indices]
             number_group = group[1]
             current_date = datetime.datetime.now()
             formated_base = datetime.datetime.strptime(data_end, "%Y-%m-%d %H:%M:%S")
             if formated_base > current_date:
                 if chat_ids != []:
-                    for chat_id_name in closed_chat_names:
+                    for chat_id_name in chat_names:
                         for chat_id in chat_ids:
                             index_chat_id = int(chat_id[0][0])
-                            links_1 = channels_link[index_chat_id - 1]
+                            links_1 = chat_ids[index_chat_id - 1]
                             links_2 = links_1[-1]
                             if links_2 == "✅":
                                 trimmed_chat_ids = int(chat_id[0][3:])

@@ -49,13 +49,17 @@
 #
 # print(result)
 
-a = ["https://t.me/doubletop_otc ✅", "https://t.me/+kaLhqGj2EHg3NjFi ✅", "@testonepublic ✅", "https://t.me/+kaLasdasd ✅"]
-b = ["2TOP OTC ✅", "TESTPRIVATE5 ✅", "testonepublic ✅", "TESTING ✅"]
+a = ["https://t.me/+kaLhqGj2EHg3NjFi ✅", "https://t.me/+kaLasdasd ✅", "@asdasdasdsad ✅", "@asdsadasdas ✅", "https://t.me/+kaLasdasdASdsd ✅"]
+b = ["2TOP OTC ✅", "TESTPRIVATE5 ✅", "testonepublic ✅", "TESTING ✅", "LYA LYA LYA ✅"]
 
-channels_link = [item for item in a if len(item) >= 13 and item[13] == '+']
-closed_chat_indices = [i for i, item in enumerate(channels_link) if len(item) >= 13 and item[13] == '+']
+# Фильтруем открытые чаты
+chat_ids = [item for item in a if item.endswith('✅') and ('https://t.me/+' in item)]
 
-# Получаем названия для закрытых чатов, используя отфильтрованные индексы
-closed_chat_names = [b[i] for i in closed_chat_indices]
+# Получаем индексы отфильтрованных открытых чатов
+chat_indices = [a.index(chat) for chat in chat_ids]
 
-print(closed_chat_names)
+# Используем эти индексы для выбора соответствующих названий из b
+chat_names = [b[index] for index in chat_indices]
+
+print(chat_ids)
+print(chat_names)
