@@ -93,8 +93,6 @@ async def search_and_forward():
             chat_ids = [item for item in chat_idn if item.endswith('✅') and not ('https://t.me/+' in item)]
             chat_indices = [chat_idn.index(chat) for chat in chat_ids]
             chat_names = [chat_name[index] for index in chat_indices]
-            print(chat_names)
-            print(chat_ids)
             if chat_ids != []:
                 number_group = group[1]
                 current_date = datetime.datetime.now()
