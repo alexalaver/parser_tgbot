@@ -1813,7 +1813,7 @@ async def add_post_func_text_4(message: types.Message, state: FSMContext):
                                         await message.answer(cfg.error_channel_name_add)
                                         break
                                 else:
-                                    if channel_name[:8] == "https://":
+                                    if "http" in channel_name or "t.me/" in channel_name:
                                         response = requests.get(channel_name)
                                     else:
                                         response = requests.get(f"https://t.me/{channel_name}")
@@ -2034,7 +2034,7 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                             channels_name_1 = []
                             await message.answer(cfg.please_wait_add_channels_name)
                             for channel_name in text_line:
-                                if "https" in channel_name:
+                                if "http" in channel_name or "t.me/" in channel_name:
                                     response = requests.get(channel_name)
                                     html_content = response.text
                                     soup = BeautifulSoup(html_content, 'html.parser')
