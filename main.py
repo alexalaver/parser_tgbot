@@ -91,7 +91,7 @@ def get_user_username(link):
         'class': 'tgme_widget_message_user'}) else None
 
     if a_href is not None:
-        return a_href
+        print(a_href)
     else:
         return "Анонимный пользователь"
 
