@@ -414,7 +414,7 @@ async def parsers_send(message):
 
     btn_inline1 = types.InlineKeyboardButton(cfg.groups_add_button, callback_data='groups_add_button_parser')
     markup_inline.add(btn_inline1)
-    await message.answer_photo(photo=types.InputFile("img/photo2.png"), caption=cfg.parser_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+    await message.answer_photo(photo=types.InputFile("img/photo2.jpg"), caption=cfg.parser_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
 
 async def autoposting_send(message):
     markup_inline = types.InlineKeyboardMarkup(row_width=1)
@@ -582,7 +582,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     markup_inline.add(button)
                 btn_inline1 = types.InlineKeyboardButton(cfg.groups_add_button, callback_data='groups_add_button_parser')
                 markup_inline.add(btn_inline1)
-                await callback_query.message.answer_photo(photo=types.InputFile("img/photo2.png"), caption=cfg.parser_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+                await callback_query.message.answer_photo(photo=types.InputFile("img/photo2.jpg"), caption=cfg.parser_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
             except Exception:
                 await callback_query.answer("Произошла ошибка при нажатии на кнопку Меню для Парсера", show_alert=True)
         elif callback_query.data == "menu_after_pay_autoposting":
