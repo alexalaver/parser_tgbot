@@ -485,7 +485,7 @@ class Data:
 
     def select_autoposting_post_name_for_number(self, id, number_account):
         with self.connect:
-            self.cursor.execute("SELECT post FROM autoposting_post WHERE id=%s AND number_account=%s", (id, number_account,))
+            self.cursor.execute("SELECT post_name FROM autoposting_post WHERE id=%s AND number_account=%s", (id, number_account,))
             a = self.cursor.fetchall()
             result_list = [item[0] for item in a]
             return result_list
@@ -500,9 +500,9 @@ class Data:
             else:
                 return len(b)
 
-    def add_post_account(self, id, post, string_session, chats, time_betw, number_post, number_account, channel_tag, message_id_bot, channels_title, days):
+    def add_post_account(self, id, post, string_session, chats, time_betw, number_post, number_account, channel_tag, message_id_bot, channels_title, days, post_name):
         with self.connect:
-            self.cursor.execute("INSERT INTO autoposting_post(id, post, string_session, chats, time_betw, number_post, number_account, channel_tag, message_id_bot, channels_title, days) VALUES(%s, %s, %s, %s::jsonb, %s, %s, %s, %s, %s, %s, %s)", (id, post, string_session, chats, time_betw, number_post, number_account, channel_tag, message_id_bot, channels_title, days,))
+            self.cursor.execute("INSERT INTO autoposting_post(id, post, string_session, chats, time_betw, number_post, number_account, channel_tag, message_id_bot, channels_title, days, post_name) VALUES(%s, %s, %s, %s::jsonb, %s, %s, %s, %s, %s, %s, %s, %s)", (id, post, string_session, chats, time_betw, number_post, number_account, channel_tag, message_id_bot, channels_title, days, post_name,))
             self.connect.commit()
 
     def get_string_session(self, number_account):
@@ -577,3 +577,10 @@ class Data:
             self.cursor.execute("SELECT channels_id FROM groups")
             a = self.cursor.fetchall()
             return a
+
+    def select_all_post_name(self):
+        with self.connect:
+            self.cursor.execute("SELECT post_name FROM autoposting_post")
+            a = self.cursor.fetchall()
+            result_list = [item[0] for item in a]
+            return result_list

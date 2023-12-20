@@ -310,7 +310,7 @@ async def autoposting_forward():
                 continue
             moscow_tz = pytz.timezone('Europe/Moscow')
             group = groups[num]
-            user_id, chat_ids, string_session, message_id, number_group, data_end, channel_tag = group[0], group[10], group[2], group[1], group[4], group[3], group[6]
+            user_id, chat_ids, string_session, message_id, number_group, data_end, channel_tag, post_name = group[0], group[10], group[2], group[1], group[4], group[3], group[6], group[12]
             # chat_ids = [sublist for sublist in chat_idn if '✅' in sublist[0]]
             current_date = datetime.datetime.now(moscow_tz)
             formated_base = datetime.datetime.strptime(data_end, "%Y-%m-%d %H:%M:%S")
@@ -318,7 +318,7 @@ async def autoposting_forward():
             if formated_base > current_date:
                 if chat_ids != []:
                     current_date = datetime.datetime.now(moscow_tz)
-                    for chat_id in chat_ids:
+                    for chat_id, posts_name in zip(chat_ids, post_name):
                         formated_chat_id = chat_id[0][:-2]
                         date_betw = chat_id[1:]
                         for date_bet in date_betw:
@@ -329,7 +329,7 @@ async def autoposting_forward():
                                     async with TelegramClient(StringSession(string_session), cfg.API_ID, cfg.API_HASH) as telethon_client_autoposting:
                                             try:
                                                 await telethon_client_autoposting.forward_messages(entity=formated_chat_id, messages=int(message_id), from_peer=channel_tag)
-                                                await bot.send_message(user_id, f"Рекламный пост, успешно отправлен в чат {formated_chat_id}")
+                                                await bot.send_message(user_id, f"Рекламный пост, успешно отправлен в чат <a href='{formated_chat_id}'>{posts_name}</a>", parse_mode=types.ParseMode.HTML)
                                                 await asyncio.sleep(5)
                                             except RPCError as err:
                                                 print(f"[ERROR RPCError] {err}")
@@ -380,6 +380,7 @@ class Add_post(StatesGroup):
     add_post_2 = State()
     add_post_3 = State()
     add_post_4 = State()
+    add_post_5 = State()
 
 class Change_time_betw(StatesGroup):
     change_time_betw_1 = State()
@@ -1282,6 +1283,8 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                             a = [updated_sublist if sub[0] == settings_callback_data else sub for sub in post_names]
                     json_data = json.dumps(a)
                     db.update_chat_idn_autoposting(json_data, number_group_autoposting)
+                    # await bot.delete_message(callback_query.from_user.id, callback_query.message.message_id)
+                    await callback_query.message.delete()
                     await callback_query.message.answer(cfg.delete_time_autoposting_yes_text)
                 elif callback_query.data == "next_page_autoposting":
                     if channels_page_autoposting == page_here_autoposting:
@@ -1802,6 +1805,33 @@ async def add_post_func_text_4(message: types.Message, state: FSMContext):
     if message.chat.type == types.ChatType.PRIVATE:
         try:
             user_id = message.from_user.id
+            if message.text == cfg.cancel_creategroup:
+                markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+                markup_reply.add(cfg.autoposting)
+                markup_reply.add(cfg.parser)
+                markup_reply.row(cfg.my_profile, cfg.support)
+                if db.select_admin(user_id) > 0:
+                    markup_reply.add(cfg.admin_panel_button)
+                await state.reset_state()
+                await message.answer(cfg.cancel_createpost_text, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
+            elif message.text:
+                if 3 <= len(message.text) <= 15:
+                    if message.text in db.select_all_post_name():
+                        await message.answer(cfg.error_name_again, parse_mode=types.ParseMode.MARKDOWN)
+                    else:
+                        await state.update_data(post_name=message.text)
+                        await message.answer(cfg.create_account_post_5, parse_mode=types.ParseMode.MARKDOWN)
+                        await Add_post.add_post_5.set()
+                else:
+                    await message.answer(cfg.error_len_name_post, parse_mode=types.ParseMode.MARKDOWN)
+        except Exception:
+            await message.answer("Произошла ошибка, пожалуйста повторите ещё раз:")
+
+@dp.message_handler(state=Add_post.add_post_5)
+async def add_post_func_text_5(message: types.Message, state: FSMContext):
+    if message.chat.type == types.ChatType.PRIVATE:
+        try:
+            user_id = message.from_user.id
             textsing = message.text
             text_line = textsing.strip().split('\n')
             text_lines = [[element + ' ⚠'] for element in text_line]
@@ -1870,8 +1900,9 @@ async def add_post_func_text_4(message: types.Message, state: FSMContext):
                                 channel_tag = data.get("channel_tag")
                                 message_id_bot = data.get("message_id_bot")
                                 days = data.get("days")
+                                post_name = data.get("post_name")
                                 json_data = json.dumps(text_lines)
-                                db.add_post_account(user_id, forwarded_message_id, string_session, json_data, time_betw, new_number_post, number_account, channel_tag, message_id_bot, channels_name_2, days)
+                                db.add_post_account(user_id, forwarded_message_id, string_session, json_data, time_betw, new_number_post, number_account, channel_tag, message_id_bot, channels_name_2, days, post_name)
                                 markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
                                 markup_reply.add(cfg.autoposting)
                                 markup_reply.add(cfg.parser)
