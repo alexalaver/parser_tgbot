@@ -139,10 +139,14 @@ async def search_and_forward():
                                                 else:
                                                     link_message = f"https://t.me/{trimmed_chat_id}/{str(message.id)}"
                                                     chat_link = f"https://t.me/{trimmed_chat_id}"
-                                                username = get_user_username(link_message)
+                                                username_1 = get_user_username(link_message)
+                                                if username_1 == "Анонимный пользователь":
+                                                    username = "Анонимный пользователь"
+                                                else:
+                                                    username = f"@username_1[13:]"
                                                 if "bot" not in username.lower():
                                                     escaped_message_text = escape_html(message.text)
-                                                    message_text = f"Обнаружено ключевое слово\n\n<a href='{chat_link}'>{chat_id_name[:-2]}</a>\n\nПользователь: @{username[13:]}\n\nЗапрос: {keyword}\n\n<a href='{link_message}'>Ссылка на сообщение</a>\n\nТекст:\n{escaped_message_text}"
+                                                    message_text = f"Обнаружено ключевое слово\n\n<a href='{chat_link}'>{chat_id_name[:-2]}</a>\n\nПользователь: {username}\n\nЗапрос: {keyword}\n\n<a href='{link_message}'>Ссылка на сообщение</a>\n\nТекст:\n{escaped_message_text}"
                                                     await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
                                                     db.update_all_message_ids(number_group, message_key)
                                                     await asyncio.sleep(2)
