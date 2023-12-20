@@ -139,10 +139,13 @@ async def search_and_forward():
                                                 if "http" in trimmed_chat_id:
                                                     link_message = f"{trimmed_chat_id}/{str(message.id)}"
                                                     chat_link = f"{trimmed_chat_id}"
-                                                else:
+                                                elif "@" in trimmed_chat_id:
                                                     link_message = f"t.me/{trimmed_chat_id[1:]}/{str(message.id)}"
                                                     chat_link = f"t.me/{trimmed_chat_id[1:]}"
-                                                get_user_username(trimmed_chat_id)
+                                                else:
+                                                    link_message = f"t.me/{trimmed_chat_id}/{str(message.id)}"
+                                                    chat_link = f"t.me/{trimmed_chat_id}"
+                                                get_user_username(link_message)
                                                 # if "bot" not in sender_identifier:
                                                 #     escaped_message_text = escape_html(message.text)
                                                 #     message_text = f"Обнаружено ключевое слово\n\n<a href='{chat_link}'>{chat_id_name[:-2]}</a>\n\nПользователь: @{sender_identifier[13:]}\n\nЗапрос: {keyword}\n\n<a href='{link_message}'>Ссылка на сообщение</a>\n\nТекст:\n{escaped_message_text}"
