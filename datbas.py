@@ -390,20 +390,20 @@ class Data:
 
     def select_chats_post(self, id, post_id):
         with self.connect:
-            self.cursor.execute("SELECT chats FROM autoposting_post WHERE id=%s AND post=%s", (id, post_id,))
+            self.cursor.execute("SELECT chats FROM autoposting_post WHERE id=%s AND post_name=%s", (id, post_id,))
             a = self.cursor.fetchone()[0]
             first_elements = [sublist[0] for sublist in a]
             return first_elements
 
     def select_chats_name_post(self, id, post_id):
         with self.connect:
-            self.cursor.execute("SELECT channels_title FROM autoposting_post WHERE id=%s AND post=%s", (id, post_id,))
+            self.cursor.execute("SELECT channels_title FROM autoposting_post WHERE id=%s AND post_name=%s", (id, post_id,))
             a = self.cursor.fetchone()[0]
             return a
 
     def check_date_tarife_account(self, id, post_id):
         with self.connect:
-            self.cursor.execute("SELECT data_end FROM autoposting_post WHERE id=%s AND post=%s", (id, post_id,))
+            self.cursor.execute("SELECT data_end FROM autoposting_post WHERE id=%s AND post_name=%s", (id, post_id,))
             a = self.cursor.fetchone()[0]
             return a
 
@@ -473,7 +473,7 @@ class Data:
 
     def select_number_post(self, id, account_name):
         with self.connect:
-            self.cursor.execute("SELECT number_post FROM autoposting_post WHERE id=%s AND post=%s", (id, account_name,))
+            self.cursor.execute("SELECT number_post FROM autoposting_post WHERE id=%s AND post_name=%s", (id, account_name,))
             a = self.cursor.fetchone()[0]
             return a
 
@@ -552,7 +552,7 @@ class Data:
 
     def select_post_name(self, post):
         with self.connect:
-            self.cursor.execute("SELECT message_id_bot FROM autoposting_post WHERE post=%s", (post,))
+            self.cursor.execute("SELECT message_id_bot FROM autoposting_post WHERE post_name=%s", (post,))
             a = self.cursor.fetchone()
             return a[0]
 
