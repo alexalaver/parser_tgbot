@@ -125,6 +125,7 @@ async def search_and_forward():
                                             message_key = [chat_check_id, message.id]
                                             if message_key not in messages_sent:
                                                 sender = await message.get_sender()
+                                                print(sender.id)
                                                 username = await telethon_client(GetFullUserRequest(sender.id))
                                                 if "http" in trimmed_chat_id:
                                                     link_message = f"{trimmed_chat_id}/{str(message.id)}"
