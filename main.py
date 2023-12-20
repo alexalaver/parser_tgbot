@@ -134,11 +134,11 @@ async def search_and_forward():
                                                     link_message = f"{trimmed_chat_id}/{str(message.id)}"
                                                     chat_link = f"{trimmed_chat_id}"
                                                 elif "@" in trimmed_chat_id:
-                                                    link_message = f"t.me/{trimmed_chat_id[1:]}/{str(message.id)}"
-                                                    chat_link = f"t.me/{trimmed_chat_id[1:]}"
+                                                    link_message = f"https://t.me/{trimmed_chat_id[1:]}/{str(message.id)}"
+                                                    chat_link = f"https://t.me/{trimmed_chat_id[1:]}"
                                                 else:
-                                                    link_message = f"t.me/{trimmed_chat_id}/{str(message.id)}"
-                                                    chat_link = f"t.me/{trimmed_chat_id}"
+                                                    link_message = f"https://t.me/{trimmed_chat_id}/{str(message.id)}"
+                                                    chat_link = f"https://t.me/{trimmed_chat_id}"
                                                 get_user_username(link_message)
                                                 # if "bot" not in sender_identifier:
                                                 #     escaped_message_text = escape_html(message.text)
