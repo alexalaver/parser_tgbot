@@ -6,6 +6,7 @@ from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from datbas import Data
 from telethon import TelegramClient
 from telethon.sessions import StringSession
+from telethon.tl.functions.users import GetFullUserRequest
 from telethon.errors import FloodWaitError, ChannelPrivateError, ChatForbiddenError, UserPrivacyRestrictedError, PeerIdInvalidError, SessionPasswordNeededError, PhoneCodeExpiredError, PhoneNumberUnoccupiedError, RPCError
 from bs4 import BeautifulSoup
 import requests
@@ -75,6 +76,16 @@ def extract_key_from_link(link):
     parts = link.replace("https://t.me/", "").split()
     return parts[0].replace("@", "")
 
+
+async def get_user_tag(user_id):
+    try:
+        user = await telethon_client(GetFullUserRequest(user_id))
+
+        return "@" + user.user.username if user.user.username else "Анонимный пользователь"
+    except Exception as e:
+        print(f"Произошла ошибка: {e}")
+        return "Анонимный пользователь"
+
 async def search_and_forward():
     num = 0
     last_message_ids = {}
@@ -114,13 +125,14 @@ async def search_and_forward():
                                             message_key = [chat_check_id, message.id]
                                             if message_key not in messages_sent:
                                                 sender = await message.get_sender()
+                                                username = await telethon_client(GetFullUserRequest(sender.id))
                                                 if "http" in trimmed_chat_id:
                                                     link_message = f"{trimmed_chat_id}/{str(message.id)}"
                                                     chat_link = f"{trimmed_chat_id}"
                                                 else:
                                                     link_message = f"t.me/{trimmed_chat_id[1:]}/{str(message.id)}"
                                                     chat_link = f"t.me/{trimmed_chat_id[1:]}"
-                                                sender_identifier = f"@{sender.username}" if sender and sender.username else "Анонимный пользователь"
+                                                sender_identifier = f"@{username.user.username}" if sender and username.user.username else "Анонимный пользователь"
                                                 escaped_message_text = escape_html(message.text)
                                                 message_text = f"Обнаружено ключевое слово\n\n<a href='{chat_link}'>{chat_id_name[:-2]}</a>\n\nПользователь: {sender_identifier}\n\nЗапрос: {keyword}\n\n<a href='{link_message}'>Ссылка на сообщение</a>\n\nТекст:\n{escaped_message_text}"
                                                 await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
