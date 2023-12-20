@@ -143,7 +143,7 @@ async def search_and_forward():
                                                 if username_1 == "Анонимный пользователь":
                                                     username = "Анонимный пользователь"
                                                 else:
-                                                    username = f"@username_1[13:]"
+                                                    username = f"@{username_1[13:]}"
                                                 if "bot" not in username.lower():
                                                     escaped_message_text = escape_html(message.text)
                                                     message_text = f"Обнаружено ключевое слово\n\n<a href='{chat_link}'>{chat_id_name[:-2]}</a>\n\nПользователь: {username}\n\nЗапрос: {keyword}\n\n<a href='{link_message}'>Ссылка на сообщение</a>\n\nТекст:\n{escaped_message_text}"
