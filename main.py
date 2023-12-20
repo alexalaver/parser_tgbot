@@ -115,7 +115,11 @@ async def search_and_forward():
                                             message_key = [chat_check_id, message.id]
                                             if message_key not in messages_sent:
                                                 sender = await message.get_sender()
-                                                full_user = await telethon_client(GetFullUserRequest(sender.id))
+                                                try:
+                                                    full_user = await telethon_client(GetFullUserRequest(sender.id))
+                                                    sender_identifier = f"@{full_user.user.username}" if full_user.user and full_user.user.username else "Анонимный пользователь"
+                                                except AttributeError:
+                                                    sender_identifier = "Анонимный пользователь"
                                                 if "http" in trimmed_chat_id:
                                                     link_message = f"{trimmed_chat_id}/{str(message.id)}"
                                                     chat_link = f"{trimmed_chat_id}"
