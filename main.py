@@ -93,6 +93,7 @@ async def search_and_forward():
             chat_ids = [item for item in chat_idn if item.endswith('✅') and not ('https://t.me/+' in item)]
             chat_indices = [chat_idn.index(chat) for chat in chat_ids]
             chat_names = [chat_name[index] for index in chat_indices]
+            messages_sent = db.select_message_id(number_group)
             if chat_ids != []:
                 number_group = group[1]
                 current_date = datetime.datetime.now()
@@ -101,7 +102,6 @@ async def search_and_forward():
                     for chat_id in chat_ids:
                         trimmed_chat_id = chat_id[:-2]
                         exception_occurred = False
-                        messages_sent = db.select_message_id(number_group)
                         for chat_id_name in chat_names:
                             try:
                                 chat_select_id = await telethon_client.get_entity(trimmed_chat_id)
