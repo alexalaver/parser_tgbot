@@ -76,16 +76,6 @@ def extract_key_from_link(link):
     parts = link.replace("https://t.me/", "").split()
     return parts[0].replace("@", "")
 
-
-async def get_user_tag(user_id):
-    try:
-        user = await telethon_client(GetFullUserRequest(user_id))
-
-        return "@" + user.user.username if user.user.username else "Анонимный пользователь"
-    except Exception as e:
-        print(f"Произошла ошибка: {e}")
-        return "Анонимный пользователь"
-
 async def search_and_forward():
     num = 0
     last_message_ids = {}
