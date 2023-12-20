@@ -318,7 +318,7 @@ async def autoposting_forward():
             if formated_base > current_date:
                 if chat_ids != []:
                     current_date = datetime.datetime.now(moscow_tz)
-                    for chat_id, posts_name in zip(chat_ids, post_name):
+                    for chat_id:
                         formated_chat_id = chat_id[0][:-2]
                         date_betw = chat_id[1:]
                         for date_bet in date_betw:
@@ -329,7 +329,7 @@ async def autoposting_forward():
                                     async with TelegramClient(StringSession(string_session), cfg.API_ID, cfg.API_HASH) as telethon_client_autoposting:
                                             try:
                                                 await telethon_client_autoposting.forward_messages(entity=formated_chat_id, messages=int(message_id), from_peer=channel_tag)
-                                                await bot.send_message(user_id, f"Рекламный пост, успешно отправлен в чат <a href='{formated_chat_id}'>{posts_name}</a>", parse_mode=types.ParseMode.HTML)
+                                                await bot.send_message(user_id, f"Рекламный пост, успешно отправлен в чат <a href='{formated_chat_id}'>{post_name}</a>", parse_mode=types.ParseMode.HTML)
                                                 await asyncio.sleep(5)
                                             except RPCError as err:
                                                 print(f"[ERROR RPCError] {err}")
