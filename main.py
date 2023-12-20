@@ -77,19 +77,19 @@ def extract_key_from_link(link):
 
 def get_user_username(link):
     url = link + '?embed=1&mode=tme'
+    try:
+        response = requests.get(url)
+        soup = BeautifulSoup(response.content, 'html.parser')
 
-    print(url)
+        a_href = soup.find('div', {'class': 'tgme_widget_message_user'}).find('a')['href'] if soup.find('div', {
+            'class': 'tgme_widget_message_user'}) else None
 
-    response = requests.get(url)
-    soup = BeautifulSoup(response.content, 'html.parser')
-
-    a_href = soup.find('div', {'class': 'tgme_widget_message_user'}).find('a')['href'] if soup.find('div', {
-        'class': 'tgme_widget_message_user'}) else None
-
-    if a_href is not None:
-        print(a_href)
-    else:
-        return "Анонимный пользователь"
+        if a_href is not None:
+            return a_href
+        else:
+            return "Анонимный пользователь"
+    except Exception:
+        return ""Анонимный пользователь""
 
 async def search_and_forward():
     num = 0
@@ -139,13 +139,13 @@ async def search_and_forward():
                                                 else:
                                                     link_message = f"https://t.me/{trimmed_chat_id}/{str(message.id)}"
                                                     chat_link = f"https://t.me/{trimmed_chat_id}"
-                                                get_user_username(link_message)
-                                                # if "bot" not in sender_identifier:
-                                                #     escaped_message_text = escape_html(message.text)
-                                                #     message_text = f"Обнаружено ключевое слово\n\n<a href='{chat_link}'>{chat_id_name[:-2]}</a>\n\nПользователь: @{sender_identifier[13:]}\n\nЗапрос: {keyword}\n\n<a href='{link_message}'>Ссылка на сообщение</a>\n\nТекст:\n{escaped_message_text}"
-                                                #     await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
-                                                #     db.update_all_message_ids(number_group, message_key)
-                                                #     await asyncio.sleep(2)
+                                                username = get_user_username(link_message)
+                                                if "bot" not in username.lower():
+                                                    escaped_message_text = escape_html(message.text)
+                                                    message_text = f"Обнаружено ключевое слово\n\n<a href='{chat_link}'>{chat_id_name[:-2]}</a>\n\nПользователь: @{username[13:]}\n\nЗапрос: {keyword}\n\n<a href='{link_message}'>Ссылка на сообщение</a>\n\nТекст:\n{escaped_message_text}"
+                                                    await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
+                                                    db.update_all_message_ids(number_group, message_key)
+                                                    await asyncio.sleep(2)
                                             break
 
                         except FloodWaitError as e:
