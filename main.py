@@ -82,6 +82,8 @@ def get_user_username(link):
     else:
         url = link + '?embed=1&mode=tme'
 
+    print(url)
+
     response = requests.get(url)
     soup = BeautifulSoup(response.content, 'html.parser')
 
