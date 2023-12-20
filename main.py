@@ -310,7 +310,7 @@ async def autoposting_forward():
                 continue
             moscow_tz = pytz.timezone('Europe/Moscow')
             group = groups[num]
-            user_id, chat_ids, string_session, message_id, number_group, data_end, channel_tag, post_name = group[0], group[10], group[2], group[1], group[4], group[3], group[6], group[12]
+            user_id, chat_ids, string_session, message_id, number_group, data_end, channel_tag, channels_name = group[0], group[10], group[2], group[1], group[4], group[3], group[6], groups[8]
             # chat_ids = [sublist for sublist in chat_idn if '✅' in sublist[0]]
             current_date = datetime.datetime.now(moscow_tz)
             formated_base = datetime.datetime.strptime(data_end, "%Y-%m-%d %H:%M:%S")
@@ -318,7 +318,7 @@ async def autoposting_forward():
             if formated_base > current_date:
                 if chat_ids != []:
                     current_date = datetime.datetime.now(moscow_tz)
-                    for chat_id in chat_ids:
+                    for chat_id, channel_name in zip(chat_ids, channels_name):
                         formated_chat_id = chat_id[0][:-2]
                         date_betw = chat_id[1:]
                         for date_bet in date_betw:
@@ -329,7 +329,7 @@ async def autoposting_forward():
                                     async with TelegramClient(StringSession(string_session), cfg.API_ID, cfg.API_HASH) as telethon_client_autoposting:
                                             try:
                                                 await telethon_client_autoposting.forward_messages(entity=formated_chat_id, messages=int(message_id), from_peer=channel_tag)
-                                                await bot.send_message(user_id, f"Рекламный пост, успешно отправлен в чат <a href='{formated_chat_id}'>{post_name}</a>", parse_mode=types.ParseMode.HTML)
+                                                await bot.send_message(user_id, f"Рекламный пост, успешно отправлен в чат <a href='{formated_chat_id}'>{channel_name[:-2]}</a>", parse_mode=types.ParseMode.HTML)
                                                 await asyncio.sleep(5)
                                             except RPCError as err:
                                                 print(f"[ERROR RPCError] {err}")
