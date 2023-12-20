@@ -78,9 +78,9 @@ def extract_key_from_link(link):
 def get_user_username(link):
     url = None
     if "http" in link:
-        url = "https://t.me/" + link[1:] + '?embed=1&mode=tme'
-    else:
         url = link + '?embed=1&mode=tme'
+    else:
+        url = "https://t.me/" + link[1:] + '?embed=1&mode=tme'
 
     print(url)
 
