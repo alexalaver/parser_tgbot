@@ -79,8 +79,10 @@ def get_user_username(link):
     url = None
     if "http" in link:
         url = link + '?embed=1&mode=tme'
-    else:
+    elif "@" in link:
         url = "https://t.me/" + link[1:] + '?embed=1&mode=tme'
+    else:
+        url = "https://t.me/" + link + '?embed=1&mode=tme'
 
     print(url)
 
