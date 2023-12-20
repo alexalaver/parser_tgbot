@@ -318,7 +318,7 @@ async def autoposting_forward():
             if formated_base > current_date:
                 if chat_ids != []:
                     current_date = datetime.datetime.now(moscow_tz)
-                    for chat_id:
+                    for chat_id in chat_ids:
                         formated_chat_id = chat_id[0][:-2]
                         date_betw = chat_id[1:]
                         for date_bet in date_betw:
