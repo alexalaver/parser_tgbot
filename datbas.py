@@ -466,7 +466,7 @@ class Data:
 
     def select_autoposting_post_name(self, id):
         with self.connect:
-            self.cursor.execute("SELECT post FROM autoposting_post WHERE id=%s", (id,))
+            self.cursor.execute("SELECT post_name FROM autoposting_post WHERE id=%s", (id,))
             a = self.cursor.fetchall()
             result_list = [item[0] for item in a]
             return result_list
