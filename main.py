@@ -89,7 +89,7 @@ def get_user_username(link):
         else:
             return "Анонимный пользователь"
     except Exception:
-        return ""Анонимный пользователь""
+        return "Анонимный пользователь"
 
 async def search_and_forward():
     num = 0
