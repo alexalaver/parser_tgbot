@@ -75,6 +75,24 @@ def extract_key_from_link(link):
     parts = link.replace("https://t.me/", "").split()
     return parts[0].replace("@", "")
 
+def get_user_username(link):
+    url = None
+    if "http" in link:
+        url = "https://t.me/" + link[1:] + '?embed=1&mode=tme'
+    else:
+        url = link + '?embed=1&mode=tme'
+
+    response = requests.get(url)
+    soup = BeautifulSoup(response.content, 'html.parser')
+
+    a_href = soup.find('div', {'class': 'tgme_widget_message_user'}).find('a')['href'] if soup.find('div', {
+        'class': 'tgme_widget_message_user'}) else None
+
+    if a_href is not None:
+        return a_href
+    else:
+        return "Анонимный пользователь"
+
 async def search_and_forward():
     num = 0
     last_message_ids = {}
@@ -120,10 +138,10 @@ async def search_and_forward():
                                                 else:
                                                     link_message = f"t.me/{trimmed_chat_id[1:]}/{str(message.id)}"
                                                     chat_link = f"t.me/{trimmed_chat_id[1:]}"
-                                                sender_identifier = f"@{sender.username}" if sender and sender.username else "Анонимный пользователь"
+                                                sender_identifier = get_user_username(trimmed_chat_id) if sender and sender.username else "Анонимный пользователь"
                                                 if "bot" not in sender_identifier:
                                                     escaped_message_text = escape_html(message.text)
-                                                    message_text = f"Обнаружено ключевое слово\n\n<a href='{chat_link}'>{chat_id_name[:-2]}</a>\n\nПользователь: {sender_identifier}\n\nЗапрос: {keyword}\n\n<a href='{link_message}'>Ссылка на сообщение</a>\n\nТекст:\n{escaped_message_text}"
+                                                    message_text = f"Обнаружено ключевое слово\n\n<a href='{chat_link}'>{chat_id_name[:-2]}</a>\n\nПользователь: @{sender_identifier[13:]}\n\nЗапрос: {keyword}\n\n<a href='{link_message}'>Ссылка на сообщение</a>\n\nТекст:\n{escaped_message_text}"
                                                     await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
                                                     db.update_all_message_ids(number_group, message_key)
                                                     await asyncio.sleep(2)

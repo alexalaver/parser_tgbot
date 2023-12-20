@@ -49,16 +49,26 @@
 #
 # print(result)
 
-chat_idn = ["https://t.me/doubletop_otc ✅", "https://t.me/+kaLhqGj2EHg3NjFi ✅", "@testonepublic ✅", "https://t.me/+kaLasdasd ✅"]
-chat_name = ["2TOP OTC ✅", "TESTPRIVATE5 ✅", "testonepublic ✅", "TESTING ✅"]
 
-# Фильтруем открытые чаты, сохраняя их индексы
-chat_ids_with_indices = [(index, item) for index, item in enumerate(chat_idn) if item.endswith('✅') and not ('https://t.me/+' in item)]
+import requests
+from bs4 import BeautifulSoup
 
-# Получаем индексы отфильтрованных открытых чатов
-chat_indices = [index for index, _ in chat_ids_with_indices]
+# Запрос к исходной странице
+url = 'https://t.me/doubletop_otc/2122434?embed=1&mode=tme'
 
-# Используем эти индексы для выбора соответствующих названий из chat_name
-chat_names = [chat_name[index] for index in chat_indices]
 
-print(chat_names)
+# Запрос к URL, указанному в src iframe
+response = requests.get(url)
+soup = BeautifulSoup(response.content, 'html.parser')
+
+# Нахождение ссылки внутри div с классом tgme_widget_message_user
+a_href = soup.find('div', {'class': 'tgme_widget_message_user'}).find('a')['href'] if soup.find('div', {'class': 'tgme_widget_message_user'}) else None
+
+
+if a_href:
+    print(a_href)
+else:
+    print("Анонимный пользователь")
+
+
+
