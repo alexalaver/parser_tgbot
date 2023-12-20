@@ -89,13 +89,12 @@ async def search_and_forward():
                 continue
 
             group = groups[num]
-            user_id, chat_idn, keywords, data_end, group_name, chat_name = group[0], group[2], group[5], group[3], group[4], group[7]
+            user_id, chat_idn, keywords, data_end, group_name, chat_name, number_group = group[0], group[2], group[5], group[3], group[4], group[7], group[1]
             chat_ids = [item for item in chat_idn if item.endswith('✅') and not ('https://t.me/+' in item)]
             chat_indices = [chat_idn.index(chat) for chat in chat_ids]
             chat_names = [chat_name[index] for index in chat_indices]
             messages_sent = db.select_message_id(number_group)
             if chat_ids != []:
-                number_group = group[1]
                 current_date = datetime.datetime.now()
                 formated_base = datetime.datetime.strptime(data_end, "%Y-%m-%d %H:%M:%S")
                 if formated_base > current_date:
