@@ -116,8 +116,10 @@ async def search_and_forward():
                                                 sender = await message.get_sender()
                                                 if "http" in trimmed_chat_id:
                                                     link_message = f"{trimmed_chat_id}/{str(message.id)}"
+                                                    chat_link = f"{trimmed_chat_id}"
                                                 else:
                                                     link_message = f"t.me/{trimmed_chat_id[1:]}/{str(message.id)}"
+                                                    chat_link = f"{chat_id[:-1]}"
                                                 sender_identifier = f"@{sender.username}" if sender and sender.username else "Анонимный пользователь"
                                                 escaped_message_text = escape_html(message.text)
                                                 message_text = f"Обнаружено ключевое слово\n\n<a href='{trimmed_chat_id}'>{chat_id_name[:-2]}</a>\n\nПользователь: {sender_identifier}\n\nЗапрос: {keyword}\n\n<a href='{link_message}'>Ссылка на сообщение</a>\n\nТекст:\n{escaped_message_text}"
