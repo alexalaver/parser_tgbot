@@ -2426,13 +2426,13 @@ async def group_name_autoposting(message: types.Message, state: FSMContext):
 async def popolnenie_func(message: types.Message, state: FSMContext):
     if message.chat.type == types.ChatType.PRIVATE:
         user_id = message.from_user.id
+        markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+        markup_reply.add(cfg.autoposting)
+        markup_reply.add(cfg.parser)
+        markup_reply.row(cfg.my_profile, cfg.support)
+        if db.select_admin(user_id) > 0:
+            markup_reply.add(cfg.admin_panel_button)
         if message.text == cfg.cancel_button:
-            markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
-            markup_reply.add(cfg.autoposting)
-            markup_reply.add(cfg.parser)
-            markup_reply.row(cfg.my_profile, cfg.support)
-            if db.select_admin(user_id) > 0:
-                markup_reply.add(cfg.admin_panel_button)
             await message.answer(cfg.popolnenie_balance_text_cancel, reply_markup=markup_reply)
             await state.reset_state()
         else:
@@ -2450,7 +2450,7 @@ async def popolnenie_func(message: types.Message, state: FSMContext):
                     )
 
                     asyncio.create_task(check_invoice_paid(invoice_data['result']['uuid'], message=message, sum=sum, user_id=user_id))
-                    await message.answer(cfg.popolnenie_balance_text_2(sum, user_id, invoice_data['result']['url']), parse_mode=types.ParseMode.MARKDOWN)
+                    await message.answer(cfg.popolnenie_balance_text_2(sum, user_id, invoice_data['result']['url']), parse_mode=types.ParseMode.MARKDOWN, reply_markup=markup_reply)
                     await state.finish()
                 else:
                     await message.answer(cfg.popolnenie_balance_text_error_sum_5)
