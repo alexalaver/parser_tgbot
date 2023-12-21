@@ -2439,7 +2439,7 @@ async def popolnenie_func(message: types.Message, state: FSMContext):
             try:
                 sum = message.text
                 float(sum)
-                if float(sum) > 4:
+                if float(sum) > 0:
                     invoice_data = await make_request(
                         url="https://api.cryptomus.com/v1/payment",
                         invoice_data={
