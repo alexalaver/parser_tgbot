@@ -2434,6 +2434,7 @@ async def popolnenie_func(message: types.Message, state: FSMContext):
             if db.select_admin(user_id) > 0:
                 markup_reply.add(cfg.admin_panel_button)
             await message.answer(cfg.popolnenie_balance_text_cancel, reply_markup=markup_reply)
+            await state.reset_state()
         else:
             try:
                 sum = message.text
