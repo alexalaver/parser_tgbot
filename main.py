@@ -493,7 +493,12 @@ async def start(message: types.Message):
         first_name = message.from_user.first_name
         username = message.from_user.username
         if(not db.check_user(user_id)):
-            db.add_user(user_id, first_name, username)
+            ids = db.check_numbers_ids()
+            if ids == 1:
+                return ids
+            else:
+                ids += 1
+            db.add_user(user_id, first_name, username, ids)
         markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
         markup_reply.add(cfg.autoposting)
         markup_reply.add(cfg.parser)

@@ -12,9 +12,9 @@ class Data:
         )
         self.cursor = self.connect.cursor()
 
-    def add_user(self, id, first_name, username):
+    def add_user(self, id, first_name, username, ids):
         with self.connect:
-            self.cursor.execute("INSERT INTO users(id, first_name, username) VALUES(%s, %s, %s)", (id, first_name, username,))
+            self.cursor.execute("INSERT INTO users(id, first_name, username, ids) VALUES(%s, %s, %s, %s)", (id, first_name, username, ids,))
             self.connect.commit()
 
     def check_user(self, id):
@@ -87,6 +87,15 @@ class Data:
             self.cursor.execute("SELECT balance FROM users WHERE id=%s", (id,))
             a = self.cursor.fetchone()[0]
             return a
+
+    def check_numbers_ids(self):
+        with self.connect:
+            self.cursor.execute("SELECT ids FROM users ORDER BY ids DESC LIMIT 1;")
+            a = self.cursor.fetchone()
+            if a is None:
+                return 0
+            else:
+                return a[0]
 
     def update_balance(self, id, oplata):
         with self.connect:
