@@ -2450,7 +2450,7 @@ async def popolnenie_func(message: types.Message, state: FSMContext):
                     )
 
                     asyncio.create_task(check_invoice_paid(invoice_data['result']['uuid'], message=message, sum=sum, user_id=user_id))
-                    await message.answer(cfg.popolnenie_balance_text_2(sum, user_id, invoice_data['result']['url']))
+                    await message.answer(cfg.popolnenie_balance_text_2(sum, user_id, invoice_data['result']['url']), parse_mode=types.ParseMode.MARKDOWN)
                     await state.finish()
                 else:
                     await message.answer(cfg.popolnenie_balance_text_error_sum_5)
