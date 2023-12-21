@@ -1,4 +1,6 @@
 TOKEN = "6949019411:AAHwIM5BM5g3cLf5Zm1rbuh2XTB-mGK5grU"
+CRYPTOMUS_API_KEY = 'OGZPiLYgK74KfBtmQDNv0WhBGxjesK20wMRywGSx6WEOvxU5bWZUylO8r0Ct16ccPTKUd7HYNh0lx4I8knkvTkpU1xrZh0L8wTtgRU3glr2r3VkWqrYjBkvDpSY7nYGL'
+CRYPTOMUS_MERCHANT_ID = 'dbeb71b8-51e9-4788-a56b-188d5c7b6572'
 # API_ID = '1234000'
 # API_HASH = 'c42d27d03355c1ef54ec5007540b3bee'
 #
@@ -260,3 +262,13 @@ error_name_again_post = "Такое имя поста уже существуе�
 cancel_createpost_text = "Вы отменили процесс создания поста!"
 error_len_name_post = "!!! Ошибка !!!\n\nНазвание пост, может быть максимум из 15 букв, минимум 3.\n\nПопробуйте ещё раз:"
 
+popolnenie_balance_text_1 = "Введите сумму в долларах, сколько хотите пополнить баланс:"
+popolnenie_balance_text_cancel = "Вы отменили пополнение баланса!"
+popolnenie_balance_text_error_int = "Вы должны ввести сумму в долларах, должно быть число, пожалуйста попробуйте ещё раз:"
+popolnenie_balance_text_error_sum_5 = "Вы можете пополнить минимум 5$, пожалуйста попробуйте ещё раз::"
+
+def popolnenie_balance_text_2(sum, user_id, link_oplata):
+    return f"🤖 Счет сформирован!\n\nСумма оплаты: `{sum}`\nВаш ID: `{user_id}`\n\nСсылка платежа: {link_oplata}"
+
+def poponenie_right_text(sum):
+    return f"Вы успешно пополнили баланс на сумму {sum}$"

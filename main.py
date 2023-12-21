@@ -17,6 +17,10 @@ import datetime
 import json
 import re
 import pytz
+import base64
+import hashlib
+import aiohttp
+import uuid
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -391,6 +395,9 @@ class Add_time_autoposting_chat(StatesGroup):
 class Change_time_autoposting_chat(StatesGroup):
     change_time_autoposting_1 = State()
 
+class Popolnenie_balance(StatesGroup):
+    popolnenie_balance_1 = State()
+
 async def profile(message):
     user_id = message.from_user.id
     markup_inline = types.InlineKeyboardMarkup(row_width=1, )
@@ -442,6 +449,41 @@ async def panel_administration(message):
         await Add_chat_ids.panel_adm.set()
     else:
         await message.answer(cfg.error_adm_dostup)
+
+
+async def make_request(url: str, invoice_data: dict):
+    encoded_data = base64.b64encode(
+        json.dumps(invoice_data).encode("utf-8")
+    ).decode("utf-8")
+    signature = hashlib.md5(f"{encoded_data}{cfg.CRYPTOMUS_API_KEY}".
+                            encode("utf-8")).hexdigest()
+
+    async with aiohttp.ClientSession(headers={
+        "merchant": cfg.CRYPTOMUS_MERCHANT_ID,
+        "sign": signature,
+    }) as session:
+        async with session.post(url=url, json=invoice_data) as response:
+            if not response.ok:
+                raise ValueError(response.reason)
+
+            return await response.json()
+
+
+async def check_invoice_paid(id: str, message, sum, user_id):
+    while True:
+        invoice_data = await make_request(
+            url="https://api.cryptomus.com/v1/payment/info",
+            invoice_data={"uuid": id},
+        )
+
+        if invoice_data['result']['payment_status'] in ('paid', 'paid_over'):
+            await message.answer(cfg.poponenie_right_text(sum))
+            db.popolnenie_balance(user_id, sum)
+            return
+        else:
+            print("Invoice is not paid for yet")
+
+        await asyncio.sleep(10)
 
 
 @dp.message_handler(commands=['start'])
@@ -604,6 +646,14 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 await callback_query.message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
             except Exception:
                 await callback_query.answer("Произошла ошибка при нажатии на кнопку Меню для Автопостинга", show_alert=True)
+        elif callback_query.data == "up_balance":
+            try:
+                markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
+                markup_reply.add(cfg.cancel_button)
+                await callback_query.message.answer(cfg.popolnenie_balance_text_1, reply_markup=markup_reply)
+                await Popolnenie_balance.popolnenie_balance_1.set()
+            except Exception:
+                await callback_query.answer("Произошла ошибка, пожалуйста повторите попытку.")
         elif callback_query.data == "groups_add_button_parser":
             try:
                 number_group_parser = db.check_number_group(user_id)
@@ -2371,6 +2421,42 @@ async def group_name_autoposting(message: types.Message, state: FSMContext):
                     await message.answer("Минимальная длина названия аккаунта, должна быть 3, максимальная 15, попробуйте ещё раз:")
         except Exception:
             await message.answer("Произошла ошибка, пожалуйста повторите ещё раз:")
+
+@dp.message_handler(state=Popolnenie_balance.popolnenie_balance_1)
+async def popolnenie_func(message: types.Message, state: FSMContext):
+    if message.chat.type == types.ChatType.PRIVATE:
+        user_id = message.from_user.id
+        if message.text == cfg.cancel_button:
+            markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+            markup_reply.add(cfg.autoposting)
+            markup_reply.add(cfg.parser)
+            markup_reply.row(cfg.my_profile, cfg.support)
+            if db.select_admin(user_id) > 0:
+                markup_reply.add(cfg.admin_panel_button)
+            await message.answer(cfg.popolnenie_balance_text_cancel, reply_markup=markup_reply)
+        else:
+            try:
+                sum = message.text
+                float(sum)
+                if float(sum) < 5:
+                    invoice_data = await make_request(
+                        url="https://api.cryptomus.com/v1/payment",
+                        invoice_data={
+                            "amount": f"{sum}",
+                            "currency": "USD",
+                            "order_id": str(uuid.uuid4())
+                        },
+                    )
+
+                    asyncio.create_task(check_invoice_paid(invoice_data['result']['uuid'], message=message, sum=sum, user_id=user_id))
+                    await message.answer(cfg.popolnenie_balance_text_2(sum, user_id, invoice_data['result']['url']))
+                    await state.finish()
+                else:
+                    await message.answer(cfg.popolnenie_balance_text_error_sum_5)
+            except Exception:
+                await message.answer(cfg.popolnenie_balance_text_error_int)
+
+
 
 
 @dp.message_handler()

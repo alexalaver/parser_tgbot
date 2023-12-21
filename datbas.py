@@ -93,6 +93,11 @@ class Data:
             self.cursor.execute(f"UPDATE users SET balance=balance-{oplata} WHERE id=%s", (id,))
             self.connect.commit()
 
+    def popolnenie_balance(self, id, oplata):
+        with self.connect:
+            self.cursor.execute(f"UPDATE users SET balance=balance+{oplata} WHERE id=%s", (id,))
+            self.connect.commit()
+
     def check_number_group(self, id):
         with self.connect:
             self.cursor.execute("SELECT id FROM groups WHERE id=%s", (id,))
