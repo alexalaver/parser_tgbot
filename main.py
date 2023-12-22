@@ -1452,7 +1452,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                         back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels_autoposting')
                         markup_inline.add(delete_post_button, back_channels)
                         await callback_query.message.edit_caption(caption=cfg.account_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
-                elif callback_query.data[:-19] == "back_channels_autoposting":
+                elif callback_query.data == "back_channels_autoposting":
                     markup_inline = types.InlineKeyboardMarkup(row_width=1)
                     user_id = callback_query.from_user.id
                     group_names = db.select_autoposting_group_name(user_id)
