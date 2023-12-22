@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 bot = Bot(cfg.TOKEN)
 dp = Dispatcher(bot, storage=MemoryStorage())
 dp.middleware.setup(LoggingMiddleware())
-db = Data("192.168.1.37", "5432", "pars_db", "pars_user", "pars_pwd")
+db = Data("178.20.41.174", "5432", "zues_db", "zeus_user", "zeus828282")
 
 # with TelegramClient(StringSession(), cfg.API_ID, cfg.API_HASH) as client:
 #     print("String Session:", client.session.save())
