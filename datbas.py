@@ -622,3 +622,8 @@ class Data:
         with self.connect:
             self.cursor.execute("UPDATE settings_bot SET proxy=%s", (proxy,))
             self.connect.commit()
+
+    def add_proxy_settings(self, proxy):
+        with self.connect:
+            self.cursor.execute("INSERT INTO settings_bot(proxy) VALUES(%s)", (proxy,))
+            self.connect.commit()

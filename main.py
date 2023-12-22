@@ -2315,8 +2315,10 @@ async def add_proxy_func(message: types.Message, state: FSMContext):
             text_lines = textsing.strip().split('\n')
             old_proxy = db.select_settings_all_proxy() or []
             new_proxy = old_proxy + text_lines
-            await message.answer(new_proxy)
-            db.update_proxy_settings(new_proxy)
+            if old_proxy == []:
+                db.add_proxy_settings(new_proxy)
+            else:
+                db.update_proxy_settings(new_proxy)
             await message.answer(cfg.add_proxy_text_2, reply_markup=markup_reply)
             await state.finish()
     except Exception as err:
