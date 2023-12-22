@@ -512,12 +512,14 @@ async def start(message: types.Message):
         if(not db.check_user(user_id)):
             ids = int(db.check_numbers_ids())
             if ids == 1:
+                print()
                 return ids
             else:
                 ids += 1
-            print(ids)
-            db.add_user(user_id, first_name, username, int(ids))
-            print(ids)
+                return ids
+            print("right 4")
+            db.add_user(user_id, first_name, username, ids)
+            print("right 5")
         markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
         markup_reply.add(cfg.autoposting)
         markup_reply.add(cfg.parser)
