@@ -616,7 +616,7 @@ class Data:
             if a is None:
                 return []
             else:
-                return a[]
+                return a[0]
 
     def update_proxy_settings(self, proxy):
         with self.connect:
