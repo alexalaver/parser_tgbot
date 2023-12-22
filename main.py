@@ -1826,7 +1826,7 @@ async def add_post_func_text_2(message: types.Message, state: FSMContext):
                         else:
                             await message.answer("Формат времени не верный, отправьте время в следющем формате")
                     else:
-                        await message.answer("Вы можете поставить минуты не больше 60 и не меньше 0, попробуйте ещё раз:")
+                        await message.answer("Вы можете поставить минуты не больше 59 и не меньше 0, попробуйте ещё раз:")
                 else:
                     await message.answer("Вы можете поставить часы не больше 23 и не меньше 0, попробуйте ещё раз:")
         except Exception:
