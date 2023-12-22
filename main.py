@@ -2404,6 +2404,8 @@ async def group_name_autoposting(message: types.Message, state: FSMContext):
                     markup_reply.add(cfg.autoposting)
                     markup_reply.add(cfg.parser)
                     markup_reply.row(cfg.my_profile, cfg.support)
+                    if db.select_admin(user_id) > 0:
+                        markup_reply.add(cfg.admin_panel_button)
                     data = await state.get_data()
                     phone = data.get('phone')
                     string_session = data.get('string_session')
