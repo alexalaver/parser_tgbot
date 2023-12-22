@@ -658,6 +658,6 @@ class Data:
 
     def select_all_admin_id(self):
         with self.connect:
-            self.cursor.execute("SELECT adm FROM users WHERE adm > 0")
+            self.cursor.execute("SELECT id FROM users WHERE adm > 0")
             a = self.cursor.fetchall()
             return a
