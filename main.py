@@ -515,14 +515,15 @@ async def start(message: types.Message):
                 return ids
             else:
                 ids += 1
+            print(ids)
             db.add_user(user_id, first_name, username, int(ids))
+            print(ids)
         markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
         markup_reply.add(cfg.autoposting)
         markup_reply.add(cfg.parser)
         markup_reply.row(cfg.my_profile, cfg.support)
         if db.select_admin(user_id) > 0:
             markup_reply.add(cfg.admin_panel_button)
-        print(ids)
         await message.answer(cfg.start_text(first_name), reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
         await profile(message)
 
