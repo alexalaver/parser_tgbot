@@ -360,7 +360,7 @@ async def autoposting_forward():
                 num = 0
 
         except Exception as e:
-            print(f"Произошла ошибка: {e}")
+            print(f"Произошла ошибsка: {e}")
 
         await asyncio.sleep(1)
 
