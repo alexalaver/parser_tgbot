@@ -313,9 +313,10 @@ async def autoposting_forward():
                 await asyncio.sleep(10)
                 continue
             moscow_tz = pytz.timezone('Europe/Moscow')
+            print("right 0")
             group = groups[num]
-            user_id, chat_ids, string_session, message_id, number_group, data_end, channel_tag, channels_name = group[0], group[10], group[2], group[1], group[4], group[3], group[6], groups[8]
             print(group)
+            user_id, chat_ids, string_session, message_id, number_group, data_end, channel_tag, channels_name = group[0], group[10], group[2], group[1], group[4], group[3], group[6], groups[8]
             # chat_ids = [sublist for sublist in chat_idn if '✅' in sublist[0]]
             current_date = datetime.datetime.now(moscow_tz)
             formated_base = datetime.datetime.strptime(data_end, "%Y-%m-%d %H:%M:%S")
