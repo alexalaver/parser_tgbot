@@ -505,7 +505,7 @@ async def check_invoice_paid(id: str, message, sum, user_id):
 
 @dp.message_handler(commands=['start'])
 async def start(message: types.Message):
-    print('start')
+    await message.answer("test")
     if message.chat.type == types.ChatType.PRIVATE:
         user_id = message.from_user.id
         first_name = message.from_user.first_name
