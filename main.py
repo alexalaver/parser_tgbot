@@ -969,7 +969,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     markup_inline.add(change_keywords)
                     markup_inline.add(back_channels)
                     await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
-            elif callback_query.data[:-7] == "back_channels_parser":
+            elif callback_query.data == "back_channels_parser":
                 markup_inline = types.InlineKeyboardMarkup(row_width=1)
                 group_names = db.select_group_name(user_id)
                 for group_name in group_names:
