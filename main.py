@@ -313,10 +313,8 @@ async def autoposting_forward():
                 await asyncio.sleep(10)
                 continue
             moscow_tz = pytz.timezone('Europe/Moscow')
-            print("right 0")
             group = groups[num]
-            print(group)
-            user_id, chat_ids, string_session, message_id, number_group, data_end, channel_tag, channels_name = group[0], group[10], group[2], group[1], group[4], group[3], group[6], groups[8]
+            user_id, chat_ids, string_session, message_id, number_group, data_end, channel_tag, channels_name = group[0], group[10], group[2], group[1], group[4], group[3], group[6], group[8]
             # chat_ids = [sublist for sublist in chat_idn if '✅' in sublist[0]]
             current_date = datetime.datetime.now(moscow_tz)
             formated_base = datetime.datetime.strptime(data_end, "%Y-%m-%d %H:%M:%S")
@@ -324,14 +322,10 @@ async def autoposting_forward():
             if formated_base > current_date:
                 if chat_ids != []:
                     current_date = datetime.datetime.now(moscow_tz)
-                    print("right 1")
                     for chat_id, channel_name in zip(chat_ids, channels_name):
-                        print("right 2")
                         formated_chat_id = chat_id[0][:-2]
-                        print("right 3")
                         date_betw = chat_id[1:]
                         for date_bet in date_betw:
-                            print("right 4")
                             if chat_id[0][-1] == "✅":
                                 formated_base = datetime.datetime.strptime(date_bet, "%Y-%m-%d %H:%M:%S")
                                 formated_base = moscow_tz.localize(formated_base)
