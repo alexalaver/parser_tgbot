@@ -323,9 +323,12 @@ async def autoposting_forward():
                 if chat_ids != []:
                     current_date = datetime.datetime.now(moscow_tz)
                     for chat_id, channel_name in zip(chat_ids, channels_name):
+                        print("right 2")
                         formated_chat_id = chat_id[0][:-2]
+                        print("right 3")
                         date_betw = chat_id[1:]
                         for date_bet in date_betw:
+                            print("right 4")
                             if chat_id[0][-1] == "✅":
                                 formated_base = datetime.datetime.strptime(date_bet, "%Y-%m-%d %H:%M:%S")
                                 formated_base = moscow_tz.localize(formated_base)
