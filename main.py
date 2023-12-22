@@ -510,9 +510,7 @@ async def start(message: types.Message):
         first_name = message.from_user.first_name
         username = message.from_user.username
         if(not db.check_user(user_id)):
-            ids = db.check_numbers_ids()
-            print(ids)
-            if ids == 1:
+            ids = db.check_numbers_ids()            if ids == 1:
                 return ids
             else:
                 ids += 1
@@ -523,7 +521,7 @@ async def start(message: types.Message):
         markup_reply.row(cfg.my_profile, cfg.support)
         if db.select_admin(user_id) > 0:
             markup_reply.add(cfg.admin_panel_button)
-
+        print(ids)
         await message.answer(cfg.start_text(first_name), reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
         await profile(message)
 
