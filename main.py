@@ -2318,8 +2318,8 @@ async def add_proxy_func(message: types.Message, state: FSMContext):
             db.update_proxy_settings(new_proxy)
             await message.answer(cfg.add_proxy_text_2, reply_markup=markup_reply)
             await state.finish()
-    except Exception:
-        await message.answer("Произошла ошибка при добавлении прокси, пожалуйста повторите попытку!")
+    except Exception as err:
+        await message.answer(f"Произошла ошибка при добавлении прокси, пожалуйста повторите попытку! {err}")
 
 @dp.message_handler(state=Create_account_autoposting.create_autoposting_1)
 async def process_phone(message: types.Message, state: FSMContext):
