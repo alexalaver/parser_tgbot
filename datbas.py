@@ -660,4 +660,5 @@ class Data:
         with self.connect:
             self.cursor.execute("SELECT id FROM users WHERE adm > 0")
             a = self.cursor.fetchall()
-            return a
+            flattened_list = [item[0] for item in a]
+            return flattened_list

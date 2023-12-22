@@ -60,7 +60,8 @@ async def check_for_new_channels(current_count):
     return new_count != current_count
 
 async def check_private_channel(channels, user_id, number_group):
-    for adm_id in cfg.admin_id:
+    admin_id = db.select_all_admin_id()
+    for adm_id in admin_id:
         await bot.send_message(adm_id, f"{fnc.nick_with_link('Пользователь', user_id)}, добавил закрытые чаты, вам необходимо подписаться на них.\n\n{channels}\n\nНомер группы - {str(number_group)}", parse_mode=types.ParseMode.MARKDOWN)
 
 async def check_keywords_len(keywords, num):
@@ -423,8 +424,9 @@ async def profile(message):
     await message.answer_photo(photo=types.InputFile("img/photo1.jpg"), caption=cfg.profile(user_id, db.select_balance(user_id)), reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
 
 async def supports_send(message):
+    admin_id = db.select_all_admin_id()
     markup_inline = types.InlineKeyboardMarkup(row_width=1)
-    btn_inline1 = types.InlineKeyboardButton(cfg.support, callback_data='support', url=f"tg://user?id={cfg.admin_id[1]}")
+    btn_inline1 = types.InlineKeyboardButton(cfg.support, callback_data='support', url=f"tg://user?id={admin_id[1]}")
     markup_inline.add(btn_inline1)
     await message.answer_photo(photo=types.InputFile("img/photo3.jpg"), caption=cfg.support_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
 
@@ -1538,7 +1540,8 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                             await callback_query.message.delete()
                             await callback_query.message.answer(text=cfg.tariffe_correct_autoposting(post_name, channels_len, formatted_date_new), reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
                         else:
-                            for admin_id in cfg.admin_id:
+                            admin_ids = db.select_all_admin_id()
+                            for admin_id in admin_ids:
                                 await bot.send_message(admin_id,
                                                        "Закончились прокси в базе данных, пожалуйста добавьте!")
                             await callback_query.answer(
@@ -2516,7 +2519,6 @@ async def other(message: types.Message):
             elif message.text == cfg.admin_panel_button:
                 await panel_administration(message)
             else:
-                await message.answer(db.select_all_admin_id())
                 await message.answer(cfg.unknown_command_text)
         except Exception:
             await message.answer("Произошла ошибка, пожалуйста повторите ещё раз:")
