@@ -2320,7 +2320,7 @@ async def add_proxy_func(message: types.Message, state: FSMContext):
             else:
                 db.update_proxy_settings(new_proxy)
             await message.answer(cfg.add_proxy_text_2, reply_markup=markup_reply)
-            await state.finish()
+            await Add_chat_ids.panel_adm.set()
     except Exception as err:
         await message.answer(f"Произошла ошибка при добавлении прокси, пожалуйста повторите попытку! {err}")
 
