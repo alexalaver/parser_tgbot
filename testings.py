@@ -50,25 +50,10 @@
 # print(result)
 
 
-import requests
-from bs4 import BeautifulSoup
+a = "hello"
 
-# Запрос к исходной странице
-url = 'https://t.me/doubletop_otc/2122434?embed=1&mode=tme'
-
-
-# Запрос к URL, указанному в src iframe
-response = requests.get(url)
-soup = BeautifulSoup(response.content, 'html.parser')
-
-# Нахождение ссылки внутри div с классом tgme_widget_message_user
-a_href = soup.find('div', {'class': 'tgme_widget_message_user'}).find('a')['href'] if soup.find('div', {'class': 'tgme_widget_message_user'}) else None
-
-
-if a_href:
-    print(a_href)
+if a[:-25] == "hello":
+    print('yes')
 else:
-    print("Анонимный пользователь")
-
-
+    print("no")
 

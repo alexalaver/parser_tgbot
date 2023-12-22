@@ -415,9 +415,8 @@ async def parsers_send(message):
     user_id = message.from_user.id
     markup_inline = types.InlineKeyboardMarkup(row_width=1)
     group_names = db.select_group_name(user_id)
-    max_buttons = 5
-    for i in range(min(max_buttons, len(group_names))):
-        button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
+    for group_name in group_names:
+        button = types.InlineKeyboardButton(text=group_name, callback_data=f"{group_name}parsers")
         markup_inline.add(button)
 
     btn_inline1 = types.InlineKeyboardButton(cfg.groups_add_button, callback_data='groups_add_button_parser')
@@ -428,9 +427,8 @@ async def autoposting_send(message):
     markup_inline = types.InlineKeyboardMarkup(row_width=1)
     user_id = message.from_user.id
     group_names = db.select_autoposting_group_name(user_id)
-    max_buttons = 5
-    for i in range(min(max_buttons, len(group_names))):
-        button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
+    for group_name in group_names:
+        button = types.InlineKeyboardButton(text=group_name, callback_data=f"{group_name}autoposting_account")
         markup_inline.add(button)
     btn1_inline = types.InlineKeyboardButton(cfg.add_account_button, callback_data="add_account_autoposting")
     markup_inline.add(btn1_inline)
@@ -624,9 +622,8 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 user_id = callback_query.from_user.id
                 markup_inline = types.InlineKeyboardMarkup(row_width=1)
                 group_names = db.select_group_name(user_id)
-                max_buttons = 5
-                for i in range(min(max_buttons, len(group_names))):
-                    button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
+                for group_name in group_names:
+                    button = types.InlineKeyboardButton(text=group_name, callback_data=f"{group_name}parsers")
                     markup_inline.add(button)
                 btn_inline1 = types.InlineKeyboardButton(cfg.groups_add_button, callback_data='groups_add_button_parser')
                 markup_inline.add(btn_inline1)
@@ -638,9 +635,8 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 markup_inline = types.InlineKeyboardMarkup(row_width=1)
                 user_id = callback_query.from_user.id
                 group_names = db.select_autoposting_group_name(user_id)
-                max_buttons = 5
-                for i in range(min(max_buttons, len(group_names))):
-                    button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
+                for group_name in group_names:
+                    button = types.InlineKeyboardButton(text=group_name, callback_data=f"{group_name}parsers")
                     markup_inline.add(button)
                 btn1_inline = types.InlineKeyboardButton(cfg.add_account_button, callback_data="add_account_autoposting")
                 markup_inline.add(btn1_inline)
@@ -672,12 +668,13 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     await callback_query.answer(cfg.error_group_5, show_alert=True)
             except Exception:
                 await callback_query.answer("Произошла ошибка при нажатии на кнопку добавления группы, нажмите ещё раз на нижнюю кнопку 'Парсер' и повторите попытку.", show_alert=True)
-        elif callback_query.data in db.select_group_name(user_id):
+        elif callback_query.data[:-7] in db.select_group_name(user_id):
             try:
-                number_group_parser = db.select_number_group(user_id, callback_query.data)
+                group_name = callback_query.data[:-7]
+                number_group_parser = db.select_number_group(user_id, group_name)
                 await state.update_data(number_group_parser=number_group_parser)
-                channels_parser = db.select_channels(user_id, callback_query.data)
-                channels_name_parser = db.select_channels_name(user_id, callback_query.data)
+                channels_parser = db.select_channels(user_id, group_name)
+                channels_name_parser = db.select_channels_name(user_id, group_name)
                 markup_inline = types.InlineKeyboardMarkup(row_width=2)
                 channels_count_parser= len(channels_parser)
                 channels_page_parser = fnc.get_category(channels_count_parser)
@@ -699,7 +696,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     buttons_next = types.InlineKeyboardButton(text=cfg.next_page, callback_data="next_page_parser")
                     buttons_old = types.InlineKeyboardButton(text=cfg.old_page, callback_data="old_page_parser")
                     markup_inline.row(buttons_old, buttons_next)
-                if db.check_date_tarife(user_id, callback_query.data) is None:
+                if db.check_date_tarife(user_id, group_name) is None:
                     pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels_parser')
                     markup_inline.add(pay_money_buttons)
                 change_keywords = types.InlineKeyboardButton(text=cfg.change_keyword_button, callback_data='change_keyword_parser')
@@ -714,9 +711,8 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 user_id = callback_query.from_user.id
                 markup_inline = types.InlineKeyboardMarkup(row_width=1)
                 group_names = db.select_group_name(user_id)
-                max_buttons = 5
-                for i in range(min(max_buttons, len(group_names))):
-                    button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
+                for group_name in group_names:
+                    button = types.InlineKeyboardButton(text=group_name, callback_data=f"{group_name}parsers")
                     markup_inline.add(button)
                 btn_inline1 = types.InlineKeyboardButton(cfg.groups_add_button, callback_data='groups_add_button_parser')
                 markup_inline.add(btn_inline1)
@@ -738,16 +734,16 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     await callback_query.answer(cfg.error_autoposting_group_5, show_alert=True)
             except Exception:
                 await callback_query.answer("Произошла ошибка при нажатии на кнопку выхода из состоянии, пожалуйста нажмите на нижнюю кнопку 'Парсер' и повторите попытку.", show_alert=True)
-        elif callback_query.data in db.select_account_name(user_id):
+        elif callback_query.data[:-19] in db.select_account_name(user_id):
             try:
-                number_account = db.select_account_number(user_id, callback_query.data)
+                account_name = callback_query.data[:-19]
+                number_account = db.select_account_number(user_id, account_name)
                 await state.update_data(number_account=number_account)
                 markup_inline = types.InlineKeyboardMarkup(row_width=1)
                 user_id = callback_query.from_user.id
                 group_names = db.select_autoposting_post_name_for_number(user_id, number_account)
-                max_buttons = 5
-                for i in range(min(max_buttons, len(group_names))):
-                    button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
+                for group_name in group_names:
+                    button = types.InlineKeyboardButton(text=group_name, callback_data=f"{group_name}autoposting_post")
                     markup_inline.add(button)
                 btn1_inline = types.InlineKeyboardButton(cfg.add_post_button, callback_data="add_post_autoposting")
                 btn2_inline = types.InlineKeyboardButton(cfg.back_button, callback_data="back_autoposting_account")
@@ -760,9 +756,8 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 markup_inline = types.InlineKeyboardMarkup(row_width=1)
                 user_id = callback_query.from_user.id
                 group_names = db.select_autoposting_group_name(user_id)
-                max_buttons = 5
-                for i in range(min(max_buttons, len(group_names))):
-                    button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
+                for group_name in group_names:
+                    button = types.InlineKeyboardButton(text=group_name, callback_data=f"{group_name}autoposting_account")
                     markup_inline.add(button)
                 btn1_inline = types.InlineKeyboardButton(cfg.add_account_button, callback_data="add_account_autoposting")
                 markup_inline.add(btn1_inline)
@@ -779,8 +774,8 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 user_id = callback_query.from_user.id
                 group_names = db.select_autoposting_group_name(user_id)
                 max_buttons = 5
-                for i in range(min(max_buttons, len(group_names))):
-                    button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
+                for group_name in group_names:
+                    button = types.InlineKeyboardButton(text=group_name, callback_data=f"{group_name}autoposting_account")
                     markup_inline.add(button)
                 btn1_inline = types.InlineKeyboardButton(cfg.add_account_button, callback_data="add_account_autoposting")
                 markup_inline.add(btn1_inline)
@@ -791,16 +786,17 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 await callback_query.message.edit_caption(caption=text, reply_markup=markup_inline)
             except Exception:
                 await callback_query.answer("Произошла ошибка при нажатии на кнопку выхода из аккаунта для автопостинга, пожалуйста нажмите на нижнюю кнопку 'Автопостинг' и повторите попытку.", show_alert=True)
-        elif callback_query.data in db.select_autoposting_post_name(user_id):
+        elif callback_query.data[:-16] in db.select_autoposting_post_name(user_id):
             try:
-                channels = db.select_chats_post(user_id, callback_query.data)
-                channels_name = db.select_chats_name_post(user_id, callback_query.data)
+                post_name = callback_query.data[:-16]
+                channels = db.select_chats_post(user_id, post_name)
+                channels_name = db.select_chats_name_post(user_id, post_name)
                 markup_inline = types.InlineKeyboardMarkup(row_width=1)
                 channels_count_autoposting = len(channels)
                 channels_page_autoposting = fnc.get_category(channels_count_autoposting)
-                number_post_autoposting = db.select_number_post(user_id, callback_query.data)
+                number_post_autoposting = db.select_number_post(user_id, post_name)
                 await state.update_data(number_post_autoposting=number_post_autoposting)
-                await state.update_data(post_name_autoposting=callback_query.data)
+                await state.update_data(post_name_autoposting=post_name)
                 page_here_autoposting = 1
                 from_page_autoposting = 0
                 before_page_autoposting = 10
@@ -819,13 +815,13 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     buttons_next = types.InlineKeyboardButton(text=cfg.next_page, callback_data="next_page_autoposting")
                     buttons_old = types.InlineKeyboardButton(text=cfg.old_page, callback_data="old_page_autoposting")
                     markup_inline.row(buttons_old, buttons_next)
-                if db.check_date_tarife_account(user_id, callback_query.data) is None:
+                if db.check_date_tarife_account(user_id, post_name) is None:
                     pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels_autoposting')
                     markup_inline.add(pay_money_buttons)
                 back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels_autoposting')
                 delete_post_button = types.InlineKeyboardButton(text=cfg.delete_post_button, callback_data="delete_post_autoposting")
                 markup_inline.add(delete_post_button, back_channels)
-                message_id_bot = db.select_post_name(callback_query.data)
+                message_id_bot = db.select_post_name(post_name)
                 await bot.forward_message(chat_id=user_id, from_chat_id=user_id, message_id=message_id_bot)
                 await callback_query.message.edit_caption(caption=cfg.account_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
             except Exception:
@@ -973,12 +969,11 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     markup_inline.add(change_keywords)
                     markup_inline.add(back_channels)
                     await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
-            elif callback_query.data == "back_channels_parser":
+            elif callback_query.data[:-7] == "back_channels_parser":
                 markup_inline = types.InlineKeyboardMarkup(row_width=1)
                 group_names = db.select_group_name(user_id)
-                max_buttons = 5
-                for i in range(min(max_buttons, len(group_names))):
-                    button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
+                for group_name in group_names:
+                    button = types.InlineKeyboardButton(text=group_name, callback_data=f"{group_name}parsers")
                     markup_inline.add(button)
                 btn_inline1 = types.InlineKeyboardButton(cfg.groups_add_button, callback_data='groups_add_button_parser')
                 markup_inline.add(btn_inline1)
@@ -1262,10 +1257,8 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 elif callback_query.data == "off_chat_autoposting":
                     data = await state.get_data()
                     settings_callback_data = data.get("settings_callback_data")
-                    print(settings_callback_data)
                     chat_idln = db.select_chats_account_with_number_autoposting(number_group_autoposting)
                     b_replaced = settings_callback_data[:-1] + "❌"
-                    print(b_replaced)
                     group_index = channels_autoposting.index(settings_callback_data)
                     all_channels_name = db.select_chats_name_account_with_number(number_group_autoposting)
                     group_name = all_channels_name[group_index]
@@ -1273,7 +1266,6 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     new_channels_name = [new_callback_name if item == group_name else item for item in all_channels_name]
                     db.update_all_chats_name_account(number_group_autoposting, new_channels_name)
                     a_updated = [[b_replaced if item == settings_callback_data else item for item in sublist] for sublist in chat_idln]
-                    print(a_updated)
                     json_data = json.dumps(a_updated)
                     db.update_chat_idn_autoposting(json_data, number_group_autoposting)
                     markup_inline = types.InlineKeyboardMarkup(row_width=1)
@@ -1460,13 +1452,12 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                         back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels_autoposting')
                         markup_inline.add(delete_post_button, back_channels)
                         await callback_query.message.edit_caption(caption=cfg.account_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
-                elif callback_query.data == "back_channels_autoposting":
+                elif callback_query.data[:-19] == "back_channels_autoposting":
                     markup_inline = types.InlineKeyboardMarkup(row_width=1)
                     user_id = callback_query.from_user.id
                     group_names = db.select_autoposting_group_name(user_id)
-                    max_buttons = 5
-                    for i in range(min(max_buttons, len(group_names))):
-                        button = types.InlineKeyboardButton(text=group_names[i], callback_data=group_names[i])
+                    for group_name in group_names:
+                        button = types.InlineKeyboardButton(text=group_name, callback_data=f"{group_name}autoposting_account")
                         markup_inline.add(button)
                     btn1_inline = types.InlineKeyboardButton(cfg.add_account_button, callback_data="add_account_autoposting")
                     markup_inline.add(btn1_inline)
