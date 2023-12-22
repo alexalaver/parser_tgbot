@@ -453,7 +453,7 @@ async def autoposting_send(message):
         text = cfg.accounts_left_text
     else:
         text = cfg.accounts_right_text
-    await message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+    await message.answer_photo(photo=types.InputFile("img/photo1.jpg"), caption=text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
 
 async def panel_administration(message):
     user_id = message.from_user.id
@@ -661,7 +661,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     text = cfg.accounts_left_text
                 else:
                     text = cfg.accounts_right_text
-                await callback_query.message.answer_photo(photo=types.InputFile("img/photo3.jpg"), caption=text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+                await callback_query.message.answer_photo(photo=types.InputFile("img/photo1.jpg"), caption=text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
             except Exception:
                 await callback_query.answer("Произошла ошибка при нажатии на кнопку Меню для Автопостинга", show_alert=True)
         elif callback_query.data == "up_balance":
