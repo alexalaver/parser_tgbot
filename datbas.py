@@ -655,3 +655,9 @@ class Data:
             self.cursor.execute("SELECT proxy FROM autoposting_groups WHERE number_group=%s", (number_account,))
             a = self.cursor.fetchone()[0]
             return a
+
+    def select_all_admin_id(self):
+        with self.connect:
+            self.cursor.execute("SELECT adm FROM users WHERE adm > 1")
+            a = self.cursor.fetchall()
+            return a

@@ -2516,6 +2516,7 @@ async def other(message: types.Message):
             elif message.text == cfg.admin_panel_button:
                 await panel_administration(message)
             else:
+                await message.answer(db.select_all_admin_id())
                 await message.answer(cfg.unknown_command_text)
         except Exception:
             await message.answer("Произошла ошибка, пожалуйста повторите ещё раз:")
