@@ -52,7 +52,4 @@
 
 a = ["testonepublic ✅", "testtwopublic ✅"]
 
-for b in a:
-    modified_b = b.replace('✅', '⚠').replace('❌', '⚠')
-
-    print(modified_b)
+print(a[2:])

@@ -627,3 +627,19 @@ class Data:
         with self.connect:
             self.cursor.execute("INSERT INTO settings_bot(proxy) VALUES(%s)", (proxy,))
             self.connect.commit()
+
+    def select_number_account_with_post(self, number_post):
+        with self.connect:
+            self.cursor.execute("SELECT number_account FROM autoposting_post WHERE number_post=%s", (number_post,))
+            a = self.cursor.fetchone()[0]
+            return a
+
+    def update_proxy_autoposting_account(self, proxy, number_account):
+        with self.connect:
+            self.cursor.execute("UPDATE autoposting_groups SET proxy=%s WHERE number_group=%s", (proxy, number_account,))
+            self.connect.commit()
+
+    def delete_proxy_settings_bot(self):
+        with self.connect:
+            self.cursor.execute("UPDATE settings_bot SET proxy=Null")
+            self.connect.commit()

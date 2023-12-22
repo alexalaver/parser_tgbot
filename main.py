@@ -1487,34 +1487,51 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     days = db.select_days_autoposting_post(number_group_autoposting)
                     money_oplata = days * 0.15 * int(channels_len)
                     if balance >= money_oplata:
-                        channels = db.select_chats_account_with_number_confirm_oplata(number_group_autoposting)
-                        channels_name = db.select_chats_name_account_with_number(number_group_autoposting)
-                        new_channels = [[channel[0][:-2] + " ✅"] for channel in channels]
-                        new_chats_name = [newer[:-2] + " ✅" for newer in channels_name]
-                        db.update_all_chats_name_account(number_group_autoposting, new_chats_name)
-                        db.update_balance(user_id, money_oplata)
-                        moscow_tz = pytz.timezone('Europe/Moscow')
-                        channels_len = len(channels)
-                        current_data = datetime.datetime.now(moscow_tz)
-                        time_betw = db.select_time_betw(number_group_autoposting)
-                        hours, minutes = map(int, time_betw[0].split(':'))
-                        current_date = datetime.datetime.now(moscow_tz)
-                        combined_datetime = current_date.replace(hour=hours, minute=minutes, second=0, microsecond=0)
-                        date_betw = combined_datetime.strftime("%Y-%m-%d %H:%M:%S")
-                        new_lst = []
-                        new_date = current_data + datetime.timedelta(days=days)
-                        formatted_date_new = new_date.strftime("%Y-%m-%d %H:%M:%S")
-                        new_lst.append(date_betw)
-                        for new_channel in new_channels:
-                            new_channel.append(str(date_betw))
-                        json_data = json.dumps(new_channels)
-                        db.update_all_chats_account(number_group_autoposting, json_data)
-                        db.add_date_tariffe_autoposting(user_id, formatted_date_new, number_group_autoposting)
-                        markup_inline = types.InlineKeyboardMarkup(row_width=1)
-                        btn_inline1 = types.InlineKeyboardButton(cfg.menu_button, callback_data='menu_after_pay_autoposting')
-                        markup_inline.add(btn_inline1)
-                        await callback_query.message.delete()
-                        await callback_query.message.answer(text=cfg.tariffe_correct_autoposting(group_name_autoposting, channels_len, formatted_date_new), reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+                        all_proxy = db.select_settings_all_proxy() or []
+                        if all_proxy != []:
+                            proxy_add = all_proxy[0]
+                            account_autposting_id = db.select_number_account_with_post(number_group_autoposting)
+                            db.update_proxy_autoposting_account(proxy_add, account_autposting_id)
+                            new_proxy = all_proxy[1:]
+                            if new_proxy == []:
+                                db.delete_proxy_settings_bot()
+                            else:
+                                db.update_proxy_settings(new_proxy)
+                            channels = db.select_chats_account_with_number_confirm_oplata(number_group_autoposting)
+                            channels_name = db.select_chats_name_account_with_number(number_group_autoposting)
+                            new_channels = [[channel[0][:-2] + " ✅"] for channel in channels]
+                            new_chats_name = [newer[:-2] + " ✅" for newer in channels_name]
+                            db.update_all_chats_name_account(number_group_autoposting, new_chats_name)
+                            db.update_balance(user_id, money_oplata)
+                            moscow_tz = pytz.timezone('Europe/Moscow')
+                            channels_len = len(channels)
+                            current_data = datetime.datetime.now(moscow_tz)
+                            time_betw = db.select_time_betw(number_group_autoposting)
+                            hours, minutes = map(int, time_betw[0].split(':'))
+                            current_date = datetime.datetime.now(moscow_tz)
+                            combined_datetime = current_date.replace(hour=hours, minute=minutes, second=0, microsecond=0)
+                            date_betw = combined_datetime.strftime("%Y-%m-%d %H:%M:%S")
+                            new_lst = []
+                            new_date = current_data + datetime.timedelta(days=days)
+                            formatted_date_new = new_date.strftime("%Y-%m-%d %H:%M:%S")
+                            new_lst.append(date_betw)
+                            for new_channel in new_channels:
+                                new_channel.append(str(date_betw))
+                            json_data = json.dumps(new_channels)
+                            db.update_all_chats_account(number_group_autoposting, json_data)
+                            db.add_date_tariffe_autoposting(user_id, formatted_date_new, number_group_autoposting)
+                            markup_inline = types.InlineKeyboardMarkup(row_width=1)
+                            btn_inline1 = types.InlineKeyboardButton(cfg.menu_button, callback_data='menu_after_pay_autoposting')
+                            markup_inline.add(btn_inline1)
+                            await callback_query.message.delete()
+                            await callback_query.message.answer(text=cfg.tariffe_correct_autoposting(group_name_autoposting, channels_len, formatted_date_new), reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+                        else:
+                            for admin_id in cfg.admin_id:
+                                await bot.send_message(admin_id,
+                                                       "Закончились прокси в базе данных, пожалуйста добавьте!")
+                            await callback_query.answer(
+                                "На данный момент отсутствует прокси, пожалуйста попробуйте через некоторое время!",
+                                show_alert=True)
                     else:
                         await callback_query.answer(text=cfg.tariffe_error, show_alert=True)
                 elif callback_query.data == "back_oplata_autoposting":
