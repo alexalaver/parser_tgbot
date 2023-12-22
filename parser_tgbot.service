@@ -1,0 +1,11 @@
+[Unit]
+Description=Parser Telegram Bot Service
+After=network.target
+
+[Service]
+WorkingDirectory=/root/parser_tgbot/
+User=root
+ExecStart=/root/parser_tgbot/venv/bin/python3 main.py
+
+[Install]
+WantedBy=multi-user.target
