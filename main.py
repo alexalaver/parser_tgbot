@@ -515,9 +515,11 @@ async def start(message: types.Message):
                 print()
                 return ids
             else:
+                print("right 3")
                 ids += 1
+                print("right 4")
                 return ids
-            print("right 4")
+
             db.add_user(user_id, first_name, username, ids)
             print("right 5")
         markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
