@@ -2306,7 +2306,7 @@ async def add_proxy_func(message: types.Message, state: FSMContext):
         if message.text == cfg.cancel_button:
             markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
             markup_reply.add(cfg.add_chat_id_button, cfg.add_proxy_button, cfg.back_button)
-            await message.answer(cfg.cancel_add_ids, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
+            await message.answer(cfg.cancel_add_proxy_text, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
             await Add_chat_ids.panel_adm.set()
         else:
             markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
