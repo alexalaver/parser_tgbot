@@ -649,3 +649,9 @@ class Data:
         with self.connect:
             self.cursor.execute("UPDATE settings_bot SET proxy=Null")
             self.connect.commit()
+
+    def select_proxy_autoposting_account(self, number_account):
+        with self.connect:
+            self.cursor.execute("SELECT proxy FROM autoposting_groups WHERE number_group=%s", (number_account,))
+            a = self.cursor.fetchone()[0]
+            return a

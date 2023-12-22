@@ -316,11 +316,21 @@ async def autoposting_forward():
                 continue
             moscow_tz = pytz.timezone('Europe/Moscow')
             group = groups[num]
-            user_id, chat_ids, string_session, message_id, number_group, data_end, channel_tag, channels_name, post_name = group[0], group[10], group[2], group[1], group[4], group[3], group[6], group[8], group[12]
+            user_id, chat_ids, string_session, message_id, number_group, data_end, channel_tag, channels_name, post_name, number_account = group[0], group[10], group[2], group[1], group[4], group[3], group[6], group[8], group[12], group[5]
             # chat_ids = [sublist for sublist in chat_idn if '✅' in sublist[0]]
             current_date = datetime.datetime.now(moscow_tz)
             formated_base = datetime.datetime.strptime(data_end, "%Y-%m-%d %H:%M:%S")
             formated_base = moscow_tz.localize(formated_base)
+            user_proxy = db.select_proxy_autoposting_account(number_account)
+            proxy_server, proxy_port, proxy_user, proxy_password = user_proxy.split(':')
+            proxy_port = int(proxy_port)
+            proxy = {
+                'proxy_type': 'socks5',
+                'addr': proxy_server,
+                'port': proxy_port,
+                'username': proxy_user,
+                'password': proxy_password
+            }
             if formated_base > current_date:
                 if chat_ids != []:
                     current_date = datetime.datetime.now(moscow_tz)
@@ -332,7 +342,7 @@ async def autoposting_forward():
                                 formated_base = datetime.datetime.strptime(date_bet, "%Y-%m-%d %H:%M:%S")
                                 formated_base = moscow_tz.localize(formated_base)
                                 if current_date > formated_base:
-                                    async with TelegramClient(StringSession(string_session), cfg.API_ID, cfg.API_HASH) as telethon_client_autoposting:
+                                    async with TelegramClient(StringSession(string_session), cfg.API_ID, cfg.API_HASH, proxy=proxy) as telethon_client_autoposting:
                                             try:
                                                 await telethon_client_autoposting.forward_messages(entity=formated_chat_id, messages=int(message_id), from_peer=channel_tag)
                                                 await bot.send_message(user_id, f"Рекламный пост, успешно отправлен в чат <a href='{formated_chat_id}'>{channel_name[:-2]}</a>", parse_mode=types.ParseMode.HTML)
