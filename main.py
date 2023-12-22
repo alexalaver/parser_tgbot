@@ -182,8 +182,10 @@ async def search_and_forward():
                                     pass
                 else:
                     db.delete_data_end_group(number_group)
-                    formated_chat_idn = [s.replace('✅', '⚠') for s in chat_idn]
+                    formated_chat_idn = [s.replace('✅', '⚠').reaplce('❌', '⚠')  for s in chat_idn]
+                    formated_chat_id_name = [s.replace('✅', '⚠').replace('❌', '⚠') for s in chat_name]
                     db.update_all_channels(number_group, formated_chat_idn)
+                    db.update_all_channels_name(number_group, formated_chat_id_name)
                     await bot.send_message(user_id, cfg.end_data_group_text(group_name))
 
             num += 1
@@ -287,8 +289,8 @@ async def search_and_forward_close_group():
                             await asyncio.sleep(1)
             else:
                 db.delete_data_end_group(number_group)
-                formated_chat_idn = [s.replace('✅', '⚠') for s in channelss_link]
-                formated_chat_id_name = [s.replace('✅', '⚠') for s in channels_name]
+                formated_chat_idn = [s.replace('✅', '⚠').replace('❌', '⚠') for s in channelss_link]
+                formated_chat_id_name = [s.replace('✅', '⚠').replace('❌', '⚠') for s in channels_name]
                 db.update_all_channels(number_group, formated_chat_idn)
                 db.update_all_channels_name(number_group, formated_chat_id_name)
                 await bot.send_message(user_id, cfg.end_data_group_text(group_name))
@@ -314,7 +316,7 @@ async def autoposting_forward():
                 continue
             moscow_tz = pytz.timezone('Europe/Moscow')
             group = groups[num]
-            user_id, chat_ids, string_session, message_id, number_group, data_end, channel_tag, channels_name = group[0], group[10], group[2], group[1], group[4], group[3], group[6], group[8]
+            user_id, chat_ids, string_session, message_id, number_group, data_end, channel_tag, channels_name, post_name = group[0], group[10], group[2], group[1], group[4], group[3], group[6], group[8], group[12]
             # chat_ids = [sublist for sublist in chat_idn if '✅' in sublist[0]]
             current_date = datetime.datetime.now(moscow_tz)
             formated_base = datetime.datetime.strptime(data_end, "%Y-%m-%d %H:%M:%S")
@@ -347,10 +349,13 @@ async def autoposting_forward():
                                     json_data = json.dumps(new_updates)
                                     db.update_chat_idn_autoposting(json_data, number_group)
             else:
-                db.delete_data_end_post(number_group)
-                formated_chat_idn = [s.replace('✅', '⚠') for s in chat_ids]
-                db.update_chats_post(formated_chat_idn, number_group)
-                await bot.send_message(user_id, cfg.end_data_post_text(message_id))
+                modified_chat_ids = [[sublist[0][:-1] + '⚠'] for sublist in chat_ids]
+                formated_chat_id_name = [s.replace('✅', '⚠').replace('❌', '⚠') for s in channels_name]
+                json_data = json.dumps(modified_chat_ids)
+                db.update_chat_idn_autoposting(json_data, number_group)
+                db.update_chat_name_autoposting(formated_chat_id_name, number_group)
+                db.delete_data_end_autoposting_post(number_group)
+                await bot.send_message(user_id, cfg.end_data_post_text(post_name))
 
             num += 1
             if num >= len(groups):
@@ -377,6 +382,7 @@ class Add_chat_ids(StatesGroup):
     panel_adm = State()
     add_ids_1 = State()
     add_ids_2 = State()
+    add_proxy = State()
 
 
 class Add_post(StatesGroup):
@@ -442,7 +448,7 @@ async def panel_administration(message):
     user_id = message.from_user.id
     if db.select_admin(user_id) > 0:
         markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
-        markup_reply.add(cfg.add_chat_id_button, cfg.back_button)
+        markup_reply.add(cfg.add_chat_id_button, cfg.add_proxy_button, cfg.back_button)
         await message.answer(cfg.panel_admin_text, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
         await Add_chat_ids.panel_adm.set()
     else:
@@ -1550,8 +1556,6 @@ async def change_time_autoposting_1_text(message: types.Message, state: FSMConte
                 user_id = message.from_user.id
                 first_name = message.from_user.first_name
                 username = message.from_user.username
-                if (not db.check_user(user_id)):
-                    db.add_user(user_id, first_name, username)
                 markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
                 markup_reply.add(cfg.autoposting)
                 markup_reply.add(cfg.parser)
@@ -1564,8 +1568,6 @@ async def change_time_autoposting_1_text(message: types.Message, state: FSMConte
                 user_id = message.from_user.id
                 first_name = message.from_user.first_name
                 username = message.from_user.username
-                if (not db.check_user(user_id)):
-                    db.add_user(user_id, first_name, username)
                 markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
                 markup_reply.add(cfg.autoposting)
                 markup_reply.add(cfg.parser)
@@ -1595,8 +1597,6 @@ async def change_time_autoposting_1_text(message: types.Message, state: FSMConte
                                 user_id = message.from_user.id
                                 first_name = message.from_user.first_name
                                 username = message.from_user.username
-                                if (not db.check_user(user_id)):
-                                    db.add_user(user_id, first_name, username)
                                 markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
                                 markup_reply.add(cfg.autoposting)
                                 markup_reply.add(cfg.parser)
@@ -1631,8 +1631,6 @@ async def add_time_autoposting_chat_text(message: types.Message, state: FSMConte
                 user_id = message.from_user.id
                 first_name = message.from_user.first_name
                 username = message.from_user.username
-                if (not db.check_user(user_id)):
-                    db.add_user(user_id, first_name, username)
                 markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
                 markup_reply.add(cfg.autoposting)
                 markup_reply.add(cfg.parser)
@@ -1645,8 +1643,6 @@ async def add_time_autoposting_chat_text(message: types.Message, state: FSMConte
                 user_id = message.from_user.id
                 first_name = message.from_user.first_name
                 username = message.from_user.username
-                if (not db.check_user(user_id)):
-                    db.add_user(user_id, first_name, username)
                 markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
                 markup_reply.add(cfg.autoposting)
                 markup_reply.add(cfg.parser)
@@ -1675,8 +1671,6 @@ async def add_time_autoposting_chat_text(message: types.Message, state: FSMConte
                                 user_id = message.from_user.id
                                 first_name = message.from_user.first_name
                                 username = message.from_user.username
-                                if (not db.check_user(user_id)):
-                                    db.add_user(user_id, first_name, username)
                                 markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
                                 markup_reply.add(cfg.autoposting)
                                 markup_reply.add(cfg.parser)
@@ -1987,8 +1981,6 @@ async def change_keyword_1_func(message: types.Message, state: FSMContext):
                 user_id = message.from_user.id
                 first_name = message.from_user.first_name
                 username = message.from_user.username
-                if (not db.check_user(user_id)):
-                    db.add_user(user_id, first_name, username)
                 markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
                 markup_reply.add(cfg.autoposting)
                 markup_reply.add(cfg.parser)
@@ -2005,8 +1997,6 @@ async def change_keyword_1_func(message: types.Message, state: FSMContext):
                             user_id = message.from_user.id
                             first_name = message.from_user.first_name
                             username = message.from_user.username
-                            if (not db.check_user(user_id)):
-                                db.add_user(user_id, first_name, username)
                             markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
                             markup_reply.add(cfg.autoposting)
                             markup_reply.add(cfg.parser)
@@ -2024,10 +2014,7 @@ async def change_keyword_1_func(message: types.Message, state: FSMContext):
                             user_id = message.from_user.id
                             first_name = message.from_user.first_name
                             username = message.from_user.username
-                            if (not db.check_user(user_id)):
-                                db.add_user(user_id, first_name, username)
-                            markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True,
-                                                                     one_time_keyboard=False)
+                            markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
                             markup_reply.add(cfg.autoposting)
                             markup_reply.add(cfg.parser)
                             markup_reply.row(cfg.my_profile, cfg.support)
@@ -2227,9 +2214,14 @@ async def panel_adm(message: types.Message, state: FSMContext):
             await state.reset_state()
         elif message.text == cfg.add_chat_id_button:
             markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
-            markup_reply.add(cfg.back_button)
+            markup_reply.add(cfg.cancel_button)
             await message.answer(cfg.write_number_group_text, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
             await Add_chat_ids.add_ids_1.set()
+        elif message.text == cfg.add_proxy_button:
+            markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
+            markup_reply.add(cfg.cancel_button)
+            await message.answer(cfg.add_proxy_text_1, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
+            await Add_chat_ids.add_proxy.set()
         else:
             await message.answer(cfg.error_text_in_state_panel, parse_mode=types.ParseMode.MARKDOWN)
     except Exception:
@@ -2238,9 +2230,9 @@ async def panel_adm(message: types.Message, state: FSMContext):
 @dp.message_handler(state=Add_chat_ids.add_ids_1)
 async def add_chat_ids_num_1(message: types.Message, state: FSMContext):
     try:
-        if message.text == cfg.back_button:
+        if message.text == cfg.cancel_button:
             markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
-            markup_reply.add(cfg.add_chat_id_button, cfg.back_button)
+            markup_reply.add(cfg.add_chat_id_button, cfg.add_proxy_button, cfg.back_button)
             await message.answer(cfg.cancel_add_ids, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
             await Add_chat_ids.panel_adm.set()
         else:
@@ -2258,14 +2250,14 @@ async def add_chat_ids_num_1(message: types.Message, state: FSMContext):
 @dp.message_handler(state=Add_chat_ids.add_ids_2)
 async def add_chat_ids_num_2(message: types.Message, state: FSMContext):
     try:
-        if message.text == cfg.back_button:
+        if message.text == cfg.cancel_button:
             markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
-            markup_reply.add(cfg.add_chat_id_button, cfg.back_button)
+            markup_reply.add(cfg.add_chat_id_button, cfg.add_proxy_button, cfg.back_button)
             await message.answer(cfg.cancel_add_ids, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
             await Add_chat_ids.panel_adm.set()
         else:
             markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
-            markup_reply.add(cfg.add_chat_id_button, cfg.back_button)
+            markup_reply.add(cfg.add_chat_id_button, cfg.add_proxy_button, cfg.back_button)
             textsing = message.text
             text_lines = textsing.strip().split('\n')
             new_lst = []
@@ -2307,6 +2299,27 @@ async def add_chat_ids_num_2(message: types.Message, state: FSMContext):
             await Add_chat_ids.panel_adm.set()
     except Exception:
         await message.answer("Произошла ошибка, попробуйте ещё раз:")
+
+@dp.message_handler(state=Add_chat_ids.add_proxy)
+async def add_proxy_func(message: types.Message, state: FSMContext):
+    try:
+        if message.text == cfg.cancel_button:
+            markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
+            markup_reply.add(cfg.add_chat_id_button, cfg.add_proxy_button, cfg.back_button)
+            await message.answer(cfg.cancel_add_ids, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
+            await Add_chat_ids.panel_adm.set()
+        else:
+            markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
+            markup_reply.add(cfg.add_chat_id_button, cfg.add_proxy_button, cfg.back_button)
+            textsing = message.text
+            text_lines = textsing.strip().split('\n')
+            old_proxy = db.select_settings_all_proxy()
+            new_proxy = old_proxy + text_lines
+            db.update_proxy_settings(new_proxy)
+            await message.answer(cfg.add_proxy_text_2, reply_markup=markup_reply)
+            await state.finish()
+    except Exception:
+        await message.answer("Произошла ошибка при добавлении прокси, пожалуйста повторите попытку!")
 
 @dp.message_handler(state=Create_account_autoposting.create_autoposting_1)
 async def process_phone(message: types.Message, state: FSMContext):
@@ -2398,8 +2411,6 @@ async def group_name_autoposting(message: types.Message, state: FSMContext):
                     user_id = message.from_user.id
                     first_name = message.from_user.first_name
                     username = message.from_user.username
-                    if (not db.check_user(user_id)):
-                        db.add_user(user_id, first_name, username)
                     markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
                     markup_reply.add(cfg.autoposting)
                     markup_reply.add(cfg.parser)

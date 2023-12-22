@@ -28,6 +28,7 @@ support = "Саппорт"
 change_keyword_button = "Изменить ✏"
 admin_panel_button = "Панель администратора"
 add_chat_id_button = "Добавить id чатов"
+add_proxy_button = "Добавить прокси"
 cancel_button = "Отменить"
 
 panel_admin_text = "Вы находитесь в панели администратора, выберите нужную вами функцию."
@@ -272,3 +273,6 @@ def popolnenie_balance_text_2(sum, user_id, link_oplata):
 
 def poponenie_right_text(sum):
     return f"Вы успешно пополнили баланс на сумму {sum}$"
+
+add_proxy_text_1 = "Введите прокси по порядку, пример:\n\n127.0.0.1\n127.0.0.1\n127.0.0.1"
+add_proxy_text_2 = "Вы успешно добавили прокси в базу данных!"

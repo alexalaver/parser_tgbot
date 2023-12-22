@@ -580,6 +580,16 @@ class Data:
             self.cursor.execute("UPDATE autoposting_post SET chats=%s::jsonb WHERE number_post=%s", (chats, number_post,))
             self.connect.commit()
 
+    def update_chat_name_autoposting(self, chats, number_post):
+        with self.connect:
+            self.cursor.execute("UPDATE autoposting_post SET channels_title=%s WHERE number_post=%s", (chats, number_post,))
+            self.connect.commit()
+
+    def delete_data_end_autoposting_post(self, number_post):
+        with self.connect:
+            self.cursor.execute("UPDATE autoposting_post SET data_end=Null WHERE number_post=%s", (number_post,))
+            self.connect.commit()
+
     def select_days_autoposting_post(self, number_post):
         with self.connect:
             self.cursor.execute("SELECT days FROM autoposting_post WHERE number_post=%s", (number_post,))
@@ -598,3 +608,17 @@ class Data:
             a = self.cursor.fetchall()
             result_list = [item[0] for item in a]
             return result_list
+
+    def select_settings_all_proxy(self):
+        with self.connect:
+            self.cursor.execute("SELECT proxy FROM settings_bot")
+            a = self.cursor.fetchone()[0]
+            if a is None:
+                return []
+            else:
+                return a
+
+    def update_proxy_settings(self, proxy):
+        with self.connect:
+            self.cursor.execute("UPDATE settings_bot SET proxy=%s", (proxy,))
+            self.connect.commit()

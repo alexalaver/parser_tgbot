@@ -50,10 +50,9 @@
 # print(result)
 
 
-a = "hello"
+a = ["testonepublic ✅", "testtwopublic ✅"]
 
-if a[:-25] == "hello":
-    print('yes')
-else:
-    print("no")
+for b in a:
+    modified_b = b.replace('✅', '⚠').replace('❌', '⚠')
 
+    print(modified_b)
