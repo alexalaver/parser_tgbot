@@ -642,7 +642,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 user_id = callback_query.from_user.id
                 group_names = db.select_autoposting_group_name(user_id)
                 for group_name in group_names:
-                    button = types.InlineKeyboardButton(text=group_name, callback_data=f"{group_name}parsers")
+                    button = types.InlineKeyboardButton(text=group_name, callback_data=f"{group_name}autoposting_account")
                     markup_inline.add(button)
                 btn1_inline = types.InlineKeyboardButton(cfg.add_account_button, callback_data="add_account_autoposting")
                 markup_inline.add(btn1_inline)
@@ -650,7 +650,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     text = cfg.accounts_left_text
                 else:
                     text = cfg.accounts_right_text
-                await callback_query.message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+                await callback_query.message.answer_photo(photo=types.InputFile("img/photo3.jpg"), caption=text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
             except Exception:
                 await callback_query.answer("Произошла ошибка при нажатии на кнопку Меню для Автопостинга", show_alert=True)
         elif callback_query.data == "up_balance":
@@ -1523,8 +1523,9 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                             markup_inline = types.InlineKeyboardMarkup(row_width=1)
                             btn_inline1 = types.InlineKeyboardButton(cfg.menu_button, callback_data='menu_after_pay_autoposting')
                             markup_inline.add(btn_inline1)
+                            post_name = db.select_post_name_autoposting(number_group_autoposting)
                             await callback_query.message.delete()
-                            await callback_query.message.answer(text=cfg.tariffe_correct_autoposting(group_name_autoposting, channels_len, formatted_date_new), reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+                            await callback_query.message.answer(text=cfg.tariffe_correct_autoposting(post_name, channels_len, formatted_date_new), reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
                         else:
                             for admin_id in cfg.admin_id:
                                 await bot.send_message(admin_id,

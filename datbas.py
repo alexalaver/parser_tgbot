@@ -570,6 +570,12 @@ class Data:
             a = self.cursor.fetchone()
             return a[0]
 
+    def select_post_name_autoposting(self, number):
+        with self.connect:
+            self.cursor.execute("SELECT post_name FROM autoposting_post WHERE number_post=%s", (number,))
+            a = self.cursor.fetchone()
+            return a[0]
+
     def delete_post(self, post):
         with self.connect:
             self.cursor.execute("DELETE FROM autoposting_post WHERE post=%s", (post,))
