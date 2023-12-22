@@ -1813,7 +1813,7 @@ async def add_post_func_text_2(message: types.Message, state: FSMContext):
                 hours = int(hours)
                 minutes = int(minutes)
                 if 0 <= hours < 24:
-                    if 0 <= minutes < 61:
+                    if 0 <= minutes < 60:
                         if validate_time_format(message.text):
                             await Add_post.add_post_3.set()
                             await message.answer(cfg.create_account_post_3)
