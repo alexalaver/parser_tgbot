@@ -612,11 +612,11 @@ class Data:
     def select_settings_all_proxy(self):
         with self.connect:
             self.cursor.execute("SELECT proxy FROM settings_bot")
-            a = self.cursor.fetchone()[0]
+            a = self.cursor.fetchone()
             if a is None:
                 return []
             else:
-                return a
+                return a[]
 
     def update_proxy_settings(self, proxy):
         with self.connect:
