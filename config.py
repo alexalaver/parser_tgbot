@@ -62,7 +62,7 @@ addbalance_command_error = "Вы ввели команду в неправиль
 rembalance_command_error = "Вы ввели команду в неправильном формате.\nПравильный формат - /rembalance _id_ _сумма_"
 
 def addbalance_right_admin(balance, id, polz, old_balance):
-    return f"Баланс пользователя {polz} \\[{id}\\] изменен ${old_balance} -> ${balance}:,"
+    return f"Баланс пользователя {polz} \\[{id}] изменен ${old_balance} -> ${balance}:,"
 
 def addbalance_right_polz(balance):
     return f"Администратор, прибавил к вашему балансу {balance}$"
