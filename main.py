@@ -77,6 +77,10 @@ async def check_keywords_len(keywords, num):
 def escape_html(text):
     return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;").replace("'", "&apos;")
 
+async def get_user_first_name(user_id):
+    chat_member = await bot.get_chat_member(chat_id=user_id, user_id=user_id)
+    return chat_member.user.first_name
+
 def extract_key_from_link(link):
     parts = link.replace("https://t.me/", "").split()
     return parts[0].replace("@", "")
@@ -601,8 +605,11 @@ async def addbalance_user(message: types.Message):
                             if int(select_info[2]):
                                 select_user_id = int(select_info[1])
                                 select_add_balance = int(select_info[2])
+                                old_balance = db.select_balance(select_user_id)
                                 db.addbalance(select_user_id, select_add_balance)
-                                await message.answer(cfg.addbalance_right_admin(fnc.nick_with_link("пользователю", select_user_id), select_add_balance), parse_mode=types.ParseMode.MARKDOWN)
+                                new_balance = db.select_balance(select_user_id)
+                                first_name = await get_user_first_name(select_user_id)
+                                await message.answer(cfg.addbalance_right_admin(new_balance, str(select_user_id), fnc.nick_with_link(first_name, select_user_id), old_balance), parse_mode=types.ParseMode.MARKDOWN)
                                 await dp.bot.send_message(select_user_id, cfg.addbalance_right_polz(select_add_balance), parse_mode=types.ParseMode.MARKDOWN)
                         else:
                             await message.answer(cfg.addbalance_command_error, parse_mode=types.ParseMode.MARKDOWN)
