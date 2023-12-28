@@ -25,7 +25,7 @@ autoposting = "Автопостинг"
 parser = "Парсер"
 my_profile = "Мой профиль"
 support = "Саппорт"
-change_keyword_button = "Изменить ✏"
+change_keyword_button = "Редактировать ✏"
 admin_panel_button = "Панель администратора"
 add_chat_id_button = "Добавить id чатов"
 add_proxy_button = "Добавить прокси"
@@ -281,3 +281,4 @@ cancel_add_proxy_text = "Вы отменили добавление прокси
 keyword_parser_buttons = "🧳 Ключевые слова"
 
 keyword_parser_text = "Ваши ключевые слова:\n\n"
+keyword_parser_text_2 = "В данном разделе вы сможете редактировать ключевые слова."

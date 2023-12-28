@@ -1162,7 +1162,8 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                         text_keywords = cfg.keyword_parser_text
                         for keyword in keywords:
                             text_keywords = text_keywords + keyword + "\n"
-                        await callback_query.message.answer(text_keywords, reply_markup=markup_inline)
+                        await callback_query.message.edit_caption(caption=cfg.keyword_parser_text_2, reply_markup=markup_inline)
+                        await callback_query.message.answer(text_keywords)
                     elif callback_query.data == "back_from_keyword_parser":
                         channels = db.select_channels_with_number(number_group_parser)
                         channels_name_parser = db.select_channels_name_with_number(number_group_parser)
