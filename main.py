@@ -748,7 +748,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                         if db.check_date_tarife(user_id, group_name) is None:
                             pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels_parser')
                             markup_inline.add(pay_money_buttons)
-                        change_keywords = types.InlineKeyboardButton(text=cfg.change_keyword_button, callback_data='change_keyword_parser')
+                        change_keywords = types.InlineKeyboardButton(text=cfg.keyword_parser_buttons, callback_data='keyword_parser')
                         back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels_parser')
                         markup_inline.add(change_keywords)
                         markup_inline.add(back_channels)
@@ -955,7 +955,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                                 if db.check_date_tarife_for_number(number_group_parser) is None:
                                     pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels_parser')
                                     markup_inline.add(pay_money_buttons)
-                                change_keywords = types.InlineKeyboardButton(text=cfg.change_keyword_button, callback_data='change_keyword_parser')
+                                change_keywords = types.InlineKeyboardButton(text=cfg.keyword_parser_buttons, callback_data='keyword_parser')
                                 back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels_parser')
                                 markup_inline.add(change_keywords)
                                 markup_inline.add(back_channels)
@@ -987,7 +987,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                             if db.check_date_tarife_for_number(number_group_parser) is None:
                                 pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels_parser')
                                 markup_inline.add(pay_money_buttons)
-                            change_keywords = types.InlineKeyboardButton(text=cfg.change_keyword_button, callback_data='change_keyword_parser')
+                            change_keywords = types.InlineKeyboardButton(text=cfg.keyword_parser_buttons, callback_data='keyword_parser')
                             back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels_parser')
                             markup_inline.add(change_keywords)
                             markup_inline.add(back_channels)
@@ -1020,8 +1020,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                             if db.check_date_tarife_for_number(number_group_parser) is None:
                                 pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels_parser')
                                 markup_inline.add(pay_money_buttons)
-                            change_keywords = types.InlineKeyboardButton(text=cfg.change_keyword_button,
-                                                                         callback_data='change_keyword_parser')
+                            change_keywords = types.InlineKeyboardButton(text=cfg.keyword_parser_buttons, callback_data='keyword_parser')
                             back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels_parser')
                             markup_inline.add(change_keywords)
                             markup_inline.add(back_channels)
@@ -1147,13 +1146,46 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                         if db.check_date_tarife_for_number(number_group_parser) is None:
                             pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels_parser')
                             markup_inline.add(pay_money_buttons)
-                        change_keywords = types.InlineKeyboardButton(text=cfg.change_keyword_button, callback_data='change_keyword_parser')
+                        change_keywords = types.InlineKeyboardButton(text=cfg.keyword_parser_buttons, callback_data='keyword_parser')
                         back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels_parser')
                         markup_inline.add(change_keywords)
                         markup_inline.add(back_channels)
                         await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+                    elif callback_query.data == "keyword_parser":
+                        user_id = callback_query.from_user.id
+                        markup_inline = types.InlineKeyboardMarkup(row_width=1)
+                        markup_inline.add(
+                            types.InlineKeyboardButton(text=cfg.change_keyword_button, callback_data="change_keyword_parser"),
+                            types.InlineKeyboardButton(text=cfg.back_button, callback_data="back_from_keyword_parser")
+                        )
+                        keywords = db.select_keyword(user_id, number_group_parser)
+                        text_keywords = cfg.keyword_parser_text
+                        for keyword in keywords:
+                            text_keywords = text_keywords + keyword + "\n"
+                        await callback_query.message.answer(text_keywords, reply_markup=markup_inline)
+                    elif callback_query.data == "back_from_keyword_parser":
+                        channels = db.select_channels_with_number(number_group_parser)
+                        channels_name_parser = db.select_channels_name_with_number(number_group_parser)
+                        markup_inline = types.InlineKeyboardMarkup(row_width=2)
+                        paired_channels = zip(channels_name_parser[from_page_parser:before_page_parser], channels[from_page_parser:before_page_parser])
+                        for channel_name, channel in paired_channels:
+                            button = types.InlineKeyboardButton(text=channel_name, callback_data=channel)
+                            markup_inline.row(button)
+                        buttons_count = types.InlineKeyboardButton(text=f"Страница {page_here_parser}/{channels_page_parser} 📄", callback_data="page_parser")
+                        markup_inline.add(buttons_count)
+                        if channels_count_all_parser > 10:
+                            buttons_next = types.InlineKeyboardButton(text=cfg.next_page, callback_data="next_page_parser")
+                            buttons_old = types.InlineKeyboardButton(text=cfg.old_page, callback_data="old_page_parser")
+                            markup_inline.row(buttons_old, buttons_next)
+                        if db.check_date_tarife_for_number(number_group_parser) is None:
+                            pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels_parser')
+                            markup_inline.add(pay_money_buttons)
+                        change_keywords = types.InlineKeyboardButton(text=cfg.keyword_parser_buttons, callback_data='keyword_parser')
+                        back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels_parser')
+                        markup_inline.add(change_keywords)
+                        markup_inline.add(back_channels)
                     elif callback_query.data == "change_keyword_parser":
-                        markup_reply= types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
+                        markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
                         markup_reply.add(cfg.cancel_button)
                         await state.update_data(number_group=number_group_parser)
                         await callback_query.message.answer(cfg.change_keyword_text, reply_markup=markup_reply)

@@ -277,3 +277,7 @@ def poponenie_right_text(sum):
 add_proxy_text_1 = "Введите прокси по порядку, пример:\n\n127.0.0.1\n127.0.0.1\n127.0.0.1"
 add_proxy_text_2 = "Вы успешно добавили прокси в базу данных!"
 cancel_add_proxy_text = "Вы отменили добавление прокси!"
+
+keyword_parser_buttons = "🧳 Ключевые слова"
+
+keyword_parser_text = "Ваши ключевые слова:\n\n"
