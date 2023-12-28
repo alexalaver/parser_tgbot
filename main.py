@@ -1185,6 +1185,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                         back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels_parser')
                         markup_inline.add(change_keywords)
                         markup_inline.add(back_channels)
+                        await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
                     elif callback_query.data == "change_keyword_parser":
                         markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
                         markup_reply.add(cfg.cancel_button)
