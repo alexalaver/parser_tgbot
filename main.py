@@ -2005,8 +2005,8 @@ async def add_post_func_text_5(message: types.Message, state: FSMContext):
                                 try:
                                     all_dialogs = await client_add_post.get_dialogs()
                                     for chat_name in text_line:
-                                        print(dialog)
                                         for dialog in all_dialogs:
+                                            print(dialog)
                                             if dialog.name == chat_name:
                                                 chat_ids.append(str(dialog.id))
                                                 break
