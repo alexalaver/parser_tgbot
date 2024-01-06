@@ -2039,7 +2039,7 @@ async def add_post_func_text_5(message: types.Message, state: FSMContext):
                             if db.select_admin(user_id) > 0:
                                 markup_reply.add(cfg.admin_panel_button)
                             await message.answer(cfg.error_create_post, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
-                            print(f"[ERROR] {es}")
+                            # print(f"[ERROR] {es}")
                     else:
                         await message.answer(cfg.error_len_chat_post_create, parse_mode=types.ParseMode.MARKDOWN)
                 else:
