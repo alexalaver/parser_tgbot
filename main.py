@@ -2004,7 +2004,7 @@ async def add_post_func_text_5(message: types.Message, state: FSMContext):
                             async with TelegramClient(StringSession(string_session), cfg.API_ID, cfg.API_HASH) as client_add_post:
                                 try:
                                     for chat_name in text_line:
-                                        chat = await client.get_entity(chat_name)
+                                        chat = await client_add_post.get_entity(chat_name)
                                         chat_ids.append(str(chat.id))
                                 except ValueError:
                                     bluable = False
