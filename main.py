@@ -2005,7 +2005,7 @@ async def add_post_func_text_5(message: types.Message, state: FSMContext):
                                 try:
                                     # Получение списка всех диалогов
                                     all_dialogs = await client_add_post.get_dialogs()
-
+                                    print(all_dialogs)
                                     # Поиск группы среди диалогов
                                     for dialog in all_dialogs:
                                         for chat_name in text_line:
