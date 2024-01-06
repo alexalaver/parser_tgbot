@@ -2009,7 +2009,6 @@ async def add_post_func_text_5(message: types.Message, state: FSMContext):
                                         print(dialog)
                                         if dialog.name == chat_name:
                                             chat_ids.append(str(dialog.id))
-                                            break
                                 except ValueError:
                                     bluable = False
                             if bluable == False:
