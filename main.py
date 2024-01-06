@@ -1995,51 +1995,51 @@ async def add_post_func_text_5(message: types.Message, state: FSMContext):
             else:
                 if 2 <= len(message.text) <= 1000:
                     if 1 <= len(text_lines) <= 10:
-                        try:
-                            bluable = True
-                            data = await state.get_data()
-                            number_account = data.get("number_account")
-                            string_session = db.get_string_session(number_account)
-                            chat_ids = []
-                            async with TelegramClient(StringSession(string_session), cfg.API_ID, cfg.API_HASH) as client_add_post:
-                                try:
-                                    for chat_name in text_line:
-                                        chat = await client.get_entity(chat_name)
-                                        chat_ids.append(str(chat.id))
-                                except ValueError:
-                                    bluable = False
-                            if bluable == False:
-                                await message.answer("Произошла ошибка, в списке чатов есть чаты которых нет либо вы не являетесь участником!")
-                            else:
-                                check_number_post = db.check_numbers_account_post()
-                                new_number_post = check_number_post + 1
-                                time_betw = data.get("time_betw")
-                                forwarded_message_id = data.get("forwarded_message_id")
-                                channel_tag = data.get("channel_tag")
-                                message_id_bot = data.get("message_id_bot")
-                                days = data.get("days")
-                                post_name = data.get("post_name")
-                                chat_ids = [[element + ' ⚠'] for element in chat_ids]
-                                json_data = json.dumps(chat_ids)
-                                db.add_post_account(user_id, forwarded_message_id, string_session, json_data, time_betw, new_number_post, number_account, channel_tag, message_id_bot, text_lines, days, post_name)
-                                markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
-                                markup_reply.add(cfg.autoposting)
-                                markup_reply.add(cfg.parser)
-                                markup_reply.row(cfg.my_profile, cfg.support)
-                                if db.select_admin(user_id) > 0:
-                                    markup_reply.add(cfg.admin_panel_button)
-                                await message.answer(cfg.right_create_post, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
-                                await state.finish()
-                        except Exception as es:
-                            await state.reset_state()
+                        # try:
+                        bluable = True
+                        data = await state.get_data()
+                        number_account = data.get("number_account")
+                        string_session = db.get_string_session(number_account)
+                        chat_ids = []
+                        async with TelegramClient(StringSession(string_session), cfg.API_ID, cfg.API_HASH) as client_add_post:
+                            try:
+                                for chat_name in text_line:
+                                    chat = await client.get_entity(chat_name)
+                                    chat_ids.append(str(chat.id))
+                            except ValueError:
+                                bluable = False
+                        if bluable == False:
+                            await message.answer("Произошла ошибка, в списке чатов есть чаты которых нет либо вы не являетесь участником!")
+                        else:
+                            check_number_post = db.check_numbers_account_post()
+                            new_number_post = check_number_post + 1
+                            time_betw = data.get("time_betw")
+                            forwarded_message_id = data.get("forwarded_message_id")
+                            channel_tag = data.get("channel_tag")
+                            message_id_bot = data.get("message_id_bot")
+                            days = data.get("days")
+                            post_name = data.get("post_name")
+                            chat_ids = [[element + ' ⚠'] for element in chat_ids]
+                            json_data = json.dumps(chat_ids)
+                            db.add_post_account(user_id, forwarded_message_id, string_session, json_data, time_betw, new_number_post, number_account, channel_tag, message_id_bot, text_lines, days, post_name)
                             markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
                             markup_reply.add(cfg.autoposting)
                             markup_reply.add(cfg.parser)
                             markup_reply.row(cfg.my_profile, cfg.support)
                             if db.select_admin(user_id) > 0:
                                 markup_reply.add(cfg.admin_panel_button)
-                            await message.answer(cfg.error_create_post, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
-                            # print(f"[ERROR] {es}")
+                            await message.answer(cfg.right_create_post, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
+                            await state.finish()
+                        # except Exception as es:
+                        #     await state.reset_state()
+                        #     markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+                        #     markup_reply.add(cfg.autoposting)
+                        #     markup_reply.add(cfg.parser)
+                        #     markup_reply.row(cfg.my_profile, cfg.support)
+                        #     if db.select_admin(user_id) > 0:
+                        #         markup_reply.add(cfg.admin_panel_button)
+                        #     await message.answer(cfg.error_create_post, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
+                        #     # print(f"[ERROR] {es}")
                     else:
                         await message.answer(cfg.error_len_chat_post_create, parse_mode=types.ParseMode.MARKDOWN)
                 else:
