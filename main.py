@@ -1996,60 +1996,32 @@ async def add_post_func_text_5(message: types.Message, state: FSMContext):
                 if 2 <= len(message.text) <= 1000:
                     if 1 <= len(text_lines) <= 10:
                         try:
-                            channels_name_1 = []
-                            await message.answer(cfg.please_wait_add_channels_name)
-                            for channel_name in text_line:
-                                if channel_name[13] == "+":
-                                    response = requests.get(channel_name)
-                                    html_content = response.text
-                                    soup = BeautifulSoup(html_content, 'html.parser')
-                                    title_div = soup.find('div', {'class': 'tgme_page_title'})
-                                    if title_div:
-                                        group_name = title_div.get_text(strip=True)
-                                        channels_name_1.append(group_name)
-                                    else:
-                                        await message.answer(cfg.error_channel_name_add)
-                                        break
-                                elif channel_name[0] == "@":
-                                    response = requests.get(f"https://t.me/{channel_name[1:]}")
-                                    html_content = response.text
-                                    soup = BeautifulSoup(html_content, 'html.parser')
-                                    title_div = soup.find('div', {'class': 'tgme_page_title'})
-                                    if title_div:
-                                        group_name = title_div.get_text(strip=True)
-                                        channels_name_1.append(group_name)
-                                    else:
-                                        await message.answer(cfg.error_channel_name_add)
-                                        break
-                                else:
-                                    if "http" in channel_name or "t.me/" in channel_name:
-                                        response = requests.get(channel_name)
-                                    else:
-                                        response = requests.get(f"https://t.me/{channel_name}")
-                                    html_content = response.text
-                                    soup = BeautifulSoup(html_content, 'html.parser')
-                                    title_div = soup.find('div', {'class': 'tgme_page_title'})
-                                    if title_div:
-                                        group_name = title_div.get_text(strip=True)
-                                        channels_name_1.append(group_name)
-                                    else:
-                                        await message.answer(cfg.error_channel_name_add)
-                                        break
-                            if len(channels_name_1) == len(text_line):
-                                channels_name_2 = list(dict.fromkeys([element + ' ⚠' for element in channels_name_1]))
+                            bluable = True
+                            data = await state.get_data()
+                            number_account = data.get("number_account")
+                            string_session = db.get_string_session(number_account)
+                            chat_ids = []
+                            async with TelegramClient(StringSession(string_session), cfg.API_ID, cfg.API_HASH) as client_add_post:
+                                try:
+                                    for chat_name in text_line:
+                                        chat = await client.get_entity(chat_name)
+                                        chat_ids.append(str(chat.id))
+                                except ValueError:
+                                    bluable = False
+                            if bluable == False:
+                                await message.answer("Произошла ошибка, в списке чатов есть чаты которых нет либо вы не являетесь участником!")
+                            else:
                                 check_number_post = db.check_numbers_account_post()
                                 new_number_post = check_number_post + 1
-                                data = await state.get_data()
-                                number_account = data.get("number_account")
-                                string_session = db.get_string_session(number_account)
                                 time_betw = data.get("time_betw")
                                 forwarded_message_id = data.get("forwarded_message_id")
                                 channel_tag = data.get("channel_tag")
                                 message_id_bot = data.get("message_id_bot")
                                 days = data.get("days")
                                 post_name = data.get("post_name")
-                                json_data = json.dumps(text_lines)
-                                db.add_post_account(user_id, forwarded_message_id, string_session, json_data, time_betw, new_number_post, number_account, channel_tag, message_id_bot, channels_name_2, days, post_name)
+                                chat_ids = [[element + ' ⚠'] for element in chat_ids]
+                                json_data = json.dumps(chat_ids)
+                                db.add_post_account(user_id, forwarded_message_id, string_session, json_data, time_betw, new_number_post, number_account, channel_tag, message_id_bot, text_lines, days, post_name)
                                 markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
                                 markup_reply.add(cfg.autoposting)
                                 markup_reply.add(cfg.parser)
