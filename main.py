@@ -2003,11 +2003,9 @@ async def add_post_func_text_5(message: types.Message, state: FSMContext):
                             chat_ids = []
                             async with TelegramClient(StringSession(string_session), cfg.API_ID, cfg.API_HASH) as client_add_post:
                                 try:
-                                    # Получение списка всех диалогов
                                     all_dialogs = await client_add_post.get_dialogs()
-                                    print(all_dialogs)
-                                    # Поиск группы среди диалогов
                                     for dialog in all_dialogs:
+                                        print(dialog)
                                         for chat_name in text_line:
                                             if dialog.name == chat_name:
                                                 chat_ids.append(str(dialog.id))
