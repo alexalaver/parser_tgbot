@@ -411,7 +411,6 @@ async def update_all_groups():
                                 print("right subscribted")
                                 booline = True
                                 break
-                            break
                 json_data = json.dumps(groups_chat)
                 db.update_all_chats_groups(json_data)
                 if booline == True:
