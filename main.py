@@ -385,10 +385,11 @@ async def autoposting_forward():
 async def update_all_groups():
     while True:
         try:
-            times = str(db.select_time_all_chats_groups())
+            times = db.select_time_all_chats_groups()
             current_date = datetime.datetime.now()
-            if times == False:
+            if times is False:
                 db.update_time_all_chats_groups(current_date)
+            times = str(db.select_time_all_chats_groups())
             formated_base = datetime.datetime.strptime(times, "%Y-%m-%d %H:%M:%S")
             if formated_base <= current_date:
                 groups = db.select_all_chats_groups()
