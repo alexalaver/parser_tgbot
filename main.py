@@ -399,19 +399,18 @@ async def update_all_groups():
                 if not telethon_client.is_connected():
                     await telethon_client.connect()
                 groups_chat = db.select_all_chats_groups()
+                first_elements = [sublist[0] for sublist in groups_chat]
                 all_dialogs = await telethon_client.get_dialogs()
                 booline = False
                 for dialog in all_dialogs:
                     new_id_dialog = str(dialog.id)
                     if new_id_dialog[0] == "-":
-                        for chat_name in groups_chat:
-                            if dialog.name != chat_name[0]:
-                                print(f"dialog: {dialog.name}\nchat_name: {chat_name[0]}")
-                                groups_chat.append([dialog.name, dialog.id])
-                                await asyncio.sleep(1)
-                                print("right subscribted")
-                                booline = True
-                                break
+                        if dialog.name not in first_elements:
+                            groups_chat.append([dialog.name, dialog.id])
+                            await asyncio.sleep(1)
+                            print("right subscribted")
+                            booline = True
+                            break
                 json_data = json.dumps(groups_chat)
                 db.update_all_chats_groups(json_data)
                 if booline == True:
