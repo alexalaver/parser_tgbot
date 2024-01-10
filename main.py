@@ -397,6 +397,8 @@ async def update_all_groups():
                     for chat_name in groups:
                         if dialog.name != chat_name[0]:
                             groups.append([dialog.name, dialog.id])
+                            await asyncio.sleep(1)
+                            print("right subscribted")
                             break
                 json_data = json.dumps(groups)
                 db.update_all_chats_groups(json_data)
