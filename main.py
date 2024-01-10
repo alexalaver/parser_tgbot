@@ -385,7 +385,7 @@ async def autoposting_forward():
 async def update_all_groups():
     while True:
         try:
-            times = db.select_time_all_chats_groups()
+            times = str(db.select_time_all_chats_groups())
             formated_base = datetime.datetime.strptime(times, "%Y-%m-%d %H:%M:%S")
             current_date = datetime.datetime.now()
             if times == False:
@@ -406,6 +406,7 @@ async def update_all_groups():
                 db.update_time_all_chats_groups(new_date)
         except Exception as err:
             print(f"[ERROR UPDATE ALL GROUPS] {err}")
+            await asyncio.sleep(1)
 
 
 class Create_group(StatesGroup):
