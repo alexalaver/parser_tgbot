@@ -382,6 +382,28 @@ async def autoposting_forward():
 
         await asyncio.sleep(1)
 
+async def update_all_groups():
+    while True:
+        try:
+            times = db.select_time_all_chats_groups()
+            formated_base = datetime.datetime.strptime(times, "%Y-%m-%d %H:%M:%S")
+            current_date = datetime.datetime.now()
+            if times == False:
+                db.update_time_all_chats_groups(current_date)
+            if formated_base <= current_date:
+                groups = db.select_all_chats_groups()
+                all_dialogs = await telethon_client.get_dialogs()
+                for dialog in all_dialogs:
+                    for chat_name in groups:
+                        if dialog.name != chat_name[0]:
+                            groups.append([dialog.name, dialog.id])
+                            break
+                new_date = current_date + datetime.timedelta(minutes=4)
+                db.update_time_all_chats_groups(new_date)
+        except Exception as err:
+            print(f"[ERROR UPDATE ALL GROUPS] {err}")
+
+
 class Create_group(StatesGroup):
     create_group_1 = State()
     create_group_2 = State()
@@ -2579,10 +2601,10 @@ async def other(message: types.Message):
                 await message.answer("Произошла ошибка, пожалуйста повторите ещё раз:")
 
 
-async def on_startup(_):
-    asyncio.create_task(search_and_forward())
-    asyncio.create_task(search_and_forward_close_group())
-    asyncio.create_task(autoposting_forward())
+# async def on_startup(_):
+#     asyncio.create_task(search_and_forward())
+#     asyncio.create_task(search_and_forward_close_group())
+#     asyncio.create_task(autoposting_forward())
 
 if __name__ == "__main__":
-    executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
+    executor.start_polling(dp, skip_updates=True) #on_startup=on_startup

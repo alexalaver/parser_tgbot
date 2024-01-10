@@ -50,6 +50,10 @@
 # print(result)
 
 
-a = ["testonepublic ✅", "testtwopublic ✅"]
+a = ["asdasd", "gsafsa", "t2erwer", "zxczxczx", "bfgadsfa"]
+c = ["32442343", "35243242", "2111111111111", "6662352", "5234234"]
 
-print(a[2:])
+for b in a:
+    for g in c:
+        print(f"{g}, {b}")
+print('hi')

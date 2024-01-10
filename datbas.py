@@ -662,3 +662,26 @@ class Data:
             a = self.cursor.fetchall()
             flattened_list = [item[0] for item in a]
             return flattened_list
+
+    def select_all_chats_groups(self):
+        with self.connect:
+            self.cursor.execute("SELECT groups FROM all_chats")
+            groups = self.cursor.fetchone()
+            if groups is None:
+                return False
+            else:
+                return groups[0]
+
+    def select_time_all_chats_groups(self):
+        with self.connect:
+            self.cursor.execute("SELECT time_update_all_groups FROM settings_bot")
+            times = self.cursor.fetchone()
+            if times is None:
+                return False
+            else:
+                return times[0]
+
+    def update_time_all_chats_groups(self, time):
+        with self.connect:
+            self.cursor.execute("UPDATE settings_bot SET time_update_all_groups=%s", (time,))
+            self.connect.commit()
