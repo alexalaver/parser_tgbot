@@ -405,7 +405,9 @@ async def update_all_groups():
                     for chat_name in groups_chat:
                         if dialog.name != chat_name[0]:
                             new_id_dialog = str(dialog.id)
+                            print("right 3")
                             if new_id_dialog[0] == "-":
+                                print("right 4")
                                 groups_chat.append([dialog.name, dialog.id])
                                 await asyncio.sleep(1)
                                 print("right subscribted")
