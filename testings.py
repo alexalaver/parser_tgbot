@@ -50,10 +50,6 @@
 # print(result)
 
 
-a = ["asdasd", "gsafsa", "t2erwer", "zxczxczx", "bfgadsfa"]
-c = ["32442343", "35243242", "2111111111111", "6662352", "5234234"]
-
-for b in a:
-    for g in c:
-        print(f"{g}, {b}")
-print('hi')
+a = ["eadsads", "LOOOOOO", "siiimuu", "qqqqqqqqq"]
+a[1] = "lox)"
+print(a)

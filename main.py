@@ -382,6 +382,7 @@ async def autoposting_forward():
 
         await asyncio.sleep(1)
 
+
 async def update_all_groups():
     while True:
         try:
@@ -390,24 +391,52 @@ async def update_all_groups():
             if times is False:
                 formatted_current = current_date.strftime("%Y-%m-%d %H:%M:%S")
                 db.update_time_all_chats_groups(formatted_current)
+            num = 0
             times = str(db.select_time_all_chats_groups())
             formated_base = datetime.datetime.strptime(times, "%Y-%m-%d %H:%M:%S")
             if formated_base <= current_date:
-                await telethon_client.connect()
-                groups = db.select_all_chats_groups()
+                if not telethon_client.is_connected():
+                    await telethon_client.connect()
+                groups_chat = db.select_all_chats_groups()
                 all_dialogs = await telethon_client.get_dialogs()
+                booline = False
                 for dialog in all_dialogs:
-                    for chat_name in groups:
+                    for chat_name in groups_chat:
                         if dialog.name != chat_name[0]:
-                            groups.append([dialog.name, dialog.id])
-                            await asyncio.sleep(1)
-                            print("right subscribted")
-                            break
-                json_data = json.dumps(groups)
+                            if str(dialog.id[0]) == "-":
+                                groups_chat.append([dialog.name, dialog.id])
+                                await asyncio.sleep(1)
+                                print("right subscribted")
+                                booline = True
+                                break
+                json_data = json.dumps(groups_chat)
                 db.update_all_chats_groups(json_data)
-                new_date = current_date + datetime.timedelta(minutes=4)
-                formatted_current = new_date.strftime("%Y-%m-%d %H:%M:%S")
-                db.update_time_all_chats_groups(formatted_current)
+                if booline == True:
+                    groups = db.select_all_channels_group()
+                    group = groups[num]
+                    user_id, chat_idn, keywords, data_end, group_name, chat_name, number_group = group[0], group[2], group[5], group[3], group[4], group[7], group[1]
+                    chat_ids = [item for item in chat_idn]
+                    chat_names = [item for item in chat_name]
+                    groups_chat = db.select_all_chats_groups()
+
+                    for group_chat in groups_chat:
+                        for name_chat in chat_names:
+                            if name_chat[-1] == "⏳":
+                                if group_chat[0] == name_chat[:-2]:
+                                    index_chat = chat_names.index(name_chat)
+                                    new_id_chat = group_chat[1]
+                                    chat_ids[index_chat] = new_id_chat + " ✅"
+                                    chat_names[index_chat] = name_chat[:-2] + " ✅"
+                                    db.update_all_channels(number_group, chat_ids)
+                                    db.update_all_channels_name(number_group, chat_names)
+
+                    num += 1
+                    if num >= len(groups):
+                        num = 0
+                        new_date = current_date + datetime.timedelta(minutes=4)
+                        formatted_current = new_date.strftime("%Y-%m-%d %H:%M:%S")
+                        db.update_time_all_chats_groups(formatted_current)
+
         except Exception as err:
             print(f"[ERROR UPDATE ALL GROUPS] {err}")
             await asyncio.sleep(1)
