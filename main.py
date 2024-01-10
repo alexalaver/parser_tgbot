@@ -21,6 +21,7 @@ import base64
 import hashlib
 import aiohttp
 import uuid
+import traceback
 
 logging.basicConfig(level=logging.INFO)
 logging.basicConfig(level=logging.DEBUG)
@@ -412,7 +413,6 @@ async def update_all_groups():
                 json_data = json.dumps(groups_chat)
                 db.update_all_chats_groups(json_data)
                 if booline == True:
-                    print("right 1")
                     groups = db.select_all_channels_group()
                     group = groups[num]
                     user_id, chat_idn, keywords, data_end, group_name, chat_name, number_group = group[0], group[2], group[5], group[3], group[4], group[7], group[1]
@@ -439,7 +439,8 @@ async def update_all_groups():
                         db.update_time_all_chats_groups(formatted_current)
 
         except Exception as err:
-            print(f"[ERROR UPDATE ALL GROUPS] {err}")
+            error_message = f"[ERROR UPDATE ALL GROUPS] {err}\n{traceback.format_exc()}"
+            print(error_message)
             await asyncio.sleep(1)
         finally:
             await asyncio.sleep(1)
