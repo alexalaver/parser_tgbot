@@ -402,12 +402,11 @@ async def update_all_groups():
                 all_dialogs = await telethon_client.get_dialogs()
                 booline = False
                 for dialog in all_dialogs:
-                    for chat_name in groups_chat:
-                        if dialog.name != chat_name[0]:
-                            new_id_dialog = str(dialog.id)
-                            print("right 3")
-                            if new_id_dialog[0] == "-":
-                                print("right 4")
+                    new_id_dialog = str(dialog.id)
+                    if new_id_dialog[0] == "-":
+                        for chat_name in groups_chat:
+                            if dialog.name != chat_name[0]:
+                                print()
                                 groups_chat.append([dialog.name, dialog.id])
                                 await asyncio.sleep(1)
                                 print("right subscribted")
