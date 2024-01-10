@@ -685,3 +685,8 @@ class Data:
         with self.connect:
             self.cursor.execute("UPDATE settings_bot SET time_update_all_groups=%s", (time,))
             self.connect.commit()
+
+    def update_all_chats_groups(self, groups):
+        with self.connect:
+            self.cursor.execute("UPDATE all_chats SET groups=%s::jsonb", (groups,))
+            self.connect.commit()

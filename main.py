@@ -398,6 +398,8 @@ async def update_all_groups():
                         if dialog.name != chat_name[0]:
                             groups.append([dialog.name, dialog.id])
                             break
+                json_data = json.dumps(groups)
+                db.update_all_chats_groups(json_data)
                 new_date = current_date + datetime.timedelta(minutes=4)
                 db.update_time_all_chats_groups(new_date)
         except Exception as err:
