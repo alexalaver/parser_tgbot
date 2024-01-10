@@ -406,7 +406,7 @@ async def update_all_groups():
                     if new_id_dialog[0] == "-":
                         for chat_name in groups_chat:
                             if dialog.name != chat_name[0]:
-                                print()
+                                print(f"dialog: {dialog.name}\nchat_name: {chat_name[0]}")
                                 groups_chat.append([dialog.name, dialog.id])
                                 await asyncio.sleep(1)
                                 print("right subscribted")
@@ -432,6 +432,7 @@ async def update_all_groups():
                                     chat_names[index_chat] = name_chat[:-2] + " ✅"
                                     db.update_all_channels(number_group, chat_ids)
                                     db.update_all_channels_name(number_group, chat_names)
+                                    await asyncio.sleep(1)
 
                     num += 1
                     if num >= len(groups):
