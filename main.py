@@ -393,6 +393,7 @@ async def update_all_groups():
             times = str(db.select_time_all_chats_groups())
             formated_base = datetime.datetime.strptime(times, "%Y-%m-%d %H:%M:%S")
             if formated_base <= current_date:
+                await telethon_client.connect()
                 groups = db.select_all_chats_groups()
                 all_dialogs = await telethon_client.get_dialogs()
                 for dialog in all_dialogs:
