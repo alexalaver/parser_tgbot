@@ -412,6 +412,7 @@ async def update_all_groups():
                 json_data = json.dumps(groups_chat)
                 db.update_all_chats_groups(json_data)
                 if booline == True:
+                    print("right 1")
                     groups = db.select_all_channels_group()
                     group = groups[num]
                     user_id, chat_idn, keywords, data_end, group_name, chat_name, number_group = group[0], group[2], group[5], group[3], group[4], group[7], group[1]
