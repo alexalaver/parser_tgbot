@@ -388,7 +388,8 @@ async def update_all_groups():
             times = db.select_time_all_chats_groups()
             current_date = datetime.datetime.now()
             if times is False:
-                db.update_time_all_chats_groups(current_date)
+                formatted_current = current_date.strftime("%Y-%m-%d %H:%M:%S")
+                db.update_time_all_chats_groups(formatted_current)
             times = str(db.select_time_all_chats_groups())
             formated_base = datetime.datetime.strptime(times, "%Y-%m-%d %H:%M:%S")
             if formated_base <= current_date:
@@ -404,9 +405,12 @@ async def update_all_groups():
                 json_data = json.dumps(groups)
                 db.update_all_chats_groups(json_data)
                 new_date = current_date + datetime.timedelta(minutes=4)
-                db.update_time_all_chats_groups(new_date)
+                formatted_current = new_date.strftime("%Y-%m-%d %H:%M:%S")
+                db.update_time_all_chats_groups(formatted_current)
         except Exception as err:
             print(f"[ERROR UPDATE ALL GROUPS] {err}")
+            await asyncio.sleep(1)
+        finally:
             await asyncio.sleep(1)
 
 
