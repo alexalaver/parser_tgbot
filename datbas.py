@@ -676,7 +676,7 @@ class Data:
         with self.connect:
             self.cursor.execute("SELECT time_update_all_groups FROM settings_bot")
             times = self.cursor.fetchone()
-            if times is None:
+            if times[0] is None:
                 return False
             else:
                 return times[0]
