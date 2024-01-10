@@ -407,14 +407,14 @@ async def update_all_groups():
                     if new_id_dialog[0] == "-":
                         if dialog.name not in first_elements:
                             groups_chat.append([dialog.name, dialog.id])
-                            await asyncio.sleep(1)
+                            await asyncio.sleep(3)
                             print("right subscribted")
                             booline = True
                             break
                 json_data = json.dumps(groups_chat)
                 db.update_all_chats_groups(json_data)
+                groups = db.select_all_channels_group()
                 if booline == True:
-                    groups = db.select_all_channels_group()
                     group = groups[num]
                     user_id, chat_idn, keywords, data_end, group_name, chat_name, number_group = group[0], group[2], group[5], group[3], group[4], group[7], group[1]
                     chat_ids = [item for item in chat_idn]
@@ -433,12 +433,12 @@ async def update_all_groups():
                                     db.update_all_channels_name(number_group, chat_names)
                                     await asyncio.sleep(1)
 
-                    num += 1
-                    if num >= len(groups):
-                        num = 0
-                        new_date = current_date + datetime.timedelta(minutes=4)
-                        formatted_current = new_date.strftime("%Y-%m-%d %H:%M:%S")
-                        db.update_time_all_chats_groups(formatted_current)
+                num += 1
+                if num >= len(groups):
+                    num = 0
+                    new_date = current_date + datetime.timedelta(minutes=4)
+                    formatted_current = new_date.strftime("%Y-%m-%d %H:%M:%S")
+                    db.update_time_all_chats_groups(formatted_current)
 
         except Exception as err:
             error_message = f"[ERROR UPDATE ALL GROUPS] {err}\n{traceback.format_exc()}"
