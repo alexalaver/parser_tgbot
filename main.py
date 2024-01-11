@@ -104,9 +104,7 @@ def get_user_username(link):
 
 async def get_group_tag(group_id):
     try:
-        group = await telethon_client.get_entity("@testonepublic")
-        print(group.id)
-        print(group)
+        group = await telethon_client.get_entity(group_id)
         if group.username:
             return f"https://t.me/{group.username}"
         else:
