@@ -102,6 +102,17 @@ def get_user_username(link):
     except Exception:
         return "Анонимный пользователь"
 
+async def get_group_tag(group_id):
+    async with client:
+        try:
+            group = await client.get_entity(group_id)
+            if group.username:
+                return f"https://t.me{group.username}"
+            else:
+                return "У этой группы нет тега"
+        except ChannelPrivateError:
+            return "Данная группа закрыта"
+
 async def search_and_forward():
     num = 0
     last_message_ids = {}
@@ -117,7 +128,7 @@ async def search_and_forward():
 
             group = groups[num]
             user_id, chat_idn, keywords, data_end, group_name, chat_name, number_group = group[0], group[2], group[5], group[3], group[4], group[7], group[1]
-            chat_ids = [item for item in chat_idn if item.endswith('✅') and not ('https://t.me/+' in item)]
+            chat_ids = [item for item in chat_idn if item.endswith('✅')]
             chat_indices = [chat_idn.index(chat) for chat in chat_ids]
             chat_names = [chat_name[index] for index in chat_indices]
             messages_sent = db.select_message_id(number_group)
@@ -126,7 +137,7 @@ async def search_and_forward():
                 formated_base = datetime.datetime.strptime(data_end, "%Y-%m-%d %H:%M:%S")
                 if formated_base > current_date:
                     for chat_id, chat_id_name in zip(chat_ids, chat_names):
-                        trimmed_chat_id = chat_id[:-2]
+                        trimmed_chat_id = int(chat_id[:-2])
                         exception_occurred = False
                         try:
                             chat_select_id = await telethon_client.get_entity(trimmed_chat_id)
@@ -140,16 +151,18 @@ async def search_and_forward():
                                         if keyword.lower() in message.text.lower():
                                             message_key = [chat_check_id, message.id]
                                             if message_key not in messages_sent:
-                                                sender = await message.get_sender()
-                                                if "http" in trimmed_chat_id:
-                                                    link_message = f"{trimmed_chat_id}/{str(message.id)}"
-                                                    chat_link = f"{trimmed_chat_id}"
-                                                elif "@" in trimmed_chat_id:
-                                                    link_message = f"https://t.me/{trimmed_chat_id[1:]}/{str(message.id)}"
-                                                    chat_link = f"https://t.me/{trimmed_chat_id[1:]}"
-                                                else:
-                                                    link_message = f"https://t.me/{trimmed_chat_id}/{str(message.id)}"
-                                                    chat_link = f"https://t.me/{trimmed_chat_id}"
+                                                # sender = await message.get_sender()
+                                                # if "http" in trimmed_chat_id:
+                                                #     link_message = f"{trimmed_chat_id}/{str(message.id)}"
+                                                #     chat_link = f"{trimmed_chat_id}"
+                                                # elif "@" in trimmed_chat_id:
+                                                #     link_message = f"https://t.me/{trimmed_chat_id[1:]}/{str(message.id)}"
+                                                #     chat_link = f"https://t.me/{trimmed_chat_id[1:]}"
+                                                # else:
+                                                #     link_message = f"https://t.me/{trimmed_chat_id}/{str(message.id)}"
+                                                #     chat_link = f"https://t.me/{trimmed_chat_id}"
+                                                group_tag = await get_group_tag(trimmed_chat_id)
+                                                link_message = group_tag + f"/{str(message.id)}"
                                                 username_1 = get_user_username(link_message)
                                                 if username_1 == "Анонимный пользователь":
                                                     username = "Анонимный пользователь"
@@ -157,7 +170,7 @@ async def search_and_forward():
                                                     username = f"@{username_1[13:]}"
                                                 if "bot" not in username.lower():
                                                     escaped_message_text = escape_html(message.text)
-                                                    message_text = f"Обнаружено ключевое слово\n\n<a href='{chat_link}'>{chat_id_name[:-2]}</a>\n\nПользователь: {username}\n\nЗапрос: {keyword}\n\n<a href='{link_message}'>Ссылка на сообщение</a>\n\nТекст:\n{escaped_message_text}"
+                                                    message_text = f"Обнаружено ключевое слово\n\n<a href='{group_tag}'>{chat_id_name[:-2]}</a>\n\nПользователь: {username}\n\nЗапрос: {keyword}\n\n<a href='{link_message}'>Ссылка на сообщение</a>\n\nТекст:\n{escaped_message_text}"
                                                     await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
                                                     db.update_all_message_ids(number_group, message_key)
                                                     await asyncio.sleep(2)
@@ -206,110 +219,110 @@ async def search_and_forward():
         await asyncio.sleep(5)
 
 
-async def search_and_forward_close_group():
-    num = 0
-    last_message_ids = {}
-
-    await telethon_client.start()
-
-    while True:
-        try:
-            groups = db.select_all_channels_group()
-            if not groups:
-                await asyncio.sleep(10)
-                continue
-
-            group = groups[num]
-            user_id, chat_idn, keywords, channelss_link, data_end, group_name, channels_name = group[0], group[8] or [], group[5], group[2], group[3], group[4], group[7]
-            chat_ids = [item for item in channelss_link if item.endswith('✅') and ('https://t.me/+' in item)]
-            chat_indices = [channelss_link.index(chat) for chat in chat_ids]
-            chat_names = [channels_name[index] for index in chat_indices]
-            number_group = group[1]
-            current_date = datetime.datetime.now()
-            formated_base = datetime.datetime.strptime(data_end, "%Y-%m-%d %H:%M:%S")
-            if formated_base > current_date:
-                if chat_ids != []:
-                    for chat_id, chat_id_name in zip(chat_idn, chat_names):
-                        index_chat_id = int(chat_id[0][0])
-                        links_1 = chat_ids[index_chat_id - 1]
-                        links_2 = links_1[-1]
-                        if links_2 == "✅":
-                            trimmed_chat_ids = int(chat_id[0][3:])
-                            exception_occurred = False
-                            try:
-                                last_id = last_message_ids.get(trimmed_chat_ids, 0)
-                                messages_to_check = 30
-                                forced_check = num == 0 and last_id == 0
-                                async for message in telethon_client.iter_messages(trimmed_chat_ids, offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
-                                    if message.text:
-                                        for keyword in keywords:
-                                            if keyword.lower() in message.text.lower():
-                                                message_key = [trimmed_chat_ids, message.id]
-                                                messages_sent = db.select_message_id(number_group)
-                                                if message_key not in messages_sent:
-                                                    sender = await message.get_sender()
-                                                    sender_identifier = f"@{sender.username}" if sender else "Анонимный пользователь"
-                                                    escaped_message_text = escape_html(message.text)
-                                                    message_text = f"Обнаружено ключевое слово\n\n<a href='{links_1[:-2]}'>{chat_id_name[:-1]}</a>\n\nПользователь: {sender_identifier}\n\nЗапрос: {keyword}\n\nСсылка на сообщение: Чат закрыт.\n\nТекст:\n{escaped_message_text}"
-                                                    await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
-                                                    # print(f"Message sent to user {user_id}: {message.text}")
-                                                    db.update_all_message_ids(number_group, message_key)
-                                                    await asyncio.sleep(2)
-                                                break
-
-                            except FloodWaitError as e:
-                                print(f"Flood wait error on chat. Sleeping for seconds. {e}")
-                                await asyncio.sleep(2)
-                                exception_occurred = True
-                            except ChannelPrivateError:
-                                print("Ошибка доступа: канал закрыт и у меня нет к нему доступа.")
-                                await asyncio.sleep(2)
-                                exception_occurred = True
-                            except ChatForbiddenError:
-                                print("Ошибка доступа: я исключён из чата или покинул его.")
-                                await asyncio.sleep(2)
-                                exception_occurred = True
-                            except UserPrivacyRestrictedError:
-                                print("Ошибка доступа: ограничения конфиденциальности пользователя.")
-                                await asyncio.sleep(2)
-                                exception_occurred = True
-                            except PeerIdInvalidError:
-                                print("Ошибка ID: не найден ID")
-                                await asyncio.sleep(2)
-                                exception_occurred = True
-                            except ValueError:
-                                print("Ошибка ID: не найден ID")
-                                await asyncio.sleep(2)
-                                exception_occurred = True
-                            except Exception as e:
-                                print(f"Произошла непредвиденная ошибка: {type(e).__name__}, {e}")
-                                await asyncio.sleep(2)
-                                exception_occurred = True
-                            finally:
-                                if exception_occurred is False:
-                                    messages = await telethon_client.get_messages(trimmed_chat_ids, limit=1)
-                                    if messages:
-                                        last_message_ids[trimmed_chat_ids] = messages[0].id
-                                        await asyncio.sleep(2)
-                                    else:
-                                        pass
-                            await asyncio.sleep(1)
-            else:
-                db.delete_data_end_group(number_group)
-                formated_chat_idn = [s.replace('✅', '⚠').replace('❌', '⚠') for s in channelss_link]
-                formated_chat_id_name = [s.replace('✅', '⚠').replace('❌', '⚠') for s in channels_name]
-                db.update_all_channels(number_group, formated_chat_idn)
-                db.update_all_channels_name(number_group, formated_chat_id_name)
-                await bot.send_message(user_id, cfg.end_data_group_text(group_name))
-            num += 1
-            if num >= len(groups):
-                num = 0
-
-        except Exception as e:
-            print(f"Произошла ошибка: {type(e).__name__}")
-            await asyncio.sleep(2)
-
-        await asyncio.sleep(1)
+# async def search_and_forward_close_group():
+#     num = 0
+#     last_message_ids = {}
+#
+#     await telethon_client.start()
+#
+#     while True:
+#         try:
+#             groups = db.select_all_channels_group()
+#             if not groups:
+#                 await asyncio.sleep(10)
+#                 continue
+#
+#             group = groups[num]
+#             user_id, chat_idn, keywords, channelss_link, data_end, group_name, channels_name = group[0], group[8] or [], group[5], group[2], group[3], group[4], group[7]
+#             chat_ids = [item for item in channelss_link if item.endswith('✅') and ('https://t.me/+' in item)]
+#             chat_indices = [channelss_link.index(chat) for chat in chat_ids]
+#             chat_names = [channels_name[index] for index in chat_indices]
+#             number_group = group[1]
+#             current_date = datetime.datetime.now()
+#             formated_base = datetime.datetime.strptime(data_end, "%Y-%m-%d %H:%M:%S")
+#             if formated_base > current_date:
+#                 if chat_ids != []:
+#                     for chat_id, chat_id_name in zip(chat_idn, chat_names):
+#                         index_chat_id = int(chat_id[0][0])
+#                         links_1 = chat_ids[index_chat_id - 1]
+#                         links_2 = links_1[-1]
+#                         if links_2 == "✅":
+#                             trimmed_chat_ids = int(chat_id[0][3:])
+#                             exception_occurred = False
+#                             try:
+#                                 last_id = last_message_ids.get(trimmed_chat_ids, 0)
+#                                 messages_to_check = 30
+#                                 forced_check = num == 0 and last_id == 0
+#                                 async for message in telethon_client.iter_messages(trimmed_chat_ids, offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
+#                                     if message.text:
+#                                         for keyword in keywords:
+#                                             if keyword.lower() in message.text.lower():
+#                                                 message_key = [trimmed_chat_ids, message.id]
+#                                                 messages_sent = db.select_message_id(number_group)
+#                                                 if message_key not in messages_sent:
+#                                                     sender = await message.get_sender()
+#                                                     sender_identifier = f"@{sender.username}" if sender else "Анонимный пользователь"
+#                                                     escaped_message_text = escape_html(message.text)
+#                                                     message_text = f"Обнаружено ключевое слово\n\n<a href='{links_1[:-2]}'>{chat_id_name[:-1]}</a>\n\nПользователь: {sender_identifier}\n\nЗапрос: {keyword}\n\nСсылка на сообщение: Чат закрыт.\n\nТекст:\n{escaped_message_text}"
+#                                                     await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
+#                                                     # print(f"Message sent to user {user_id}: {message.text}")
+#                                                     db.update_all_message_ids(number_group, message_key)
+#                                                     await asyncio.sleep(2)
+#                                                 break
+#
+#                             except FloodWaitError as e:
+#                                 print(f"Flood wait error on chat. Sleeping for seconds. {e}")
+#                                 await asyncio.sleep(2)
+#                                 exception_occurred = True
+#                             except ChannelPrivateError:
+#                                 print("Ошибка доступа: канал закрыт и у меня нет к нему доступа.")
+#                                 await asyncio.sleep(2)
+#                                 exception_occurred = True
+#                             except ChatForbiddenError:
+#                                 print("Ошибка доступа: я исключён из чата или покинул его.")
+#                                 await asyncio.sleep(2)
+#                                 exception_occurred = True
+#                             except UserPrivacyRestrictedError:
+#                                 print("Ошибка доступа: ограничения конфиденциальности пользователя.")
+#                                 await asyncio.sleep(2)
+#                                 exception_occurred = True
+#                             except PeerIdInvalidError:
+#                                 print("Ошибка ID: не найден ID")
+#                                 await asyncio.sleep(2)
+#                                 exception_occurred = True
+#                             except ValueError:
+#                                 print("Ошибка ID: не найден ID")
+#                                 await asyncio.sleep(2)
+#                                 exception_occurred = True
+#                             except Exception as e:
+#                                 print(f"Произошла непредвиденная ошибка: {type(e).__name__}, {e}")
+#                                 await asyncio.sleep(2)
+#                                 exception_occurred = True
+#                             finally:
+#                                 if exception_occurred is False:
+#                                     messages = await telethon_client.get_messages(trimmed_chat_ids, limit=1)
+#                                     if messages:
+#                                         last_message_ids[trimmed_chat_ids] = messages[0].id
+#                                         await asyncio.sleep(2)
+#                                     else:
+#                                         pass
+#                             await asyncio.sleep(1)
+#             else:
+#                 db.delete_data_end_group(number_group)
+#                 formated_chat_idn = [s.replace('✅', '⚠').replace('❌', '⚠') for s in channelss_link]
+#                 formated_chat_id_name = [s.replace('✅', '⚠').replace('❌', '⚠') for s in channels_name]
+#                 db.update_all_channels(number_group, formated_chat_idn)
+#                 db.update_all_channels_name(number_group, formated_chat_id_name)
+#                 await bot.send_message(user_id, cfg.end_data_group_text(group_name))
+#             num += 1
+#             if num >= len(groups):
+#                 num = 0
+#
+#         except Exception as e:
+#             print(f"Произошла ошибка: {type(e).__name__}")
+#             await asyncio.sleep(2)
+#
+#         await asyncio.sleep(1)
 
 async def autoposting_forward():
     num = 0
@@ -2648,7 +2661,7 @@ async def other(message: types.Message):
 
 
 async def on_startup(_):
-    # asyncio.create_task(search_and_forward())
+    asyncio.create_task(search_and_forward())
     # asyncio.create_task(search_and_forward_close_group())
     # asyncio.create_task(autoposting_forward())
     asyncio.create_task(update_all_groups())
