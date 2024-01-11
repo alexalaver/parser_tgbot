@@ -163,6 +163,7 @@ async def search_and_forward():
                                                 #     chat_link = f"https://t.me/{trimmed_chat_id}"
                                                 group_tag = await get_group_tag(trimmed_chat_id)
                                                 link_message = group_tag + f"/{str(message.id)}"
+                                                print(link_message)
                                                 username_1 = get_user_username(link_message)
                                                 if username_1 == "Анонимный пользователь":
                                                     username = "Анонимный пользователь"
