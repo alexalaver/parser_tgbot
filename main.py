@@ -428,7 +428,7 @@ async def update_all_groups():
                                 print("right 6")
                                 index_chat = chat_names.index(name_chat)
                                 new_id_chat = group_chat[1]
-                                chat_ids[index_chat] = new_id_chat + " ✅"
+                                chat_ids[index_chat] = str(new_id_chat) + " ✅"
                                 chat_names[index_chat] = name_chat[:-2] + " ✅"
                                 db.update_all_channels(number_group, chat_ids)
                                 db.update_all_channels_name(number_group, chat_names)
