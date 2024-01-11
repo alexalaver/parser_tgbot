@@ -111,6 +111,8 @@ async def get_group_tag(group_id):
             return "У этой группы нет тега"
     except ChannelPrivateError:
         return "Данная группа закрыта"
+    except Exception:
+        return "Данная группа закрыта"
 
 async def search_and_forward():
     num = 0
