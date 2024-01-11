@@ -421,9 +421,7 @@ async def update_all_groups():
 
                 for group_chat in groups_chat:
                     for name_chat in chat_names:
-                        print(f"{name_chat[-1]} right 4")
                         if name_chat[-1] == "⏳":
-                            print("right 5")
                             if group_chat[0] == name_chat[:-2]:
                                 print("right 6")
                                 index_chat = chat_names.index(name_chat)
