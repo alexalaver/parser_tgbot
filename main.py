@@ -105,8 +105,9 @@ def get_user_username(link):
 async def get_group_tag(group_id):
     try:
         group = await telethon_client.get_entity(group_id)
+        print(group)
         if group.username:
-            return f"https://t.me{group.username}"
+            return f"https://t.me/{group.username}"
         else:
             return "У этой группы нет тега"
     except ChannelPrivateError:
