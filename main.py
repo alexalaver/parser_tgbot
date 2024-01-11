@@ -407,12 +407,12 @@ async def update_all_groups():
                     if new_id_dialog[0] == "-":
                         if dialog.name not in first_elements:
                             groups_chat.append([dialog.name, dialog.id])
+                            json_data = json.dumps(groups_chat)
+                            db.update_all_chats_groups(json_data)
                             await asyncio.sleep(3)
                             print("right subscribted")
                             booline = True
                             break
-                json_data = json.dumps(groups_chat)
-                db.update_all_chats_groups(json_data)
                 groups = db.select_all_channels_group()
                 if booline == True:
                     group = groups[num]
@@ -436,16 +436,16 @@ async def update_all_groups():
                 num += 1
                 if num >= len(groups):
                     num = 0
-                    new_date = current_date + datetime.timedelta(minutes=4)
-                    formatted_current = new_date.strftime("%Y-%m-%d %H:%M:%S")
-                    db.update_time_all_chats_groups(formatted_current)
+                    # new_date = current_date + datetime.timedelta(minutes=4)
+                    # formatted_current = new_date.strftime("%Y-%m-%d %H:%M:%S")
+                    # db.update_time_all_chats_groups(formatted_current)
 
         except Exception as err:
             error_message = f"[ERROR UPDATE ALL GROUPS] {err}\n{traceback.format_exc()}"
             print(error_message)
             await asyncio.sleep(1)
         finally:
-            await asyncio.sleep(1)
+            await asyncio.sleep(1800)
 
 
 class Create_group(StatesGroup):
