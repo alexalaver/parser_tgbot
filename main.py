@@ -424,7 +424,6 @@ async def update_all_groups():
                             json_data = json.dumps(groups_chat)
                             db.update_all_chats_groups(json_data)
                             await asyncio.sleep(3)
-                            print("right subscribted")
                             booline = True
                 groups = db.select_all_channels_group()
                 group = groups[num]
@@ -436,17 +435,13 @@ async def update_all_groups():
                 for group_chat in groups_chat:
                     for name_chat in chat_names:
                         if name_chat[-1] == "⏳":
-                            print("right 5")
-                            print(f"{group_chat[0]}   :::   {name_chat[:-2]}")
                             if group_chat[0] == name_chat[:-2]:
-                                print("right 6")
                                 index_chat = chat_names.index(name_chat)
                                 new_id_chat = group_chat[1]
                                 chat_ids[index_chat] = str(new_id_chat) + " ✅"
                                 chat_names[index_chat] = name_chat[:-2] + " ✅"
                                 db.update_all_channels(number_group, chat_ids)
                                 db.update_all_channels_name(number_group, chat_names)
-                                print('right')
                                 await asyncio.sleep(1)
 
                 num += 1
