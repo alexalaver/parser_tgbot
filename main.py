@@ -117,7 +117,8 @@ async def search_and_forward():
     num = 0
     last_message_ids = {}
 
-    await telethon_client.start()
+    if not telethon_client.is_connected():
+        await telethon_client.connect()
 
     while True:
         try:
