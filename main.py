@@ -414,24 +414,24 @@ async def update_all_groups():
                             booline = True
                             break
                 groups = db.select_all_channels_group()
-                if booline == True:
-                    group = groups[num]
-                    user_id, chat_idn, keywords, data_end, group_name, chat_name, number_group = group[0], group[2], group[5], group[3], group[4], group[7], group[1]
-                    chat_ids = [item for item in chat_idn]
-                    chat_names = [item for item in chat_name]
-                    groups_chat = db.select_all_chats_groups()
+                group = groups[num]
+                user_id, chat_idn, keywords, data_end, group_name, chat_name, number_group = group[0], group[2], group[5], group[3], group[4], group[7], group[1]
+                chat_ids = [item for item in chat_idn]
+                chat_names = [item for item in chat_name]
+                groups_chat = db.select_all_chats_groups()
 
-                    for group_chat in groups_chat:
-                        for name_chat in chat_names:
-                            if name_chat[-1] == "⏳":
-                                if group_chat[0] == name_chat[:-2]:
-                                    index_chat = chat_names.index(name_chat)
-                                    new_id_chat = group_chat[1]
-                                    chat_ids[index_chat] = new_id_chat + " ✅"
-                                    chat_names[index_chat] = name_chat[:-2] + " ✅"
-                                    db.update_all_channels(number_group, chat_ids)
-                                    db.update_all_channels_name(number_group, chat_names)
-                                    await asyncio.sleep(1)
+                for group_chat in groups_chat:
+                    for name_chat in chat_names:
+                        if name_chat[-1] == "⏳":
+                            if group_chat[0] == name_chat[:-2]:
+                                index_chat = chat_names.index(name_chat)
+                                new_id_chat = group_chat[1]
+                                chat_ids[index_chat] = new_id_chat + " ✅"
+                                chat_names[index_chat] = name_chat[:-2] + " ✅"
+                                db.update_all_channels(number_group, chat_ids)
+                                db.update_all_channels_name(number_group, chat_names)
+                                print('right')
+                                await asyncio.sleep(1)
 
                 num += 1
                 if num >= len(groups):
