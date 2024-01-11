@@ -140,16 +140,14 @@ async def search_and_forward():
                         trimmed_chat_id = int(chat_id[:-2])
                         exception_occurred = False
                         try:
-                            chat_select_id = await telethon_client.get_entity(trimmed_chat_id)
-                            chat_check_id = chat_select_id.id
                             last_id = last_message_ids.get(trimmed_chat_id, 0)
                             messages_to_check = 30
                             forced_check = num == 0 and last_id == 0
-                            async for message in telethon_client.iter_messages(chat_check_id, offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
+                            async for message in telethon_client.iter_messages(trimmed_chat_id, offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
                                 if message.text:
                                     for keyword in keywords:
                                         if keyword.lower() in message.text.lower():
-                                            message_key = [chat_check_id, message.id]
+                                            message_key = [trimmed_chat_id, message.id]
                                             if message_key not in messages_sent:
                                                 # sender = await message.get_sender()
                                                 # if "http" in trimmed_chat_id:
