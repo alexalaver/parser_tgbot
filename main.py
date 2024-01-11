@@ -2664,7 +2664,7 @@ async def on_startup(_):
     asyncio.create_task(search_and_forward())
     # asyncio.create_task(search_and_forward_close_group())
     # asyncio.create_task(autoposting_forward())
-    asyncio.create_task(update_all_groups())
+    # asyncio.create_task(update_all_groups())
 
 if __name__ == "__main__":
     executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
