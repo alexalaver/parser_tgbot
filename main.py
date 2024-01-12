@@ -2288,7 +2288,6 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
             user_id = message.from_user.id
             textsing = message.text
             text_line = textsing.strip().split('\n')
-            text_lines = list(dict.fromkeys([element + ' ⚠' for element in text_line]))
             if message.text == cfg.cancel_creategroup:
                 markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
                 markup_reply.add(cfg.autoposting)
@@ -2308,6 +2307,7 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                     all_groups = db.select_all_chats_groups()
                     for name_chat in text_line:
                         for name_group in all_groups:
+                            print(f"{name_chat}\n{name_group}")
                             if name_chat == name_group[0]:
                                 names_chats.append(name_chat)
                                 ids_chats.append(name_group[1])
@@ -2318,7 +2318,7 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                                 break
                     if booline == False:
                         text_not_find = None
-                        await Create_group.create_group_3.set()
+                        await Create_group.create_group_4.set()
                         for not_find_chat in not_find_chats:
                             text_not_find = "4. В списке предоставленных чатов в базе данных не обнаружены:\n\n" + f"{not_find_chat}\n" + "Напишите тэги/ссылки для данных чатов."
                         await state.update_data(names_chats=names_chats, ids_chats=ids_chats)
