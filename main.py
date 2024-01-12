@@ -1160,7 +1160,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                                 markup_inline.add(btn_inline1)
                                 all_channels = db.select_channels_with_number(number_group_parser)
                                 all_channels_name = db.select_channels_name_with_number(number_group_parser)
-                                updated_a = [x[:-1] + '⏳' if len(x) >= 13 and x[13] == '+' else x for x in all_channels]
+                                updated_a = [x[:-1] + '⏳' if len(x) > 13 and x[13] == '+' else x for x in all_channels]
                                 db.update_all_channels(number_group_parser, updated_a)
                                 paired_channels = zip(updated_a, all_channels_name)
                                 for channel_name_updated, channel_name_id in paired_channels:
