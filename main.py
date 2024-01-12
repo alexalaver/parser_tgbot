@@ -142,7 +142,10 @@ async def search_and_forward():
                 formated_base = datetime.datetime.strptime(data_end, "%Y-%m-%d %H:%M:%S")
                 if formated_base > current_date:
                     for chat_id, chat_id_name in zip(chat_ids, chat_names):
-                        trimmed_chat_id = int(chat_id[:-2])
+                        try:
+                            trimmed_chat_id = int(chat_id[:-2])
+                        except ValueError:
+                            trimmed_chat_id = chat_id[:-2]
                         exception_occurred = False
                         try:
                             last_id = last_message_ids.get(trimmed_chat_id, 0)
@@ -1210,7 +1213,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                             #             new_channels_name = [new_callback_name if item == group_name else item for item in all_channels_name]
                             #             db.update_all_channels_name(number_group_parser, new_channels_name)
                             if channels_link != []:
-                                await check_private_channel(channels_link, user_id, number_group_parser)
+                                await check_private_channel(channels_link, user_id)
                             await state.finish()
                             await callback_query.message.delete()
                             await callback_query.message.answer(text=cfg.tariffe_correct(group_name_parser, channels_len, formatted_date_new), reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
