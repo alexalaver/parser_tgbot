@@ -2315,6 +2315,8 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                             if name_chat == name_group[0]:
                                 names_chats.append(name_chat)
                                 ids_chats.append(name_group[1])
+                                print(names_chats)
+                                print(ids_chats)
                                 await state.update_data(names_chats=names_chats, ids_chats=ids_chats)
                                 new_bl = True
                                 break
