@@ -2372,8 +2372,8 @@ async def create_group_func_4(message: types.Message, state: FSMContext):
                 await message.answer(cfg.cancel_creategroup_text, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
             elif message.text:
                 data = await state.get_data()
-                names_chats = data.get("names_chats")
-                ids_chats = data.get("ids_chats")
+                names_chats = data.get("names_chats") or []
+                ids_chats = data.get("ids_chats") or []
                 ids_chats.append(text_line)
                 if 2 <= len(message.text) <= 1000:
                     if 1 <= len(text_line) <= 50 - int(len(names_chats)):
@@ -2430,7 +2430,8 @@ async def create_group_func_4(message: types.Message, state: FSMContext):
                             if db.select_admin(user_id) > 0:
                                 markup_reply.add(cfg.admin_panel_button)
                             await message.answer(cfg.error_create_group, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
-                            print(f"[ERROR] {es}")
+                            error_message = f"[ERROR CREATE GROUP 2] {es}\n{traceback.format_exc()}"
+                            print(error_message)
                     else:
                         await message.answer(cfg.error_len_channels_create, parse_mode=types.ParseMode.MARKDOWN)
                 else:
