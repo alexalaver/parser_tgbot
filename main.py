@@ -145,7 +145,9 @@ async def search_and_forward():
                             last_id = last_message_ids.get(trimmed_chat_id, 0)
                             messages_to_check = 30
                             forced_check = num == 0 and last_id == 0
+                            print('right 1')
                             async for message in telethon_client.iter_messages(trimmed_chat_id, offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
+                                print("right 2")
                                 if message.text:
                                     for keyword in keywords:
                                         if keyword.lower() in message.text.lower():
@@ -161,8 +163,9 @@ async def search_and_forward():
                                                 # else:
                                                 #     link_message = f"https://t.me/{trimmed_chat_id}/{str(message.id)}"
                                                 #     chat_link = f"https://t.me/{trimmed_chat_id}"
-                                                print(message)
+                                                print("right 3")
                                                 group_tag = await get_group_tag(trimmed_chat_id)
+                                                print("right 4")
                                                 link_message = group_tag + f"/{str(message.id)}"
                                                 username_1 = get_user_username(link_message)
                                                 if username_1 == "Анонимный пользователь":
