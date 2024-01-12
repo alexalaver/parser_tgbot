@@ -2343,7 +2343,9 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                             markup_reply.add(cfg.admin_panel_button)
                         await message.answer(cfg.right_create_group, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
                         await state.finish()
-        except Exception:
+        except Exception as err:
+            error_message = f"[ERROR CREATE GROUP] {err}\n{traceback.format_exc()}"
+            print(error_message)
             await message.answer("Произошла ошибка, пожалуйста повторите ещё раз:")
 
 
