@@ -422,6 +422,7 @@ async def update_all_groups():
                 first_elements = [sublist[0] for sublist in groups_chat]
                 all_dialogs = await telethon_client.get_dialogs()
                 booline = False
+                print(all_dialogs)
                 for dialog in all_dialogs:
                     new_id_dialog = str(dialog.id)
                     if new_id_dialog[0] == "-":
