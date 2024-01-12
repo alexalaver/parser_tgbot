@@ -2333,7 +2333,7 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                         cashe_group_name = data.get('group_name')
                         cashe_keyword = data.get('text_lines')
                         names_all_chats = list(dict.fromkeys([element + ' ⚠' for element in names_chats]))
-                        ids_all_chats = list(dict.fromkeys([element + ' ⚠' for element in ids_chats]))
+                        ids_all_chats = list(dict.fromkeys([str(element) + ' ⚠' for element in ids_chats]))
                         db.add_channels(user_id, new_number_group, cashe_keyword, ids_all_chats, cashe_group_name, names_all_chats)
                         markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True,one_time_keyboard=False)
                         markup_reply.add(cfg.autoposting)
