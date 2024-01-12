@@ -438,8 +438,7 @@ async def update_all_groups():
                             await asyncio.sleep(3)
                             booline = True
                 groups = db.select_all_channels_group()
-                print(groups)
-                if groups is None:
+                if groups == []:
                     pass
                 else:
                     group = groups[num]
