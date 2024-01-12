@@ -2312,7 +2312,6 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                     all_groups = db.select_all_chats_groups()
                     for name_chat in text_line:
                         for name_group in all_groups:
-                            print(f"{name_chat}\n{name_group}")
                             if name_chat == name_group[0]:
                                 names_chats.append(name_chat)
                                 ids_chats.append(name_group[1])
@@ -2374,6 +2373,8 @@ async def create_group_func_4(message: types.Message, state: FSMContext):
                 data = await state.get_data()
                 names_chats = data.get("names_chats") or []
                 ids_chats = data.get("ids_chats") or []
+                print(names_chats)
+                print(ids_chats)
                 ids_chats.append(text_line)
                 if 2 <= len(message.text) <= 1000:
                     if 1 <= len(text_line) <= 50 - int(len(names_chats)):
