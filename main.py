@@ -2371,8 +2371,8 @@ async def create_group_func_4(message: types.Message, state: FSMContext):
                 await message.answer(cfg.cancel_creategroup_text, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
             elif message.text:
                 data = await state.get_data()
-                names_chats = data.get("names_chats") or []
-                ids_chats = data.get("ids_chats") or []
+                names_chats = data.get("names_chats")
+                ids_chats = data.get("ids_chats")
                 print(names_chats)
                 print(ids_chats)
                 ids_chats.append(text_line)
