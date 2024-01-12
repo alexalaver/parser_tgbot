@@ -60,10 +60,13 @@ async def check_for_new_channels(current_count):
     new_count = len(db.select_all_channels_group())
     return new_count != current_count
 
-async def check_private_channel(channels, user_id, number_group):
+async def check_private_channel(channels, user_id):
     admin_id = db.select_all_admin_id()
     for adm_id in admin_id:
-        await bot.send_message(adm_id, f"{fnc.nick_with_link('Пользователь', user_id)}, добавил закрытые чаты, вам необходимо подписаться на них.\n\n{channels}\n\nНомер группы - {str(number_group)}", parse_mode=types.ParseMode.MARKDOWN)
+        text = None
+        for channel in channels:
+            text = f"{fnc.nick_with_link('Пользователь', user_id)}, добавил закрытые чаты которых нету в базе данных, вам необходимо подписаться на них.\n\n" + f"{channel}\n"
+        await bot.send_message(adm_id, text=text, parse_mode=types.ParseMode.MARKDOWN)
 
 async def check_keywords_len(keywords, num):
     groups = db.select_all_channels_group()
@@ -145,9 +148,7 @@ async def search_and_forward():
                             last_id = last_message_ids.get(trimmed_chat_id, 0)
                             messages_to_check = 30
                             forced_check = num == 0 and last_id == 0
-                            print('right 1')
                             async for message in telethon_client.iter_messages(trimmed_chat_id, offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
-                                print("right 2")
                                 if message.text:
                                     for keyword in keywords:
                                         if keyword.lower() in message.text.lower():
@@ -163,9 +164,7 @@ async def search_and_forward():
                                                 # else:
                                                 #     link_message = f"https://t.me/{trimmed_chat_id}/{str(message.id)}"
                                                 #     chat_link = f"https://t.me/{trimmed_chat_id}"
-                                                print("right 3")
                                                 group_tag = await get_group_tag(trimmed_chat_id)
-                                                print("right 4")
                                                 link_message = group_tag + f"/{str(message.id)}"
                                                 username_1 = get_user_username(link_message)
                                                 if username_1 == "Анонимный пользователь":
@@ -427,7 +426,11 @@ async def update_all_groups():
                     new_id_dialog = str(dialog.id)
                     if new_id_dialog[0] == "-":
                         if dialog.name not in first_elements:
-                            groups_chat.append([dialog.name, dialog.id])
+                            dialog_username = getattr(dialog.entity, 'username', None)
+                            if dialog_username is None:
+                                groups_chat.append([dialog.name, dialog.id])
+                            else:
+                                groups_chat.append([dialog.name, dialog_username])
                             json_data = json.dumps(groups_chat)
                             db.update_all_chats_groups(json_data)
                             await asyncio.sleep(3)
@@ -470,6 +473,7 @@ class Create_group(StatesGroup):
     create_group_1 = State()
     create_group_2 = State()
     create_group_3 = State()
+    create_group_4 = State()
 
 class Create_account_autoposting(StatesGroup):
     create_autoposting_1 = State()
@@ -1165,49 +1169,48 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                                         new_callback_name = group_name + '⏳'
                                         new_channels_name = [new_callback_name if item[:-2] == group_name else item for item in all_channels_name_parser]
                                         db.update_all_channels_name(number_group_parser, new_channels_name)
-                            channels_id = db.select_channels_id_parser()
                             all_channels = db.select_channels_with_number(number_group_parser)
                             channels_link = [item for item in all_channels if len(item) >= 13 and item[13] == '+']
-                            channels_id = [item for sublist in channels_id if sublist[0] for item in sublist[0]]
-                            cleaned_a_updated = [link.split(' ⏳')[0] for link in channels_link]
+                            # channels_id = [item for sublist in channels_id if sublist[0] for item in sublist[0]]
+                            # cleaned_a_updated = [link.split(' ⏳')[0] for link in channels_link]
 
                             # Создание списков c_matched и c_unmatched
-                            c_matched = []
-                            c_unmatched = []
-                            index = 1
-                            valuable = False
-                            for link in cleaned_a_updated:
-                                matched = False
-                                for item in channels_id:
-                                    if item[1] == link:
-                                        c_matched.append([f"{index}) {item[0].split(')')[1]}", item[1]])
-                                        matched = True
-                                        valuable = True
-                                        break
-                                if not matched:
-                                    c_unmatched.append([f"{index})", link])
-                                index += 1
-
-                            if valuable is True:
-                                for new_lst_with_ids in c_matched:
-                                    all_channels = db.select_channels_with_number(number_group_parser)
-                                    channels_link = [item for item in all_channels if len(item) >= 13 and item[13] == '+']
-                                    index = int(new_lst_with_ids[0][0]) - 1
-                                    channels_link[index] = channels_link[index].replace("⏳", "✅")
-                                    owner_lst = [next((full_word for full_word in channels_link if full_word[:-2] == word[:-2]), word) for word in all_channels]
-                                    db.update_all_channels(number_group_parser, owner_lst)
-                                    db.add_chat_ids(int(number_group_parser), c_matched)
-                                all_channels = db.select_channels_with_number(number_group_parser)
-                                for channel_name in all_channels:
-                                    if channel_name[-1] == "✅":
-                                        index_channel = all_channels.index(channel_name)
-                                        all_channels_name = db.select_channels_name_with_number(number_group_parser)
-                                        group_name = all_channels_name[index_channel]
-                                        new_callback_name = group_name[:-1] + "✅"
-                                        new_channels_name = [new_callback_name if item == group_name else item for item in all_channels_name]
-                                        db.update_all_channels_name(number_group_parser, new_channels_name)
-                            if c_unmatched != []:
-                                await check_private_channel(c_unmatched, user_id, number_group_parser)
+                            # c_matched = []
+                            # c_unmatched = []
+                            # index = 1
+                            # valuable = False
+                            # for link in cleaned_a_updated:
+                            #     matched = False
+                            #     for item in channels_id:
+                            #         if item[1] == link:
+                            #             c_matched.append([f"{index}) {item[0].split(')')[1]}", item[1]])
+                            #             matched = True
+                            #             valuable = True
+                            #             break
+                            #     if not matched:
+                            #         c_unmatched.append([f"{index})", link])
+                            #     index += 1
+                            #
+                            # if valuable is True:
+                            #     for new_lst_with_ids in c_matched:
+                            #         all_channels = db.select_channels_with_number(number_group_parser)
+                            #         channels_link = [item for item in all_channels if len(item) >= 13 and item[13] == '+']
+                            #         index = int(new_lst_with_ids[0][0]) - 1
+                            #         channels_link[index] = channels_link[index].replace("⏳", "✅")
+                            #         owner_lst = [next((full_word for full_word in channels_link if full_word[:-2] == word[:-2]), word) for word in all_channels]
+                            #         db.update_all_channels(number_group_parser, owner_lst)
+                            #         db.add_chat_ids(int(number_group_parser), c_matched)
+                            #     all_channels = db.select_channels_with_number(number_group_parser)
+                            #     for channel_name in all_channels:
+                            #         if channel_name[-1] == "✅":
+                            #             index_channel = all_channels.index(channel_name)
+                            #             all_channels_name = db.select_channels_name_with_number(number_group_parser)
+                            #             group_name = all_channels_name[index_channel]
+                            #             new_callback_name = group_name[:-1] + "✅"
+                            #             new_channels_name = [new_callback_name if item == group_name else item for item in all_channels_name]
+                            #             db.update_all_channels_name(number_group_parser, new_channels_name)
+                            if channels_link != []:
+                                await check_private_channel(channels_link, user_id, number_group_parser)
                             await state.finish()
                             await callback_query.message.delete()
                             await callback_query.message.answer(text=cfg.tariffe_correct(group_name_parser, channels_len, formatted_date_new), reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
@@ -2291,10 +2294,76 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                 await state.reset_state()
                 await message.answer(cfg.cancel_creategroup_text, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
             elif message.text:
+                all_names_chat = [ch_name for ch_name in text_line if "http" not in ch_name and "@" not in ch_name]
+                names_chats = []
+                ids_chats = []
+                not_find_chats = []
+                booline = True
+                if len(text_line) == len(all_names_chat):
+                    all_groups = db.select_all_chats_groups()
+                    for name_chat in text_line:
+                        for name_group in all_groups:
+                            if name_chat == name_group[0]:
+                                names_chats.append(name_chat)
+                                ids_chats.append(name_group[1])
+                                break
+                            else:
+                                booline = False
+                                not_find_chats.append(name_chat)
+                                break
+                    if booline == False:
+                        text_not_find = None
+                        await Create_group.create_group_3.set()
+                        for not_find_chat in not_find_chats:
+                            text_not_find = "4. В списке предоставленных чатов в базе данных не обнаружены:\n\n" + f"{not_find_chat}\n" + "Напишите тэги/ссылки для данных чатов."
+                        await state.update_data(names_chats=names_chats, ids_chats=ids_chats)
+                        await message.answer(text_not_find)
+                    else:
+                        check_number_group = db.check_numbers_group()
+                        new_number_group = check_number_group + 1
+                        data = await state.get_data()
+                        cashe_group_name = data.get('group_name')
+                        cashe_keyword = data.get('text_lines')
+                        names_all_chats = list(dict.fromkeys([element + ' ⚠' for element in names_chats]))
+                        ids_all_chats = list(dict.fromkeys([element + ' ⚠' for element in ids_chats]))
+                        db.add_channels(user_id, new_number_group, cashe_keyword, ids_all_chats, cashe_group_name, names_all_chats)
+                        markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True,one_time_keyboard=False)
+                        markup_reply.add(cfg.autoposting)
+                        markup_reply.add(cfg.parser)
+                        markup_reply.row(cfg.my_profile, cfg.support)
+                        if db.select_admin(user_id) > 0:
+                            markup_reply.add(cfg.admin_panel_button)
+                        await message.answer(cfg.right_create_group, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
+                        await state.finish()
+        except Exception:
+            await message.answer("Произошла ошибка, пожалуйста повторите ещё раз:")
+
+
+
+@dp.message_handler(state=Create_group.create_group_4)
+async def create_group_func_4(message: types.Message, state: FSMContext):
+    if message.chat.type == types.ChatType.PRIVATE:
+        try:
+            user_id = message.from_user.id
+            textsing = message.text
+            text_line = textsing.strip().split('\n')
+            if message.text == cfg.cancel_creategroup:
+                markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+                markup_reply.add(cfg.autoposting)
+                markup_reply.add(cfg.parser)
+                markup_reply.row(cfg.my_profile, cfg.support)
+                if db.select_admin(user_id) > 0:
+                    markup_reply.add(cfg.admin_panel_button)
+                await state.reset_state()
+                await message.answer(cfg.cancel_creategroup_text, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
+            elif message.text:
+                data = await state.get_data()
+                names_chats = data.get("names_chats")
+                ids_chats = data.get("ids_chats")
+                ids_chats.append(text_line)
                 if 2 <= len(message.text) <= 1000:
-                    if 1 <= len(text_lines) <= 50:
+                    if 1 <= len(text_line) <= 50 - int(len(names_chats)):
                         try:
-                            channels_name_1 = []
                             await message.answer(cfg.please_wait_add_channels_name)
                             for channel_name in text_line:
                                 if "http" in channel_name or "t.me/" in channel_name:
@@ -2304,7 +2373,7 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                                     title_div = soup.find('div', {'class': 'tgme_page_title'})
                                     if title_div:
                                         group_name = title_div.get_text(strip=True)
-                                        channels_name_1.append(group_name)
+                                        names_chats.append(group_name)
                                     else:
                                         await message.answer(cfg.error_channel_name_add)
                                         break
@@ -2315,29 +2384,21 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                                     title_div = soup.find('div', {'class': 'tgme_page_title'})
                                     if title_div:
                                         group_name = title_div.get_text(strip=True)
-                                        channels_name_1.append(group_name)
+                                        names_chats.append(group_name)
                                     else:
                                         await message.answer(cfg.error_channel_name_add)
                                         break
                                 else:
-                                    response = requests.get(f"https://t.me/{channel_name}")
-                                    html_content = response.text
-                                    soup = BeautifulSoup(html_content, 'html.parser')
-                                    title_div = soup.find('div', {'class': 'tgme_page_title'})
-                                    if title_div:
-                                        group_name = title_div.get_text(strip=True)
-                                        channels_name_1.append(group_name)
-                                    else:
-                                        await message.answer(cfg.error_channel_name_add)
-                                        break
-                            if len(channels_name_1) == len(text_line):
-                                channels_name_2 = list(dict.fromkeys([element + ' ⚠' for element in channels_name_1]))
+                                    await message.answer(cfg.error_channel_teg_link)
+                                    break
+                            if len(names_chats) == len(ids_chats):
                                 check_number_group = db.check_numbers_group()
                                 new_number_group = check_number_group + 1
-                                data = await state.get_data()
                                 cashe_group_name = data.get('group_name')
                                 cashe_keyword = data.get('text_lines')
-                                db.add_channels(user_id, new_number_group, cashe_keyword, text_lines, cashe_group_name, channels_name_2)
+                                names_all_chats = list(dict.fromkeys([element + ' ⚠' for element in names_chats]))
+                                ids_all_chats = list(dict.fromkeys([element + ' ⚠' for element in ids_chats]))
+                                db.add_channels(user_id, new_number_group, cashe_keyword, ids_all_chats, cashe_group_name, names_all_chats)
                                 markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
                                 markup_reply.add(cfg.autoposting)
                                 markup_reply.add(cfg.parser)

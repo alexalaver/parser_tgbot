@@ -50,6 +50,6 @@
 # print(result)
 
 
-a = ["eadsads", "LOOOOOO", "siiimuu", "qqqqqqqqq"]
-a[1] = "lox)"
-print(a)
+a = ["eadsads", "LOOOOOO", "httpsiiimuu", "@qqqqqqqqq"]
+channels_link = [item for item in a if len(item) >= 13 and item[13] == '+']
+print(channels_link)
