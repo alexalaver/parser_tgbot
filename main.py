@@ -2315,6 +2315,7 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                             if name_chat == name_group[0]:
                                 names_chats.append(name_chat)
                                 ids_chats.append(name_group[1])
+                                await state.update_data(names_chats=names_chats, ids_chats=ids_chats)
                                 new_bl = True
                                 break
                             else:
@@ -2327,8 +2328,6 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                         await Create_group.create_group_4.set()
                         for not_find_chat in not_find_chats:
                             text_not_find = "4. В списке предоставленных чатов в базе данных не обнаружены:\n\n" + f"{not_find_chat}\n" + "Напишите тэги/ссылки для данных чатов."
-                        print(f"{names_chats}\n{ids_chats}")
-                        await state.update_data(names_chats=names_chats, ids_chats=ids_chats)
                         await message.answer(text_not_find)
                     else:
                         check_number_group = db.check_numbers_group()
