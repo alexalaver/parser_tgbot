@@ -1136,91 +1136,95 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                         money_oplata = str(5 * int(channels_len))
                         await callback_query.message.edit_caption(caption=cfg.oplata_chatov(channels_len, money_oplata), reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
                     elif callback_query.data == "confirm_oplata_parser":
-                        balance = db.check_balance(user_id)
-                        channels_len = len(channels_parser)
-                        money_oplata = 5 * int(channels_len)
-                        if balance >= money_oplata:
-                            await callback_query.message.answer(cfg.confirm_oplata_text)
-                            channels = db.select_channels_with_number(number_group_parser)
-                            new_channels = [newer[:-2] + " ✅" for newer in channels]
-                            new_chan = [newer[:-2] for newer in channels]
-                            db.update_all_channels(number_group_parser, new_channels)
-                            channels_name_parser = db.select_channels_name_with_number(number_group_parser)
-                            new_channels_name = [newer[:-2] + " ✅" for newer in channels_name_parser]
-                            db.update_all_channels_name(number_group_parser, new_channels_name)
-                            db.update_balance(user_id, money_oplata)
-                            channels_len = len(channels)
-                            current_data = datetime.datetime.now()
-                            new_date = current_data + datetime.timedelta(days=30)
-                            formatted_date_new = new_date.strftime("%Y-%m-%d %H:%M:%S")
-                            db.add_date_tariffe(user_id, formatted_date_new, number_group_parser)
-                            markup_inline = types.InlineKeyboardMarkup(row_width=1)
-                            btn_inline1 = types.InlineKeyboardButton(cfg.menu_button, callback_data='menu_after_pay_parser')
-                            markup_inline.add(btn_inline1)
-                            all_channels = db.select_channels_with_number(number_group_parser)
-                            all_channels_name = db.select_channels_name_with_number(number_group_parser)
-                            updated_a = [x[:-1] + '⏳' if len(x) >= 13 and x[13] == '+' else x for x in all_channels]
-                            db.update_all_channels(number_group_parser, updated_a)
-                            paired_channels = zip(updated_a, all_channels_name)
-                            for channel_name_updated, channel_name_id in paired_channels:
-                                if channel_name_updated[13] == "+":
-                                    response = requests.get(channel_name_updated[:-2])
-                                    html_content = response.text
-                                    soup = BeautifulSoup(html_content, 'html.parser')
-                                    title_div = soup.find('div', {'class': 'tgme_page_title'})
-                                    if title_div:
-                                        group_name = title_div.get_text(strip=True)
-                                        all_channels_name_parser = db.select_channels_name_with_number(number_group_parser)
-                                        new_callback_name = group_name + '⏳'
-                                        new_channels_name = [new_callback_name if item[:-2] == group_name else item for item in all_channels_name_parser]
-                                        db.update_all_channels_name(number_group_parser, new_channels_name)
-                            all_channels = db.select_channels_with_number(number_group_parser)
-                            channels_link = [item for item in all_channels if len(item) >= 13 and item[13] == '+']
-                            # channels_id = [item for sublist in channels_id if sublist[0] for item in sublist[0]]
-                            # cleaned_a_updated = [link.split(' ⏳')[0] for link in channels_link]
+                        try:
+                            balance = db.check_balance(user_id)
+                            channels_len = len(channels_parser)
+                            money_oplata = 5 * int(channels_len)
+                            if balance >= money_oplata:
+                                await callback_query.message.answer(cfg.confirm_oplata_text)
+                                channels = db.select_channels_with_number(number_group_parser)
+                                new_channels = [newer[:-2] + " ✅" for newer in channels]
+                                new_chan = [newer[:-2] for newer in channels]
+                                db.update_all_channels(number_group_parser, new_channels)
+                                channels_name_parser = db.select_channels_name_with_number(number_group_parser)
+                                new_channels_name = [newer[:-2] + " ✅" for newer in channels_name_parser]
+                                db.update_all_channels_name(number_group_parser, new_channels_name)
+                                db.update_balance(user_id, money_oplata)
+                                channels_len = len(channels)
+                                current_data = datetime.datetime.now()
+                                new_date = current_data + datetime.timedelta(days=30)
+                                formatted_date_new = new_date.strftime("%Y-%m-%d %H:%M:%S")
+                                db.add_date_tariffe(user_id, formatted_date_new, number_group_parser)
+                                markup_inline = types.InlineKeyboardMarkup(row_width=1)
+                                btn_inline1 = types.InlineKeyboardButton(cfg.menu_button, callback_data='menu_after_pay_parser')
+                                markup_inline.add(btn_inline1)
+                                all_channels = db.select_channels_with_number(number_group_parser)
+                                all_channels_name = db.select_channels_name_with_number(number_group_parser)
+                                updated_a = [x[:-1] + '⏳' if len(x) >= 13 and x[13] == '+' else x for x in all_channels]
+                                db.update_all_channels(number_group_parser, updated_a)
+                                paired_channels = zip(updated_a, all_channels_name)
+                                for channel_name_updated, channel_name_id in paired_channels:
+                                    if channel_name_updated[13] == "+":
+                                        response = requests.get(channel_name_updated[:-2])
+                                        html_content = response.text
+                                        soup = BeautifulSoup(html_content, 'html.parser')
+                                        title_div = soup.find('div', {'class': 'tgme_page_title'})
+                                        if title_div:
+                                            group_name = title_div.get_text(strip=True)
+                                            all_channels_name_parser = db.select_channels_name_with_number(number_group_parser)
+                                            new_callback_name = group_name + '⏳'
+                                            new_channels_name = [new_callback_name if item[:-2] == group_name else item for item in all_channels_name_parser]
+                                            db.update_all_channels_name(number_group_parser, new_channels_name)
+                                all_channels = db.select_channels_with_number(number_group_parser)
+                                channels_link = [item for item in all_channels if len(item) >= 13 and item[13] == '+']
+                                # channels_id = [item for sublist in channels_id if sublist[0] for item in sublist[0]]
+                                # cleaned_a_updated = [link.split(' ⏳')[0] for link in channels_link]
 
-                            # Создание списков c_matched и c_unmatched
-                            # c_matched = []
-                            # c_unmatched = []
-                            # index = 1
-                            # valuable = False
-                            # for link in cleaned_a_updated:
-                            #     matched = False
-                            #     for item in channels_id:
-                            #         if item[1] == link:
-                            #             c_matched.append([f"{index}) {item[0].split(')')[1]}", item[1]])
-                            #             matched = True
-                            #             valuable = True
-                            #             break
-                            #     if not matched:
-                            #         c_unmatched.append([f"{index})", link])
-                            #     index += 1
-                            #
-                            # if valuable is True:
-                            #     for new_lst_with_ids in c_matched:
-                            #         all_channels = db.select_channels_with_number(number_group_parser)
-                            #         channels_link = [item for item in all_channels if len(item) >= 13 and item[13] == '+']
-                            #         index = int(new_lst_with_ids[0][0]) - 1
-                            #         channels_link[index] = channels_link[index].replace("⏳", "✅")
-                            #         owner_lst = [next((full_word for full_word in channels_link if full_word[:-2] == word[:-2]), word) for word in all_channels]
-                            #         db.update_all_channels(number_group_parser, owner_lst)
-                            #         db.add_chat_ids(int(number_group_parser), c_matched)
-                            #     all_channels = db.select_channels_with_number(number_group_parser)
-                            #     for channel_name in all_channels:
-                            #         if channel_name[-1] == "✅":
-                            #             index_channel = all_channels.index(channel_name)
-                            #             all_channels_name = db.select_channels_name_with_number(number_group_parser)
-                            #             group_name = all_channels_name[index_channel]
-                            #             new_callback_name = group_name[:-1] + "✅"
-                            #             new_channels_name = [new_callback_name if item == group_name else item for item in all_channels_name]
-                            #             db.update_all_channels_name(number_group_parser, new_channels_name)
-                            if channels_link != []:
-                                await check_private_channel(channels_link, user_id)
-                            await state.finish()
-                            await callback_query.message.delete()
-                            await callback_query.message.answer(text=cfg.tariffe_correct(group_name_parser, channels_len, formatted_date_new), reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
-                        else:
-                            await callback_query.answer(text=cfg.tariffe_error, show_alert=True)
+                                # Создание списков c_matched и c_unmatched
+                                # c_matched = []
+                                # c_unmatched = []
+                                # index = 1
+                                # valuable = False
+                                # for link in cleaned_a_updated:
+                                #     matched = False
+                                #     for item in channels_id:
+                                #         if item[1] == link:
+                                #             c_matched.append([f"{index}) {item[0].split(')')[1]}", item[1]])
+                                #             matched = True
+                                #             valuable = True
+                                #             break
+                                #     if not matched:
+                                #         c_unmatched.append([f"{index})", link])
+                                #     index += 1
+                                #
+                                # if valuable is True:
+                                #     for new_lst_with_ids in c_matched:
+                                #         all_channels = db.select_channels_with_number(number_group_parser)
+                                #         channels_link = [item for item in all_channels if len(item) >= 13 and item[13] == '+']
+                                #         index = int(new_lst_with_ids[0][0]) - 1
+                                #         channels_link[index] = channels_link[index].replace("⏳", "✅")
+                                #         owner_lst = [next((full_word for full_word in channels_link if full_word[:-2] == word[:-2]), word) for word in all_channels]
+                                #         db.update_all_channels(number_group_parser, owner_lst)
+                                #         db.add_chat_ids(int(number_group_parser), c_matched)
+                                #     all_channels = db.select_channels_with_number(number_group_parser)
+                                #     for channel_name in all_channels:
+                                #         if channel_name[-1] == "✅":
+                                #             index_channel = all_channels.index(channel_name)
+                                #             all_channels_name = db.select_channels_name_with_number(number_group_parser)
+                                #             group_name = all_channels_name[index_channel]
+                                #             new_callback_name = group_name[:-1] + "✅"
+                                #             new_channels_name = [new_callback_name if item == group_name else item for item in all_channels_name]
+                                #             db.update_all_channels_name(number_group_parser, new_channels_name)
+                                if channels_link != []:
+                                    await check_private_channel(channels_link, user_id)
+                                await state.finish()
+                                await callback_query.message.delete()
+                                await callback_query.message.answer(text=cfg.tariffe_correct(group_name_parser, channels_len, formatted_date_new), reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+                            else:
+                                await callback_query.answer(text=cfg.tariffe_error, show_alert=True)
+                        except Exception as err:
+                            error_message = f"[ERROR CREATE GROUP] {err}\n{traceback.format_exc()}"
+                            print(error_message)
                     elif callback_query.data == "back_oplata_parser":
                         channels = db.select_channels_with_number(number_group_parser)
                         channels_name_parser = db.select_channels_name_with_number(number_group_parser)
@@ -2431,7 +2435,9 @@ async def create_group_func_4(message: types.Message, state: FSMContext):
                         await message.answer(cfg.error_len_channels_create, parse_mode=types.ParseMode.MARKDOWN)
                 else:
                     await message.answer(cfg.error_len_channels, parse_mode=types.ParseMode.MARKDOWN)
-        except Exception:
+        except Exception as err:
+            error_message = f"[ERROR CREATE GROUP] {err}\n{traceback.format_exc()}"
+            print(error_message)
             await message.answer("Произошла ошибка, пожалуйста повторите ещё раз:")
 
 @dp.callback_query_handler(state=Create_group.create_group_3)
