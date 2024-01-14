@@ -2374,7 +2374,7 @@ async def create_group_func_4(message: types.Message, state: FSMContext):
                 ids_chats = data.get("ids_chats")
                 print(names_chats)
                 print(ids_chats)
-                ids_chats.append(text_line)
+                ids_chats += text_line
                 if 2 <= len(message.text) <= 1000:
                     if 1 <= len(text_line) <= 50 - int(len(names_chats)):
                         try:
