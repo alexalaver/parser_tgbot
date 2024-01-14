@@ -2311,20 +2311,18 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                 if len(text_line) == len(all_names_chat):
                     all_groups = db.select_all_chats_groups()
                     for name_chat in text_line:
-                        new_bl = False
                         for name_group in all_groups:
-                            lens_name = len(name_group)
                             if name_chat == name_group[0]:
                                 names_chats.append(name_chat)
                                 ids_chats.append(name_group[1])
                                 print(names_chats)
                                 print(ids_chats)
                                 await state.update_data(names_chats=names_chats, ids_chats=ids_chats)
-                                lens_name -= 1
-                                new_bl = True
-                            if lens_name == 2 and new_bl == False:
-                                booline = False
-                                not_find_chats.append(name_chat)
+
+
+                    not_find_chats = [item for item in text_line if item not in names_chats]
+                    if not_find_chats != []:
+                        booline = False
                     if booline == False:
                         text_not_find = None
                         await Create_group.create_group_4.set()

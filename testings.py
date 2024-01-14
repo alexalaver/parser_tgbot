@@ -50,6 +50,10 @@
 # print(result)
 
 
-a = ["eadsads", "LOOOOOO", "httpsiiimuu", "@qqqqqqqqq"]
-channels_link = [item for item in a if len(item) >= 13 and item[13] == '+']
-print(channels_link)
+a = ["hello", "lii"]
+b = ["hello", "lii"]
+
+# Удаление элементов из списка a, которые есть в списке b
+a_filtered = [item for item in a if item not in b]
+
+print(a_filtered)
