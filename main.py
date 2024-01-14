@@ -2322,6 +2322,8 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                                 await state.update_data(names_chats=names_chats, ids_chats=ids_chats)
                                 lens_name -= 1
                                 new_bl = True
+                            print(lens_name)
+                            print(new_bl)
                             if lens_name == 1 and new_bl == False:
                                 booline = False
                                 not_find_chats.append(name_chat)
