@@ -2308,10 +2308,10 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                 ids_chats = []
                 not_find_chats = []
                 booline = True
-                new_bl = False
                 if len(text_line) == len(all_names_chat):
                     all_groups = db.select_all_chats_groups()
                     for name_chat in text_line:
+                        new_bl = False
                         for name_group in all_groups:
                             lens_name = len(name_group)
                             if name_chat == name_group[0]:
