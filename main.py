@@ -187,11 +187,12 @@ async def search_and_forward():
 
                         except FloodWaitError as e:
                             wait_time = e.seconds
-                            print(f"Flood wait error on chat {trimmed_chat_id}. Sleeping for {wait_time} seconds.")
+                            print(f"Flood wait error on chat {trimmed_chat_id}. Sleeping for {wait_time} seconds.{traceback.format_exc()}")
                             await asyncio.sleep(3)
                             exception_occurred = True
                         except Exception as erri:
-                            print(f"[ERROR EXCEPTION] {erri}")
+                            error_message = f"[ERROR EXCEPTION PARSING] {erri}\n{traceback.format_exc()}"
+                            print(error_message)
                             all_channels = db.select_channels_with_number(number_group)
                             new_callback = chat_id[:-1] + '⏳'
                             new_channels = [new_callback if item == chat_id else item for item in all_channels]
@@ -1164,7 +1165,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                                 db.update_all_channels(number_group_parser, updated_a)
                                 paired_channels = zip(updated_a, all_channels_name)
                                 for channel_name_updated, channel_name_id in paired_channels:
-                                    if channel_name_updated[13] == "+":
+                                    if str(channel_name_updated)[13] == "+":
                                         response = requests.get(channel_name_updated[:-2])
                                         html_content = response.text
                                         soup = BeautifulSoup(html_content, 'html.parser')
@@ -2307,7 +2308,7 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                 ids_chats = []
                 not_find_chats = []
                 booline = True
-                new_bl = True
+                new_bl = False
                 if len(text_line) == len(all_names_chat):
                     all_groups = db.select_all_chats_groups()
                     for name_chat in text_line:
@@ -2319,7 +2320,9 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                                 print(names_chats)
                                 print(ids_chats)
                                 await state.update_data(names_chats=names_chats, ids_chats=ids_chats)
-                            else:
+                                lens_name -= 1
+                                new_bl = True
+                            if lens_name == 0 and new_bl != True:
                                 booline = False
                                 not_find_chats.append(name_chat)
                     if booline == False:
