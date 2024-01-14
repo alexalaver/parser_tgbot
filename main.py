@@ -2315,11 +2315,12 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                             if name_chat == name_group[0]:
                                 names_chats.append(name_chat)
                                 ids_chats.append(name_group[1])
-                                print(names_chats)
-                                print(ids_chats)
+                                # print(names_chats)
+                                # print(ids_chats)
                                 await state.update_data(names_chats=names_chats, ids_chats=ids_chats)
 
-
+                    print(names_chats)
+                    print(text_line)
                     not_find_chats = [item for item in text_line if item not in names_chats]
                     if not_find_chats != []:
                         booline = False
@@ -2373,8 +2374,8 @@ async def create_group_func_4(message: types.Message, state: FSMContext):
                 data = await state.get_data()
                 names_chats = data.get("names_chats")
                 ids_chats = data.get("ids_chats")
-                print(names_chats)
-                print(ids_chats)
+                # print(names_chats)
+                # print(ids_chats)
                 for text_ln in text_line:
                     ids_chats.append(text_ln)
                 if 2 <= len(message.text) <= 1000:
