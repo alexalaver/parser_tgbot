@@ -2327,6 +2327,7 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                     if booline == False:
                         text_not_find = None
                         await Create_group.create_group_4.set()
+                        print(not_find_chats)
                         for not_find_chat in not_find_chats:
                             text_not_find = "4. В списке предоставленных чатов в базе данных не обнаружены:\n\n" + f"{not_find_chat}\n" + "Напишите тэги/ссылки для данных чатов."
                         await message.answer(text_not_find)

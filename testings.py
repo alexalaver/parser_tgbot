@@ -50,8 +50,8 @@
 # print(result)
 
 
-a = ["hello", "lii"]
-b = ["hello", "lii"]
+a = ['TESTPRIVATE6', 'TESTPRIVATE1', 'TESTPRIVATE2', 'testonepublic', 'Progressor_ba']
+b = ['TESTPRIVATE6', 'Progressor_ba']
 
 # Удаление элементов из списка a, которые есть в списке b
 a_filtered = [item for item in a if item not in b]
