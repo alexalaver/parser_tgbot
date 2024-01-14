@@ -144,8 +144,10 @@ async def search_and_forward():
                     for chat_id, chat_id_name in zip(chat_ids, chat_names):
                         try:
                             trimmed_chat_id = int(chat_id[:-2])
+                            right_int = True
                         except ValueError:
                             trimmed_chat_id = chat_id[:-2]
+                            right_int = False
                         exception_occurred = False
                         try:
                             last_id = last_message_ids.get(trimmed_chat_id, 0)
@@ -155,7 +157,11 @@ async def search_and_forward():
                                 if message.text:
                                     for keyword in keywords:
                                         if keyword.lower() in message.text.lower():
-                                            message_key = [trimmed_chat_id, message.id]
+                                            message_key = None
+                                            if right_int == False:
+                                                message_key = [message.chat_id, message.id]
+                                            else:
+                                                message_key = [trimmed_chat_id, message.id]
                                             if message_key not in messages_sent:
                                                 # sender = await message.get_sender()
                                                 # if "http" in trimmed_chat_id:
@@ -1165,17 +1171,18 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                                 db.update_all_channels(number_group_parser, updated_a)
                                 paired_channels = zip(updated_a, all_channels_name)
                                 for channel_name_updated, channel_name_id in paired_channels:
-                                    if str(channel_name_updated)[13] == "+":
-                                        response = requests.get(channel_name_updated[:-2])
-                                        html_content = response.text
-                                        soup = BeautifulSoup(html_content, 'html.parser')
-                                        title_div = soup.find('div', {'class': 'tgme_page_title'})
-                                        if title_div:
-                                            group_name = title_div.get_text(strip=True)
-                                            all_channels_name_parser = db.select_channels_name_with_number(number_group_parser)
-                                            new_callback_name = group_name + '⏳'
-                                            new_channels_name = [new_callback_name if item[:-2] == group_name else item for item in all_channels_name_parser]
-                                            db.update_all_channels_name(number_group_parser, new_channels_name)
+                                    if len(channel_name_updated) >= 13:
+                                        if str(channel_name_updated)[13] == "+":
+                                            response = requests.get(channel_name_updated[:-2])
+                                            html_content = response.text
+                                            soup = BeautifulSoup(html_content, 'html.parser')
+                                            title_div = soup.find('div', {'class': 'tgme_page_title'})
+                                            if title_div:
+                                                group_name = title_div.get_text(strip=True)
+                                                all_channels_name_parser = db.select_channels_name_with_number(number_group_parser)
+                                                new_callback_name = group_name + '⏳'
+                                                new_channels_name = [new_callback_name if item[:-2] == group_name else item for item in all_channels_name_parser]
+                                                db.update_all_channels_name(number_group_parser, new_channels_name)
                                 all_channels = db.select_channels_with_number(number_group_parser)
                                 channels_link = [item for item in all_channels if len(item) >= 13 and item[13] == '+']
                                 # channels_id = [item for sublist in channels_id if sublist[0] for item in sublist[0]]
