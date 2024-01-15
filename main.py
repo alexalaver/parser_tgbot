@@ -177,7 +177,7 @@ async def search_and_forward():
                                                 link_message = group_tag + f"/{str(message.id)}"
                                                 username_1 = get_user_username(link_message)
                                                 if username_1 == "Анонимный пользователь":
-                                                    username = "Анонимный пользователь"
+                                                    username = f"@{message.sender.username}"
                                                 else:
                                                     username = f"@{username_1[13:]}"
                                                 if "bot" not in username.lower():
