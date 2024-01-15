@@ -178,6 +178,10 @@ async def search_and_forward():
                                                 username_1 = get_user_username(link_message)
                                                 if username_1 == "Анонимный пользователь":
                                                     username = f"@{message.sender.username}"
+                                                    if username == "@None":
+                                                        username = "Анонимный пользователь"
+                                                    else:
+                                                        pass
                                                 else:
                                                     username = f"@{username_1[13:]}"
                                                 if "bot" not in username.lower():
