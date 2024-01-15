@@ -50,7 +50,8 @@
 # print(result)
 
 channel_name_updated = "asd"
-if str(channel_name_updated)[13] == "+":
-    print('yes')
-else:
-    print("right")
+if len(channel_name_updated) >= 13:
+    if str(channel_name_updated)[13] == "+":
+        print('yes')
+    else:
+        print("right")

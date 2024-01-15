@@ -1171,7 +1171,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                                 db.update_all_channels(number_group_parser, updated_a)
                                 paired_channels = zip(updated_a, all_channels_name)
                                 for channel_name_updated, channel_name_id in paired_channels:
-                                    if len(channel_name_updated) >= 13:
+                                    if len(channel_name_updated) > 13:
                                         if str(channel_name_updated)[13] == "+":
                                             response = requests.get(channel_name_updated[:-2])
                                             html_content = response.text
@@ -2325,9 +2325,6 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                                 # print(names_chats)
                                 # print(ids_chats)
                                 await state.update_data(names_chats=names_chats, ids_chats=ids_chats)
-
-                    print(names_chats)
-                    print(text_line)
                     not_find_chats = [item for item in text_line if item not in names_chats]
                     if not_find_chats != []:
                         booline = False
