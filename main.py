@@ -2329,7 +2329,7 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                 await message.answer(cfg.cancel_creategroup_text, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
             elif message.text:
                 all_names_chat = [ch_name for ch_name in text_line if "http" not in ch_name and "@" not in ch_name]
-                all_links_chat = [ch_name for ch_name in text_line if "http" in ch_name and "@" in ch_name]
+                all_links_chat = [ch_name for ch_name in text_line if "http" in ch_name or "@" in ch_name]
                 names_chats = []
                 ids_chats = []
                 not_find_chats = []
@@ -2365,6 +2365,7 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                             if title_div:
                                 group_name = title_div.get_text(strip=True)
                                 names_chats.append(group_name)
+                                ids_chats.append(channel_name)
                             else:
                                 await message.answer(cfg.error_channel_name_add)
                                 break
@@ -2376,6 +2377,7 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                             if title_div:
                                 group_name = title_div.get_text(strip=True)
                                 names_chats.append(group_name)
+                                ids_chats.append(channel_name)
                             else:
                                 await message.answer(cfg.error_channel_name_add)
                                 break

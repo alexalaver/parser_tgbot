@@ -50,6 +50,6 @@
 # print(result)
 
 text_line = ["httphello", "@aushashasu"]
-all_names_chat = [ch_name for ch_name in text_line if "http" not in ch_name and "@" not in ch_name]
+all_links_chat = [ch_name for ch_name in text_line if "http" in ch_name and "@" in ch_name]
 
-print(all_names_chat)
+print(all_links_chat)
