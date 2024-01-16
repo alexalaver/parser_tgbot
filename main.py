@@ -2344,63 +2344,64 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                                 # print(names_chats)
                                 # print(ids_chats)
                                 await state.update_data(names_chats=names_chats, ids_chats=ids_chats)
-                    not_find_chats = [item for item in text_line if item not in names_chats]
-                    # if not_find_chats != []:
-                    #     booline = False
-                    # if booline == False:
-                    #     text_not_find = None
-                    #     await Create_group.create_group_4.set()
-                    #     text_not_find = "4. В списке предоставленных чатов в базе данных не обнаружены:\n\n"
-                    #     for not_find_chat in not_find_chats:
-                    #         text_not_find += f"{not_find_chat}\n"
-                    #     text_not_find += "\nНапишите тэги/ссылки для данных чатов."
-                    #     await message.answer(text_not_find)
-                if all_links_chat != []:
-                    for channel_name in all_links_chat:
-                        if "http" in channel_name or "t.me/" in channel_name:
-                            response = requests.get(channel_name)
-                            html_content = response.text
-                            soup = BeautifulSoup(html_content, 'html.parser')
-                            title_div = soup.find('div', {'class': 'tgme_page_title'})
-                            if title_div:
-                                group_name = title_div.get_text(strip=True)
-                                names_chats.append(group_name)
-                                ids_chats.append(channel_name)
+                not_find_chats = [item for item in text_line if item not in names_chats]
+                if not_find_chats != []:
+                    booline = False
+                if booline == False:
+                    text_not_find = None
+                    await Create_group.create_group_4.set()
+                    text_not_find = "В списке предоставленных чатов в базе данных не обнаружены:\n\n"
+                    for not_find_chat in not_find_chats:
+                        text_not_find += f"{not_find_chat}\n"
+                    text_not_find += "\nНапишите всё заново, включая тэги/ссылки для тех чатов, которые не были обнаружены."
+                    await message.answer(text_not_find)
+                if booline != False:
+                    if all_links_chat != []:
+                        for channel_name in all_links_chat:
+                            if "http" in channel_name or "t.me/" in channel_name:
+                                response = requests.get(channel_name)
+                                html_content = response.text
+                                soup = BeautifulSoup(html_content, 'html.parser')
+                                title_div = soup.find('div', {'class': 'tgme_page_title'})
+                                if title_div:
+                                    group_name = title_div.get_text(strip=True)
+                                    names_chats.append(group_name)
+                                    ids_chats.append(channel_name)
+                                else:
+                                    await message.answer(cfg.error_channel_name_add)
+                                    break
+                            elif channel_name[0] == "@":
+                                response = requests.get(f"https://t.me/{channel_name[1:]}")
+                                html_content = response.text
+                                soup = BeautifulSoup(html_content, 'html.parser')
+                                title_div = soup.find('div', {'class': 'tgme_page_title'})
+                                if title_div:
+                                    group_name = title_div.get_text(strip=True)
+                                    names_chats.append(group_name)
+                                    ids_chats.append(channel_name)
+                                else:
+                                    await message.answer(cfg.error_channel_name_add)
+                                    break
                             else:
-                                await message.answer(cfg.error_channel_name_add)
+                                await message.answer(cfg.error_channel_teg_link)
                                 break
-                        elif channel_name[0] == "@":
-                            response = requests.get(f"https://t.me/{channel_name[1:]}")
-                            html_content = response.text
-                            soup = BeautifulSoup(html_content, 'html.parser')
-                            title_div = soup.find('div', {'class': 'tgme_page_title'})
-                            if title_div:
-                                group_name = title_div.get_text(strip=True)
-                                names_chats.append(group_name)
-                                ids_chats.append(channel_name)
-                            else:
-                                await message.answer(cfg.error_channel_name_add)
-                                break
-                        else:
-                            await message.answer(cfg.error_channel_teg_link)
-                            break
-                if names_chats != [] and ids_chats != []:
-                    check_number_group = db.check_numbers_group()
-                    new_number_group = check_number_group + 1
-                    data = await state.get_data()
-                    cashe_group_name = data.get('group_name')
-                    cashe_keyword = data.get('text_lines')
-                    names_all_chats = list(dict.fromkeys([element + ' ⚠' for element in names_chats]))
-                    ids_all_chats = list(dict.fromkeys([str(element) + ' ⚠' for element in ids_chats]))
-                    db.add_channels(user_id, new_number_group, cashe_keyword, ids_all_chats, cashe_group_name, names_all_chats)
-                    markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True,one_time_keyboard=False)
-                    markup_reply.add(cfg.autoposting)
-                    markup_reply.add(cfg.parser)
-                    markup_reply.row(cfg.my_profile, cfg.support)
-                    if db.select_admin(user_id) > 0:
-                        markup_reply.add(cfg.admin_panel_button)
-                    await message.answer(cfg.right_create_group, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
-                    await state.finish()
+                    if names_chats != [] and ids_chats != []:
+                        check_number_group = db.check_numbers_group()
+                        new_number_group = check_number_group + 1
+                        data = await state.get_data()
+                        cashe_group_name = data.get('group_name')
+                        cashe_keyword = data.get('text_lines')
+                        names_all_chats = list(dict.fromkeys([element + ' ⚠' for element in names_chats]))
+                        ids_all_chats = list(dict.fromkeys([str(element) + ' ⚠' for element in ids_chats]))
+                        db.add_channels(user_id, new_number_group, cashe_keyword, ids_all_chats, cashe_group_name, names_all_chats)
+                        markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True,one_time_keyboard=False)
+                        markup_reply.add(cfg.autoposting)
+                        markup_reply.add(cfg.parser)
+                        markup_reply.row(cfg.my_profile, cfg.support)
+                        if db.select_admin(user_id) > 0:
+                            markup_reply.add(cfg.admin_panel_button)
+                        await message.answer(cfg.right_create_group, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
+                        await state.finish()
         except Exception as err:
             error_message = f"[ERROR CREATE GROUP] {err}\n{traceback.format_exc()}"
             print(error_message)
