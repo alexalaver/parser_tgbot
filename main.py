@@ -805,7 +805,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     except Exception as err:
                         print(f"ОШИБКА ПРИ НАЖАТИИ МЕНЮ АВТОПОСТИНГА: {err}")
                         await callback_query.answer("Произошла ошибка при нажатии на кнопку Меню для Автопостинга", show_alert=True)
-                elif callback_query.data == "back_autoposting_test":
+                elif callback_query.data == "back_autoposting_text":
                     await callback_query.message.delete()
                     user_id = callback_query.from_user.id
                     markup_inline = types.InlineKeyboardMarkup(row_width=1, )
