@@ -2356,9 +2356,9 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                     text_not_find += "\nНапишите всё заново, включая тэги/ссылки для тех чатов, которые не были обнаружены."
                     await message.answer(text_not_find)
                 if booline != False:
+                    await message.answer(all_links_chat)
                     if all_links_chat != []:
                         for channel_name in all_links_chat:
-                            print(channel_name)
                             if "http" in channel_name or "t.me/" in channel_name:
                                 response = requests.get(channel_name)
                                 html_content = response.text
