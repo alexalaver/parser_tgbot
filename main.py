@@ -551,18 +551,25 @@ async def parsers_send(message):
     await message.answer_photo(photo=types.InputFile("img/photo2.jpg"), caption=cfg.parser_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
 
 async def autoposting_send(message):
+    # markup_inline = types.InlineKeyboardMarkup(row_width=1)
+    # user_id = message.from_user.id
+    # group_names = db.select_autoposting_group_name(user_id)
+    # for group_name in group_names:
+    #     button = types.InlineKeyboardButton(text=group_name, callback_data=f"{group_name}autoposting_account")
+    #     markup_inline.add(button)
+    # btn1_inline = types.InlineKeyboardButton(cfg.add_account_button, callback_data="add_account_autoposting")
+    # markup_inline.add(btn1_inline)
+    # if group_names is None:
+    #     text = cfg.accounts_left_text
+    # else:
+    #     text = cfg.accounts_right_text
+    # await message.answer_photo(photo=types.InputFile("img/photo1.jpg"), caption=text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+
     markup_inline = types.InlineKeyboardMarkup(row_width=1)
-    user_id = message.from_user.id
-    group_names = db.select_autoposting_group_name(user_id)
-    for group_name in group_names:
-        button = types.InlineKeyboardButton(text=group_name, callback_data=f"{group_name}autoposting_account")
-        markup_inline.add(button)
-    btn1_inline = types.InlineKeyboardButton(cfg.add_account_button, callback_data="add_account_autoposting")
-    markup_inline.add(btn1_inline)
-    if group_names is None:
-        text = cfg.accounts_left_text
-    else:
-        text = cfg.accounts_right_text
+    markup_inline.add(
+        types.InlineKeyboardButton(text="Вернуться назад", callback_data="back_autoposting_text")
+    )
+    text = "Автопостинг находится в разработке!"
     await message.answer_photo(photo=types.InputFile("img/photo1.jpg"), caption=text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
 
 async def panel_administration(message):
@@ -798,6 +805,13 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     except Exception as err:
                         print(f"ОШИБКА ПРИ НАЖАТИИ МЕНЮ АВТОПОСТИНГА: {err}")
                         await callback_query.answer("Произошла ошибка при нажатии на кнопку Меню для Автопостинга", show_alert=True)
+                elif callback_query.data == "back_autoposting_test":
+                    await callback_query.message.delete()
+                    user_id = callback_query.from_user.id
+                    markup_inline = types.InlineKeyboardMarkup(row_width=1, )
+                    btn_inline1 = types.InlineKeyboardButton(cfg.up_balance, callback_data='up_balance')
+                    markup_inline.add(btn_inline1)
+                    await callback_query.message.answer_photo(photo=types.InputFile("img/photo1.jpg"), caption=cfg.profile(user_id, db.select_balance(user_id)), reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
                 elif callback_query.data == "up_balance":
                     try:
                         markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
@@ -2315,11 +2329,12 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                 await message.answer(cfg.cancel_creategroup_text, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
             elif message.text:
                 all_names_chat = [ch_name for ch_name in text_line if "http" not in ch_name and "@" not in ch_name]
+                all_links_chat = [ch_name for ch_name in text_line if "http" in ch_name and "@" in ch_name]
                 names_chats = []
                 ids_chats = []
                 not_find_chats = []
                 booline = True
-                if len(text_line) == len(all_names_chat):
+                if all_names_chat != []:
                     all_groups = db.select_all_chats_groups()
                     for name_chat in text_line:
                         for name_group in all_groups:
@@ -2330,33 +2345,60 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                                 # print(ids_chats)
                                 await state.update_data(names_chats=names_chats, ids_chats=ids_chats)
                     not_find_chats = [item for item in text_line if item not in names_chats]
-                    if not_find_chats != []:
-                        booline = False
-                    if booline == False:
-                        text_not_find = None
-                        await Create_group.create_group_4.set()
-                        text_not_find = "4. В списке предоставленных чатов в базе данных не обнаружены:\n\n"
-                        for not_find_chat in not_find_chats:
-                            text_not_find += f"{not_find_chat}\n"
-                        text_not_find += "\nНапишите тэги/ссылки для данных чатов."
-                        await message.answer(text_not_find)
-                    else:
-                        check_number_group = db.check_numbers_group()
-                        new_number_group = check_number_group + 1
-                        data = await state.get_data()
-                        cashe_group_name = data.get('group_name')
-                        cashe_keyword = data.get('text_lines')
-                        names_all_chats = list(dict.fromkeys([element + ' ⚠' for element in names_chats]))
-                        ids_all_chats = list(dict.fromkeys([str(element) + ' ⚠' for element in ids_chats]))
-                        db.add_channels(user_id, new_number_group, cashe_keyword, ids_all_chats, cashe_group_name, names_all_chats)
-                        markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True,one_time_keyboard=False)
-                        markup_reply.add(cfg.autoposting)
-                        markup_reply.add(cfg.parser)
-                        markup_reply.row(cfg.my_profile, cfg.support)
-                        if db.select_admin(user_id) > 0:
-                            markup_reply.add(cfg.admin_panel_button)
-                        await message.answer(cfg.right_create_group, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
-                        await state.finish()
+                    # if not_find_chats != []:
+                    #     booline = False
+                    # if booline == False:
+                    #     text_not_find = None
+                    #     await Create_group.create_group_4.set()
+                    #     text_not_find = "4. В списке предоставленных чатов в базе данных не обнаружены:\n\n"
+                    #     for not_find_chat in not_find_chats:
+                    #         text_not_find += f"{not_find_chat}\n"
+                    #     text_not_find += "\nНапишите тэги/ссылки для данных чатов."
+                    #     await message.answer(text_not_find)
+                if all_links_chat != []:
+                    for channel_name in all_links_chat:
+                        if "http" in channel_name or "t.me/" in channel_name:
+                            response = requests.get(channel_name)
+                            html_content = response.text
+                            soup = BeautifulSoup(html_content, 'html.parser')
+                            title_div = soup.find('div', {'class': 'tgme_page_title'})
+                            if title_div:
+                                group_name = title_div.get_text(strip=True)
+                                names_chats.append(group_name)
+                            else:
+                                await message.answer(cfg.error_channel_name_add)
+                                break
+                        elif channel_name[0] == "@":
+                            response = requests.get(f"https://t.me/{channel_name[1:]}")
+                            html_content = response.text
+                            soup = BeautifulSoup(html_content, 'html.parser')
+                            title_div = soup.find('div', {'class': 'tgme_page_title'})
+                            if title_div:
+                                group_name = title_div.get_text(strip=True)
+                                names_chats.append(group_name)
+                            else:
+                                await message.answer(cfg.error_channel_name_add)
+                                break
+                        else:
+                            await message.answer(cfg.error_channel_teg_link)
+                            break
+                if names_chats != [] and ids_chats != []:
+                    check_number_group = db.check_numbers_group()
+                    new_number_group = check_number_group + 1
+                    data = await state.get_data()
+                    cashe_group_name = data.get('group_name')
+                    cashe_keyword = data.get('text_lines')
+                    names_all_chats = list(dict.fromkeys([element + ' ⚠' for element in names_chats]))
+                    ids_all_chats = list(dict.fromkeys([str(element) + ' ⚠' for element in ids_chats]))
+                    db.add_channels(user_id, new_number_group, cashe_keyword, ids_all_chats, cashe_group_name, names_all_chats)
+                    markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True,one_time_keyboard=False)
+                    markup_reply.add(cfg.autoposting)
+                    markup_reply.add(cfg.parser)
+                    markup_reply.row(cfg.my_profile, cfg.support)
+                    if db.select_admin(user_id) > 0:
+                        markup_reply.add(cfg.admin_panel_button)
+                    await message.answer(cfg.right_create_group, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
+                    await state.finish()
         except Exception as err:
             error_message = f"[ERROR CREATE GROUP] {err}\n{traceback.format_exc()}"
             print(error_message)

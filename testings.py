@@ -49,9 +49,7 @@
 #
 # print(result)
 
-channel_name_updated = "asd"
-if len(channel_name_updated) >= 13:
-    if str(channel_name_updated)[13] == "+":
-        print('yes')
-    else:
-        print("right")
+text_line = ["httphello", "@aushashasu"]
+all_names_chat = [ch_name for ch_name in text_line if "http" not in ch_name and "@" not in ch_name]
+
+print(all_names_chat)
