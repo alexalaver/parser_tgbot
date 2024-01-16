@@ -2349,14 +2349,12 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                     booline = False
                 if booline == False:
                     text_not_find = None
-                    await Create_group.create_group_4.set()
                     text_not_find = "В списке предоставленных чатов в базе данных не обнаружены:\n\n"
                     for not_find_chat in not_find_chats:
                         text_not_find += f"{not_find_chat}\n"
                     text_not_find += "\nНапишите всё заново, включая тэги/ссылки для тех чатов, которые не были обнаружены."
                     await message.answer(text_not_find)
                 if booline != False:
-                    await message.answer(all_links_chat)
                     if all_links_chat != []:
                         for channel_name in all_links_chat:
                             if "http" in channel_name or "t.me/" in channel_name:
