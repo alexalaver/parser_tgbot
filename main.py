@@ -2358,6 +2358,7 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                 if booline != False:
                     if all_links_chat != []:
                         for channel_name in all_links_chat:
+                            print(channel_name)
                             if "http" in channel_name or "t.me/" in channel_name:
                                 response = requests.get(channel_name)
                                 html_content = response.text
