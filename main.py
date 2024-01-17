@@ -2341,7 +2341,7 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                     for name_chat in text_line:
                         for name_group in all_groups:
                             print(f"ONE - {name_chat}  - {name_group[0]} -")
-                            if name_chat == name_group[0]:
+                            if "".join(name_chat.split()) == "".join(name_group[0].split()):
                                 names_chats.append(name_chat)
                                 ids_chats.append(name_group[1])
                                 # print(names_chats)
