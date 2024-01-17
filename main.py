@@ -198,11 +198,13 @@ async def search_and_forward():
                         except FloodWaitError as e:
                             wait_time = e.seconds
                             print(f"Flood wait error on chat {trimmed_chat_id}. Sleeping for {wait_time} seconds.{traceback.format_exc()}")
+                            await bot.send_message(cfg.channel_logs, text=f"Flood wait error on chat {trimmed_chat_id}. Sleeping for {wait_time} seconds.{traceback.format_exc()}")
                             await asyncio.sleep(3)
                             exception_occurred = True
                         except Exception as erri:
                             error_message = f"[ERROR EXCEPTION PARSING] {erri}\n{traceback.format_exc()}"
                             print(error_message)
+                            await bot.send_message(cfg.channel_logs, text=f"[Произошла ошибка во время парсинга] {erri}\n{traceback.format_exc()}")
                             all_channels = db.select_channels_with_number(number_group)
                             new_callback = chat_id[:-1] + '⏳'
                             new_channels = [new_callback if item == chat_id else item for item in all_channels]
@@ -2344,6 +2346,7 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                                 # print(names_chats)
                                 # print(ids_chats)
                                 await state.update_data(names_chats=names_chats, ids_chats=ids_chats)
+                print(names_chats)
                 not_find_chats = [item for item in all_names_chat if item not in names_chats]
                 if not_find_chats != []:
                     booline = False
@@ -2408,95 +2411,95 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
 
 
 
-@dp.message_handler(state=Create_group.create_group_4)
-async def create_group_func_4(message: types.Message, state: FSMContext):
-    if message.chat.type == types.ChatType.PRIVATE:
-        try:
-            user_id = message.from_user.id
-            textsing = message.text
-            text_line = textsing.strip().split('\n')
-            if message.text == cfg.cancel_creategroup:
-                markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
-                markup_reply.add(cfg.autoposting)
-                markup_reply.add(cfg.parser)
-                markup_reply.row(cfg.my_profile, cfg.support)
-                if db.select_admin(user_id) > 0:
-                    markup_reply.add(cfg.admin_panel_button)
-                await state.reset_state()
-                await message.answer(cfg.cancel_creategroup_text, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
-            elif message.text:
-                data = await state.get_data()
-                names_chats = data.get("names_chats")
-                ids_chats = data.get("ids_chats")
-                # print(names_chats)
-                # print(ids_chats)
-                for text_ln in text_line:
-                    ids_chats.append(text_ln)
-                if 2 <= len(message.text) <= 1000:
-                    if 1 <= len(text_line) <= 50 - int(len(names_chats)):
-                        try:
-                            await message.answer(cfg.please_wait_add_channels_name)
-                            for channel_name in text_line:
-                                if "http" in channel_name or "t.me/" in channel_name:
-                                    response = requests.get(channel_name)
-                                    html_content = response.text
-                                    soup = BeautifulSoup(html_content, 'html.parser')
-                                    title_div = soup.find('div', {'class': 'tgme_page_title'})
-                                    if title_div:
-                                        group_name = title_div.get_text(strip=True)
-                                        names_chats.append(group_name)
-                                    else:
-                                        await message.answer(cfg.error_channel_name_add)
-                                        break
-                                elif channel_name[0] == "@":
-                                    response = requests.get(f"https://t.me/{channel_name[1:]}")
-                                    html_content = response.text
-                                    soup = BeautifulSoup(html_content, 'html.parser')
-                                    title_div = soup.find('div', {'class': 'tgme_page_title'})
-                                    if title_div:
-                                        group_name = title_div.get_text(strip=True)
-                                        names_chats.append(group_name)
-                                    else:
-                                        await message.answer(cfg.error_channel_name_add)
-                                        break
-                                else:
-                                    await message.answer(cfg.error_channel_teg_link)
-                                    break
-                            if len(names_chats) == len(ids_chats):
-                                check_number_group = db.check_numbers_group()
-                                new_number_group = check_number_group + 1
-                                cashe_group_name = data.get('group_name')
-                                cashe_keyword = data.get('text_lines')
-                                names_all_chats = list(dict.fromkeys([element + ' ⚠' for element in names_chats]))
-                                ids_all_chats = list(dict.fromkeys([str(element) + ' ⚠' for element in ids_chats]))
-                                db.add_channels(user_id, new_number_group, cashe_keyword, ids_all_chats, cashe_group_name, names_all_chats)
-                                markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
-                                markup_reply.add(cfg.autoposting)
-                                markup_reply.add(cfg.parser)
-                                markup_reply.row(cfg.my_profile, cfg.support)
-                                if db.select_admin(user_id) > 0:
-                                    markup_reply.add(cfg.admin_panel_button)
-                                await message.answer(cfg.right_create_group, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
-                                await state.finish()
-                        except Exception as es:
-                            await state.reset_state()
-                            markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
-                            markup_reply.add(cfg.autoposting)
-                            markup_reply.add(cfg.parser)
-                            markup_reply.row(cfg.my_profile, cfg.support)
-                            if db.select_admin(user_id) > 0:
-                                markup_reply.add(cfg.admin_panel_button)
-                            await message.answer(cfg.error_create_group, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
-                            error_message = f"[ERROR CREATE GROUP 2] {es}\n{traceback.format_exc()}"
-                            print(error_message)
-                    else:
-                        await message.answer(cfg.error_len_channels_create, parse_mode=types.ParseMode.MARKDOWN)
-                else:
-                    await message.answer(cfg.error_len_channels, parse_mode=types.ParseMode.MARKDOWN)
-        except Exception as err:
-            error_message = f"[ERROR CREATE GROUP] {err}\n{traceback.format_exc()}"
-            print(error_message)
-            await message.answer("Произошла ошибка, пожалуйста повторите ещё раз:")
+# @dp.message_handler(state=Create_group.create_group_4)
+# async def create_group_func_4(message: types.Message, state: FSMContext):
+#     if message.chat.type == types.ChatType.PRIVATE:
+#         try:
+#             user_id = message.from_user.id
+#             textsing = message.text
+#             text_line = textsing.strip().split('\n')
+#             if message.text == cfg.cancel_creategroup:
+#                 markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+#                 markup_reply.add(cfg.autoposting)
+#                 markup_reply.add(cfg.parser)
+#                 markup_reply.row(cfg.my_profile, cfg.support)
+#                 if db.select_admin(user_id) > 0:
+#                     markup_reply.add(cfg.admin_panel_button)
+#                 await state.reset_state()
+#                 await message.answer(cfg.cancel_creategroup_text, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
+#             elif message.text:
+#                 data = await state.get_data()
+#                 names_chats = data.get("names_chats")
+#                 ids_chats = data.get("ids_chats")
+#                 # print(names_chats)
+#                 # print(ids_chats)
+#                 for text_ln in text_line:
+#                     ids_chats.append(text_ln)
+#                 if 2 <= len(message.text) <= 1000:
+#                     if 1 <= len(text_line) <= 50 - int(len(names_chats)):
+#                         try:
+#                             await message.answer(cfg.please_wait_add_channels_name)
+#                             for channel_name in text_line:
+#                                 if "http" in channel_name or "t.me/" in channel_name:
+#                                     response = requests.get(channel_name)
+#                                     html_content = response.text
+#                                     soup = BeautifulSoup(html_content, 'html.parser')
+#                                     title_div = soup.find('div', {'class': 'tgme_page_title'})
+#                                     if title_div:
+#                                         group_name = title_div.get_text(strip=True)
+#                                         names_chats.append(group_name)
+#                                     else:
+#                                         await message.answer(cfg.error_channel_name_add)
+#                                         break
+#                                 elif channel_name[0] == "@":
+#                                     response = requests.get(f"https://t.me/{channel_name[1:]}")
+#                                     html_content = response.text
+#                                     soup = BeautifulSoup(html_content, 'html.parser')
+#                                     title_div = soup.find('div', {'class': 'tgme_page_title'})
+#                                     if title_div:
+#                                         group_name = title_div.get_text(strip=True)
+#                                         names_chats.append(group_name)
+#                                     else:
+#                                         await message.answer(cfg.error_channel_name_add)
+#                                         break
+#                                 else:
+#                                     await message.answer(cfg.error_channel_teg_link)
+#                                     break
+#                             if len(names_chats) == len(ids_chats):
+#                                 check_number_group = db.check_numbers_group()
+#                                 new_number_group = check_number_group + 1
+#                                 cashe_group_name = data.get('group_name')
+#                                 cashe_keyword = data.get('text_lines')
+#                                 names_all_chats = list(dict.fromkeys([element + ' ⚠' for element in names_chats]))
+#                                 ids_all_chats = list(dict.fromkeys([str(element) + ' ⚠' for element in ids_chats]))
+#                                 db.add_channels(user_id, new_number_group, cashe_keyword, ids_all_chats, cashe_group_name, names_all_chats)
+#                                 markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+#                                 markup_reply.add(cfg.autoposting)
+#                                 markup_reply.add(cfg.parser)
+#                                 markup_reply.row(cfg.my_profile, cfg.support)
+#                                 if db.select_admin(user_id) > 0:
+#                                     markup_reply.add(cfg.admin_panel_button)
+#                                 await message.answer(cfg.right_create_group, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
+#                                 await state.finish()
+#                         except Exception as es:
+#                             await state.reset_state()
+#                             markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
+#                             markup_reply.add(cfg.autoposting)
+#                             markup_reply.add(cfg.parser)
+#                             markup_reply.row(cfg.my_profile, cfg.support)
+#                             if db.select_admin(user_id) > 0:
+#                                 markup_reply.add(cfg.admin_panel_button)
+#                             await message.answer(cfg.error_create_group, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
+#                             error_message = f"[ERROR CREATE GROUP 2] {es}\n{traceback.format_exc()}"
+#                             print(error_message)
+#                     else:
+#                         await message.answer(cfg.error_len_channels_create, parse_mode=types.ParseMode.MARKDOWN)
+#                 else:
+#                     await message.answer(cfg.error_len_channels, parse_mode=types.ParseMode.MARKDOWN)
+#         except Exception as err:
+#             error_message = f"[ERROR CREATE GROUP] {err}\n{traceback.format_exc()}"
+#             print(error_message)
+#             await message.answer("Произошла ошибка, пожалуйста повторите ещё раз:")
 
 @dp.callback_query_handler(state=Create_group.create_group_3)
 async def button_group_2(callback_query: types.CallbackQuery):

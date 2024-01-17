@@ -49,7 +49,16 @@
 #
 # print(result)
 
-text_line = ["httphello", "@aushashasu"]
-all_links_chat = [ch_name for ch_name in text_line if "http" in ch_name and "@" in ch_name]
+from pywallet import wallet
 
-print(all_links_chat)
+def generate_new_wallet():
+    my_wallet = wallet.create_wallet(network="BTC", seed=None, children=1)
+
+    address = my_wallet['address']
+    private_key = my_wallet['private_key']
+
+    print(f"Bitcoin Address: {address}")
+    print(f"Private Key: {private_key}")
+
+if __name__ == "__main__":
+    generate_new_wallet()
