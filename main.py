@@ -2340,8 +2340,9 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                     all_groups = db.select_all_chats_groups()
                     for name_chat in text_line:
                         for name_group in all_groups:
-                            print(f"ONE\n{name_chat[:-2]}\n{name_group[0][:-2]}")
+                            # print(f"ONE\n{name_chat[:-2]}\n{name_group[0][:-2]}")
                             if name_chat[:-2] == name_group[0][:-2]:
+                                print("right 1")
                                 names_chats.append(name_chat)
                                 ids_chats.append(name_group[1])
                                 # print(names_chats)
