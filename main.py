@@ -413,6 +413,7 @@ async def autoposting_forward():
                                                 print(f"[ERROR RPCError] {err}")
                                             except Exception as erri:
                                                 print(f"[ERROR EXCEPTION] {erri}")
+                                            await bot.send_message(cfg.channel_logs, text=f"[Произошла ошибка во время автопостинга] {err}\n{traceback.format_exc()}")
                                     time_in_60_minutes = formated_base + datetime.timedelta(minutes=1440)
                                     formatted_date_new = time_in_60_minutes.strftime("%Y-%m-%d %H:%M:%S")
                                     new_channels = [formatted_date_new if item == date_bet else item for item in chat_id]
@@ -435,6 +436,7 @@ async def autoposting_forward():
 
         except Exception as e:
             print(f"Произошла ошибка: {e}")
+            await bot.send_message(cfg.channel_logs, text=f"[Произошла всеообщая ошибка во использования автопостинга] {err}\n{traceback.format_exc()}")
 
         await asyncio.sleep(1)
 
@@ -1030,6 +1032,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                         await Add_post.add_post_1.set()
                     except Exception as err:
                         print(f"ОШИБКА ПРИ НАЖАТИИ НА КНОПКУ ДОБАВЛЕНИЯ ПОСТА ДЛЯ АВТОПОСТИНГА {err}")
+                        await bot.send_message(cfg.channel_logs, text=f"[Произошла ошибка при нажатии на кнопку добавления поста для автопостинга] {err}\n{traceback.format_exc()}")
                         await callback_query.answer("Произошла ошибка при нажатии на кнопку добавления аккаунта для автопостинга, пожалуйста нажмите на нижнюю кнопку 'Автопостинг' и повторите попытку.", show_alert=True)
                 data = await state.get_data()
                 number_group_parser = data.get('number_group_parser')
@@ -1795,9 +1798,11 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                             await Change_time_betw.change_time_betw_1.set()
                 except Exception as err:
                     print(f"ОШИБКА ПРИ ИСПОЛЬЗОВАНИИ АВТОПОСТИНГА {err}")
+                    await bot.send_message(cfg.channel_logs, text=f"[Произошла ошибка во время настроек автопостинга] {err}\n{traceback.format_exc()}")
                     await callback_query.answer("Произошла ошибка при использовании автопостинга, пожалуйста нажмите на нижнюю кнопку 'Автопостинг' и повторите попытку.", show_alert=True)
     except Exception as err:
         print(f"ОШИБКА {err}")
+        await bot.send_message(cfg.channel_logs, text=f"[Произошла общая ошибка в общих кнопках] {err}\n{traceback.format_exc()}")
 
 @dp.message_handler(state=Change_time_autoposting_chat.change_time_autoposting_1)
 async def change_time_autoposting_1_text(message: types.Message, state: FSMContext):
@@ -1871,8 +1876,9 @@ async def change_time_autoposting_1_text(message: types.Message, state: FSMConte
                         await message.answer("Вы можете поставить минуты не больше 60 и не меньше 0, попробуйте ещё раз:")
                 else:
                     await message.answer("Вы можете поставить часы не больше 23 и не меньше 0, попробуйте ещё раз:")
-        except Exception:
+        except Exception as err:
             await message.answer("Произошла ошибка, пожалуйста повторите ещё раз:")
+            await bot.send_message(cfg.channel_logs, text=f"[Произошла ошибка во время изминения времени чата в автопостинге] {err}\n{traceback.format_exc()}")
 
 @dp.message_handler(state=Add_time_autoposting_chat.add_time_autoposting_1)
 async def add_time_autoposting_chat_text(message: types.Message, state: FSMContext):
@@ -1946,8 +1952,9 @@ async def add_time_autoposting_chat_text(message: types.Message, state: FSMConte
                         await message.answer("Вы можете поставить минуты не больше 60 и не меньше 0, попробуйте ещё раз:")
                 else:
                     await message.answer("Вы можете поставить часы не больше 23 и не меньше 0, попробуйте ещё раз:")
-        except Exception:
+        except Exception as err:
             await message.answer("Произошла ошибка, возможно вы не правильно ввели, повторите ещё раз:")
+            await bot.send_message(cfg.channel_logs, text=f"[Произошла ошибка во время добавления времени для чата в автопостинге] {err}\n{traceback.format_exc()}")
 
 
 @dp.message_handler(state=Change_time_betw.change_time_betw_1)
@@ -2192,8 +2199,9 @@ async def add_post_func_text_5(message: types.Message, state: FSMContext):
                         await message.answer(cfg.error_len_chat_post_create, parse_mode=types.ParseMode.MARKDOWN)
                 else:
                     await message.answer(cfg.error_len_channels, parse_mode=types.ParseMode.MARKDOWN)
-        except Exception:
+        except Exception as err:
             await message.answer("Произошла ошибка, пожалуйста повторите ещё раз:")
+            await bot.send_message(cfg.channel_logs, text=f"[Произошла ошибка во время создания поста для аккаунта] {err}\n{traceback.format_exc()}")
 
 @dp.message_handler(state=Change_keyword.change_keyword_1)
 async def change_keyword_1_func(message: types.Message, state: FSMContext):
@@ -2253,8 +2261,9 @@ async def change_keyword_1_func(message: types.Message, state: FSMContext):
                         await message.answer(cfg.error_len_keyword_create, parse_mode=types.ParseMode.MARKDOWN)
                 else:
                     await message.answer(cfg.error_len_keyword, parse_mode=types.ParseMode.MARKDOWN)
-        except Exception:
+        except Exception as err:
             await message.answer("Произошла ошибка, пожалуйста повторите ещё раз:")
+            await bot.send_message(cfg.channel_logs, text=f"[Произошла ошибка во изминения ключевых слов] {err}\n{traceback.format_exc()}")
 
 @dp.message_handler(state=Create_group.create_group_1)
 async def create_group_func_1(message: types.Message, state: FSMContext):
@@ -2362,13 +2371,11 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                         for name_group in all_groups:
                             # print(f"ONE\n{name_chat[:-2]}\n{name_group[0][:-2]}")
                             if remove_emoji_and_symbols(name_chat) == remove_emoji_and_symbols(name_group[0]):
-                                print("right 1")
                                 names_chats.append(name_chat)
                                 ids_chats.append(name_group[1])
                                 # print(names_chats)
                                 # print(ids_chats)
                                 await state.update_data(names_chats=names_chats, ids_chats=ids_chats)
-                print(names_chats)
                 not_find_chats = [item for item in all_names_chat if item not in names_chats]
                 if not_find_chats != []:
                     booline = False
@@ -2429,6 +2436,7 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
         except Exception as err:
             error_message = f"[ERROR CREATE GROUP] {err}\n{traceback.format_exc()}"
             print(error_message)
+            await bot.send_message(cfg.channel_logs, text=f"[Произошла ошибка во время создания группы] {err}\n{traceback.format_exc()}")
             await message.answer("Произошла ошибка, пожалуйста повторите ещё раз:")
 
 

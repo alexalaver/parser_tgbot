@@ -48,17 +48,11 @@
 # times = [datetime_str.split()[1][:5] for datetime_str in result[1:]]
 #
 # print(result)
+import re
+def remove_emoji_and_symbols(string):
+    # Регулярное выражение для удаления эмодзи и нестандартных символов, оставляя только буквы и цифры
+    emoji_and_symbol_pattern = re.compile("[^a-zA-Z0-9\s]", flags=re.UNICODE)
+    return emoji_and_symbol_pattern.sub(r'', string)
 
-from pywallet import wallet
-
-def generate_new_wallet():
-    my_wallet = wallet.create_wallet(network="BTC", seed=None, children=1)
-
-    address = my_wallet['address']
-    private_key = my_wallet['private_key']
-
-    print(f"Bitcoin Address: {address}")
-    print(f"Private Key: {private_key}")
-
-if __name__ == "__main__":
-    generate_new_wallet()
+a = "uroCard • Worldwide 💳"
+print(remove_emoji_and_symbols(a))
