@@ -22,6 +22,7 @@ import hashlib
 import aiohttp
 import uuid
 import traceback
+import unicodedata
 
 logging.basicConfig(level=logging.INFO)
 logging.basicConfig(level=logging.DEBUG)
@@ -116,6 +117,9 @@ async def get_group_tag(group_id):
         return "Данная группа закрыта"
     except Exception:
         return "Данная группа закрыта"
+
+def normalize_string(s):
+    return unicodedata.normalize('NFKC', s)
 
 async def search_and_forward():
     num = 0
@@ -2341,7 +2345,7 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                     for name_chat in text_line:
                         for name_group in all_groups:
                             # print(f"ONE\n{name_chat[:-2]}\n{name_group[0][:-2]}")
-                            if name_chat[:-2] == name_group[0][:-2]:
+                            if normalize_string(name_chat) == normalize_string(name_group[0]):
                                 print("right 1")
                                 names_chats.append(name_chat)
                                 ids_chats.append(name_group[1])
