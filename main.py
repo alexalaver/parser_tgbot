@@ -121,6 +121,17 @@ async def get_group_tag(group_id):
 def normalize_string(s):
     return unicodedata.normalize('NFKC', s)
 
+def remove_emoji(string):
+    emoji_pattern = re.compile("["
+                           u"\U0001F600-\U0001F64F"  # emoticons
+                           u"\U0001F300-\U0001F5FF"  # symbols & pictographs
+                           u"\U0001F680-\U0001F6FF"  # transport & map symbols
+                           u"\U0001F1E0-\U0001F1FF"  # flags (iOS)
+                           u"\U00002702-\U000027B0"
+                           u"\U000024C2-\U0001F251"
+                           "]+", flags=re.UNICODE)
+    return emoji_pattern.sub(r'', string)
+
 async def search_and_forward():
     num = 0
     last_message_ids = {}
@@ -2345,7 +2356,7 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                     for name_chat in text_line:
                         for name_group in all_groups:
                             # print(f"ONE\n{name_chat[:-2]}\n{name_group[0][:-2]}")
-                            if normalize_string(name_chat) == normalize_string(name_group[0]):
+                            if remove_emoji(name_chat) == remove_emoji(name_group[0]):
                                 print("right 1")
                                 names_chats.append(name_chat)
                                 ids_chats.append(name_group[1])
