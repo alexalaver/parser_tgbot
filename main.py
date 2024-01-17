@@ -132,6 +132,11 @@ def remove_emoji(string):
                            "]+", flags=re.UNICODE)
     return emoji_pattern.sub(r'', string)
 
+def remove_emoji_and_symbols(string):
+    # Регулярное выражение для удаления эмодзи и нестандартных символов, оставляя только буквы и цифры
+    emoji_and_symbol_pattern = re.compile("[^a-zA-Z0-9\s]", flags=re.UNICODE)
+    return emoji_and_symbol_pattern.sub(r'', string)
+
 async def search_and_forward():
     num = 0
     last_message_ids = {}
@@ -2356,7 +2361,7 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                     for name_chat in text_line:
                         for name_group in all_groups:
                             # print(f"ONE\n{name_chat[:-2]}\n{name_group[0][:-2]}")
-                            if remove_emoji(name_chat) == remove_emoji(name_group[0]):
+                            if remove_emoji_and_symbols(name_chat) == remove_emoji_and_symbols(name_group[0]):
                                 print("right 1")
                                 names_chats.append(name_chat)
                                 ids_chats.append(name_group[1])
