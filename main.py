@@ -213,6 +213,7 @@ async def search_and_forward():
                                                     await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
                                                     db.update_all_message_ids(number_group, message_key)
                                                     await asyncio.sleep(2)
+                                                    await bot.send_message(cfg.channel_logs, text=f"Парсинг работает")
                                             break
 
                         except FloodWaitError as e:
@@ -2417,22 +2418,25 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                                 await message.answer(cfg.error_channel_teg_link)
                                 break
                     if names_chats != [] and ids_chats != []:
-                        check_number_group = db.check_numbers_group()
-                        new_number_group = check_number_group + 1
-                        data = await state.get_data()
-                        cashe_group_name = data.get('group_name')
-                        cashe_keyword = data.get('text_lines')
-                        names_all_chats = list(dict.fromkeys([element + ' ⚠' for element in names_chats]))
-                        ids_all_chats = list(dict.fromkeys([str(element) + ' ⚠' for element in ids_chats]))
-                        db.add_channels(user_id, new_number_group, cashe_keyword, ids_all_chats, cashe_group_name, names_all_chats)
-                        markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True,one_time_keyboard=False)
-                        markup_reply.add(cfg.autoposting)
-                        markup_reply.add(cfg.parser)
-                        markup_reply.row(cfg.my_profile, cfg.support)
-                        if db.select_admin(user_id) > 0:
-                            markup_reply.add(cfg.admin_panel_button)
-                        await message.answer(cfg.right_create_group, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
-                        await state.finish()
+                        if 4 < len(names_chats) < 51:
+                            check_number_group = db.check_numbers_group()
+                            new_number_group = check_number_group + 1
+                            data = await state.get_data()
+                            cashe_group_name = data.get('group_name')
+                            cashe_keyword = data.get('text_lines')
+                            names_all_chats = list(dict.fromkeys([element + ' ⚠' for element in names_chats]))
+                            ids_all_chats = list(dict.fromkeys([str(element) + ' ⚠' for element in ids_chats]))
+                            db.add_channels(user_id, new_number_group, cashe_keyword, ids_all_chats, cashe_group_name, names_all_chats)
+                            markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True,one_time_keyboard=False)
+                            markup_reply.add(cfg.autoposting)
+                            markup_reply.add(cfg.parser)
+                            markup_reply.row(cfg.my_profile, cfg.support)
+                            if db.select_admin(user_id) > 0:
+                                markup_reply.add(cfg.admin_panel_button)
+                            await message.answer(cfg.right_create_group, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
+                            await state.finish()
+                        else:
+                            await message.answer("Вы можете добавить максимум 50 чатов, минимум 5, пожалуйста повторите попытку!")
         except Exception as err:
             error_message = f"[ERROR CREATE GROUP] {err}\n{traceback.format_exc()}"
             print(error_message)
