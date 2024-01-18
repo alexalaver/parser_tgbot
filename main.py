@@ -1308,7 +1308,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                                 back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels_parser')
                                 markup_inline.add(change_keywords)
                                 markup_inline.add(back_channels)
-                                await callback_query.message.answer(text=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+                                await callback_query.message.answer_photo(photo=types.InputFile("img/photo2.jpg"), caption=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
                             else:
                                 await callback_query.answer(text=cfg.tariffe_error, show_alert=True)
                         except Exception as err:
