@@ -48,11 +48,14 @@
 # times = [datetime_str.split()[1][:5] for datetime_str in result[1:]]
 #
 # print(result)
-import re
-def remove_emoji_and_symbols(string):
-    # Регулярное выражение для удаления эмодзи и нестандартных символов, оставляя только буквы и цифры
-    emoji_and_symbol_pattern = re.compile("[^a-zA-Z0-9\s]", flags=re.UNICODE)
-    return emoji_and_symbol_pattern.sub(r'', string)
+from bit import Key
 
-a = "uroCard • Worldwide 💳"
-print(remove_emoji_and_symbols(a))
+def create_new_btc_wallet():
+    # Генерируем новый приватный ключ и соответствующий ему адрес
+    key = Key()
+
+    print(f"Bitcoin Address: {key.address}")
+    print(f"Private Key: {key.to_wif()}")
+
+if __name__ == "__main__":
+    create_new_btc_wallet()

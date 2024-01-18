@@ -285,4 +285,4 @@ keyword_parser_buttons = "🧳 Ключевые слова"
 keyword_parser_text = "Ваши ключевые слова:\n\n"
 keyword_parser_text_2 = "В данном разделе вы сможете редактировать ключевые слова."
 
-channel_logs = -4120067145
+channel_logs = "@zeus_logsbot"

@@ -154,8 +154,8 @@ async def search_and_forward():
             group = groups[num]
             user_id, chat_idn, keywords, data_end, group_name, chat_name, number_group = group[0], group[2], group[5], group[3], group[4], group[7], group[1]
             chat_ids = [item for item in chat_idn if item.endswith('✅')]
-            chat_indices = [chat_idn.index(chat) for chat in chat_ids]
-            chat_names = [chat_name[index] for index in chat_indices]
+            # chat_indices = [chat_idn.index(chat) for chat in chat_ids]
+            chat_names = [item for item in chat_name if item.endswith('✅')]
             messages_sent = db.select_message_id(number_group)
             if chat_ids != []:
                 current_date = datetime.datetime.now()
@@ -195,15 +195,18 @@ async def search_and_forward():
                                                 #     chat_link = f"https://t.me/{trimmed_chat_id}"
                                                 group_tag = await get_group_tag(trimmed_chat_id)
                                                 link_message = group_tag + f"/{str(message.id)}"
-                                                username_1 = get_user_username(link_message)
-                                                if username_1 == "Анонимный пользователь":
-                                                    username = f"@{message.sender.username}"
-                                                    if username == "@None":
-                                                        username = "Анонимный пользователь"
+                                                try:
+                                                    username_1 = get_user_username(link_message)
+                                                    if username_1 == "Анонимный пользователь":
+                                                        username = f"@{message.sender.username}"
+                                                        if username == "@None":
+                                                            username = "Анонимный пользователь"
+                                                        else:
+                                                            pass
                                                     else:
-                                                        pass
-                                                else:
-                                                    username = f"@{username_1[13:]}"
+                                                        username = f"@{username_1[13:]}"
+                                                except AttributeError:
+                                                    username = "Анонимный пользователь"
                                                 if "bot" not in username.lower():
                                                     escaped_message_text = escape_html(message.text)
                                                     if group_tag == "Данная группа закрыта":
