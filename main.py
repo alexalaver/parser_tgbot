@@ -1274,6 +1274,41 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                                 await state.finish()
                                 await callback_query.message.delete()
                                 await callback_query.message.answer(text=cfg.tariffe_correct(group_name_parser, channels_len, formatted_date_new), reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+                                number_group_parser = db.select_number_group(user_id, group_name_parser)
+                                await state.update_data(number_group_parser=number_group_parser)
+                                channels_parser = db.select_channels(user_id, group_name_parser)
+                                channels_name_parser = db.select_channels_name(user_id, group_name_parser)
+                                markup_inline = types.InlineKeyboardMarkup(row_width=2)
+                                channels_count_parser = len(channels_parser)
+                                channels_page_parser = fnc.get_category(channels_count_parser)
+                                page_here_parser = 1
+                                from_page_parser = 0
+                                before_page_parser = 10
+                                await state.update_data(channels_count_parser=channels_count_parser)
+                                await state.update_data(channels_page_parser=channels_page_parser)
+                                await state.update_data(page_here_parser=page_here_parser)
+                                await state.update_data(from_page_parser=from_page_parser)
+                                await state.update_data(before_page_parser=before_page_parser)
+                                paired_channels = zip(channels_name_parser[from_page_parser:before_page_parser], channels_parser[from_page_parser:before_page_parser])
+                                for channel_name, channel in paired_channels:
+                                    button = types.InlineKeyboardButton(text=channel_name, callback_data=channel)
+                                    markup_inline.row(button)
+                                buttons_count = types.InlineKeyboardButton(
+                                    text=f"Страница {page_here_parser}/{channels_page_parser} 📄",
+                                    callback_data="page_parser")
+                                markup_inline.add(buttons_count)
+                                if channels_count_parser > 10:
+                                    buttons_next = types.InlineKeyboardButton(text=cfg.next_page, callback_data="next_page_parser")
+                                    buttons_old = types.InlineKeyboardButton(text=cfg.old_page, callback_data="old_page_parser")
+                                    markup_inline.row(buttons_old, buttons_next)
+                                if db.check_date_tarife(user_id, group_name_parser) is None:
+                                    pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels_parser')
+                                    markup_inline.add(pay_money_buttons)
+                                change_keywords = types.InlineKeyboardButton(text=cfg.keyword_parser_buttons, callback_data='keyword_parser')
+                                back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels_parser')
+                                markup_inline.add(change_keywords)
+                                markup_inline.add(back_channels)
+                                await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
                             else:
                                 await callback_query.answer(text=cfg.tariffe_error, show_alert=True)
                         except Exception as err:
