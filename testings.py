@@ -50,17 +50,10 @@
 # print(result)
 from pywallet import wallet
 
-# Создание нового Bitcoin кошелька
-def create_new_btc_wallet():
-    # Генерация нового кошелька
-    my_wallet = wallet.create_wallet(network="BTC", seed=None, children=0)
+# generate 12 word mnemonic seed
+seed = wallet.generate_mnemonic
 
-    # Получение адреса и приватного ключа
-    address = my_wallet['address']
-    private_key = my_wallet['private_key']
+# create usdt wallet
+w = wallet.create_wallet(network="USDT", seed=seed, children=1)
 
-    print(f"Bitcoin Address: {address}")
-    print(f"Private Key: {private_key}")
-
-if __name__ == "__main__":
-    create_new_btc_wallet()
+print(w)
