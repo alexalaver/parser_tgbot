@@ -2399,6 +2399,8 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
             elif message.text:
                 all_names_chat = [ch_name for ch_name in text_line if "http" not in ch_name and "@" not in ch_name]
                 all_links_chat = [ch_name for ch_name in text_line if "http" in ch_name or "@" in ch_name]
+                await message.answer(all_names_chat)
+                await message.answer(all_links_chat)
                 names_chats = []
                 ids_chats = []
                 not_find_chats = []
@@ -2459,10 +2461,9 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                                 bl_line = False
                                 break
                     if names_chats != [] and ids_chats != []:
-                        await message.answer(names_chats)
                         await message.answer(str(len(names_chats)))
                         await message.answer(str(len(ids_chats)))
-                        if 4 < len(ids_chats) < 52:
+                        if 4 < len(ids_chats) < 51:
                             if bl_line == True:
                                 check_number_group = db.check_numbers_group()
                                 new_number_group = check_number_group + 1
