@@ -209,7 +209,7 @@ async def search_and_forward():
                                                     username = "Анонимный пользователь"
                                                 if "bot" not in username.lower():
                                                     escaped_message_text = escape_html(message.text)
-                                                    if group_tag == "Данная группа закрыта":
+                                                    if group_tag == "Данная группа закрыта" or group_tag == "У этой группы нет тега":
                                                         message_text = f"Обнаружено ключевое слово\n\n{chat_id_name[:-2]}\n\nПользователь: {username}\n\nЗапрос: {keyword}\n\nТекст:\n{escaped_message_text}"
                                                     else:
                                                         message_text = f"Обнаружено ключевое слово\n\n<a href='{group_tag}'>{chat_id_name[:-2]}</a>\n\nПользователь: {username}\n\nЗапрос: {keyword}\n\n<a href='{link_message}'>Ссылка на сообщение</a>\n\nТекст:\n{escaped_message_text}"
