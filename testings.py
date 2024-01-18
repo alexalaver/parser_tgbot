@@ -48,14 +48,19 @@
 # times = [datetime_str.split()[1][:5] for datetime_str in result[1:]]
 #
 # print(result)
-from bit import Key
+from pywallet import wallet
 
+# Создание нового Bitcoin кошелька
 def create_new_btc_wallet():
-    # Генерируем новый приватный ключ и соответствующий ему адрес
-    key = Key()
+    # Генерация нового кошелька
+    my_wallet = wallet.create_wallet(network="BTC", seed=None, children=0)
 
-    print(f"Bitcoin Address: {key.address}")
-    print(f"Private Key: {key.to_wif()}")
+    # Получение адреса и приватного ключа
+    address = my_wallet['address']
+    private_key = my_wallet['private_key']
+
+    print(f"Bitcoin Address: {address}")
+    print(f"Private Key: {private_key}")
 
 if __name__ == "__main__":
     create_new_btc_wallet()
