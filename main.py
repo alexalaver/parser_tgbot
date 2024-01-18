@@ -216,7 +216,6 @@ async def search_and_forward():
                                                     await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
                                                     db.update_all_message_ids(number_group, message_key)
                                                     await asyncio.sleep(2)
-                                                    await bot.send_message(cfg.channel_logs, text=f"Парсинг работает")
                                             break
 
                         except FloodWaitError as e:
