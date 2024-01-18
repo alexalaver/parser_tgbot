@@ -2427,9 +2427,8 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                 if booline != False:
                     bl_line = True
                     if all_links_chat != []:
-                        await message.answer(names_chats)
-                        await message.answer(all_links_chat)
                         for channel_name in all_links_chat:
+                            await message.answer(channel_name)
                             if "http" in channel_name or "t.me/" in channel_name:
                                 response = requests.get(channel_name)
                                 html_content = response.text
@@ -2438,6 +2437,7 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                                 if title_div:
                                     group_name = title_div.get_text(strip=True)
                                     names_chats.append(group_name)
+                                    await message.answer(names_chats)
                                     ids_chats.append(channel_name)
                                 else:
                                     await message.answer(cfg.error_channel_name_add)
