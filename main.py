@@ -2399,8 +2399,6 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
             elif message.text:
                 all_names_chat = [ch_name for ch_name in text_line if "http" not in ch_name and "@" not in ch_name]
                 all_links_chat = [ch_name for ch_name in text_line if "http" in ch_name or "@" in ch_name]
-                await message.answer(all_names_chat)
-                await message.answer(all_links_chat)
                 names_chats = []
                 ids_chats = []
                 not_find_chats = []
@@ -2429,6 +2427,8 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                 if booline != False:
                     bl_line = True
                     if all_links_chat != []:
+                        await message.answer(names_chats)
+                        await message.answer(all_links_chat)
                         for channel_name in all_links_chat:
                             if "http" in channel_name or "t.me/" in channel_name:
                                 response = requests.get(channel_name)
