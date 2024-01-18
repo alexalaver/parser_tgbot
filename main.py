@@ -2459,6 +2459,8 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                                 bl_line = False
                                 break
                     if names_chats != [] and ids_chats != []:
+                        await message.answer(str(len(names_chats)))
+                        await message.answer(str(len(ids_chats)))
                         if 4 < len(ids_chats) < 52:
                             if bl_line == True:
                                 check_number_group = db.check_numbers_group()
