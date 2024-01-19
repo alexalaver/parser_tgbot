@@ -2416,7 +2416,6 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                                 # await state.update_data(names_chats=names_chats, ids_chats=ids_chats)
                                 break
                 not_find_chats = [item for item in all_names_chat if item not in names_chats]
-                await message.answer(f"{names_chats}\n\n{ids_chats}")
                 if not_find_chats != []:
                     booline = False
                 if booline == False:
@@ -2470,6 +2469,7 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                                 cashe_keyword = data.get('text_lines')
                                 names_all_chats = list(dict.fromkeys([element + ' ⚠' for element in names_chats]))
                                 ids_all_chats = list(dict.fromkeys([str(element) + ' ⚠' for element in ids_chats]))
+                                await message.answer(f"{names_all_chats}\n\n{ids_all_chats}")
                                 db.add_channels(user_id, new_number_group, cashe_keyword, ids_all_chats, cashe_group_name, names_all_chats)
                                 markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True,one_time_keyboard=False)
                                 markup_reply.add(cfg.autoposting)

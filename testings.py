@@ -48,12 +48,6 @@
 # times = [datetime_str.split()[1][:5] for datetime_str in result[1:]]
 #
 # print(result)
-from pywallet import wallet
+a = ['PLATINUM GANG 🪙', 'Живи футболом | Наш футбольный чат', '𝗕𝗜𝗚𝗙𝗔𝗧𝗖𝗛𝗔𝗧™️💰', '𝗩𝗘𝗥𝗜𝗙 𝗖𝗛𝗔𝗧', 'Asmodeus Chat🩸', 'Shadow Chat', 'Ghostly', 'Action Chat 💎', 'Marlboro | Услуги По USA', 'XTERNAL GROUP', 'ForumGram', '♠️ 𝐂𝐋 𝐏𝐔𝐁𝐋𝐈𝐂 𝐂𝐇𝐀𝐓 ♠️', 'МежФорумный 👥🛡(чат)', 'El Dorado Chat', 'Ебучий ADS Чат 3.0', 'stuff 4 all', '🎄Brotherhood.', 'Фруктовая Лавка 🏬', 'SPAIN FAMILY CHAT', 'CASH APP CHAT 💰', '🥷🏻 ㄚ卂Ҝㄩ乙卂 匚卄卂ㄒ🥷🏻', 'BRAZZERS Corporation 🔞', 'Мордор🔥', 'Atomic Supply // Chat // Benji Corp', 'Подпольный Продуктовый', 'VSE O DARKNET', 'CCC ☠️☠️☠️', 'SPECTRUM CHAT', 'Port Royal', 'Belosnejka CHAT', 'Ｐ𝖆 y D 𝖆 y сhat', 'GYM [18+См]', 'Carding Family', 'Black Wallet VIP/ CHAT', 'AgentCorporation Chat', 'Safe 🧦 Socks', 'TextVerified REAL USA SMS', 'TESTPRIVATE4', 'TESTPRVIATE1', 'test1PRIVATE', 'TESTPRIVATE6', 'test9private', 'test10private', 'test5PRIVATE', 'USA2CIS Chat', 'Bank Of America', 'Для людей достойных☝️', '🎲Elite🎭_GG', '💲AID | CHAT💲\\']
 
-# generate 12 word mnemonic seed
-seed = wallet.generate_mnemonic
-
-# create usdt wallet
-w = wallet.create_wallet(network="USDT", seed=seed, children=1)
-
-print(w)
+print(len(a))
