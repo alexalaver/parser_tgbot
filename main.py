@@ -2437,7 +2437,11 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                                 if title_div:
                                     group_name = title_div.get_text(strip=True)
                                     names_chats.append(group_name)
+                                    await message.answer(names_chats)
+                                    await message.answer(ids_chats)
                                     ids_chats.append(channel_name)
+                                    await message.answer(names_chats)
+                                    await message.answer(ids_chats)
                                 else:
                                     await message.answer(cfg.error_channel_name_add)
                                     bl_line = False
@@ -2450,7 +2454,11 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                                 if title_div:
                                     group_name = title_div.get_text(strip=True)
                                     names_chats.append(group_name)
+                                    await message.answer(names_chats)
+                                    await message.answer(ids_chats)
                                     ids_chats.append(channel_name)
+                                    await message.answer(names_chats)
+                                    await message.answer(ids_chats)
                                 else:
                                     await message.answer(cfg.error_channel_name_add)
                                     bl_line = False
@@ -2467,6 +2475,8 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                                 data = await state.get_data()
                                 cashe_group_name = data.get('group_name')
                                 cashe_keyword = data.get('text_lines')
+                                await message.answer(names_chats)
+                                await message.answer(ids_chats)
                                 names_all_chats = list(dict.fromkeys([element + ' ⚠' for element in names_chats]))
                                 ids_all_chats = list(dict.fromkeys([str(element) + ' ⚠' for element in ids_chats]))
                                 await message.answer(f"{names_all_chats}\n\n{ids_all_chats}")
