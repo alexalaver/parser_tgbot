@@ -2437,11 +2437,7 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                                 if title_div:
                                     group_name = title_div.get_text(strip=True)
                                     names_chats.append(group_name)
-                                    await message.answer(names_chats)
-                                    await message.answer(ids_chats)
                                     ids_chats.append(channel_name)
-                                    await message.answer(names_chats)
-                                    await message.answer(ids_chats)
                                 else:
                                     await message.answer(cfg.error_channel_name_add)
                                     bl_line = False
@@ -2454,11 +2450,7 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                                 if title_div:
                                     group_name = title_div.get_text(strip=True)
                                     names_chats.append(group_name)
-                                    await message.answer(names_chats)
-                                    await message.answer(ids_chats)
                                     ids_chats.append(channel_name)
-                                    await message.answer(names_chats)
-                                    await message.answer(ids_chats)
                                 else:
                                     await message.answer(cfg.error_channel_name_add)
                                     bl_line = False
@@ -2475,11 +2467,8 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                                 data = await state.get_data()
                                 cashe_group_name = data.get('group_name')
                                 cashe_keyword = data.get('text_lines')
-                                await message.answer(names_chats)
-                                await message.answer(ids_chats)
-                                names_all_chats = list(dict.fromkeys([element + ' ⚠' for element in names_chats]))
-                                ids_all_chats = list(dict.fromkeys([str(element) + ' ⚠' for element in ids_chats]))
-                                await message.answer(f"{names_all_chats}\n\n{ids_all_chats}")
+                                names_all_chats = list([element + ' ⚠' for element in names_chats])
+                                ids_all_chats = list([str(element) + ' ⚠' for element in ids_chats])
                                 db.add_channels(user_id, new_number_group, cashe_keyword, ids_all_chats, cashe_group_name, names_all_chats)
                                 markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True,one_time_keyboard=False)
                                 markup_reply.add(cfg.autoposting)

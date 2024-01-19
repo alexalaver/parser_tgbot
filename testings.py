@@ -48,6 +48,8 @@
 # times = [datetime_str.split()[1][:5] for datetime_str in result[1:]]
 #
 # print(result)
-a = ['-1001510977035 ⚠️', '-1001736743858 ⚠️', '-1001213408970 ⚠️', '-1001878678108 ⚠️', '-1001517774064 ⚠️', '-1001705213339 ⚠️', '-1001279574075 ⚠️', '-1001683121035 ⚠️', '-1001696310170 ⚠️', '-1001650231363 ⚠️', '-1001851304640 ⚠️', '-1001514722834 ⚠️', '-1001677058295 ⚠️', '-1001877669709 ⚠️', '-1001674655522 ⚠️', '-1001328817518 ⚠️', '-1001605199078 ⚠️', '-1001597998355 ⚠️', '-1001948194729 ⚠️', '-1001580175916 ⚠️', '-1001923149774 ⚠️', '-1001752221510 ⚠️', '-1001517407287 ⚠️', '-1001779341796 ⚠️', '-1001896940199 ⚠️', '-1001635034914 ⚠️', '-1001621632301 ⚠️', '-1001801359698 ⚠️', '-1001602280233 ⚠️', '-1001686686186 ⚠️', '-1001461827575 ⚠️', '-1001249220364 ⚠️', '-1001549236483 ⚠️', '-4039465465 ⚠️', '-4078334833 ⚠️', '-4066982254 ⚠️', '-4004407892 ⚠️', '-4069402198 ⚠️', '-4095027897 ⚠️', '-4012396350 ⚠️', '-1001900518404 ⚠️', '-1001467130623 ⚠️', '-1001207474533 ⚠️', '-1001993377284 ⚠️', 'https://t.me/cardeurope ⚠️']
+a = ['PLATINUM GANG 🪙', 'Живи футболом | Наш футбольный чат', '𝗕𝗜𝗚𝗙𝗔𝗧𝗖𝗛𝗔𝗧™️💰', '𝗩𝗘𝗥𝗜𝗙 𝗖𝗛𝗔𝗧', 'Asmodeus Chat🩸', 'Shadow Chat', 'Ghostly', 'Action Chat 💎', 'Marlboro | Услуги По USA', 'XTERNAL GROUP', 'ForumGram', '♠️ 𝐂𝐋 𝐏𝐔𝐁𝐋𝐈𝐂 𝐂𝐇𝐀𝐓 ♠️', 'МежФорумный 👥🛡(чат)', 'El Dorado Chat', 'Ебучий ADS Чат 3.0', 'stuff 4 all', '🎄Brotherhood.', 'Фруктовая Лавка 🏬', 'SPAIN FAMILY CHAT', 'CASH APP CHAT 💰', '🥷🏻 ㄚ卂Ҝㄩ乙卂 匚卄卂ㄒ🥷🏻', 'BRAZZERS Corporation 🔞', 'Мордор🔥', 'Atomic Supply // Chat // Benji Corp', 'Подпольный Продуктовый', 'VSE O DARKNET', 'CCC ☠️☠️☠️', 'SPECTRUM CHAT', 'Port Royal', 'Belosnejka CHAT', 'Ｐ𝖆 y D 𝖆 y сhat', 'GYM [18+См]', 'Carding Family', 'Black Wallet VIP/ CHAT', 'AgentCorporation Chat', 'Safe 🧦 Socks', 'TextVerified REAL USA SMS', 'TESTPRIVATE4', 'TESTPRVIATE1', 'test1PRIVATE', 'TESTPRIVATE6', 'test9private', 'test10private', 'test5PRIVATE', 'USA2CIS Chat', 'Bank Of America', 'Для людей достойных☝️', '🎲Elite🎭_GG', '💲AID | CHAT💲\\', 'EuroCard • Worldwide 💳']
 
-print(len(a))
+names_all_chats = list([element + ' ⚠' for element in a])
+
+print(names_all_chats)
