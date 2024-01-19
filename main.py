@@ -2416,6 +2416,7 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                                 # await state.update_data(names_chats=names_chats, ids_chats=ids_chats)
                                 break
                 not_find_chats = [item for item in all_names_chat if item not in names_chats]
+                await message.answer(f"{names_chats}\n\n{ids_chats}")
                 if not_find_chats != []:
                     booline = False
                 if booline == False:
