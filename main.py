@@ -121,7 +121,8 @@ async def get_group_tag(group_id):
 def normalize_string(s):
     return unicodedata.normalize('NFKC', s)
 
-def remove_emoji(string):
+def remove_emojis(text):
+    # Регулярное выражение, охватывающее большинство эмодзи
     emoji_pattern = re.compile("["
                            u"\U0001F600-\U0001F64F"  # emoticons
                            u"\U0001F300-\U0001F5FF"  # symbols & pictographs
@@ -130,7 +131,7 @@ def remove_emoji(string):
                            u"\U00002702-\U000027B0"
                            u"\U000024C2-\U0001F251"
                            "]+", flags=re.UNICODE)
-    return emoji_pattern.sub(r'', string)
+    return emoji_pattern.sub(r'', text)
 
 def remove_emoji_and_symbols(string):
     # Регулярное выражение для удаления эмодзи и нестандартных символов, оставляя только буквы и цифры
@@ -1071,7 +1072,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                                     new_channels = [new_callback if item == channel_name else item for item in all_channels]
                                     db.update_all_channels(number_group_parser, new_channels)
                                     new_callback_name = group_name[:-1] + '❌'
-                                    new_channels_name = [new_callback_name if remove_emoji_and_symbols(item) == remove_emoji_and_symbols(group_name) else item for item in all_channels_name_parser]
+                                    new_channels_name = [new_callback_name if remove_emojis(item) == remove_emojis(group_name) else item for item in all_channels_name_parser]
                                     db.update_all_channels_name(number_group_parser, new_channels_name)
                                 elif channel_name[-1] == "❌":
                                     group_index = channels_parser.index(channel_name)
@@ -1079,10 +1080,10 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                                     group_name = all_channels_name_parser[group_index]
                                     all_channels = db.select_channels_with_number(number_group_parser)
                                     new_callback = channel_name[:-1] + "✅"
-                                    new_channels = [new_callback if remove_emoji_and_symbols(item) == remove_emoji_and_symbols(channel_name) else item for item in all_channels]
+                                    new_channels = [new_callback if item == channel_name else item for item in all_channels]
                                     db.update_all_channels(number_group_parser, new_channels)
                                     new_callback_name = group_name[:-1] + "✅"
-                                    new_channels_name = [new_callback_name if remove_emoji_and_symbols(item) == remove_emoji_and_symbols(group_name) else item for item in all_channels_name_parser]
+                                    new_channels_name = [new_callback_name if remove_emojis(item) == remove_emojis(group_name) else item for item in all_channels_name_parser]
                                     db.update_all_channels_name(number_group_parser, new_channels_name)
                                 elif channel_name[-1] == "⏳":
                                     await callback_query.answer(cfg.error_dostup_chat, show_alert=True)
