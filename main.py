@@ -2405,7 +2405,7 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                 booline = True
                 if all_names_chat != []:
                     all_groups = db.select_all_chats_groups()
-                    for name_chat in text_line:
+                    for name_chat in all_names_chat:
                         for name_group in all_groups:
                             # print(f"ONE\n{name_chat[:-2]}\n{name_group[0][:-2]}")
                             if remove_emoji_and_symbols(name_chat) == remove_emoji_and_symbols(name_group[0]):
