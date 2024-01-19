@@ -48,8 +48,6 @@
 # times = [datetime_str.split()[1][:5] for datetime_str in result[1:]]
 #
 # print(result)
-a = ['PLATINUM GANG 🪙', 'Живи футболом | Наш футбольный чат', '𝗕𝗜𝗚𝗙𝗔𝗧𝗖𝗛𝗔𝗧™️💰', '𝗩𝗘𝗥𝗜𝗙 𝗖𝗛𝗔𝗧', 'Asmodeus Chat🩸', 'Shadow Chat', 'Ghostly', 'Action Chat 💎', 'Marlboro | Услуги По USA', 'XTERNAL GROUP', 'ForumGram', '♠️ 𝐂𝐋 𝐏𝐔𝐁𝐋𝐈𝐂 𝐂𝐇𝐀𝐓 ♠️', 'МежФорумный 👥🛡(чат)', 'El Dorado Chat', 'Ебучий ADS Чат 3.0', 'stuff 4 all', '🎄Brotherhood.', 'Фруктовая Лавка 🏬', 'SPAIN FAMILY CHAT', 'CASH APP CHAT 💰', '🥷🏻 ㄚ卂Ҝㄩ乙卂 匚卄卂ㄒ🥷🏻', 'BRAZZERS Corporation 🔞', 'Мордор🔥', 'Atomic Supply // Chat // Benji Corp', 'Подпольный Продуктовый', 'VSE O DARKNET', 'CCC ☠️☠️☠️', 'SPECTRUM CHAT', 'Port Royal', 'Belosnejka CHAT', 'Ｐ𝖆 y D 𝖆 y сhat', 'GYM [18+См]', 'Carding Family', 'Black Wallet VIP/ CHAT', 'AgentCorporation Chat', 'Safe 🧦 Socks', 'TextVerified REAL USA SMS', 'TESTPRIVATE4', 'TESTPRVIATE1', 'test1PRIVATE', 'TESTPRIVATE6', 'test9private', 'test10private', 'test5PRIVATE', 'USA2CIS Chat', 'Bank Of America', 'Для людей достойных☝️', '🎲Elite🎭_GG', '💲AID | CHAT💲\\', 'EuroCard • Worldwide 💳']
+a = ["PLATINUM GANG 🪙 ❌","Живи футболом | Наш футбольный чат ✅","𝗕𝗜𝗚𝗙𝗔𝗧𝗖𝗛𝗔𝗧™️💰 ❌","𝗩𝗘𝗥𝗜𝗙 𝗖𝗛𝗔𝗧 ❌","Asmodeus Chat🩸 ❌","Shadow Chat ❌","Ghostly ❌","Action Chat 💎 ❌","Marlboro | Услуги По USA ❌","XTERNAL GROUP ❌","ForumGram ❌","♠️ 𝐂𝐋 𝐏𝐔𝐁𝐋𝐈𝐂 𝐂𝐇𝐀𝐓 ♠️ ❌","𝗩𝗘𝗥𝗜𝗙 𝗖𝗛𝗔𝗧 ❌","El Dorado Chat ❌","Ебучий ADS Чат 3.0 ❌","stuff 4 all ❌","🎄Brotherhood. ❌","Фруктовая Лавка 🏬 ❌","SPAIN FAMILY CHAT ❌","CASH APP CHAT 💰 ❌","Фруктовая Лавка 🏬 ❌","BRAZZERS Corporation 🔞 ✅","𝗕𝗜𝗚𝗙𝗔𝗧𝗖𝗛𝗔𝗧™️💰 ❌","Atomic Supply // Chat // Benji Corp ✅","𝗩𝗘𝗥𝗜𝗙 𝗖𝗛𝗔𝗧 ❌","VSE O DARKNET ✅","CCC ☠️☠️☠️ ✅","SPECTRUM CHAT ✅","Port Royal ✅","Belosnejka CHAT ✅","Ｐ𝖆 y D 𝖆 y сhat ✅","GYM [18+См] ✅","Carding Family ✅","Black Wallet VIP/ CHAT ✅","AgentCorporation Chat ✅","Safe 🧦 Socks ✅","TextVerified REAL USA SMS ✅","TESTPRIVATE4 ✅","TESTPRVIATE1 ✅","test1PRIVATE ✅","TESTPRIVATE6 ✅","test9private ✅","test10private ✅","test5PRIVATE ✅","USA2CIS Chat ✅","Bank Of America ✅","Фруктовая Лавка 🏬 ❌","🎲Elite🎭_GG ✅","💲AID | CHAT💲\\ ✅","EuroCard • Worldwide 💳 ✅"]
 
-names_all_chats = list([element + ' ⚠' for element in a])
-
-print(names_all_chats)
+print(len(a))

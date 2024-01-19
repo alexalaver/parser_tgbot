@@ -1068,7 +1068,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                                     group_name = all_channels_name_parser[group_index]
                                     all_channels = db.select_channels_with_number(number_group_parser)
                                     new_callback = channel_name[:-1] + '❌'
-                                    new_channels = [new_callback if remove_emoji_and_symbols(item) == remove_emoji_and_symbols(channel_name) else item for item in all_channels]
+                                    new_channels = [new_callback if item == channel_name else item for item in all_channels]
                                     db.update_all_channels(number_group_parser, new_channels)
                                     new_callback_name = group_name[:-1] + '❌'
                                     new_channels_name = [new_callback_name if remove_emoji_and_symbols(item) == remove_emoji_and_symbols(group_name) else item for item in all_channels_name_parser]
