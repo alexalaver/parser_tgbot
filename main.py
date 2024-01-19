@@ -174,6 +174,7 @@ async def search_and_forward():
                             messages_to_check = 30
                             forced_check = num == 0 and last_id == 0
                             offset_id = 0 if last_id == 0 else last_id - messages_to_check
+                            # async for message in telethon_client.iter_messages(trimmed_chat_id, offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
                             async for message in telethon_client.iter_messages(trimmed_chat_id, offset_id=offset_id, limit=messages_to_check, reverse=True):
                                 if message.text:
                                     for keyword in keywords:
@@ -1067,10 +1068,10 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                                     group_name = all_channels_name_parser[group_index]
                                     all_channels = db.select_channels_with_number(number_group_parser)
                                     new_callback = channel_name[:-1] + '❌'
-                                    new_channels = [new_callback if item == channel_name else item for item in all_channels]
+                                    new_channels = [new_callback if remove_emoji_and_symbols(item) == remove_emoji_and_symbols(channel_name) else item for item in all_channels]
                                     db.update_all_channels(number_group_parser, new_channels)
                                     new_callback_name = group_name[:-1] + '❌'
-                                    new_channels_name = [new_callback_name if item == group_name else item for item in all_channels_name_parser]
+                                    new_channels_name = [new_callback_name if remove_emoji_and_symbols(item) == remove_emoji_and_symbols(group_name) else item for item in all_channels_name_parser]
                                     db.update_all_channels_name(number_group_parser, new_channels_name)
                                 elif channel_name[-1] == "❌":
                                     group_index = channels_parser.index(channel_name)
@@ -1078,10 +1079,10 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                                     group_name = all_channels_name_parser[group_index]
                                     all_channels = db.select_channels_with_number(number_group_parser)
                                     new_callback = channel_name[:-1] + "✅"
-                                    new_channels = [new_callback if item == channel_name else item for item in all_channels]
+                                    new_channels = [new_callback if remove_emoji_and_symbols(item) == remove_emoji_and_symbols(channel_name) else item for item in all_channels]
                                     db.update_all_channels(number_group_parser, new_channels)
                                     new_callback_name = group_name[:-1] + "✅"
-                                    new_channels_name = [new_callback_name if item == group_name else item for item in all_channels_name_parser]
+                                    new_channels_name = [new_callback_name if remove_emoji_and_symbols(item) == remove_emoji_and_symbols(group_name) else item for item in all_channels_name_parser]
                                     db.update_all_channels_name(number_group_parser, new_channels_name)
                                 elif channel_name[-1] == "⏳":
                                     await callback_query.answer(cfg.error_dostup_chat, show_alert=True)
