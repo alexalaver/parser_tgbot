@@ -2412,6 +2412,8 @@ async def create_group_func_3(message: types.Message, state: FSMContext):
                         for name_group in all_groups:
                             # print(f"ONE\n{name_chat[:-2]}\n{name_group[0][:-2]}")
                             if remove_emoji_and_symbols(name_chat) == remove_emoji_and_symbols(name_group[0]):
+                                print(remove_emoji_and_symbols(name_chat))
+                                print(remove_emoji_and_symbols(name_group[0]))
                                 names_chats.append(name_chat)
                                 ids_chats.append(name_group[1])
                                 # print(names_chats)
