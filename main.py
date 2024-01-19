@@ -1108,7 +1108,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                                 back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels_parser')
                                 markup_inline.add(change_keywords)
                                 markup_inline.add(back_channels)
-                                await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+                                await callback_query.message.edit_reply_markup(reply_markup=markup_inline)
                     elif callback_query.data == "next_page_parser":
                         if channels_page_parser == page_here_parser:
                             await callback_query.answer(cfg.error_page_next, show_alert=True)
@@ -1140,7 +1140,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                             back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels_parser')
                             markup_inline.add(change_keywords)
                             markup_inline.add(back_channels)
-                            await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+                            await callback_query.message.edit_reply_markup(reply_markup=markup_inline)
                     elif callback_query.data == "old_page_parser":
                         print(f"{channels_count_parser}\n{page_here_parser}\n{from_page_parser}\n{before_page_parser}")
                         if page_here_parser == 1:
@@ -1173,7 +1173,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                             back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels_parser')
                             markup_inline.add(change_keywords)
                             markup_inline.add(back_channels)
-                            await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+                            await callback_query.message.edit_reply_markup(reply_markup=markup_inline)
                     elif callback_query.data == "back_channels_parser":
                         markup_inline = types.InlineKeyboardMarkup(row_width=1)
                         group_names = db.select_group_name(user_id)
