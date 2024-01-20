@@ -138,6 +138,7 @@ def remove_emoji_and_symbols(string):
     emoji_and_symbol_pattern = re.compile("[^a-zA-Z0-9\s]", flags=re.UNICODE)
     return emoji_and_symbol_pattern.sub(r'', string)
 
+
 async def search_and_forward():
     num = 0
     last_message_ids = {}
@@ -155,13 +156,13 @@ async def search_and_forward():
             group = groups[num]
             user_id, chat_idn, keywords, data_end, group_name, chat_name, number_group = group[0], group[2], group[5], group[3], group[4], group[7], group[1]
             chat_ids = [item for item in chat_idn if item.endswith('✅')]
-            # chat_indices = [chat_idn.index(chat) for chat in chat_ids]
             chat_names = [item for item in chat_name if item.endswith('✅')]
             messages_sent = db.select_message_id(number_group)
-            if chat_ids != []:
+
+            if chat_ids:
                 current_date = datetime.datetime.now()
-                formated_base = datetime.datetime.strptime(data_end, "%Y-%m-%d %H:%M:%S")
-                if formated_base > current_date:
+                formatted_base = datetime.datetime.strptime(data_end, "%Y-%m-%d %H:%M:%S")
+                if formatted_base > current_date:
                     for chat_id, chat_id_name in zip(chat_ids, chat_names):
                         try:
                             trimmed_chat_id = int(chat_id[:-2])
@@ -173,18 +174,13 @@ async def search_and_forward():
                         try:
                             last_id = last_message_ids.get(trimmed_chat_id, 0)
                             messages_to_check = 30
-                            forced_check = num == 0 and last_id == 0
-                            offset_id = 0 if last_id == 0 else last_id - messages_to_check
-                            # async for message in telethon_client.iter_messages(trimmed_chat_id, offset_id=last_id - messages_to_check, limit=messages_to_check, reverse=True):
+                            offset_id = max(last_id - messages_to_check, 0) if last_id != 0 else 0
+
                             async for message in telethon_client.iter_messages(trimmed_chat_id, offset_id=offset_id, limit=messages_to_check, reverse=True):
                                 if message.text:
                                     for keyword in keywords:
                                         if keyword.lower() in message.text.lower():
-                                            message_key = None
-                                            if right_int == False:
-                                                message_key = [message.chat_id, message.id]
-                                            else:
-                                                message_key = [trimmed_chat_id, message.id]
+                                            message_key = [message.chat_id, message.id] if not right_int else [trimmed_chat_id, message.id]
                                             if message_key not in messages_sent:
                                                 # sender = await message.get_sender()
                                                 # if "http" in trimmed_chat_id:
@@ -220,7 +216,9 @@ async def search_and_forward():
                                                     db.update_all_message_ids(number_group, message_key)
                                                     await asyncio.sleep(2)
                                             break
-
+                            messages = await telethon_client.get_messages(trimmed_chat_id, limit=1)
+                            if messages:
+                                last_message_ids[trimmed_chat_id] = messages[0].id
                         except FloodWaitError as e:
                             wait_time = e.seconds
                             print(f"Flood wait error on chat {trimmed_chat_id}. Sleeping for {wait_time} seconds.{traceback.format_exc()}")
