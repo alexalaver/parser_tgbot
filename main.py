@@ -173,13 +173,6 @@ async def search_and_forward():
                         exception_occurred = False
 
                         try:
-                            last_id = last_message_ids.get(trimmed_chat_id, None)
-                            if last_id is None:
-                                last_message = await telethon_client.get_messages(trimmed_chat_id, limit=1)
-                                if last_message:
-                                    last_id = last_message[0].id
-                                else:
-                                    continue
 
                             trimmed_chat_id = int(chat_id[:-2]) if chat_id[-2].isdigit() else chat_id[:-2]
                             last_id = last_message_ids.get(trimmed_chat_id, 0)
