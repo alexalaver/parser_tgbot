@@ -171,12 +171,18 @@ async def search_and_forward():
                             trimmed_chat_id = chat_id[:-2]
                             right_int = False
                         exception_occurred = False
-                        try:
-                            last_id = last_message_ids.get(trimmed_chat_id, 0)
-                            messages_to_check = 30
-                            offset_id = max(last_id - messages_to_check, 0) if last_id != 0 else 0
 
-                            async for message in telethon_client.iter_messages(trimmed_chat_id, offset_id=offset_id, limit=messages_to_check, reverse=True):
+                        try:
+                            last_id = last_message_ids.get(trimmed_chat_id, None)
+                            if last_id is None:
+                                last_message = await telethon_client.get_messages(trimmed_chat_id, limit=1)
+                                if last_message:
+                                    last_id = last_message[0].id
+                                else:
+                                    continue
+
+                            offset_id = max(last_id - 30, 0)
+                            async for message in telethon_client.iter_messages(trimmed_chat_id, offset_id=offset_id, limit=30, reverse=True):
                                 if message.text:
                                     for keyword in keywords:
                                         if keyword.lower() in message.text.lower():
@@ -216,9 +222,8 @@ async def search_and_forward():
                                                     db.update_all_message_ids(number_group, message_key)
                                                     await asyncio.sleep(2)
                                             break
-                            messages = await telethon_client.get_messages(trimmed_chat_id, limit=1)
-                            if messages:
-                                last_message_ids[trimmed_chat_id] = messages[0].id
+                            last_message_ids[trimmed_chat_id] = last_id
+
                         except FloodWaitError as e:
                             wait_time = e.seconds
                             print(f"Flood wait error on chat {trimmed_chat_id}. Sleeping for {wait_time} seconds.{traceback.format_exc()}")
