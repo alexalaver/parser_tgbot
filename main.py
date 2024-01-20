@@ -181,8 +181,13 @@ async def search_and_forward():
                                 else:
                                     continue
 
-                            offset_id = max(last_id - 30, 0)
-                            async for message in telethon_client.iter_messages(trimmed_chat_id, offset_id=30, limit=30, reverse=True):
+                            last_message = await telethon_client.get_messages(trimmed_chat_id, limit=1)
+                            if last_message:
+                                last_id = last_message[0].id
+                                offset_id = max(last_id - 30, 0)
+                            else:
+                                continue
+                            async for message in telethon_client.iter_messages(trimmed_chat_id, offset_id=offset_id, limit=30, reverse=True):
                                 if message.text:
                                     for keyword in keywords:
                                         if keyword.lower() in message.text.lower():
