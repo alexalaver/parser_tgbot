@@ -176,7 +176,7 @@ async def search_and_forward():
 
                             last_id = last_message_ids.get(trimmed_chat_id, 0)
 
-                            async for message in telethon_client.iter_messages(trimmed_chat_id, min_id=last_id, limit=30):
+                            async for message in telethon_client.iter_messages(trimmed_chat_id, min_id=30, limit=30):
                                 if message.text:
                                     for keyword in keywords:
                                         if keyword.lower() in message.text.lower():
