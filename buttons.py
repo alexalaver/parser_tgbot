@@ -78,3 +78,22 @@ def enter_account_button(group_names):
     btn_2 = InlineKeyboardButton(cfg.back_button, callback_data="back_autoposting_account")
     markup.add(btn_1, btn_2)
     return markup
+
+def enter_account_post_button(paired_channels, page_here_autoposting, channels_page_autoposting, channels_count_autoposting, check_tarife):
+    markup = InlineKeyboardMarkup(row_width=1)
+    for channel_name, channel in paired_channels:
+        buttons = InlineKeyboardButton(text=channel_name, callback_data=channel)
+        markup.row(buttons)
+    buttons_count = InlineKeyboardButton(text=f"Страница {page_here_autoposting}/{channels_page_autoposting} 📄", callback_data="page_autoposting")
+    markup.add(buttons_count)
+    if channels_count_autoposting > 10:
+        buttons_next = InlineKeyboardButton(text=cfg.next_page, callback_data="next_page_autoposting")
+        buttons_old = InlineKeyboardButton(text=cfg.old_page, callback_data="old_page_autoposting")
+        markup.row(buttons_old, buttons_next)
+    if check_tarife is None:
+        pay_money_buttons = InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels_autoposting')
+        markup.add(pay_money_buttons)
+    back_channels = InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels_autoposting')
+    delete_post_button = InlineKeyboardButton(text=cfg.delete_post_button,callback_data="delete_post_autoposting")
+    markup.add(delete_post_button, back_channels)
+    return markup

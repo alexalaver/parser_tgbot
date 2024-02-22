@@ -908,20 +908,14 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                         await callback_query.answer("Произошла ошибка при нажатии на кнопку выхода из состояния аккаунта для автопостинга, пожалуйста нажмите на нижнюю кнопку 'Автопостинг' и повторите попытку.", show_alert=True)
                 elif callback_query.data == "back_autoposting_account":
                     try:
-                        markup_inline = types.InlineKeyboardMarkup(row_width=1)
                         user_id = callback_query.from_user.id
                         group_names = db.select_autoposting_group_name(user_id)
-                        max_buttons = 5
-                        for group_name in group_names:
-                            button = types.InlineKeyboardButton(text=group_name, callback_data=f"{group_name}autoposting_account")
-                            markup_inline.add(button)
-                        btn1_inline = types.InlineKeyboardButton(cfg.add_account_button, callback_data="add_account_autoposting")
-                        markup_inline.add(btn1_inline)
+                        markup = btn.autoposting_button_menu(group_names)
                         if group_names is None:
                             text = cfg.accounts_left_text
                         else:
                             text = cfg.accounts_right_text
-                        await callback_query.message.edit_caption(caption=text, reply_markup=markup_inline)
+                        await callback_query.message.edit_caption(caption=text, reply_markup=markup)
                     except Exception as err:
                         print(f"ОШИБКА ПРИ НАЖАТИИ НА КНОПКУ НАЗАД ИЗ АККАУНТОВ АВТОПОСТИНГА {err}")
                         await callback_query.answer("Произошла ошибка при нажатии на кнопку выхода из аккаунта для автопостинга, пожалуйста нажмите на нижнюю кнопку 'Автопостинг' и повторите попытку.", show_alert=True)
@@ -930,7 +924,6 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                         post_name = callback_query.data[:-16]
                         channels = db.select_chats_post(user_id, post_name)
                         channels_name = db.select_chats_name_post(user_id, post_name)
-                        markup_inline = types.InlineKeyboardMarkup(row_width=1)
                         channels_count_autoposting = len(channels)
                         channels_page_autoposting = fnc.get_category(channels_count_autoposting)
                         number_post_autoposting = db.select_number_post(user_id, post_name)
@@ -945,32 +938,18 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                         await state.update_data(from_page_autoposting=from_page_autoposting)
                         await state.update_data(before_page_autoposting=before_page_autoposting)
                         paired_channels = zip(channels_name[from_page_autoposting:before_page_autoposting], channels[from_page_autoposting:before_page_autoposting])
-                        for channel_name, channel in paired_channels:
-                            buttons = types.InlineKeyboardButton(text=channel_name, callback_data=channel)
-                            markup_inline.row(buttons)
-                        buttons_count = types.InlineKeyboardButton(text=f"Страница {page_here_autoposting}/{channels_page_autoposting} 📄", callback_data="page_autoposting")
-                        markup_inline.add(buttons_count)
-                        if channels_count_autoposting > 10:
-                            buttons_next = types.InlineKeyboardButton(text=cfg.next_page, callback_data="next_page_autoposting")
-                            buttons_old = types.InlineKeyboardButton(text=cfg.old_page, callback_data="old_page_autoposting")
-                            markup_inline.row(buttons_old, buttons_next)
-                        if db.check_date_tarife_account(user_id, post_name) is None:
-                            pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels_autoposting')
-                            markup_inline.add(pay_money_buttons)
-                        back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels_autoposting')
-                        delete_post_button = types.InlineKeyboardButton(text=cfg.delete_post_button, callback_data="delete_post_autoposting")
-                        markup_inline.add(delete_post_button, back_channels)
+                        check_tarife = db.check_date_tarife_account(user_id, post_name)
+                        markup = btn.enter_account_post_button(paired_channels, page_here_autoposting, channels_page_autoposting, channels_count_autoposting, check_tarife)
                         message_id_bot = db.select_post_name(post_name)
                         await bot.forward_message(chat_id=user_id, from_chat_id=user_id, message_id=message_id_bot)
-                        await callback_query.message.edit_caption(caption=cfg.account_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+                        await callback_query.message.edit_caption(caption=cfg.account_text_use, reply_markup=markup, parse_mode=types.ParseMode.MARKDOWN)
                     except Exception as err:
                         print(f"ОШИБКА ПРИ НАЖАТИИ НА ПОСТА В АККАУНТЕ АВТОПОСТИНГА {err}")
                         await callback_query.answer("Произошла ошибка при нажатии на аккаунта для автопостинга, пожалуйста нажмите на нижнюю кнопку 'Автопостинг' и повторите попытку.", show_alert=True)
                 elif callback_query.data == "add_post_autoposting":
                     try:
-                        markup_reply = types.ReplyKeyboardMarkup(resize_keyboard=True)
-                        markup_reply.add("Отменить")
-                        await callback_query.message.answer(cfg.create_account_post_1, reply_markup=markup_reply)
+                        markup = btn.cancel_button()
+                        await callback_query.message.answer(cfg.create_account_post_1, reply_markup=markup)
                         await Add_post.add_post_1.set()
                     except Exception as err:
                         print(f"ОШИБКА ПРИ НАЖАТИИ НА КНОПКУ ДОБАВЛЕНИЯ ПОСТА ДЛЯ АВТОПОСТИНГА {err}")
