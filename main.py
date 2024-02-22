@@ -23,6 +23,7 @@ import aiohttp
 import uuid
 import traceback
 import unicodedata
+import buttons as btn
 
 logging.basicConfig(level=logging.INFO)
 logging.basicConfig(level=logging.DEBUG)
@@ -551,29 +552,19 @@ class Popolnenie_balance(StatesGroup):
 
 async def profile(message):
     user_id = message.from_user.id
-    markup_inline = types.InlineKeyboardMarkup(row_width=1, )
-    btn_inline1 = types.InlineKeyboardButton(cfg.up_balance, callback_data='up_balance')
-    markup_inline.add(btn_inline1)
-    await message.answer_photo(photo=types.InputFile("img/photo1.jpg"), caption=cfg.profile(user_id, db.select_balance(user_id)), reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+    markup = btn.profile_buttons()
+    await message.answer_photo(photo=types.InputFile("img/photo1.jpg"), caption=cfg.profile(user_id, db.select_balance(user_id)), reply_markup=markup, parse_mode=types.ParseMode.MARKDOWN)
 
 async def supports_send(message):
     admin_id = db.select_all_admin_id()
-    markup_inline = types.InlineKeyboardMarkup(row_width=1)
-    btn_inline1 = types.InlineKeyboardButton(cfg.support, callback_data='support', url=f"tg://user?id={admin_id[1]}")
-    markup_inline.add(btn_inline1)
-    await message.answer_photo(photo=types.InputFile("img/photo3.jpg"), caption=cfg.support_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+    markup = btn.support_buttons(admin_id)
+    await message.answer_photo(photo=types.InputFile("img/photo3.jpg"), caption=cfg.support_text, reply_markup=markup, parse_mode=types.ParseMode.MARKDOWN)
 
 async def parsers_send(message):
     user_id = message.from_user.id
-    markup_inline = types.InlineKeyboardMarkup(row_width=1)
     group_names = db.select_group_name(user_id)
-    for group_name in group_names:
-        button = types.InlineKeyboardButton(text=group_name, callback_data=f"{group_name}parsers")
-        markup_inline.add(button)
-
-    btn_inline1 = types.InlineKeyboardButton(cfg.groups_add_button, callback_data='groups_add_button_parser')
-    markup_inline.add(btn_inline1)
-    await message.answer_photo(photo=types.InputFile("img/photo2.jpg"), caption=cfg.parser_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+    markup = btn.parsers_button_menu(group_names)
+    await message.answer_photo(photo=types.InputFile("img/photo2.jpg"), caption=cfg.parser_text, reply_markup=markup, parse_mode=types.ParseMode.MARKDOWN)
 
 async def autoposting_send(message):
     # markup_inline = types.InlineKeyboardMarkup(row_width=1)
@@ -653,13 +644,9 @@ async def start(message: types.Message):
             ids = db.check_numbers_ids()
             ids += 1
             db.add_user(user_id, first_name, username, ids)
-        markup_reply = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=False)
-        markup_reply.add(cfg.autoposting)
-        markup_reply.add(cfg.parser)
-        markup_reply.row(cfg.my_profile, cfg.support)
-        if db.select_admin(user_id) > 0:
-            markup_reply.add(cfg.admin_panel_button)
-        await message.answer(cfg.start_text(first_name), reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
+        admin_lvl = db.select_admin(user_id)
+        markup = btn.menu_buttons(admin_lvl)
+        await message.answer(cfg.start_text(first_name), reply_markup=markup, parse_mode=types.ParseMode.MARKDOWN)
         await profile(message)
 
 @dp.message_handler(commands=['send_message'])
@@ -801,47 +788,34 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 if callback_query.data == "menu_after_pay_parser":
                     try:
                         user_id = callback_query.from_user.id
-                        markup_inline = types.InlineKeyboardMarkup(row_width=1)
                         group_names = db.select_group_name(user_id)
-                        for group_name in group_names:
-                            button = types.InlineKeyboardButton(text=group_name, callback_data=f"{group_name}parsers")
-                            markup_inline.add(button)
-                        btn_inline1 = types.InlineKeyboardButton(cfg.groups_add_button, callback_data='groups_add_button_parser')
-                        markup_inline.add(btn_inline1)
-                        await callback_query.message.answer_photo(photo=types.InputFile("img/photo2.jpg"), caption=cfg.parser_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+                        markup = btn.parsers_button_menu(group_names)
+                        await callback_query.message.answer_photo(photo=types.InputFile("img/photo2.jpg"), caption=cfg.parser_text, reply_markup=markup, parse_mode=types.ParseMode.MARKDOWN)
                     except Exception as err:
                         print(f"ОШИБКА ПРИ НАЖАТИИ МЕНЮ ПАРСИНГА: {err}")
                         await callback_query.answer("Произошла ошибка при нажатии на кнопку Меню для Парсера", show_alert=True)
                 elif callback_query.data == "menu_after_pay_autoposting":
                     try:
-                        markup_inline = types.InlineKeyboardMarkup(row_width=1)
                         user_id = callback_query.from_user.id
                         group_names = db.select_autoposting_group_name(user_id)
-                        for group_name in group_names:
-                            button = types.InlineKeyboardButton(text=group_name, callback_data=f"{group_name}autoposting_account")
-                            markup_inline.add(button)
-                        btn1_inline = types.InlineKeyboardButton(cfg.add_account_button, callback_data="add_account_autoposting")
-                        markup_inline.add(btn1_inline)
+                        markup = btn.autoposting_button_menu(group_names)
                         if group_names is None:
                             text = cfg.accounts_left_text
                         else:
                             text = cfg.accounts_right_text
-                        await callback_query.message.answer_photo(photo=types.InputFile("img/photo1.jpg"), caption=text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+                        await callback_query.message.answer_photo(photo=types.InputFile("img/photo1.jpg"), caption=text, reply_markup=markup, parse_mode=types.ParseMode.MARKDOWN)
                     except Exception as err:
                         print(f"ОШИБКА ПРИ НАЖАТИИ МЕНЮ АВТОПОСТИНГА: {err}")
                         await callback_query.answer("Произошла ошибка при нажатии на кнопку Меню для Автопостинга", show_alert=True)
                 elif callback_query.data == "back_autoposting_text":
                     await callback_query.message.delete()
                     user_id = callback_query.from_user.id
-                    markup_inline = types.InlineKeyboardMarkup(row_width=1, )
-                    btn_inline1 = types.InlineKeyboardButton(cfg.up_balance, callback_data='up_balance')
-                    markup_inline.add(btn_inline1)
-                    await callback_query.message.answer_photo(photo=types.InputFile("img/photo1.jpg"), caption=cfg.profile(user_id, db.select_balance(user_id)), reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+                    markup = btn.profile_buttons()
+                    await callback_query.message.answer_photo(photo=types.InputFile("img/photo1.jpg"), caption=cfg.profile(user_id, db.select_balance(user_id)), reply_markup=markup, parse_mode=types.ParseMode.MARKDOWN)
                 elif callback_query.data == "up_balance":
                     try:
-                        markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
-                        markup_reply.add(cfg.cancel_button)
-                        await callback_query.message.answer(cfg.popolnenie_balance_text_1, reply_markup=markup_reply)
+                        markup = btn.cancel_button()
+                        await callback_query.message.answer(cfg.popolnenie_balance_text_1, reply_markup=markup)
                         await Popolnenie_balance.popolnenie_balance_1.set()
                     except Exception as err:
                         print(f"ОШИБКА ПРИ НАЖАТИИ НА КНОПКУ ПОПОЛНИТЬ БАЛАНС {err}")
@@ -850,11 +824,10 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     try:
                         number_group_parser = db.check_number_group(user_id)
                         if int(number_group_parser) < 5:
-                            markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
-                            markup_reply.add(cfg.cancel_creategroup)
+                            markup = btn.cancel_button()
                             await Create_group.create_group_1.set()
                             await callback_query.message.answer(cfg.create_group_text_1, parse_mode=types.ParseMode.MARKDOWN)
-                            await callback_query.message.answer(cfg.create_group_text_2, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
+                            await callback_query.message.answer(cfg.create_group_text_2, reply_markup=markup, parse_mode=types.ParseMode.MARKDOWN)
                         else:
                             await callback_query.answer(cfg.error_group_5, show_alert=True)
                     except Exception as err:
@@ -867,8 +840,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                         await state.update_data(number_group_parser=number_group_parser)
                         channels_parser = db.select_channels(user_id, group_name)
                         channels_name_parser = db.select_channels_name(user_id, group_name)
-                        markup_inline = types.InlineKeyboardMarkup(row_width=2)
-                        channels_count_parser= len(channels_parser)
+                        channels_count_parser = len(channels_parser)
                         channels_page_parser = fnc.get_category(channels_count_parser)
                         page_here_parser = 1
                         from_page_parser = 0
@@ -879,37 +851,18 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                         await state.update_data(from_page_parser=from_page_parser)
                         await state.update_data(before_page_parser=before_page_parser)
                         paired_channels = zip(channels_name_parser[from_page_parser:before_page_parser], channels_parser[from_page_parser:before_page_parser])
-                        for channel_name, channel in paired_channels:
-                            button = types.InlineKeyboardButton(text=channel_name, callback_data=channel)
-                            markup_inline.row(button)
-                        buttons_count = types.InlineKeyboardButton(text=f"Страница {page_here_parser}/{channels_page_parser} 📄", callback_data="page_parser")
-                        markup_inline.add(buttons_count)
-                        if channels_count_parser > 10:
-                            buttons_next = types.InlineKeyboardButton(text=cfg.next_page, callback_data="next_page_parser")
-                            buttons_old = types.InlineKeyboardButton(text=cfg.old_page, callback_data="old_page_parser")
-                            markup_inline.row(buttons_old, buttons_next)
-                        if db.check_date_tarife(user_id, group_name) is None:
-                            pay_money_buttons = types.InlineKeyboardButton(text=cfg.pay_money_channels, callback_data='pay_money_channels_parser')
-                            markup_inline.add(pay_money_buttons)
-                        change_keywords = types.InlineKeyboardButton(text=cfg.keyword_parser_buttons, callback_data='keyword_parser')
-                        back_channels = types.InlineKeyboardButton(text=cfg.back_channels, callback_data='back_channels_parser')
-                        markup_inline.add(change_keywords)
-                        markup_inline.add(back_channels)
-                        await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+                        check_tarife = db.check_date_tarife(user_id, group_name)
+                        markup = btn.enter_group_button(paired_channels, page_here_parser, channels_page_parser, channels_count_parser, check_tarife)
+                        await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup, parse_mode=types.ParseMode.MARKDOWN)
                     except Exception as err:
                         print(f"ОШИБКА ПРИ НАЖАТИИ НА ГРУППУ ПАРСИНГА {err}")
                         await callback_query.answer("Произошла ошибка при нажатии на группу, возможно группы не существует, пожалуйста нажмите на нижнюю кнопку 'Парсер' и повторите попытку.", show_alert=True)
                 elif callback_query.data == "back_sostoyanie_parser":
                     try:
                         user_id = callback_query.from_user.id
-                        markup_inline = types.InlineKeyboardMarkup(row_width=1)
                         group_names = db.select_group_name(user_id)
-                        for group_name in group_names:
-                            button = types.InlineKeyboardButton(text=group_name, callback_data=f"{group_name}parsers")
-                            markup_inline.add(button)
-                        btn_inline1 = types.InlineKeyboardButton(cfg.groups_add_button, callback_data='groups_add_button_parser')
-                        markup_inline.add(btn_inline1)
-                        await callback_query.message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.parser_text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+                        markup = btn.parsers_button_menu(group_names)
+                        await callback_query.message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=cfg.parser_text, reply_markup=markup, parse_mode=types.ParseMode.MARKDOWN)
                     except Exception as err:
                         print(f"ОШИБКА ПРИ НАЖАТИИ НА КНОПКУ ВЫХОДА ИЗ СОСТОЯНИЯ ПАРСИНГА {err}")
                         await callback_query.answer("Произошла ошибка при нажатии на кнопку выхода из состоянии, пожалуйста нажмите на нижнюю кнопку 'Парсер' и повторите попытку.", show_alert=True)
@@ -917,13 +870,12 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     try:
                         number_group = db.check_numbers_autoposting_group(user_id)
                         if int(number_group) < 5:
-                            markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
-                            markup_reply.add(cfg.cancel_creategroup)
+                            markup = btn.cancel_button()
                             await Create_account_autoposting.create_autoposting_1.set()
                             db.delete_sms_get(user_id)
                             db.sms_get_add(user_id)
                             await callback_query.message.answer(cfg.create_account_autoposting_1, parse_mode=types.ParseMode.MARKDOWN)
-                            await callback_query.message.answer(cfg.create_account_autoposting_2, reply_markup=markup_reply, parse_mode=types.ParseMode.MARKDOWN)
+                            await callback_query.message.answer(cfg.create_account_autoposting_2, reply_markup=markup, parse_mode=types.ParseMode.MARKDOWN)
                         else:
                             await callback_query.answer(cfg.error_autoposting_group_5, show_alert=True)
                     except Exception as err:
@@ -934,34 +886,23 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                         account_name = callback_query.data[:-19]
                         number_account = db.select_account_number(user_id, account_name)
                         await state.update_data(number_account=number_account)
-                        markup_inline = types.InlineKeyboardMarkup(row_width=1)
                         user_id = callback_query.from_user.id
                         group_names = db.select_autoposting_post_name_for_number(user_id, number_account)
-                        for group_name in group_names:
-                            button = types.InlineKeyboardButton(text=group_name, callback_data=f"{group_name}autoposting_post")
-                            markup_inline.add(button)
-                        btn1_inline = types.InlineKeyboardButton(cfg.add_post_button, callback_data="add_post_autoposting")
-                        btn2_inline = types.InlineKeyboardButton(cfg.back_button, callback_data="back_autoposting_account")
-                        markup_inline.add(btn1_inline, btn2_inline)
-                        await callback_query.message.edit_caption(caption=cfg.posts_right_text, reply_markup=markup_inline)
+                        markup = btn.enter_account_button(group_names)
+                        await callback_query.message.edit_caption(caption=cfg.posts_right_text, reply_markup=markup)
                     except Exception as err:
                         print(f"ОШИБКА ПРИ НАЖАТИИ НА КНОПКУ АККАУНТА АВТОПОСТИНГА {err}")
                         await callback_query.answer("Произошла ошибка при нажатии на аккаунта для автопостинга, пожалуйста нажмите на нижнюю кнопку 'Автопостинг' и повторите попытку.", show_alert=True)
                 elif callback_query.data == "back_sostoyanie_autoposting":
                     try:
-                        markup_inline = types.InlineKeyboardMarkup(row_width=1)
                         user_id = callback_query.from_user.id
                         group_names = db.select_autoposting_group_name(user_id)
-                        for group_name in group_names:
-                            button = types.InlineKeyboardButton(text=group_name, callback_data=f"{group_name}autoposting_account")
-                            markup_inline.add(button)
-                        btn1_inline = types.InlineKeyboardButton(cfg.add_account_button, callback_data="add_account_autoposting")
-                        markup_inline.add(btn1_inline)
+                        markup = btn.autoposting_button_menu(group_names)
                         if group_names is None:
                             text = cfg.accounts_left_text
                         else:
                             text = cfg.accounts_right_text
-                        await callback_query.message.answer_photo(photo=types.InputFile("img/testphoto.png"), caption=text, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+                        await callback_query.message.answer_photo(photo=types.InputFile("img/photo1.png"), caption=text, reply_markup=markup, parse_mode=types.ParseMode.MARKDOWN)
                     except Exception as err:
                         print(f"ОШИБКА ПРИ НАЖАТИИ НА КНОПКУ ВЫХОДА ИЗ СОСТОЯНИЯ АВТОПОСТИНГА {err}")
                         await callback_query.answer("Произошла ошибка при нажатии на кнопку выхода из состояния аккаунта для автопостинга, пожалуйста нажмите на нижнюю кнопку 'Автопостинг' и повторите попытку.", show_alert=True)
