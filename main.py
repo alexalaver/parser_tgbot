@@ -1180,11 +1180,10 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     elif callback_query.data == "back_from_keyword_parser":
                         channels = db.select_channels_with_number(number_group_parser)
                         channels_name_parser = db.select_channels_name_with_number(number_group_parser)
-                        markup_inline = types.InlineKeyboardMarkup(row_width=2)
                         paired_channels = zip(channels_name_parser[from_page_parser:before_page_parser], channels[from_page_parser:before_page_parser])
                         check_tarife = db.check_date_tarife_for_number(number_group_parser)
                         markup = btn.enter_group_button(paired_channels, page_here_parser, channels_page_parser, channels_count_parser, check_tarife)
-                        await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup_inline, parse_mode=types.ParseMode.MARKDOWN)
+                        await callback_query.message.edit_caption(caption=cfg.group_text_use, reply_markup=markup, parse_mode=types.ParseMode.MARKDOWN)
                     elif callback_query.data == "change_keyword_parser":
                         markup_reply = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
                         markup_reply.add(cfg.cancel_button)
