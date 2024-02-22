@@ -1014,7 +1014,6 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                         else:
                             channels = db.select_channels_with_number(number_group_parser)
                             channels_name_parser = db.select_channels_name_with_number(number_group_parser)
-                            markup_inline = types.InlineKeyboardMarkup(row_width=2)
                             page_here_parser = page_here_parser + 1
                             await state.update_data(page_here_parser=page_here_parser)
                             await state.update_data(channels_count_parser=channels_count_parser)
@@ -1025,7 +1024,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                             paired_channels = zip(channels_name_parser[from_page_parser:before_page_parser], channels[from_page_parser:before_page_parser])
                             check_tarife = db.check_date_tarife_for_number(number_group_parser)
                             markup = btn.enter_group_button(paired_channels, page_here_parser, channels_page_parser, channels_count_parser, check_tarife)
-                            await callback_query.message.edit_reply_markup(reply_markup=markup_inline)
+                            await callback_query.message.edit_reply_markup(reply_markup=markup)
                     elif callback_query.data == "old_page_parser":
                         print(f"{channels_count_parser}\n{page_here_parser}\n{from_page_parser}\n{before_page_parser}")
                         if page_here_parser == 1:
@@ -1033,7 +1032,6 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                         else:
                             channels = db.select_channels_with_number(number_group_parser)
                             channels_name_parser = db.select_channels_name_with_number(number_group_parser)
-                            markup_inline = types.InlineKeyboardMarkup(row_width=2)
                             page_here_parser = page_here_parser - 1
                             before_page_parser = before_page_parser - 10
                             from_page_parser = from_page_parser - 10
@@ -1044,7 +1042,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                             paired_channels = zip(channels_name_parser[from_page_parser:before_page_parser], channels[from_page_parser:before_page_parser])
                             check_tarife = db.check_date_tarife_for_number(number_group_parser)
                             markup = btn.enter_group_button(paired_channels, page_here_parser, channels_page_parser, channels_count_parser, check_tarife)
-                            await callback_query.message.edit_reply_markup(reply_markup=markup_inline)
+                            await callback_query.message.edit_reply_markup(reply_markup=markup)
                     elif callback_query.data == "back_channels_parser":
                         markup_inline = types.InlineKeyboardMarkup(row_width=1)
                         group_names = db.select_group_name(user_id)
