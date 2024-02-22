@@ -97,3 +97,74 @@ def enter_account_post_button(paired_channels, page_here_autoposting, channels_p
     delete_post_button = InlineKeyboardButton(text=cfg.delete_post_button,callback_data="delete_post_autoposting")
     markup.add(delete_post_button, back_channels)
     return markup
+
+def confirm_back_oplata_button():
+    markup = InlineKeyboardMarkup(row_width=1)
+    btn_1 = InlineKeyboardButton(cfg.confirm_oplata, callback_data='confirm_oplata_parser')
+    btn_2 = InlineKeyboardButton(cfg.back_button, callback_data='back_oplata_parser')
+    markup.add(btn_1, btn_2)
+    return markup
+
+def keyword_button():
+    markup = InlineKeyboardMarkup(row_width=1)
+    markup.add(
+        InlineKeyboardButton(text=cfg.change_keyword_button, callback_data="change_keyword_parser"),
+        InlineKeyboardButton(text=cfg.back_button, callback_data="back_from_keyword_parser")
+    )
+    return markup
+
+def click_chat_in_autoposting_post_button(times, channel_name):
+    markup = InlineKeyboardMarkup(row_width=1)
+    for time in times:
+        button = InlineKeyboardButton(text=time, callback_data=time)
+        markup.add(button)
+    if channel_name[-1] == "✅":
+        markup.add(InlineKeyboardButton(text=cfg.off_chat_button, callback_data="off_chat_autoposting"))
+    elif channel_name[-1] == "❌":
+        markup.add(InlineKeyboardButton(text=cfg.on_chat_button, callback_data="on_chat_autoposting"))
+    markup.add(
+        InlineKeyboardButton(text=cfg.add_time_button, callback_data="add_time_autoposting_chat"),
+        InlineKeyboardButton(text=cfg.back_button, callback_data="back_settings_chat_time_autoposting")
+    )
+    return markup
+
+def click_time_in_post_group_button():
+    markup = InlineKeyboardMarkup(row_width=1)
+    markup.add(
+        InlineKeyboardButton(cfg.change_time_chat_button, callback_data="change_time_chat_button_autoposting"),
+        InlineKeyboardButton(cfg.back_button, callback_data="back_change_time_chat_button_autoposting"),
+        InlineKeyboardButton(cfg.delete_time_chat_button, callback_data="delete_time_chat_button_autoposting")
+    )
+    return markup
+
+def button_yes_no_delete_time_group_post():
+    markup = InlineKeyboardMarkup(row_width=1)
+    btn_yes = InlineKeyboardButton("Да", callback_data='yes_delete_time_autoposting')
+    btn_no = InlineKeyboardButton("Нет", callback_data='no_delete_time_autoposting')
+    markup.add(btn_yes, btn_no)
+    return markup
+
+def button_yes_no_delete_post_group():
+    markup = InlineKeyboardMarkup(row_width=1)
+    btn_yes = InlineKeyboardButton("Да", callback_data='yes_delete_autoposting')
+    btn_no = InlineKeyboardButton("Нет", callback_data='no_delete_autoposting')
+    markup.add(btn_yes, btn_no)
+    return markup
+
+def confirm_back_oplata_button_autoposting():
+    markup = InlineKeyboardMarkup(row_width=1)
+    btn_1 = InlineKeyboardButton(cfg.confirm_oplata, callback_data='confirm_oplata_autoposting')
+    btn_2 = InlineKeyboardButton(cfg.back_button, callback_data='back_oplata_autoposting')
+    markup.add(btn_1, btn_2)
+    return markup
+
+def menu_after_pay_autoposting_button():
+    markup = InlineKeyboardMarkup(row_width=1)
+    btn_1 = InlineKeyboardButton(cfg.menu_button, callback_data='menu_after_pay_autoposting')
+    markup.add(btn_1)
+    return markup
+
+def buttons_in_panel_adm():
+    markup = ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
+    markup.add(cfg.add_chat_id_button, cfg.add_proxy_button, cfg.back_button)
+    return markup
