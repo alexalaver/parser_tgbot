@@ -160,6 +160,7 @@ async def search_and_forward():
             chat_names = [item for item in chat_name if item.endswith('✅')]
             messages_sent = db.select_message_id(number_group)
             print("test 0")
+            print(f"chat_ids-{chat_ids}")
             if chat_ids:
                 current_date = datetime.datetime.now()
                 formatted_base = datetime.datetime.strptime(data_end, "%Y-%m-%d %H:%M:%S")
