@@ -180,6 +180,8 @@ async def search_and_forward():
                             async for message in telethon_client.iter_messages(trimmed_chat_id, limit=30):
                                 if message.text:
                                     print("test 1")
+                                    print(f"number_group-{number_group}")
+                                    print(f"num-{num}")
                                     for keyword in keywords:
                                         if keyword.lower() in message.text.lower():
                                             print("test 2")
