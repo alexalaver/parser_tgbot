@@ -159,7 +159,7 @@ async def search_and_forward():
             chat_ids = [item for item in chat_idn if item.endswith('✅')]
             chat_names = [item for item in chat_name if item.endswith('✅')]
             messages_sent = db.select_message_id(number_group)
-
+            print("test 0")
             if chat_ids:
                 current_date = datetime.datetime.now()
                 formatted_base = datetime.datetime.strptime(data_end, "%Y-%m-%d %H:%M:%S")
@@ -179,10 +179,13 @@ async def search_and_forward():
 
                             async for message in telethon_client.iter_messages(trimmed_chat_id, limit=30):
                                 if message.text:
+                                    print("test 1")
                                     for keyword in keywords:
                                         if keyword.lower() in message.text.lower():
+                                            print("test 2")
                                             message_key = [message.chat_id, message.id] if not right_int else [trimmed_chat_id, message.id]
                                             if message_key not in messages_sent:
+                                                print("test 3")
                                                 # sender = await message.get_sender()
                                                 # if "http" in trimmed_chat_id:
                                                 #     link_message = f"{trimmed_chat_id}/{str(message.id)}"
@@ -215,6 +218,7 @@ async def search_and_forward():
                                                         message_text = f"Обнаружено ключевое слово\n\n<a href='{group_tag}'>{chat_id_name[:-2]}</a>\n\nПользователь: {username}\n\nЗапрос: {keyword}\n\n<a href='{link_message}'>Ссылка на сообщение</a>\n\nТекст:\n{escaped_message_text}"
                                                     # await bot.send_message(user_id, f"user_id-{message.sender.id}\nusername-{username}")
                                                     # markup = btn.button_black_list(username, message.sender.id, message.sender.first_name)
+                                                    print("test 4")
                                                     await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML) #, reply_markup=markup
                                                     db.update_all_message_ids(number_group, message_key)
                                                     await asyncio.sleep(2)
