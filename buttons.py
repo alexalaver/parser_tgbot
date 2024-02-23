@@ -169,11 +169,11 @@ def buttons_in_panel_adm():
     markup.add(cfg.add_chat_id_button, cfg.add_proxy_button, cfg.back_button)
     return markup
 
-def button_black_list(username, user_id, post):
+def button_black_list(username, user_id, first_name):
     markup = InlineKeyboardMarkup(row_width=2)
     markup.add(
-        InlineKeyboardButton(text=cfg.black_list_add_username_button, callback_data=f"black_list_add_username_button:{username}:{user_id}"),
-        InlineKeyboardButton(text=cfg.black_list_add_post_button, callback_data=f"black_list_add_post_button:{username}:{user_id}:{post}"),
+        InlineKeyboardButton(text=cfg.black_list_add_username_button, callback_data=f"black_list_add_username_button:{username}:{user_id}:{first_name}"),
+        InlineKeyboardButton(text=cfg.black_list_add_post_button, callback_data=f"black_list_add_post_button:{username}:{user_id}:{first_name}"),
         InlineKeyboardButton(text=cfg.black_list_button, callback_data=f"black_list_button")
     )
     return markup
