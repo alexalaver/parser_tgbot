@@ -213,7 +213,8 @@ async def search_and_forward():
                                                         message_text = f"Обнаружено ключевое слово\n\n{chat_id_name[:-2]}\n\nПользователь: {username}\n\nЗапрос: {keyword}\n\nТекст:\n{escaped_message_text}"
                                                     else:
                                                         message_text = f"Обнаружено ключевое слово\n\n<a href='{group_tag}'>{chat_id_name[:-2]}</a>\n\nПользователь: {username}\n\nЗапрос: {keyword}\n\n<a href='{link_message}'>Ссылка на сообщение</a>\n\nТекст:\n{escaped_message_text}"
-                                                    await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML)
+                                                    markup = btn.button_black_list(username, message.sender.id, message.text)
+                                                    await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML, reply_markup=markup)
                                                     db.update_all_message_ids(number_group, message_key)
                                                     await asyncio.sleep(2)
                                             break
@@ -779,13 +780,18 @@ async def rembalance_user(message: types.Message):
 @dp.callback_query_handler()
 async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContext):
     try:
+        black_list_button = callback_query.data.split(":")
         user_id = callback_query.from_user.id
         if (not db.check_user(user_id)):
             await callback_query.answer("Прежде чем использовать бот, введите команду /start")
         else:
             if callback_query.message.chat.type == types.ChatType.PRIVATE:
                 user_id = callback_query.from_user.id
-                if callback_query.data == "menu_after_pay_parser":
+                if black_list_button[0] == "black_list_add_username_button":
+                    await callback_query.message.answer(callback_query.data)
+                elif black_list_button[0] == "black_list_add_post_button":
+                    await callback_query.message.answer(callback_query.data)
+                elif callback_query.data == "menu_after_pay_parser":
                     try:
                         user_id = callback_query.from_user.id
                         group_names = db.select_group_name(user_id)

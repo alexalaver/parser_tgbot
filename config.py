@@ -286,3 +286,7 @@ keyword_parser_text = "Ваши ключевые слова:\n\n"
 keyword_parser_text_2 = "В данном разделе вы сможете редактировать ключевые слова."
 
 channel_logs = "@zeus_logsbot"
+
+black_list_add_username_button = "Не показать пользователя"
+black_list_add_post_button = "Не показать пост"
+black_list_button = "Чёрный список"
