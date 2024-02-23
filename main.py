@@ -159,8 +159,6 @@ async def search_and_forward():
             chat_ids = [item for item in chat_idn if item.endswith('✅')]
             chat_names = [item for item in chat_name if item.endswith('✅')]
             messages_sent = db.select_message_id(number_group)
-            print("test 0")
-            print(f"chat_ids-{chat_ids}")
             if chat_ids:
                 current_date = datetime.datetime.now()
                 formatted_base = datetime.datetime.strptime(data_end, "%Y-%m-%d %H:%M:%S")
@@ -181,9 +179,8 @@ async def search_and_forward():
                             async for message in telethon_client.iter_messages(trimmed_chat_id, limit=30):
                                 if message.text:
                                     print("test 1")
-                                    print(f"number_group-{number_group}")
-                                    print(f"num-{num}")
                                     for keyword in keywords:
+                                        print(f"keyword - {keyword.lower()}\nmessage_text - {message.text.lower()}")
                                         if keyword.lower() in message.text.lower():
                                             print("test 2")
                                             message_key = [message.chat_id, message.id] if not right_int else [trimmed_chat_id, message.id]
