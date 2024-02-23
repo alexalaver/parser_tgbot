@@ -216,9 +216,9 @@ async def search_and_forward():
                                                     else:
                                                         message_text = f"Обнаружено ключевое слово\n\n<a href='{group_tag}'>{chat_id_name[:-2]}</a>\n\nПользователь: {username}\n\nЗапрос: {keyword}\n\n<a href='{link_message}'>Ссылка на сообщение</a>\n\nТекст:\n{escaped_message_text}"
                                                     await bot.send_message(user_id, f"user_id-{message.sender.id}\nusername-{username}\nfirst_name-{message.sender.first_name}")
-                                                    # markup = btn.button_black_list(username, message.sender.id, message.sender.first_name)
+                                                    markup = btn.button_black_list(username, message.sender.id, message.sender.first_name)
                                                     print("test 4")
-                                                    await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML) #, reply_markup=markup
+                                                    await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML, reply_markup=markup)
                                                     db.update_all_message_ids(number_group, message_key)
                                                     await asyncio.sleep(2)
                                             break
