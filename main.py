@@ -180,7 +180,6 @@ async def search_and_forward():
                                 if message.text:
                                     print("test 1")
                                     for keyword in keywords:
-                                        print(f"keyword - {keyword.lower()}\nmessage_text - {message.text.lower()}")
                                         if keyword.lower() in message.text.lower():
                                             print("test 2")
                                             message_key = [message.chat_id, message.id] if not right_int else [trimmed_chat_id, message.id]
