@@ -702,7 +702,7 @@ class Data:
 
     def add_user_id_black_list(self, id, user_id, user_id_black, first_name_black, username_black):
         with self.connect:
-            self.cursor.execute("ISNERT INTO black_list_users(id, user_id, user_id_black, first_name_black, username_black) VALUES(%s, %s, %s, %s, %s)", (id, user_id, user_id_black, first_name_black, username_black))
+            self.cursor.execute("INSERT INTO black_list_users(id, user_id, user_id_black, first_name_black, username_black) VALUES(%s, %s, %s, %s, %s)", (id, user_id, user_id_black, first_name_black, username_black))
             self.connect.commit()
 
     def check_black_list_user_id(self):
