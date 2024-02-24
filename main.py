@@ -792,6 +792,9 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
             if callback_query.message.chat.type == types.ChatType.PRIVATE:
                 user_id = callback_query.from_user.id
                 if black_list_button[0] == "black_list_add_username_button":
+                    post_for_black_list_text = callback_query.message.text
+                    await state.update_data(post_for_black_list_text=post_for_black_list_text)
+                    await state.update_data(black_list_button=black_list_button)
                     markup = btn.confirm_black_list_button_user(black_list_button)
                     await callback_query.message.edit_text(text=cfg.black_list_user_confirm_text, reply_markup=markup)
                 elif black_list_button[0] == "black_list_add_post_button":
@@ -805,6 +808,12 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                         await callback_query.message.edit_text(text=cfg.black_list_user_confirm_right_text, reply_markup=None)
                     else:
                         await callback_query.message.edit_text(text=cfg.black_list_user_confirm_left_text, reply_markup=None)
+                elif callback_query.data == "back_from_confirm_black_list_user":
+                    data = await state.get_data()
+                    post_for_black_list_text = data.get("post_for_black_list_text")
+                    black_list_button = data.get("black_list_button")
+                    markup = btn.button_black_list(black_list_button[1], black_list_button[2], black_list_button[3])
+                    await callback_query.message.edit_text(text=post_for_black_list_text, reply_markup=markup)
                 elif callback_query.data == "menu_after_pay_parser":
                     try:
                         user_id = callback_query.from_user.id
