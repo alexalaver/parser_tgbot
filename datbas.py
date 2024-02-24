@@ -736,3 +736,21 @@ class Data:
         with self.connect:
             self.cursor.execute("INSERT INTO black_list_posts(id, user_id, user_id_black, first_name_black, username_black, post_text) VALUES(%s, %s, %s, %s, %s, %s)", (id, user_id, user_id_black, first_name_black, username_black, post_text,))
             self.connect.commit()
+
+    def select_all_user_id_black_list(self, user_id):
+        with self.connect:
+            self.cursor.execute("SELECT user_id_black FROM black_list_users WHERE user_id=%s", (user_id,))
+            all = self.cursor.fetchone()
+            if all is None:
+                return []
+            else:
+                return all
+
+    def select_all_user_post_black_list(self, user_id):
+        with self.connect:
+            self.cursor.execute("SELECT post_text FROM black_list_posts WHERE user_id=%s", (user_id,))
+            all = self.cursor.fetchone()
+            if all is None:
+                return []
+            else:
+                return all

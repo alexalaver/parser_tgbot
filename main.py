@@ -159,6 +159,10 @@ async def search_and_forward():
             chat_ids = [item for item in chat_idn if item.endswith('✅')]
             chat_names = [item for item in chat_name if item.endswith('✅')]
             messages_sent = db.select_message_id(number_group)
+            black_list_id = db.select_all_user_id_black_list(user_id)
+            black_list_post = db.select_all_user_post_black_list(user_id)
+            print(black_list_id)
+            print(black_list_post)
             if chat_ids:
                 current_date = datetime.datetime.now()
                 formatted_base = datetime.datetime.strptime(data_end, "%Y-%m-%d %H:%M:%S")
