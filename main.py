@@ -799,12 +799,12 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 elif black_list_button[0] == "confirm_black_list_user":
                     get_user_black_id = db.get_user_id_black_list(user_id, black_list_button[2])
                     if get_user_black_id == False:
-                        await callback_query.message.edit_text(text=cfg.black_list_user_confirm_left_text, reply_markup=None)
-                    else:
                         check_id_black_list_user = db.check_black_list_user_id()
                         check_id_black_list_user = 1 + check_id_black_list_user
                         db.add_user_id_black_list(check_id_black_list_user, user_id, black_list_button[2], black_list_button[3], black_list_button[1])
                         await callback_query.message.edit_text(text=cfg.black_list_user_confirm_right_text, reply_markup=None)
+                    else:
+                        await callback_query.message.edit_text(text=cfg.black_list_user_confirm_left_text, reply_markup=None)
                 elif callback_query.data == "menu_after_pay_parser":
                     try:
                         user_id = callback_query.from_user.id
