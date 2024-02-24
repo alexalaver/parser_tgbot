@@ -744,7 +744,8 @@ class Data:
             if all is None:
                 return []
             else:
-                return all
+                result = [item[0] for item in all]
+                return result
 
     def select_all_user_post_black_list(self, user_id):
         with self.connect:
@@ -753,4 +754,5 @@ class Data:
             if all is None:
                 return []
             else:
-                return all
+                result = [item[0] for item in all]
+                return result
