@@ -700,6 +700,15 @@ class Data:
             else:
                 return us_id[0]
 
+    def get_user_post_black_list(self, user_id, post_text):
+        with self.connect:
+            self.cursor.execute("SELECT post_text FROM black_list_posts WHERE post_text=%s AND user_id=%s", (post_text, user_id,))
+            us_id = self.cursor.fetchone()
+            if us_id is None:
+                return False
+            else:
+                return us_id[0]
+
     def add_user_id_black_list(self, id, user_id, user_id_black, first_name_black, username_black):
         with self.connect:
             self.cursor.execute("INSERT INTO black_list_users(id, user_id, user_id_black, first_name_black, username_black) VALUES(%s, %s, %s, %s, %s)", (id, user_id, user_id_black, first_name_black, username_black))
@@ -713,3 +722,17 @@ class Data:
                 return 0
             else:
                 return a[0]
+
+    def check_black_list_post_id(self):
+        with self.connect:
+            self.cursor.execute("SELECT id FROM black_list_posts ORDER BY id DESC LIMIT 1;")
+            a = self.cursor.fetchone()
+            if a is None:
+                return 0
+            else:
+                return a[0]
+
+    def add_user_post_black_list(self, id, user_id, user_id_black, first_name_black, username_black, post_text):
+        with self.connect:
+            self.cursor.execute("INSERT INTO black_list_posts(id, user_id, user_id_black, first_name_black, username_black, post_text) VALUES(%s, %s, %s, %s, %s, %s)", (id, user_id, user_id_black, first_name_black, username_black, post_text,))
+            self.connect.commit()
