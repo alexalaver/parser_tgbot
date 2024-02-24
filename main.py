@@ -216,15 +216,17 @@ async def search_and_forward():
                                                         message_text = f"Обнаружено ключевое слово\n\n{chat_id_name[:-2]}\n\nПользователь: {username}\n\nЗапрос: {keyword}\n\nТекст:\n{escaped_message_text}"
                                                     else:
                                                         message_text = f"Обнаружено ключевое слово\n\n<a href='{group_tag}'>{chat_id_name[:-2]}</a>\n\nПользователь: {username}\n\nЗапрос: {keyword}\n\n<a href='{link_message}'>Ссылка на сообщение</a>\n\nТекст:\n{escaped_message_text}"
-                                                    await bot.send_message(user_id, f"user_id-{message.sender.id}\nusername-{username}\nfirst_name-{message.sender.first_name}")
-                                                    if username == "Анонимный пользователь":
-                                                        username_2 = "none"
+                                                    if message_text in black_list_post or message.sender.id in black_list_id:
+                                                        pass
                                                     else:
-                                                        username_2 = username
-                                                    markup = btn.button_black_list(username_2, message.sender.id, message.sender.first_name)
-                                                    await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML, reply_markup=markup)
-                                                    db.update_all_message_ids(number_group, message_key)
-                                                    await asyncio.sleep(2)
+                                                        if username == "Анонимный пользователь":
+                                                            username_2 = "none"
+                                                        else:
+                                                            username_2 = username
+                                                        markup = btn.button_black_list(username_2, message.sender.id, message.sender.first_name)
+                                                        await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML, reply_markup=markup)
+                                                        db.update_all_message_ids(number_group, message_key)
+                                                        await asyncio.sleep(2)
                                             break
                         except FloodWaitError as e:
                             wait_time = e.seconds
