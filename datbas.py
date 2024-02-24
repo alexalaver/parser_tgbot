@@ -690,3 +690,26 @@ class Data:
         with self.connect:
             self.cursor.execute("UPDATE all_chats SET groups=%s::jsonb", (groups,))
             self.connect.commit()
+
+    def get_user_id_black_list(self, user_id, user_id_black):
+        with self.connect:
+            self.cursor.execute("SELECT user_id_black FROM black_list_user WHERE user_id_black=%s AND user_id=%s", (user_id_black, user_id,))
+            us_id = self.cursor.fetchone()
+            if us_id is None:
+                return False
+            else:
+                return us_id[0]
+
+    def add_user_id_black_list(self, id, user_id, user_id_black, first_name_black, username_black):
+        with self.connect:
+            self.cursor.execute("ISNERT INTO black_list_user(id, user_id, user_id_black, first_name_black, username_black) VALUES(%s, %s, %s, %s, %s)", (id, user_id, user_id_black, first_name_black, username_black))
+            self.connect.commit()
+
+    def check_black_list_user_id(self):
+        with self.connect:
+            self.cursor.execute("SELECT id FROM black_list_user ORDER BY id DESC LIMIT 1;")
+            a = self.cursor.fetchone()
+            if a is None:
+                return 0
+            else:
+                return a[0]

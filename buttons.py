@@ -177,3 +177,11 @@ def button_black_list(username, user_id, first_name):
         InlineKeyboardButton(text=cfg.black_list_button, callback_data=f"black_list_button")
     )
     return markup
+
+def confirm_black_list_button_user(info):
+    markup = InlineKeyboardMarkup(row_width=1)
+    markup.add(
+        InlineKeyboardButton(text=cfg.confirm_button, callback_data=f"confirm_black_list_user:{info[1]}:{info[2]}:{info[3]}"),
+        InlineKeyboardButton(text=cfg.back_channels, callback_data="back_from_confirm_black_list_user")
+    )
+    return markup

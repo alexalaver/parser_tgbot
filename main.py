@@ -178,13 +178,10 @@ async def search_and_forward():
 
                             async for message in telethon_client.iter_messages(trimmed_chat_id, limit=30):
                                 if message.text:
-                                    print("test 1")
                                     for keyword in keywords:
                                         if keyword.lower() in message.text.lower():
-                                            print("test 2")
                                             message_key = [message.chat_id, message.id] if not right_int else [trimmed_chat_id, message.id]
                                             if message_key not in messages_sent:
-                                                print("test 3")
                                                 # sender = await message.get_sender()
                                                 # if "http" in trimmed_chat_id:
                                                 #     link_message = f"{trimmed_chat_id}/{str(message.id)}"
@@ -221,7 +218,6 @@ async def search_and_forward():
                                                     else:
                                                         username_2 = username
                                                     markup = btn.button_black_list(username_2, message.sender.id, message.sender.first_name)
-                                                    print("test 4")
                                                     await bot.send_message(user_id, message_text, parse_mode=types.ParseMode.HTML, reply_markup=markup)
                                                     db.update_all_message_ids(number_group, message_key)
                                                     await asyncio.sleep(2)
@@ -796,9 +792,19 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
             if callback_query.message.chat.type == types.ChatType.PRIVATE:
                 user_id = callback_query.from_user.id
                 if black_list_button[0] == "black_list_add_username_button":
-                    await callback_query.message.answer(callback_query.data)
+                    markup = btn.confirm_black_list_button_user(black_list_button)
+                    await callback_query.message.edit_text(text=cfg.black_list_user_confirm_text, reply_markup=markup)
                 elif black_list_button[0] == "black_list_add_post_button":
                     await callback_query.message.answer(callback_query.data)
+                elif black_list_button[0] == "confirm_black_list_user":
+                    get_user_black_id = db.get_user_id_black_list(user_id, black_list_button[2])
+                    if get_user_black_id == False:
+                        await callback_query.message.edit_text(text=cfg.black_list_user_confirm_left_text, reply_markup=None)
+                    else:
+                        check_id_black_list_user = db.check_black_list_user_id()
+                        check_id_black_list_user = 1 + check_id_black_list_user
+                        db.add_user_id_black_list(check_id_black_list_user, user_id, black_list_button[2], black_list_button[3], black_list_button[1])
+                        await callback_query.message.edit_text(text=cfg.black_list_user_confirm_right_text, reply_markup=None)
                 elif callback_query.data == "menu_after_pay_parser":
                     try:
                         user_id = callback_query.from_user.id
