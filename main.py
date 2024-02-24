@@ -812,7 +812,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                         await callback_query.message.edit_text(text=cfg.black_list_user_confirm_right_text, reply_markup=None)
                     else:
                         await callback_query.message.edit_text(text=cfg.black_list_user_confirm_left_text, reply_markup=None)
-                elif black_list_button[0] == "confirm_black_list_button_post":
+                elif black_list_button[0] == "confirm_black_list_post":
                     get_user_black_post = db.get_user_post_black_list(user_id, black_list_button[2])
                     if get_user_black_post == False:
                         check_id_black_list_post = db.check_black_list_post_id()
