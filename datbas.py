@@ -761,5 +761,5 @@ class Data:
         with self.connect:
             self.cursor.execute("SELECT user_id_black, first_name_black FROM black_list_users WHERE user_id=%s", (id,))
             a = self.cursor.fetchall()
-            # result_list = [item[0] for item in a]
-            return a
+            result = [[element for element in tup] for tup in a]
+            return result
