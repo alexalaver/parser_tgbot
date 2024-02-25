@@ -298,3 +298,7 @@ black_list_user_confirm_right_text = "Вы успешно добавили да�
 black_list_post_confirm_right_text = "Вы успешно добавили данный пост в чёрный список, данный пост от любого пользователя не будут поступатся."
 black_list_post_confirm_left_text = "Данный пост уже добавлен в чёрный список."
 black_list_user_confirm_left_text = "Данный пользователь уже добавлен в чёрный список."
+
+users_black_list_button = "Пользователи"
+posts_black_list_button = "Посты"
+black_list_button_text = "Ниже вы можете выбрать чёрный список пользователей или постов!"
