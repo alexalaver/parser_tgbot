@@ -853,7 +853,7 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                 elif black_list_button[0] == "select_user_black_list":
                     print(black_list_button)
                     markup = btn.black_list_select_user_button(black_list_button[1], black_list_button[2], black_list_button[3], black_list_button[4])
-                    await callback_query.message.answer(cfg.select_user_black_list_text, reply_markup=markup)
+                    await callback_query.message.edit_text(text=cfg.select_user_black_list_text, reply_markup=markup)
                 elif black_list_button[0] == "back_from_delete_user_from_black_list":
                     users_black_list_all = db.select_users_black_list_all(user_id)
                     markup = btn.black_list_users_button_all(users_black_list_all, black_list_button[1], black_list_button[2], black_list_button[3])
