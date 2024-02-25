@@ -216,6 +216,6 @@ def black_list_select_user_button(user_id_black, username, user_id, first_name):
     markup = InlineKeyboardMarkup(row_width=1)
     markup.add(
         InlineKeyboardButton(text=cfg.delete_user_from_black_list_button, callback_data=f"delete_user_from_black_list:{user_id_black}"),
-        InlineKeyboardButton(text=cfg.back_button, callback_data=f"back_from_delete_user_from_black_list:{username}:{user_id}:{first_name}")
+        InlineKeyboardButton(text=cfg.back_button, callback_data=f"back_from_delete_:{username}:{user_id}:{first_name}")
     )
     return markup
