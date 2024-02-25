@@ -302,3 +302,4 @@ black_list_user_confirm_left_text = "Данный пользователь уж�
 users_black_list_button = "Пользователи"
 posts_black_list_button = "Посты"
 black_list_button_text = "Ниже вы можете выбрать чёрный список пользователей или постов!"
+black_list_button_user_text = "Ниже предоставлен список пользователей которых вы добавили в чёрный список!"

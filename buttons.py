@@ -203,11 +203,11 @@ def black_list_button_all(username, user_id, first_name):
     )
     return markup
 
-def autoposting_button_menu(group_names):
+def black_list_users_button_all(users_black_list_all, username, user_id, first_name):
     markup = InlineKeyboardMarkup(row_width=1)
-    for group_name in group_names:
-        button = InlineKeyboardButton(text=group_name, callback_data=f"{group_name}autoposting_account")
+    for us_black in users_black_list_all:
+        button = InlineKeyboardButton(text=us_black[1], callback_data=us_black[0])
         markup.add(button)
-    btn_1 = InlineKeyboardButton(cfg.add_account_button, callback_data="add_account_autoposting")
+    btn_1 = InlineKeyboardButton(cfg.back_button, callback_data=f"back_from_black_list_users_all:{username}:{user_id}:{first_name}")
     markup.add(btn_1)
     return markup
