@@ -305,3 +305,5 @@ black_list_button_text = "Ниже вы можете выбрать чёрный
 black_list_button_user_text = "Ниже предоставлен список пользователей которых вы добавили в чёрный список!"
 delete_user_from_black_list_button = "Удалить пользователя"
 select_user_black_list_text = "Вы можете удалить пользователя из чёрного списка нажав на кнопку 'Удалить пользователя'."
+delete_user_from_black_list_text_right = "Вы успешно удалили данного пользователя с чёрного списка!"
+delete_user_from_black_list_text_left = "Данный пользователь не находится в чёрном списке!"

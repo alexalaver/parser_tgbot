@@ -763,3 +763,17 @@ class Data:
             a = self.cursor.fetchall()
             result = [[element for element in tup] for tup in a]
             return result
+
+    def select_user_black_list(self, user_id, user_id_black):
+        with self.connect:
+            self.cursor.execute("SELECT user_id_black FROM black_list_users WHERE user_id_black=%s AND user_id=%s", (user_id_black, user_id,))
+            a = self.cursor.fetchone()
+            if a is None:
+                return False
+            else:
+                return True
+
+    def delete_user_black_list(self, user_id, user_id_black):
+        with self.connect:
+            self.cursor.execute("DELETE FROM black_list_users WHERE user_id_black=%s AND user_id=%s", (user_id_black, user_id,))
+            self.connect.commit()

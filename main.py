@@ -857,6 +857,13 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     users_black_list_all = db.select_users_black_list_all(user_id)
                     markup = btn.black_list_users_button_all(users_black_list_all, black_list_button[1], black_list_button[2], black_list_button[3])
                     await callback_query.message.edit_text(text=cfg.black_list_button_user_text, reply_markup=markup)
+                elif black_list_button[0] == "delete_user_from_black_list":
+                    user_id_black = black_list_button[1]
+                    if db.select_user_black_list(user_id, user_id_black) == True:
+                        db.delete_user_black_list(user_id, user_id_black)
+                        await callback_query.message.edit_text(text=cfg.delete_user_from_black_list_text_right, reply_markup=None)
+                    else:
+                        await callback_query.message.edit_text(text=cfg.delete_user_from_black_list_text_left, reply_markup=None)
                 elif callback_query.data == "menu_after_pay_parser":
                     try:
                         user_id = callback_query.from_user.id
