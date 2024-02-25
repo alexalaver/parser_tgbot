@@ -197,8 +197,17 @@ def confirm_black_list_button_post(info):
 def black_list_button_all(username, user_id, first_name):
     markup = InlineKeyboardMarkup(row_width=2)
     markup.add(
-        InlineKeyboardButton(text=cfg.users_black_list_button, callback_data="users_black_list_button"),
-        InlineKeyboardButton(text=cfg.posts_black_list_button, callback_data="posts_black_list_button"),
+        InlineKeyboardButton(text=cfg.users_black_list_button, callback_data=f"users_black_list_button:{username}:{user_id}:{first_name}"),
+        InlineKeyboardButton(text=cfg.posts_black_list_button, callback_data=f"posts_black_list_button:{username}:{user_id}:{first_name}"),
         InlineKeyboardButton(text=cfg.back_button, callback_data=f"back_from_black_list_all:{username}:{user_id}:{first_name}")
     )
+    return markup
+
+def autoposting_button_menu(group_names):
+    markup = InlineKeyboardMarkup(row_width=1)
+    for group_name in group_names:
+        button = InlineKeyboardButton(text=group_name, callback_data=f"{group_name}autoposting_account")
+        markup.add(button)
+    btn_1 = InlineKeyboardButton(cfg.add_account_button, callback_data="add_account_autoposting")
+    markup.add(btn_1)
     return markup

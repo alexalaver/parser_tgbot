@@ -843,6 +843,9 @@ async def buttons_callback(callback_query: types.CallbackQuery, state: FSMContex
                     post_for_black_list_text = data.get("post_for_black_list_text")
                     markup = btn.button_black_list(black_list_button[1], black_list_button[2], black_list_button[3])
                     await callback_query.message.edit_text(text=post_for_black_list_text, reply_markup=markup)
+                elif black_list_button[0] == "users_black_list_button":
+                    users_black_list_all = db.select_users_black_list_all(user_id)
+                    print(users_black_list_all)
                 elif callback_query.data == "menu_after_pay_parser":
                     try:
                         user_id = callback_query.from_user.id
