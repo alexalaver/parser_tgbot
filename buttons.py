@@ -228,3 +228,11 @@ def black_list_posts_button_all(posts_black_list_all, username, user_id, first_n
     btn_1 = InlineKeyboardButton(cfg.back_button, callback_data=f"back_from_black_list_posts_all:{username}:{user_id}:{first_name}")
     markup.add(btn_1)
     return markup
+
+def black_list_select_post_button(user_id_black, username, user_id, first_name):
+    markup = InlineKeyboardMarkup(row_width=1)
+    markup.add(
+        InlineKeyboardButton(text=cfg.delete_post_from_black_list_button, callback_data=f"delete_post_from_black_list:{user_id_black}"),
+        InlineKeyboardButton(text=cfg.back_button, callback_data=f"back_from_delete_post:{username}:{user_id}:{first_name}")
+    )
+    return markup

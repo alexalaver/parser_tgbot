@@ -308,3 +308,7 @@ select_user_black_list_text = "Вы можете удалить пользова
 delete_user_from_black_list_text_right = "Вы успешно удалили данного пользователя с чёрного списка!"
 delete_user_from_black_list_text_left = "Данный пользователь не находится в чёрном списке!"
 black_list_button_user_post = "Ниже предоставлен список постов которых вы добавили в чёрный список!"
+select_post_black_list_text = "Вы можете удалить пост из чёрного списка нажав на кнопку 'Удалить пост'."
+delete_post_from_black_list_button = "Удалить пост"
+delete_post_from_black_list_text_right = "Вы успешно удалили данный пост с чёрного списка!"
+delete_post_from_black_list_text_left = "Данный пост не находится в чёрном списке!"

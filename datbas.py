@@ -784,8 +784,22 @@ class Data:
             a = self.cursor.fetchall()
             result = [[element for element in tup] for tup in a]
             modified_a = [
-                [item[0], '...' + item[1].split('Текст:\n')[1][0:7] + '...']
+                [item[0], item[1].split('Текст:\n')[1][0:7] + '...']
                 if 'Текст:\n' in item[1] else item[1]
                 for item in result
             ]
             return modified_a
+
+    def select_post_black_list(self, user_id, id):
+        with self.connect:
+            self.cursor.execute("SELECT post_text FROM black_list_posts WHERE id=%s AND user_id=%s", (id, user_id,))
+            a = self.cursor.fetchone()
+            if a is None:
+                return False
+            else:
+                return True
+
+    def delete_post_black_list(self, user_id, id):
+        with self.connect:
+            self.cursor.execute("DELETE FROM black_list_posts WHERE id=%s AND user_id=%s", (id, user_id,))
+            self.connect.commit()
