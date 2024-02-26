@@ -777,3 +777,15 @@ class Data:
         with self.connect:
             self.cursor.execute("DELETE FROM black_list_users WHERE user_id_black=%s AND user_id=%s", (user_id_black, user_id,))
             self.connect.commit()
+
+    def select_post_black_list_all(self, user_id):
+        with self.connect:
+            self.cursor.execute("SELECT id, post_text FROM black_list_posts WHERE user_id=%s", (user_id,))
+            a = self.cursor.fetchall()
+            result = [[element for element in tup] for tup in a]
+            modified_a = [
+                [item[0], '...' + item[1].split('Текст:\n')[1][0:7] + '...']
+                if 'Текст:\n' in item[1] else item[1]
+                for item in result
+            ]
+            return modified_a
